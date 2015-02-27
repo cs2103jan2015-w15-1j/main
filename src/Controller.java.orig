@@ -1,13 +1,10 @@
-import java.util.ArrayList;
-
 public class Controller {
-    private static final String MESSAGE_ADD = "Task has been successfully added. \n";
-    private static final String MESSAGE_DELETE = "Task has been successfully deleted. \n";
-
-    StorageStub storage;
+<<<<<<< HEAD
+    StorageStub storage = new StorageStub();
+=======
+    Storage storage;
     boolean timeToExit;
-    ArrayList<Task> allTasks;
-
+>>>>>>> 4fe4a663be0df7dedd231c17b05b900df794476b
 
     public Controller(String[] args) {
         storage = new StorageStub();
@@ -35,13 +32,12 @@ public class Controller {
             case COMPLETE :
                 return completeTask(arguments);
             case UNDO :
-                return undo();
+                break;
             case SEARCH :
-                return search(arguments);
-            case EXIT :
-                timeToExit = true;
-                return exit();
+                break;
         }
+
+        return null;
     }
 
     public boolean isTimeToExit() {
@@ -49,20 +45,18 @@ public class Controller {
     }
 
     // Private methods
-    private boolean setSaveFileDest(String input) {
-        return storage.setSaveFileDest(input);
+    private String setSaveFileDest(String input) {
+
+
+        return null;
     }
 
     private String addTask(String input) {
-        Task task = new Task(input);
-        allTasks.add(task);
-        storage.writeTasksToFile(allTasks);
-        return MESSAGE_ADD;
+        return null;
     }
 
     private String deleteTask(String input) {
-        
-        return MESSAGE_DELETE;
+        return null;
     }
 
     private String editTask(String input) {
@@ -85,7 +79,4 @@ public class Controller {
         return null;
     }
 
-    private String exit() {
-        return null;
-    }
 }
