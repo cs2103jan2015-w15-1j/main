@@ -34,8 +34,8 @@ public class Task {
 		// else it is floating
 	}
 	
-	public static boolean isDeadline(String information) {
-		String[] stringArr = information.split(" ");
+	public boolean isDeadline() {
+		String[] stringArr = info.split(" ");
 		ArrayList<String> stringList = new ArrayList<String>(Arrays.asList(stringArr));
 		int arrayLength = stringList.size();
 		if (0 < stringList.lastIndexOf("by")) {
