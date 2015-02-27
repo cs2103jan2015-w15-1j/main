@@ -4,7 +4,12 @@ public class Controller {
     private static final String MESSAGE_EMPTY = "There is currently no task. \n";
     private static final String MESSAGE_ADD = "Task has been successfully added. \n";
     private static final String MESSAGE_DELETE = "Task has been successfully deleted. \n";
+<<<<<<< HEAD
     private static final String MESSAGE_EDIT = "Task has been successfully edited. \n";
+=======
+    private static final String MESSAGE_COMPLETE = "\"%s\" completed.";
+    private static final String MESSAGE_EXIT = "Goodbye!";
+>>>>>>> 5d75ece1da0ffa1cc07310a7508f6494ccf48205
 
     StorageStub storage;
     boolean timeToExit;
@@ -38,12 +43,13 @@ public class Controller {
             case COMPLETE :
                 return completeTask(arguments);
             case UNDO :
-                break;
+                return undo();
             case SEARCH :
-                break;
+                return search(arguments);
+            case EXIT :
+                timeToExit = true;
+                return exit();
         }
-
-        return null;
     }
 
     public boolean isTimeToExit() {
@@ -102,4 +108,7 @@ public class Controller {
         return null;
     }
 
+    private String exit() {
+        return MESSAGE_EXIT;
+    }
 }
