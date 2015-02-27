@@ -8,4 +8,8 @@ public class StorageStub {
     public ArrayList<Task> getTasksFromFile() {
         return null;
     }
+
+    public boolean setSaveFileDest(String input) {
+        return true;
+    }
 }
