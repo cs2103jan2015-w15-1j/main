@@ -3,8 +3,11 @@
  */
 public class Task {
 
+    public Task() {
+
+    }
 
     // Public getters
-    String
+
 
 }
