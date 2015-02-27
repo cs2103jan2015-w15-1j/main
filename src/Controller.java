@@ -1,7 +1,12 @@
 public class Controller {
-    
+
     public Controller(String[] args) {
 
+    }
+
+    // Public methods
+    public String executeCommand(String input) {
+        return null;
     }
 
     public boolean isTimeToExit() {
@@ -9,8 +14,36 @@ public class Controller {
         return false;
     }
 
-    public String execute(String userInput) {
-        // TODO Auto-generated method stub
+    // Private methods
+    private String setSaveFileDest(String input) {
+        return null;
+    }
+
+    private String addTask(String input) {
+        return null;
+    }
+
+    private String deleteTask(String input) {
+        return null;
+    }
+
+    private String editTask(String input) {
+        return null;
+    }
+
+    private String displayTasks() {
+        return null;
+    }
+
+    private String completeTask(String input) {
+        return null;
+    }
+
+    private String undo() {
+        return null;
+    }
+
+    private String search(String input) {
         return null;
     }
 
