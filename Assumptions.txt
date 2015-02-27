@@ -1,0 +1,4 @@
+Task.java
+- Must follow strict format
+- User must be smart enough to put in the correct 24 hour notation
+- For timedTask and deadlineTask, user must put some text before the indicators
