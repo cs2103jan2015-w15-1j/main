@@ -1,3 +1,6 @@
+import java.util.ArrayList;
+import java.util.Arrays;
+
 /**
  * Let us standardize what kind of keywords we accept for commands for V0.1
  * 
@@ -14,6 +17,7 @@
 public class Task {
 	
 	private static String[] months = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+	private static ArrayList<String> monthsArray = new ArrayList<String>(Arrays.asList(months));
 	
 	private String info;
 	private String taskType;
@@ -21,16 +25,26 @@ public class Task {
 	private int day;
 	private int month;
 	
-	public Task (String information) {		
+	public Task (String information) {	
+		info = information;
 		// need to process the information to check whether it is floating or not
 		
 		// if got "by" and any month from the array = deadline task
 		// if got "at", "on" and any month from the array = timed-task
 		// else it is floating
-
-		if (information.contains(" by ")) {
-			
-		}
 	}
-
+	
+	public static boolean isDeadline(String information) {
+		String[] stringArr = information.split(" ");
+		ArrayList<String> stringList = new ArrayList<String>(Arrays.asList(stringArr));
+		int arrayLength = stringList.size();
+		if (0 < stringList.lastIndexOf("by")) {
+			if (stringList.lastIndexOf("by")+1 == arrayLength-1) {
+				if (monthsArray.contains(stringList.get(stringList.lastIndexOf("by")+1))) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 }
