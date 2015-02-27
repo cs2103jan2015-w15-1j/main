@@ -75,6 +75,8 @@ public class Task {
 			Integer.parseInt(array[1]);
 		} catch (NumberFormatException e) {
 			answer = false;
+		} catch (ArrayIndexOutOfBoundsException e) {
+			answer = false;
 		}
 		if (!list.get(2).equals("on")) {
 			answer = false;
