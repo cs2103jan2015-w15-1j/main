@@ -63,30 +63,23 @@ public class Task {
 	
 	public boolean isTimedTaskHelper(List<String> list) {
 		boolean answer = true;
-		if (list.size() == 4) {
-			for (int index = 0; index < 4; index++) {
-				if (index == 1) {
-					String date = list.get(index);
-					String[] dateArray = date.split("-");
-					if (dateArray.length == 2) {
-						try {
-							Integer.parseInt(dateArray[0]);
-							Integer.parseInt(dateArray[1]);
-						} catch (NumberFormatException e) {
-							answer = false;
-						}
-					}
-				} else if (index == 2) {
-					if (!list.get(index).equals("at")) {
-						answer = false;
-					}
-				} else {
-					if (!monthsArray.contains(list.get(index))) {
-						answer = false;
-					}
-				}
-			}
-		} else {
+		if (list.size() != 4) {
+			answer = false;
+		}
+		String[] array = list.get(1).split("-");
+		if (array.length != 2) {
+			answer = false;
+		}
+		try {
+			Integer.parseInt(array[0]);
+			Integer.parseInt(array[1]);
+		} catch (NumberFormatException e) {
+			answer = false;
+		}
+		if (!list.get(2).equals("on")) {
+			answer = false;
+		}
+		if (!monthsArray.contains(list.get(3))) {
 			answer = false;
 		}
 		return answer;
