@@ -3,6 +3,8 @@ import java.util.ArrayList;
 public class Controller {
     private static final String MESSAGE_ADD = "Task has been successfully added. \n";
     private static final String MESSAGE_DELETE = "Task has been successfully deleted. \n";
+    private static final String MESSAGE_COMPLETE = "\"%s\" completed.";
+    private static final String MESSAGE_EXIT = "Goodbye!";
 
     StorageStub storage;
     boolean timeToExit;
@@ -86,6 +88,6 @@ public class Controller {
     }
 
     private String exit() {
-        return null;
+        return MESSAGE_EXIT;
     }
 }
