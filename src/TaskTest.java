@@ -107,4 +107,22 @@ public class TaskTest {
 		testingTask = new Task("random at 5643-654321 on May");
 		assertTrue(testingTask.isTimedTask());
 	}
+	
+	@Test
+	public void testIsTimedTaskInvalid() {
+		Task testingTask = new Task("attend meeting on 1200-1400 on Apr");
+		assertFalse(testingTask.isTimedTask());
+		
+		testingTask = new Task("attend meeting at 1200 by April");
+		assertFalse(testingTask.isTimedTask());
+		
+		testingTask = new Task("gibberish at 12529 on Nov");
+		assertFalse(testingTask.isTimedTask());
+		
+		testingTask = new Task("random stuffs on 12pm-2pm on Feb");
+		assertFalse(testingTask.isTimedTask());
+		
+		testingTask = new Task("attend meeting on 1200-1400 later");
+		assertFalse(testingTask.isTimedTask());
+	}
 }
