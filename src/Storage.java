@@ -1,11 +1,11 @@
 import java.util.ArrayList;
 
 public class Storage {
-	public String overwritesFile(ArrayList<Tasks> input) {
+	public String writeTasksToFile(ArrayList<Tasks> input) {
 		return null;
 	}
 	
-	public ArrayList<Tasks> readsFile() {
+	public ArrayList<Tasks> getTasksFromFile() {
 		return null;
 	}
 }
