@@ -9,7 +9,7 @@ public class Veto {
 
         while (!controller.isTimeToExit()) {
             String userInput = scanner.nextLine();
-            String feedback = controller.execute(userInput);
+            String feedback = controller.executeCommand(userInput);
             showLine(feedback);
         }
 
