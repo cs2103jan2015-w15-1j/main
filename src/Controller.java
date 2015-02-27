@@ -1,18 +1,43 @@
 public class Controller {
-	Storage storage = new Storage();
-	
+    Storage storage;
+    boolean timeToExit;
+
     public Controller(String[] args) {
-        // testing
+        storage = new StorageStub();
+        timeToExit = false;
     }
 
     // Public methods
     public String executeCommand(String input) {
+        Command currentCommand = new Command(input);
+
+        Command.Type commandType = currentCommand.getCommandType();
+        String arguments = currentCommand.getArguments();
+        
+        switch (commandType) {
+            case SETSAVEFILE :
+                return setSaveFileDest(arguments);
+            case ADD :
+                return addTask(arguments);
+            case DELETE :
+                return deleteTask(arguments);
+            case EDIT :
+                return editTask(arguments);
+            case DISPLAY :
+                return displayTasks();
+            case COMPLETE :
+                return completeTask(arguments);
+            case UNDO :
+                break;
+            case SEARCH :
+                break;
+        }
+
         return null;
     }
 
     public boolean isTimeToExit() {
-        // TODO Auto-generated method stub
-        return false;
+        return timeToExit;
     }
 
     // Private methods
