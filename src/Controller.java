@@ -1,6 +1,6 @@
 public class Controller {
-	Storage storage = new Storage();
-	
+    StorageStub storage = new StorageStub();
+
     public Controller(String[] args) {
         // testing
     }
@@ -17,6 +17,8 @@ public class Controller {
 
     // Private methods
     private String setSaveFileDest(String input) {
+
+
         return null;
     }
 
