@@ -94,6 +94,17 @@ public class TaskTest {
 		testList.add("on");
 		testList.add("apr");
 		assertFalse(testingTask.isTimedTaskHelper(testList));
+	}
+	
+	@Test
+	public void testIsTimedTaskValid() {
+		Task testingTask = new Task("attend meeting at 1200-1400 on Apr");
+		assertTrue(testingTask.isTimedTask());
 		
+		testingTask = new Task("gibberish at 12-14 on Dec");
+		assertTrue(testingTask.isTimedTask());
+		
+		testingTask = new Task("random at 5643-654321 on May");
+		assertTrue(testingTask.isTimedTask());
 	}
 }
