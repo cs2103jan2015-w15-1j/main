@@ -2,4 +2,4 @@ Task.java
 - Must follow strict format (lowercases and uppercases)
 - User must be smart enough to put in the correct 24 hour notation
 - For timedTask and deadlineTask, user must put some text before the indicators
-- 
+- For date, only able to handle months. Not days.
