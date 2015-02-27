@@ -28,12 +28,13 @@ public class Controller {
             case COMPLETE :
                 return completeTask(arguments);
             case UNDO :
-                break;
+                return undo();
             case SEARCH :
-                break;
+                return search(arguments);
+            case EXIT :
+                timeToExit = true;
+                return exit();
         }
-
-        return null;
     }
 
     public boolean isTimeToExit() {
@@ -73,4 +74,7 @@ public class Controller {
         return null;
     }
 
+    private String exit() {
+        return null;
+    }
 }
