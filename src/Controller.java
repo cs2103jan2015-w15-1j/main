@@ -8,6 +8,10 @@ public class Controller {
     private static final String MESSAGE_COMPLETE = "\"%s\" completed.";
     private static final String MESSAGE_EXIT = "Goodbye!";
 
+    private static final String MESSAGE_INVALID_COMMAND = "Invalid command.";
+    
+    private static final String DISPLAY_LINE = "%d. %s\n";
+    
     StorageStub storage;
     boolean timeToExit;
     ArrayList<Task> allTasks;
@@ -46,6 +50,8 @@ public class Controller {
             case EXIT :
                 timeToExit = true;
                 return exit();
+            default :
+                return null;
         }
     }
 
@@ -60,6 +66,7 @@ public class Controller {
 
     private String addTask(String input) {
         Task task = new Task(input);
+        // TODO check if task is valid.
         allTasks.add(task);
         storage.writeTasksToFile(allTasks);
         return MESSAGE_ADD;
@@ -67,10 +74,14 @@ public class Controller {
 
     private String deleteTask(String input) {
         // ArrayList is 0-indexed, but Tasks are displayed to users as 1-indexed
-        int removalIndex = Integer.parseInt(input) - 1;
-        allTasks.remove(removalIndex);
-        storage.writeTasksToFile(allTasks);
-        return MESSAGE_DELETE;
+        try {
+            int removalIndex = Integer.parseInt(input) - 1;
+            allTasks.remove(removalIndex);
+            storage.writeTasksToFile(allTasks);
+            return MESSAGE_DELETE;
+        } catch (NumberFormatException e) {
+            return MESSAGE_INVALID_COMMAND;
+        }        
     }
 
     private String editTask(String input) {
@@ -79,7 +90,7 @@ public class Controller {
     }
 
     private String displayTasks() {
-        if (allTasks.size() == 0) {
+        if (allTasks.isEmpty()) {
             return MESSAGE_EMPTY;
         }
 
@@ -87,7 +98,8 @@ public class Controller {
 
         int counter = 1;
         for (Task task : allTasks) {
-            display += counter + ". " + task.getInfo();
+            display += String.format(DISPLAY_LINE, counter, task.getInfo());
+            counter++;
         }
 
         return display;
