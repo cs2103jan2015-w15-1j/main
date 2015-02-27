@@ -1,3 +1,4 @@
+import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -10,10 +11,10 @@ import java.util.Arrays;
  *                (Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec)
  *                Example: "do assignment by Mar"
  * 
- * Timed-task:    "at" followed by two 24-hour notation representing start and end, "on" followed by number
- * 			      representing day and the short-form name for month
+ * Timed-task:    "at" followed by two 24-hour notation representing start and end (seperated by "-" without spacing,
+ * 				  "on" followed by number representing day and the short-form name for month
  *			      (Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec)
- *                Example: "attend meeting at 1200 1400 on Apr"
+ *                Example: "attend meeting at 1200-1400 on Apr"
  */
 
 public class Task {
@@ -48,5 +49,46 @@ public class Task {
 			}
 		}
 		return false;
+	}
+	
+	public boolean isTimedTask() {
+		String[] stringArr = info.split(" ");
+		ArrayList<String> stringList = new ArrayList<String>(Arrays.asList(stringArr));
+		int arrayLength = stringList.size();
+		if (0 < stringList.lastIndexOf("at")) {
+			return isTimedTaskHelper(stringList.subList(stringList.lastIndexOf("at"), arrayLength));
+		}
+		return false;
+	}
+	
+	public boolean isTimedTaskHelper(List<String> list) {
+		boolean answer = true;
+		if (list.size() == 4) {
+			for (int index = 0; index < 4; index++) {
+				if (index == 1) {
+					String date = list.get(index);
+					String[] dateArray = date.split("-");
+					if (dateArray.length == 2) {
+						try {
+							Integer.parseInt(dateArray[0]);
+							Integer.parseInt(dateArray[1]);
+						} catch (NumberFormatException e) {
+							answer = false;
+						}
+					}
+				} else if (index == 2) {
+					if (!list.get(index).equals("at")) {
+						answer = false;
+					}
+				} else {
+					if (!monthsArray.contains(list.get(index))) {
+						answer = false;
+					}
+				}
+			}
+		} else {
+			answer = false;
+		}
+		return answer;
 	}
 }
