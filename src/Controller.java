@@ -1,8 +1,10 @@
 import java.util.ArrayList;
 
 public class Controller {
+    private static final String MESSAGE_EMPTY = "There is currently no task. \n";
     private static final String MESSAGE_ADD = "Task has been successfully added. \n";
     private static final String MESSAGE_DELETE = "Task has been successfully deleted. \n";
+    private static final String MESSAGE_EDIT = "Task has been successfully edited. \n";
 
     StorageStub storage;
     boolean timeToExit;
@@ -12,6 +14,7 @@ public class Controller {
     public Controller(String[] args) {
         storage = new StorageStub();
         timeToExit = false;
+        allTasks = storage.getTasksFromFile();
     }
 
     // Public methods
@@ -60,16 +63,31 @@ public class Controller {
     }
 
     private String deleteTask(String input) {
-        
+        // ArrayList is 0-indexed, but Tasks are displayed to users as 1-indexed
+        int removalIndex = Integer.parseInt(input) - 1;
+        allTasks.remove(removalIndex);
+        storage.writeTasksToFile(allTasks);
         return MESSAGE_DELETE;
     }
 
     private String editTask(String input) {
-        return null;
+
+        return MESSAGE_EDIT;
     }
 
     private String displayTasks() {
-        return null;
+        if (allTasks.size() == 0) {
+            return MESSAGE_EMPTY;
+        }
+
+        String display = "";
+
+        int counter = 1;
+        for (Task task : allTasks) {
+            display += counter + ". " + task.getInfo();
+        }
+
+        return display;
     }
 
     private String completeTask(String input) {
