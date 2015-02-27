@@ -8,10 +8,12 @@ import java.util.Arrays;
  * 
  * Deadline task: "by" followed by a number representing day and the short-form name for month
  *                (Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec)
+ *                Example: "do assignment by Mar"
  * 
- * Timed-task: "at" followed by two 24-hour notation representing start and end, "on" followed by number
- * 			   representing day and the short-form name for month
- *			   (Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec)
+ * Timed-task:    "at" followed by two 24-hour notation representing start and end, "on" followed by number
+ * 			      representing day and the short-form name for month
+ *			      (Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec)
+ *                Example: "attend meeting at 1200 1400 on Apr"
  */
 
 public class Task {
