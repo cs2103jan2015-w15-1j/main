@@ -60,7 +60,7 @@ public class Controller {
     }
 
     // Private methods
-    private boolean setSaveFileDest(String input) {
+    private String setSaveFileDest(String input) {
         return storage.setSaveFileDest(input);
     }
 

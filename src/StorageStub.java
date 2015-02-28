@@ -9,7 +9,7 @@ public class StorageStub {
         return null;
     }
 
-    public boolean setSaveFileDest(String input) {
-        return true;
+    public String setSaveFileDest(String input) {
+        return null;
     }
 }
