@@ -111,10 +111,7 @@ public class Task {
 	private String extractInfoDeadline() {
 		String[] stringArr = info.split(" ");
 		ArrayList<String> stringList = new ArrayList<String>(Arrays.asList(stringArr));
-		int arrayLength = stringList.size();
-		stringList.remove(arrayLength-1);
-		stringList.remove(arrayLength-2);
-		stringList.remove(arrayLength-3);
+		elementDeleter(stringList, 3);
 		return stringFormatter(stringList);
 	}
 	
@@ -122,13 +119,15 @@ public class Task {
 	private String extractInfoTimed() {
 		String[] stringArr = info.split(" ");
 		ArrayList<String> stringList = new ArrayList<String>(Arrays.asList(stringArr));
-		int arrayLength = stringList.size();
-		stringList.remove(arrayLength-1);
-		stringList.remove(arrayLength-2);
-		stringList.remove(arrayLength-3);
-		stringList.remove(arrayLength-4);
-		stringList.remove(arrayLength-5);
+		elementDeleter(stringList, 5);
 		return stringFormatter(stringList);
+	}
+	
+	// Delete the number of elements from behind an ArrayList
+	private void elementDeleter(ArrayList<String> array, int amountFromBack) {
+		for (int i = 1; i <= amountFromBack; i++) {
+			array.remove(array.size() - i);
+		}
 	}
 	
 	// Extract out the main info for a floating task
@@ -140,12 +139,14 @@ public class Task {
 	private boolean isDeadlineHelper(List<String> list) {
 		if (list.size() != 3) {
 			return false;
-		} try {
-			Integer.parseInt(list.get(1));
-		} catch (NumberFormatException e) {
+		} else if (!monthsArray.contains(list.get(2))) {
 			return false;
-		} if (!monthsArray.contains(list.get(2))) {
-			return false;
+		} else {
+			try {
+				Integer.parseInt(list.get(1));
+			} catch (NumberFormatException e) {
+				return false;
+			}  
 		} 
 		return true;
 	}
@@ -154,25 +155,25 @@ public class Task {
 	private boolean isTimedHelper(List<String> list) {
 		if (list.size() != 5) {
 			return false;
-		}
-		String[] array = list.get(1).split("-");
-		if (array.length != 2) {
+		} else if (!monthsArray.contains(list.get(4))) {
 			return false;
-		} try {
-			Integer.parseInt(array[0]);
-			Integer.parseInt(array[1]);
-		} catch (NumberFormatException e) {
+		} else if (!list.get(2).equals("on")) {
 			return false;
-		} catch (ArrayIndexOutOfBoundsException e) {
-			return false;
-		} if (!list.get(2).equals("on")) {
-			return false;
-		} try {
-			Integer.parseInt(list.get(3));
-		} catch (NumberFormatException e) {
-			return false;
-		} if (!monthsArray.contains(list.get(4))) {
-			return false;
+		} else {
+			String[] array = list.get(1).split("-");
+			if (array.length != 2) {
+				return false;
+			} else {
+				try {
+					Integer.parseInt(array[0]);
+					Integer.parseInt(array[1]);
+					Integer.parseInt(list.get(3));
+				} catch (NumberFormatException e) {
+					return false;
+				} catch (ArrayIndexOutOfBoundsException e) {
+					return false;
+				}
+			}
 		}
 		return true;
 	}
