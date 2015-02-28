@@ -15,6 +15,10 @@ import java.util.Arrays;
  * 				  "on" followed by number representing day and the short-form name for month
  *			      (Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec)
  *                Example: "attend meeting at 1200-1400 on 20 Apr"
+ *                
+ * NOTE THAT IF THE INFORMATION DOES NOT FOLLOW FORMAT OF DEADLINE AND TIMED TASK, IT WILL BE DEEMED AS FLOATING TASK
+ * 
+ * API: getInfo(), getDay(), getMonth(), getTime(), getTaskStatus(), markAsComplete()
  */
 
 public class Task {
@@ -30,6 +34,7 @@ public class Task {
 		isCompleted = false;
 	}
 	
+	// Get the description of the task
 	public String getInfo() {
 		if (isDeadline()) {
 			return extractInfoDeadline();
@@ -39,7 +44,8 @@ public class Task {
 			return extractInfoFloat();
 		}
 	}
-
+	
+	// Get the day of the timed or deadline task. Return null if it is a floating task
 	public String getDay() {
 		if (!(isDeadline() || isTimed())) {
 			return null;
@@ -49,6 +55,7 @@ public class Task {
 		return stringArr[length-2];
 	}
 
+	// Get the month of the timed or deadline task. Return null if it is a floating task
 	public String getMonth() {
 		if (!(isDeadline() || isTimed())) {
 			return null;
@@ -57,7 +64,8 @@ public class Task {
 		int length = stringArr.length;
 		return stringArr[length-1];
 	}
-
+	
+	// Get the time of the timed task. Return null if it is a deadline or floating task
 	public String getTime() {
 		if (!isTimed()) {
 			return null;
@@ -67,11 +75,13 @@ public class Task {
 		return stringArr[length-4];
 	}
 
+	// Checks whether task has been done or not
 	public boolean getTaskStatus() {
 		return isCompleted;
 	}
-
-	public void taskCompleted() {
+	
+	// Mark a task as complete
+	public void markAsComplete() {
 		isCompleted = true;
 	}
 
