@@ -30,7 +30,52 @@ public class Task {
 		isCompleted = false;
 	}
 	
-	public boolean isDeadline() {
+	public String getInfo() {
+		if (isDeadline()) {
+			return extractInfoDeadline();
+		} else if (isTimed()) {
+			return extractInfoTimed();
+		} else {
+			return extractInfoFloat();
+		}
+	}
+
+	public String getDay() {
+		if (!(isDeadline() || isTimed())) {
+			return null;
+		}
+		String[] stringArr = info.split(" ");
+		int length = stringArr.length;
+		return stringArr[length-2];
+	}
+
+	public String getMonth() {
+		if (!(isDeadline() || isTimed())) {
+			return null;
+		}
+		String[] stringArr = info.split(" ");
+		int length = stringArr.length;
+		return stringArr[length-1];
+	}
+
+	public String getTime() {
+		if (!isTimed()) {
+			return null;
+		}
+		String[] stringArr = info.split(" ");
+		int length = stringArr.length;
+		return stringArr[length-4];
+	}
+
+	public boolean getTaskStatus() {
+		return isCompleted;
+	}
+
+	public void taskCompleted() {
+		isCompleted = true;
+	}
+
+	private boolean isDeadline() {
 		String[] stringArr = info.split(" ");
 		ArrayList<String> stringList = new ArrayList<String>(Arrays.asList(stringArr));
 		int arrayLength = stringList.size();
@@ -40,7 +85,7 @@ public class Task {
 		return false;
 	}
 
-	public boolean isTimed() {
+	private boolean isTimed() {
 		String[] stringArr = info.split(" ");
 		ArrayList<String> stringList = new ArrayList<String>(Arrays.asList(stringArr));
 		int arrayLength = stringList.size();
@@ -49,8 +94,8 @@ public class Task {
 		}
 		return false;
 	}
-
-	public String extractInfoDeadline() {
+	
+	private String extractInfoDeadline() {
 		String[] stringArr = info.split(" ");
 		ArrayList<String> stringList = new ArrayList<String>(Arrays.asList(stringArr));
 		int arrayLength = stringList.size();
@@ -60,7 +105,7 @@ public class Task {
 		return stringFormatter(stringList);
 	}
 
-	public String extractInfoTimed() {
+	private String extractInfoTimed() {
 		String[] stringArr = info.split(" ");
 		ArrayList<String> stringList = new ArrayList<String>(Arrays.asList(stringArr));
 		int arrayLength = stringList.size();
@@ -72,36 +117,10 @@ public class Task {
 		return stringFormatter(stringList);
 	}
 	
-	public String extractInfoFloat() {
+	private String extractInfoFloat() {
 		return info;
 	}
 
-	public String extractDay() {
-		String[] stringArr = info.split(" ");
-		int length = stringArr.length;
-		return stringArr[length-2];
-	}
-	
-	public String extractMonth() {
-		String[] stringArr = info.split(" ");
-		int length = stringArr.length;
-		return stringArr[length-1];
-	}
-	
-	public String extractTime() {
-		String[] stringArr = info.split(" ");
-		int length = stringArr.length;
-		return stringArr[length-4];
-	}
-	
-	public void taskCompleted() {
-		isCompleted = true;
-	}
-	
-	public boolean getTaskStatus() {
-		return isCompleted;
-	}
-	
 	private boolean isDeadlineHelper(List<String> list) {
 		if (list.size() != 3) {
 			return false;
