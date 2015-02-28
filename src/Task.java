@@ -23,27 +23,11 @@ public class Task {
 	private static ArrayList<String> monthsArray = new ArrayList<String>(Arrays.asList(months));
 	
 	private String info;
-	private String taskType;
 	private boolean isCompleted;
-	private int day;
-	private int month;
-	
-	public Task (String information) {	
+
+	public Task (String information) {
 		info = information;
 		isCompleted = false;
-		// need to process the information to check whether it is floating or not
-		
-		// if got "by" and any month from the array = deadline task
-		// if got "at", "on" and any month from the array = timed-task
-		// else it is floating
-	}
-	
-	public void taskCompleted() {
-		isCompleted = true;
-	}
-	
-	public boolean getTaskStatus() {
-		return isCompleted;
 	}
 	
 	public boolean isDeadline() {
@@ -55,7 +39,7 @@ public class Task {
 		}
 		return false;
 	}
-	
+
 	public boolean isTimed() {
 		String[] stringArr = info.split(" ");
 		ArrayList<String> stringList = new ArrayList<String>(Arrays.asList(stringArr));
@@ -64,6 +48,58 @@ public class Task {
 			return isTimedHelper(stringList.subList(stringList.lastIndexOf("at"), arrayLength));
 		}
 		return false;
+	}
+
+	public String extractInfoDeadline() {
+		String[] stringArr = info.split(" ");
+		ArrayList<String> stringList = new ArrayList<String>(Arrays.asList(stringArr));
+		int arrayLength = stringList.size();
+		stringList.remove(arrayLength-1);
+		stringList.remove(arrayLength-2);
+		stringList.remove(arrayLength-3);
+		return stringFormatter(stringList);
+	}
+
+	public String extractInfoTimed() {
+		String[] stringArr = info.split(" ");
+		ArrayList<String> stringList = new ArrayList<String>(Arrays.asList(stringArr));
+		int arrayLength = stringList.size();
+		stringList.remove(arrayLength-1);
+		stringList.remove(arrayLength-2);
+		stringList.remove(arrayLength-3);
+		stringList.remove(arrayLength-4);
+		stringList.remove(arrayLength-5);
+		return stringFormatter(stringList);
+	}
+	
+	public String extractInfoFloat() {
+		return info;
+	}
+
+	public String extractDay() {
+		String[] stringArr = info.split(" ");
+		int length = stringArr.length;
+		return stringArr[length-2];
+	}
+	
+	public String extractMonth() {
+		String[] stringArr = info.split(" ");
+		int length = stringArr.length;
+		return stringArr[length-1];
+	}
+	
+	public String extractTime() {
+		String[] stringArr = info.split(" ");
+		int length = stringArr.length;
+		return stringArr[length-4];
+	}
+	
+	public void taskCompleted() {
+		isCompleted = true;
+	}
+	
+	public boolean getTaskStatus() {
+		return isCompleted;
 	}
 	
 	private boolean isDeadlineHelper(List<String> list) {
@@ -103,5 +139,14 @@ public class Task {
 			return false;
 		}
 		return true;
+	}
+
+	private String stringFormatter(ArrayList<String> strList) {
+		String result = "";
+		for (String word: strList) {
+			result += word + " ";
+		}
+		result.trim();
+		return result;
 	}
 }
