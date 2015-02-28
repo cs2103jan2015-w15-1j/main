@@ -38,12 +38,30 @@ public class Task {
 		// else it is floating
 	}
 	
+	public void taskCompleted() {
+		isCompleted = true;
+	}
+	
+	public boolean getTaskStatus() {
+		return isCompleted;
+	}
+	
 	public boolean isDeadline() {
 		String[] stringArr = info.split(" ");
 		ArrayList<String> stringList = new ArrayList<String>(Arrays.asList(stringArr));
 		int arrayLength = stringList.size();
 		if (0 < stringList.lastIndexOf("by")) {
 			return isDeadlineHelper(stringList.subList(stringList.lastIndexOf("by"), arrayLength));
+		}
+		return false;
+	}
+	
+	public boolean isTimed() {
+		String[] stringArr = info.split(" ");
+		ArrayList<String> stringList = new ArrayList<String>(Arrays.asList(stringArr));
+		int arrayLength = stringList.size();
+		if (0 < stringList.lastIndexOf("at")) {
+			return isTimedHelper(stringList.subList(stringList.lastIndexOf("at"), arrayLength));
 		}
 		return false;
 	}
@@ -60,17 +78,7 @@ public class Task {
 		} 
 		return true;
 	}
-	
-	public boolean isTimed() {
-		String[] stringArr = info.split(" ");
-		ArrayList<String> stringList = new ArrayList<String>(Arrays.asList(stringArr));
-		int arrayLength = stringList.size();
-		if (0 < stringList.lastIndexOf("at")) {
-			return isTimedHelper(stringList.subList(stringList.lastIndexOf("at"), arrayLength));
-		}
-		return false;
-	}
-	
+
 	private boolean isTimedHelper(List<String> list) {
 		if (list.size() != 5) {
 			return false;
