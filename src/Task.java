@@ -66,6 +66,8 @@ public class Task {
 	}
 	
 	// Get the time of the timed task. Return null if it is a deadline or floating task
+	// Note that this method will return something like "1200-1400"
+	// You can use String.split("-") to separate the two numbers and store them in String[]
 	public String getTime() {
 		if (!isTimed()) {
 			return null;
