@@ -3,6 +3,26 @@ import org.junit.Test;
 
 
 public class TaskTest {
+	
+	@Test
+	public void testTaskIncomplete() {
+		Task testingTask = new Task("do homework by 23 Jan");
+		assertFalse(testingTask.getTaskStatus());
+		
+		testingTask = new Task("random gibberish");
+		assertFalse(testingTask.getTaskStatus());
+	}
+	
+	@Test
+	public void testTaskComplete() {
+		Task testingTask = new Task("do homework by 23 Jan");
+		testingTask.taskCompleted();
+		assertTrue(testingTask.getTaskStatus());
+		
+		testingTask = new Task("random gibberish");
+		testingTask.taskCompleted();
+		assertTrue(testingTask.getTaskStatus());
+	}
 
 	@Test
 	public void testIsDeadlineValid() {
