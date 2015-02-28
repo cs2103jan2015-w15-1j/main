@@ -20,7 +20,15 @@ public class Command {
         commandType = determineCommandType(userCommand);
     }
 
-    private Type determineCommandType(String userCommand2) {
+    public Type getCommandType() {
+	    return commandType;
+	}
+
+	public String getArguments() {
+	    return arguments;
+	}
+
+	private Type determineCommandType(String userCommand2) {
         switch (userCommand.toLowerCase()) {
             case "add" :
                 return Type.ADD;
@@ -43,14 +51,6 @@ public class Command {
             default :
                 return Type.INVALID;
         }
-    }
-
-    public Type getCommandType() {
-        return commandType;
-    }
-
-    public String getArguments() {
-        return arguments;
     }
 
     private String getUserCommand(String[] parameters) {
