@@ -84,7 +84,8 @@ public class Task {
 	public void markAsComplete() {
 		isCompleted = true;
 	}
-
+	
+	// Checks whether the task is a deadline task
 	private boolean isDeadline() {
 		String[] stringArr = info.split(" ");
 		ArrayList<String> stringList = new ArrayList<String>(Arrays.asList(stringArr));
@@ -94,7 +95,8 @@ public class Task {
 		}
 		return false;
 	}
-
+	
+	// Checks whether the task is a timed task
 	private boolean isTimed() {
 		String[] stringArr = info.split(" ");
 		ArrayList<String> stringList = new ArrayList<String>(Arrays.asList(stringArr));
@@ -105,6 +107,7 @@ public class Task {
 		return false;
 	}
 	
+	// Extract out the main info of a deadline task
 	private String extractInfoDeadline() {
 		String[] stringArr = info.split(" ");
 		ArrayList<String> stringList = new ArrayList<String>(Arrays.asList(stringArr));
@@ -114,7 +117,8 @@ public class Task {
 		stringList.remove(arrayLength-3);
 		return stringFormatter(stringList);
 	}
-
+	
+	// Extract out the main info of a timed task
 	private String extractInfoTimed() {
 		String[] stringArr = info.split(" ");
 		ArrayList<String> stringList = new ArrayList<String>(Arrays.asList(stringArr));
@@ -127,10 +131,12 @@ public class Task {
 		return stringFormatter(stringList);
 	}
 	
+	// Extract out the main info for a floating task
 	private String extractInfoFloat() {
 		return info;
 	}
-
+	
+	// Helper function for "isDeadline" method 
 	private boolean isDeadlineHelper(List<String> list) {
 		if (list.size() != 3) {
 			return false;
@@ -143,7 +149,8 @@ public class Task {
 		} 
 		return true;
 	}
-
+	
+	// Helper function for "isTimed" method
 	private boolean isTimedHelper(List<String> list) {
 		if (list.size() != 5) {
 			return false;
@@ -169,7 +176,8 @@ public class Task {
 		}
 		return true;
 	}
-
+	
+	// Format the elements in the ArrayList to one single string
 	private String stringFormatter(ArrayList<String> strList) {
 		String result = "";
 		for (String word: strList) {
