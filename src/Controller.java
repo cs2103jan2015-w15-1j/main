@@ -9,9 +9,9 @@ public class Controller {
     private static final String MESSAGE_EXIT = "Goodbye!";
 
     private static final String MESSAGE_INVALID_COMMAND = "Invalid command.";
-    
+
     private static final String DISPLAY_LINE = "%d. %s\n";
-    
+
     StorageStub storage;
     boolean timeToExit;
     ArrayList<Task> allTasks;
@@ -29,7 +29,7 @@ public class Controller {
 
         Command.Type commandType = currentCommand.getCommandType();
         String arguments = currentCommand.getArguments();
-        
+
         switch (commandType) {
             case SETSAVEFILE :
                 return setSaveFileDest(arguments);
@@ -81,7 +81,7 @@ public class Controller {
             return MESSAGE_DELETE;
         } catch (NumberFormatException e) {
             return MESSAGE_INVALID_COMMAND;
-        }        
+        }
     }
 
     private String editTask(String input) {
@@ -106,7 +106,15 @@ public class Controller {
     }
 
     private String completeTask(String input) {
-        return null;
+        try {
+            int index = Integer.parseInt(input.trim()) - 1;
+            Task task = allTasks.get(index);
+            task.markAsComplete();
+            storage.writeTasksToFile(allTasks);
+            return String.format(MESSAGE_COMPLETE, task.getInfo());
+        } catch (NumberFormatException | IndexOutOfBoundsException e) {
+            return MESSAGE_INVALID_COMMAND;
+        }
     }
 
     private String undo() {
