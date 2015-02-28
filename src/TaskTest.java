@@ -1,7 +1,4 @@
 import static org.junit.Assert.*;
-
-import java.util.ArrayList;
-
 import org.junit.Test;
 
 
@@ -9,120 +6,61 @@ public class TaskTest {
 
 	@Test
 	public void testIsDeadlineValid() {
-		Task testingTask = new Task("do homework by Jan");
+		Task testingTask = new Task("do homework by 23 Jan");
 		assertTrue(testingTask.isDeadline());
 		
-		testingTask = new Task("do homework by Dec");
+		testingTask = new Task("do homework by 31 Dec");
 		assertTrue(testingTask.isDeadline());
 		
-		testingTask = new Task("something something by Apr");
+		testingTask = new Task("something something by 50 Apr");
 		assertTrue(testingTask.isDeadline());
 	}
 	
 	@Test
 	public void testIsDeadlineInvalid() {
-		Task testingTask = new Task("do homework by March");
+		Task testingTask = new Task("do homework by 30 March");
 		assertFalse(testingTask.isDeadline());
 		
 		testingTask = new Task("do homework by today");
 		assertFalse(testingTask.isDeadline());
 		
-		testingTask = new Task("do homework on Apr");
+		testingTask = new Task("do homework on 20 Apr");
 		assertFalse(testingTask.isDeadline());
 		
-		testingTask = new Task("by Oct do homework");
+		testingTask = new Task("by 10 Oct do homework");
 		assertFalse(testingTask.isDeadline());
 		
 		testingTask = new Task("do what I want");
 		assertFalse(testingTask.isDeadline());
 	}
 	
-	// Note that this method wont check the the first index of the array
-	// The main "isTimedTask" helper will handle that
 	@Test
-	public void testIsTimedTaskHelperValid() {
-		Task testingTask = new Task("random gibberish");
-		ArrayList<String> testList = new ArrayList<String>();
-		testList.add("at");
-		testList.add("1200-1400");
-		testList.add("on");
-		testList.add("Apr");
-		assertTrue(testingTask.isTimedTaskHelper(testList));
+	public void testIsTimedValid() {
+		Task testingTask = new Task("attend meeting at 1200-1400 on 20 Apr");
+		assertTrue(testingTask.isTimed());
 		
-		testList = new ArrayList<String>();
-		testList.add("at");
-		testList.add("10-20");
-		testList.add("on");
-		testList.add("Apr");
-		assertTrue(testingTask.isTimedTaskHelper(testList));
+		testingTask = new Task("gibberish at 12-14 on 100 Dec");
+		assertTrue(testingTask.isTimed());
 		
-		testList = new ArrayList<String>();
-		testList.add("at");
-		testList.add("102032-12312314");
-		testList.add("on");
-		testList.add("Apr");
-		assertTrue(testingTask.isTimedTaskHelper(testList));
+		testingTask = new Task("random at 5643-654321 on -3 May");
+		assertTrue(testingTask.isTimed());
 	}
 	
 	@Test
-	public void testIsTimedTaskHelperInvalid() {
-		Task testingTask = new Task("random gibberish");
-		ArrayList<String> testList = new ArrayList<String>();
-		testList.add("at");
-		testList.add("1200-1400");
-		testList.add("on");
-		testList.add("April");
-		assertFalse(testingTask.isTimedTaskHelper(testList));
+	public void testIsTimedInvalid() {
+		Task testingTask = new Task("attend meeting on 1200-1400 on 20 Apr");
+		assertFalse(testingTask.isTimed());
 		
-		testList = new ArrayList<String>();
-		testList.add("at");
-		testList.add("12pm-2pm");
-		testList.add("on");
-		testList.add("Apr");
-		assertFalse(testingTask.isTimedTaskHelper(testList));
+		testingTask = new Task("attend meeting at 1200 by 5 April");
+		assertFalse(testingTask.isTimed());
 		
-		testList = new ArrayList<String>();
-		testList.add("at");
-		testList.add("1200-1400");
-		testList.add("by");
-		testList.add("Apr");
-		assertFalse(testingTask.isTimedTaskHelper(testList));
+		testingTask = new Task("gibberish at 12529 on 10th Nov");
+		assertFalse(testingTask.isTimed());
 		
-		testList = new ArrayList<String>();
-		testList.add("at");
-		testList.add("156432-12344");
-		testList.add("on");
-		testList.add("apr");
-		assertFalse(testingTask.isTimedTaskHelper(testList));
-	}
-	
-	@Test
-	public void testIsTimedTaskValid() {
-		Task testingTask = new Task("attend meeting at 1200-1400 on Apr");
-		assertTrue(testingTask.isTimedTask());
-		
-		testingTask = new Task("gibberish at 12-14 on Dec");
-		assertTrue(testingTask.isTimedTask());
-		
-		testingTask = new Task("random at 5643-654321 on May");
-		assertTrue(testingTask.isTimedTask());
-	}
-	
-	@Test
-	public void testIsTimedTaskInvalid() {
-		Task testingTask = new Task("attend meeting on 1200-1400 on Apr");
-		assertFalse(testingTask.isTimedTask());
-		
-		testingTask = new Task("attend meeting at 1200 by April");
-		assertFalse(testingTask.isTimedTask());
-		
-		testingTask = new Task("gibberish at 12529 on Nov");
-		assertFalse(testingTask.isTimedTask());
-		
-		testingTask = new Task("random stuffs on 12pm-2pm on Feb");
-		assertFalse(testingTask.isTimedTask());
+		testingTask = new Task("random stuffs on 12pm-2pm on 2 Feb");
+		assertFalse(testingTask.isTimed());
 		
 		testingTask = new Task("attend meeting on 1200-1400 later");
-		assertFalse(testingTask.isTimedTask());
+		assertFalse(testingTask.isTimed());
 	}
 }
