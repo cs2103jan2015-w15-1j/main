@@ -3,6 +3,8 @@ import java.util.ArrayList;
 public class Controller {
     private static final int PARAM_POSITION_FILENAME = 0;
     
+    private static final String MESSAGE_SAVE_FILE_READY = "Welcome to Veto. %s is ready for use.";
+    
     private static final String MESSAGE_EMPTY = "There is currently no task.\n";
     private static final String MESSAGE_ADD = "Task has been successfully added.\n";
     private static final String MESSAGE_DELETE = "Task has been successfully deleted.\n";
@@ -36,11 +38,11 @@ public class Controller {
         allTasksPreviousState = allTasks;
     }
 
-    private String getFileNameFromArgs(String[] args) {
-        return args[PARAM_POSITION_FILENAME];
-    }
-
     // Public methods
+    public String getWelcomeMessage() {
+        return String.format(MESSAGE_SAVE_FILE_READY, saveFileName);
+    }
+    
     public String executeCommand(String input) {
         Command currentCommand = new Command(input);
 
@@ -84,6 +86,10 @@ public class Controller {
     }
 
     // Private methods
+    private String getFileNameFromArgs(String[] args) {
+        return args[PARAM_POSITION_FILENAME];
+    }    
+    
     private String setSaveFileDest(String input) {
         return storage.setSaveFileDest(input);
     }
