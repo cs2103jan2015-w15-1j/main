@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class Storage {
     private static final String MESSAGE_ERROR = "Error: %s\n";
     private static final String MESSAGE_ADDED = "File updated\n";
-    
+
     private File saveFile;
 
     public Storage(String fileName) {
@@ -37,7 +37,14 @@ public class Storage {
     }
 
     private Object taskToInfoString(Task task) {
-        return null;
+        String string = "";
+        if (task.getTaskStatus()) {
+            string += "T ";
+        } else {
+            string += "F ";
+        }
+        string += task.getRawInfo();
+        return string;
     }
 
     public ArrayList<Task> getTasksFromFile() {
