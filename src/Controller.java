@@ -97,24 +97,8 @@ public class Controller {
     }
 
     private String editTask(String input) {
-        // TODO
+        // TODO need to think this through
         return MESSAGE_EDIT;
-    }
-
-    private String displayTasks() {
-        if (allTasks.isEmpty()) {
-            return MESSAGE_EMPTY;
-        }
-
-        String display = "";
-
-        int counter = 1;
-        for (Task task : allTasks) {
-            display += String.format(DISPLAY_LINE, counter, task.getInfo());
-            counter++;
-        }
-
-        return display;
     }
 
     private String formatTasksForDisplay(ArrayList<Task> input) {
