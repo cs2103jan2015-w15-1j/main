@@ -20,6 +20,7 @@ public class Command {
         commandType = determineCommandType(userCommand);
     }
 
+    // Public getters
     public Type getCommandType() {
 	    return commandType;
 	}
@@ -28,6 +29,8 @@ public class Command {
 	    return arguments;
 	}
 
+
+    // Private methods
 	private Type determineCommandType(String userCommand2) {
         switch (userCommand.toLowerCase()) {
             case "add" :

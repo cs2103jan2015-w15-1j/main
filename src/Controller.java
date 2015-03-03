@@ -33,7 +33,7 @@ public class Controller {
 
         switch (commandType) {
             case SETSAVEFILE :
-                if (setSaveFileDest(input)) {
+                if (Boolean.parseBoolean(setSaveFileDest(input))) {
                     return MESSAGE_SAVE_DEST;
                 }
             case ADD :
