@@ -1,4 +1,8 @@
 import java.io.File;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
@@ -7,6 +11,7 @@ public class Storage {
     private static final String MESSAGE_ADDED = "File updated\n";
 
     private File saveFile;
+    private BufferedReader reader;
 
     public Storage(String fileName) {
         if(!fileName.contains(".txt")){
@@ -50,7 +55,21 @@ public class Storage {
         return string;
     }
 
-    public ArrayList<Task> getTasksFromFile() {
-        return null;
+    public ArrayList<Task> getTasksFromFile() throws IOException {
+        ArrayList<Task> storage = new ArrayList<Task>();
+        String text;
+        initBufferedReader(saveFile);
+        while ((text = reader.readLine()) != null) {
+            storage.add(new Task(text));
+        }
+        return storage;
+    }
+    
+    private void initBufferedReader(File file) {
+        try {
+            reader = new BufferedReader(new FileReader(file));
+        } catch (FileNotFoundException e) {
+            System.out.printf(MESSAGE_ERROR, e.getMessage());
+        }
     }
 }
