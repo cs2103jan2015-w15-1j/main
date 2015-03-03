@@ -14,8 +14,8 @@ public class Storage {
     private BufferedReader reader;
 
     public Storage(String fileName) {
-        if(!fileName.contains(".txt")){
-            fileName +=".txt";
+        if (!fileName.contains(".txt")) {
+            fileName += ".txt";
         }
         saveFile = new File(fileName);
         createMissingFile(saveFile);
@@ -55,16 +55,20 @@ public class Storage {
         return string;
     }
 
-    public ArrayList<Task> getTasksFromFile() throws IOException {
+    public ArrayList<Task> getTasksFromFile() {
         ArrayList<Task> storage = new ArrayList<Task>();
         String text;
-        initBufferedReader(saveFile);
-        while ((text = reader.readLine()) != null) {
-            storage.add(new Task(text));
+        try {
+            initBufferedReader(saveFile);
+            while ((text = reader.readLine()) != null) {
+                storage.add(new Task(text));
+            }
+        } catch (Exception e) {
+            return null;
         }
         return storage;
     }
-    
+
     private void initBufferedReader(File file) {
         try {
             reader = new BufferedReader(new FileReader(file));
