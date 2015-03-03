@@ -51,7 +51,7 @@ public class Controller {
                 updatePreviousState();
                 return editTask(arguments);
             case DISPLAY :
-                return displayTasks();
+                return formatTasksForDisplay(allTasks);
             case COMPLETE :
                 updatePreviousState();
                 return completeTask(arguments);
@@ -114,6 +114,21 @@ public class Controller {
             counter++;
         }
 
+        return display;
+    }
+
+    private String formatTasksForDisplay(ArrayList<Task> input) {
+        if (input.isEmpty()) {
+            return MESSAGE_EMPTY;
+        }
+
+        String display = "";
+
+        int counter = 1;
+        for (Task task : input) {
+            display += String.format(DISPLAY_LINE, counter, task.getInfo());
+            counter++;
+        }
         return display;
     }
 
