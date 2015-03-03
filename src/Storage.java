@@ -2,7 +2,6 @@ import java.io.File;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
@@ -58,15 +57,32 @@ public class Storage {
     public ArrayList<Task> getTasksFromFile() {
         ArrayList<Task> storage = new ArrayList<Task>();
         String text;
+        String info;
+        Boolean isCompleted = false;
+
         try {
             initBufferedReader(saveFile);
             while ((text = reader.readLine()) != null) {
+                isCompleted = checkCompletion(text);
+                info = text.substring(text.indexOf(' ')).trim();
+                Task task = new Task(info);
+                if (isCompleted) {
+                    task.markAsComplete();
+                }
                 storage.add(new Task(text));
             }
         } catch (Exception e) {
-            return null;
+            System.out.printf(MESSAGE_ERROR, e.getMessage());
         }
         return storage;
+    }
+
+    private Boolean checkCompletion(String text) {
+        if (text.substring(0, text.indexOf(' ')).equals("T")) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     private void initBufferedReader(File file) {
