@@ -22,16 +22,16 @@ public class Command {
 
     // Public getters
     public Type getCommandType() {
-	    return commandType;
-	}
+        return commandType;
+    }
 
-	public String getArguments() {
-	    return arguments;
-	}
+    public String getArguments() {
+        return arguments;
+    }
 
 
     // Private methods
-	private Type determineCommandType(String userCommand2) {
+    private Type determineCommandType(String userCommand2) {
         switch (userCommand.toLowerCase()) {
             case "add" :
                 return Type.ADD;
