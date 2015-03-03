@@ -58,7 +58,8 @@ public class Controller {
             case UNDO :
                 return undo();
             case SEARCH :
-                return search(arguments);
+                ArrayList<String> searchResults = search(arguments);
+                return null;
             case EXIT :
                 timeToExit = true;
                 return exit();
@@ -138,10 +139,17 @@ public class Controller {
         }
     }
 
-    private String search(String input) {
-        // TODO
+    private ArrayList<String> search(String input) {
+        // TODO check Task.getInfo() implementation
+        ArrayList<String> searchResults = new ArrayList<String>();
 
-        return null;
+        for (Task task : allTasks) {
+            String taskInfo = task.getInfo();
+            if (input.equals(taskInfo)) {
+                searchResults.add(taskInfo);
+            }
+        }
+        return searchResults;
     }
 
     private String exit() {
