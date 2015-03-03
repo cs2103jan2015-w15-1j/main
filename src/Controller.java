@@ -8,20 +8,25 @@ public class Controller {
     private static final String MESSAGE_COMPLETE = "\"%s\" completed.";
     private static final String MESSAGE_EXIT = "Goodbye!";
     private static final String MESSAGE_SAVE_DEST = "File save destination has been confirmed. \n";
+    private static final String MESSAGE_UNDO = "Last command has been undone. \n";
+
 
     private static final String MESSAGE_INVALID_COMMAND = "Invalid command.";
+    private static final String MESSAGE_NO_UNDO = "Unable to undo. \n";
 
     private static final String DISPLAY_LINE = "%d. %s\n";
 
     StorageStub storage;
     boolean timeToExit;
     ArrayList<Task> allTasks;
+    ArrayList<Task> allTasksPreviousState;
 
 
     public Controller(String[] args) {
         storage = new StorageStub();
         timeToExit = false;
         allTasks = storage.getTasksFromFile();
+        allTasksPreviousState = allTasks;
     }
 
     // Public methods
@@ -37,14 +42,18 @@ public class Controller {
                     return MESSAGE_SAVE_DEST;
                 }
             case ADD :
+                updatePreviousState();
                 return addTask(arguments);
             case DELETE :
+                updatePreviousState();
                 return deleteTask(arguments);
             case EDIT :
+                updatePreviousState();
                 return editTask(arguments);
             case DISPLAY :
                 return displayTasks();
             case COMPLETE :
+                updatePreviousState();
                 return completeTask(arguments);
             case UNDO :
                 return undo();
@@ -69,7 +78,6 @@ public class Controller {
 
     private String addTask(String input) {
         Task task = new Task(input);
-        // TODO check if task is valid.
         allTasks.add(task);
         storage.writeTasksToFile(allTasks);
         return MESSAGE_ADD;
@@ -88,7 +96,7 @@ public class Controller {
     }
 
     private String editTask(String input) {
-
+        // TODO
         return MESSAGE_EDIT;
     }
 
@@ -121,14 +129,26 @@ public class Controller {
     }
 
     private String undo() {
-        return null;
+        // TODO check if this method actually works
+        if (allTasksPreviousState.equals(allTasks)) {
+            return MESSAGE_NO_UNDO;
+        } else {
+            allTasks = allTasksPreviousState;
+            return MESSAGE_UNDO;
+        }
     }
 
     private String search(String input) {
+        // TODO
+
         return null;
     }
 
     private String exit() {
         return MESSAGE_EXIT;
+    }
+
+    private void updatePreviousState() {
+        allTasksPreviousState = allTasks;
     }
 }
