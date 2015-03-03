@@ -1,18 +1,18 @@
 import java.util.ArrayList;
 
 public class Controller {
-    private static final String MESSAGE_EMPTY = "There is currently no task. \n";
-    private static final String MESSAGE_ADD = "Task has been successfully added. \n";
-    private static final String MESSAGE_DELETE = "Task has been successfully deleted. \n";
-    private static final String MESSAGE_EDIT = "Task has been successfully edited. \n";
+    private static final String MESSAGE_EMPTY = "There is currently no task.\n";
+    private static final String MESSAGE_ADD = "Task has been successfully added.\n";
+    private static final String MESSAGE_DELETE = "Task has been successfully deleted.\n";
+    private static final String MESSAGE_EDIT = "Task has been successfully edited.\n";
     private static final String MESSAGE_COMPLETE = "\"%s\" completed.";
     private static final String MESSAGE_EXIT = "Goodbye!";
     private static final String MESSAGE_SAVE_DEST = "File save destination has been confirmed. \n";
 
     private static final String MESSAGE_INVALID_COMMAND = "Invalid command.";
-    
+
     private static final String DISPLAY_LINE = "%d. %s\n";
-    
+
     StorageStub storage;
     boolean timeToExit;
     ArrayList<Task> allTasks;
@@ -30,7 +30,7 @@ public class Controller {
 
         Command.Type commandType = currentCommand.getCommandType();
         String arguments = currentCommand.getArguments();
-        
+
         switch (commandType) {
             case SETSAVEFILE :
                 if (setSaveFileDest(input)) {
@@ -63,7 +63,7 @@ public class Controller {
     }
 
     // Private methods
-    private boolean setSaveFileDest(String input) {
+    private String setSaveFileDest(String input) {
         return storage.setSaveFileDest(input);
     }
 
@@ -84,7 +84,7 @@ public class Controller {
             return MESSAGE_DELETE;
         } catch (NumberFormatException e) {
             return MESSAGE_INVALID_COMMAND;
-        }        
+        }
     }
 
     private String editTask(String input) {
@@ -109,7 +109,15 @@ public class Controller {
     }
 
     private String completeTask(String input) {
-        return null;
+        try {
+            int index = Integer.parseInt(input.trim()) - 1;
+            Task task = allTasks.get(index);
+            task.markAsComplete();
+            storage.writeTasksToFile(allTasks);
+            return String.format(MESSAGE_COMPLETE, task.getInfo());
+        } catch (NumberFormatException | IndexOutOfBoundsException e) {
+            return MESSAGE_INVALID_COMMAND;
+        }
     }
 
     private String undo() {

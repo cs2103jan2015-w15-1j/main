@@ -15,6 +15,10 @@ import java.util.Arrays;
  * 				  "on" followed by number representing day and the short-form name for month
  *			      (Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec)
  *                Example: "attend meeting at 1200-1400 on 20 Apr"
+ *                
+ * NOTE THAT IF THE INFORMATION DOES NOT FOLLOW FORMAT OF DEADLINE AND TIMED TASK, IT WILL BE DEEMED AS FLOATING TASK
+ * 
+ * API: getInfo(), getDay(), getMonth(), getTime(), getTaskStatus(), markAsComplete()
  */
 
 public class Task {
@@ -23,30 +27,68 @@ public class Task {
 	private static ArrayList<String> monthsArray = new ArrayList<String>(Arrays.asList(months));
 	
 	private String info;
-	private String taskType;
 	private boolean isCompleted;
-	private int day;
-	private int month;
-	
-	public Task (String information) {	
+
+	public Task (String information) {
 		info = information;
 		isCompleted = false;
-		// need to process the information to check whether it is floating or not
-		
-		// if got "by" and any month from the array = deadline task
-		// if got "at", "on" and any month from the array = timed-task
-		// else it is floating
 	}
 	
-	public void taskCompleted() {
-		isCompleted = true;
+	// Get the description of the task
+	public String getInfo() {
+		if (isDeadline()) {
+			return extractInfoDeadline();
+		} else if (isTimed()) {
+			return extractInfoTimed();
+		} else {
+			return extractInfoFloat();
+		}
 	}
 	
+	// Get the day of the timed or deadline task. Return null if it is a floating task
+	public String getDay() {
+		if (!(isDeadline() || isTimed())) {
+			return null;
+		}
+		String[] stringArr = info.split(" ");
+		int length = stringArr.length;
+		return stringArr[length-2];
+	}
+
+	// Get the month of the timed or deadline task. Return null if it is a floating task
+	public String getMonth() {
+		if (!(isDeadline() || isTimed())) {
+			return null;
+		}
+		String[] stringArr = info.split(" ");
+		int length = stringArr.length;
+		return stringArr[length-1];
+	}
+	
+	// Get the time of the timed task. Return null if it is a deadline or floating task
+	// Note that this method will return something like "1200-1400"
+	// You can use String.split("-") to separate the two numbers and store them in String[]
+	public String getTime() {
+		if (!isTimed()) {
+			return null;
+		}
+		String[] stringArr = info.split(" ");
+		int length = stringArr.length;
+		return stringArr[length-4];
+	}
+
+	// Checks whether task has been done or not
 	public boolean getTaskStatus() {
 		return isCompleted;
 	}
 	
-	public boolean isDeadline() {
+	// Mark a task as complete
+	public void markAsComplete() {
+		isCompleted = true;
+	}
+	
+	// Checks whether the task is a deadline task
+	private boolean isDeadline() {
 		String[] stringArr = info.split(" ");
 		ArrayList<String> stringList = new ArrayList<String>(Arrays.asList(stringArr));
 		int arrayLength = stringList.size();
@@ -56,7 +98,8 @@ public class Task {
 		return false;
 	}
 	
-	public boolean isTimed() {
+	// Checks whether the task is a timed task
+	private boolean isTimed() {
 		String[] stringArr = info.split(" ");
 		ArrayList<String> stringList = new ArrayList<String>(Arrays.asList(stringArr));
 		int arrayLength = stringList.size();
@@ -66,42 +109,84 @@ public class Task {
 		return false;
 	}
 	
+	// Extract out the main info of a deadline task
+	private String extractInfoDeadline() {
+		String[] stringArr = info.split(" ");
+		ArrayList<String> stringList = new ArrayList<String>(Arrays.asList(stringArr));
+		elementDeleter(stringList, 3);
+		return stringFormatter(stringList);
+	}
+	
+	// Extract out the main info of a timed task
+	private String extractInfoTimed() {
+		String[] stringArr = info.split(" ");
+		ArrayList<String> stringList = new ArrayList<String>(Arrays.asList(stringArr));
+		elementDeleter(stringList, 5);
+		return stringFormatter(stringList);
+	}
+	
+	// Delete the number of elements from behind an ArrayList
+	private void elementDeleter(ArrayList<String> array, int amountFromBack) {
+		for (int i = 1; i <= amountFromBack; i++) {
+			array.remove(array.size() - i);
+		}
+	}
+	
+	// Extract out the main info for a floating task
+	private String extractInfoFloat() {
+		return info;
+	}
+	
+	// Helper function for "isDeadline" method 
 	private boolean isDeadlineHelper(List<String> list) {
 		if (list.size() != 3) {
 			return false;
-		} try {
-			Integer.parseInt(list.get(1));
-		} catch (NumberFormatException e) {
+		} else if (!monthsArray.contains(list.get(2))) {
 			return false;
-		} if (!monthsArray.contains(list.get(2))) {
-			return false;
+		} else {
+			try {
+				Integer.parseInt(list.get(1));
+			} catch (NumberFormatException e) {
+				return false;
+			}  
 		} 
 		return true;
 	}
-
+	
+	// Helper function for "isTimed" method
 	private boolean isTimedHelper(List<String> list) {
 		if (list.size() != 5) {
 			return false;
-		}
-		String[] array = list.get(1).split("-");
-		if (array.length != 2) {
+		} else if (!monthsArray.contains(list.get(4))) {
 			return false;
-		} try {
-			Integer.parseInt(array[0]);
-			Integer.parseInt(array[1]);
-		} catch (NumberFormatException e) {
+		} else if (!list.get(2).equals("on")) {
 			return false;
-		} catch (ArrayIndexOutOfBoundsException e) {
-			return false;
-		} if (!list.get(2).equals("on")) {
-			return false;
-		} try {
-			Integer.parseInt(list.get(3));
-		} catch (NumberFormatException e) {
-			return false;
-		} if (!monthsArray.contains(list.get(4))) {
-			return false;
+		} else {
+			String[] array = list.get(1).split("-");
+			if (array.length != 2) {
+				return false;
+			} else {
+				try {
+					Integer.parseInt(array[0]);
+					Integer.parseInt(array[1]);
+					Integer.parseInt(list.get(3));
+				} catch (NumberFormatException e) {
+					return false;
+				} catch (ArrayIndexOutOfBoundsException e) {
+					return false;
+				}
+			}
 		}
 		return true;
+	}
+	
+	// Format the elements in the ArrayList to one single string
+	private String stringFormatter(ArrayList<String> strList) {
+		String result = "";
+		for (String word: strList) {
+			result += word + " ";
+		}
+		result.trim();
+		return result;
 	}
 }
