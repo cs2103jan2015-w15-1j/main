@@ -7,6 +7,7 @@ public class Controller {
     private static final String MESSAGE_EDIT = "Task has been successfully edited. \n";
     private static final String MESSAGE_COMPLETE = "\"%s\" completed.";
     private static final String MESSAGE_EXIT = "Goodbye!";
+    private static final String MESSAGE_SAVE_DEST = "File save destination has been confirmed. \n";
 
     private static final String MESSAGE_INVALID_COMMAND = "Invalid command.";
     
@@ -32,7 +33,9 @@ public class Controller {
         
         switch (commandType) {
             case SETSAVEFILE :
-                return setSaveFileDest(arguments);
+                if (setSaveFileDest(input)) {
+                    return MESSAGE_SAVE_DEST;
+                }
             case ADD :
                 return addTask(arguments);
             case DELETE :
