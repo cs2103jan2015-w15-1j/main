@@ -93,4 +93,9 @@ public class Storage {
             System.out.printf(MESSAGE_ERROR, e.getMessage());
         }
     }
+
+    public String setSaveFileDest(String input) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }
