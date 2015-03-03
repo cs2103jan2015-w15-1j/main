@@ -2,9 +2,9 @@ import java.util.ArrayList;
 
 public class Controller {
     private static final int PARAM_POSITION_FILENAME = 0;
-    
+
     private static final String MESSAGE_SAVE_FILE_READY = "Welcome to Veto. %s is ready for use.";
-    
+
     private static final String MESSAGE_EMPTY = "There is currently no task.\n";
     private static final String MESSAGE_ADD = "Task has been successfully added.\n";
     private static final String MESSAGE_DELETE = "Task has been successfully deleted.\n";
@@ -19,7 +19,7 @@ public class Controller {
     private static final String MESSAGE_NO_UNDO = "Unable to undo. \n";
 
     private static final String DISPLAY_LINE = "%d. %s\n";
-    
+
     private static final String ERROR_NO_FILE = "No file in argument";
 
     private String saveFileName;
@@ -42,7 +42,7 @@ public class Controller {
     public String getWelcomeMessage() {
         return String.format(MESSAGE_SAVE_FILE_READY, saveFileName);
     }
-    
+
     public String executeCommand(String input) {
         Command currentCommand = new Command(input);
 
@@ -73,6 +73,8 @@ public class Controller {
             case SEARCH :
                 ArrayList<Task> searchResults = search(arguments);
                 return formatTasksForDisplay(searchResults);
+            case INVALID :
+                return invalid();
             case EXIT :
                 timeToExit = true;
                 return exit();
@@ -88,8 +90,8 @@ public class Controller {
     // Private methods
     private String getFileNameFromArgs(String[] args) {
         return args[PARAM_POSITION_FILENAME];
-    }    
-    
+    }
+
     private String setSaveFileDest(String input) {
         return storage.setSaveFileDest(input);
     }
@@ -167,6 +169,10 @@ public class Controller {
         }
         return searchResults;
     }
+    
+    private String invalid() {
+        return MESSAGE_INVALID_COMMAND;
+    }
 
     private String exit() {
         return MESSAGE_EXIT;
@@ -175,7 +181,7 @@ public class Controller {
     private void updatePreviousState() {
         allTasksPreviousState = allTasks;
     }
-    
+
     private void exitIfMissingArgs(String[] args) {
         if (args.length == 0) {
             System.err.println(ERROR_NO_FILE);
