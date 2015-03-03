@@ -9,6 +9,9 @@ public class Storage {
     private File saveFile;
 
     public Storage(String fileName) {
+        if(!fileName.contains(".txt")){
+            fileName +=".txt";
+        }
         saveFile = new File(fileName);
         createMissingFile(saveFile);
     }
