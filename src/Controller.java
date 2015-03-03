@@ -1,6 +1,8 @@
 import java.util.ArrayList;
 
 public class Controller {
+    private static final int PARAM_POSITION_FILENAME = 0;
+    
     private static final String MESSAGE_EMPTY = "There is currently no task.\n";
     private static final String MESSAGE_ADD = "Task has been successfully added.\n";
     private static final String MESSAGE_DELETE = "Task has been successfully deleted.\n";
@@ -15,18 +17,27 @@ public class Controller {
     private static final String MESSAGE_NO_UNDO = "Unable to undo. \n";
 
     private static final String DISPLAY_LINE = "%d. %s\n";
+    
+    private static final String ERROR_NO_FILE = "No file in argument";
 
-    StorageStub storage;
+    String saveFileName;
+    Storage storage;
     boolean timeToExit;
     ArrayList<Task> allTasks;
     ArrayList<Task> allTasksPreviousState;
 
 
     public Controller(String[] args) {
-        storage = new StorageStub();
+        exitIfMissingArgs(args);
+        saveFileName = getFileNameFromArgs(args);
+        storage = new Storage(saveFileName);
         timeToExit = false;
         allTasks = storage.getTasksFromFile();
         allTasksPreviousState = allTasks;
+    }
+
+    private String getFileNameFromArgs(String[] args) {
+        return args[PARAM_POSITION_FILENAME];
     }
 
     // Public methods
@@ -157,5 +168,12 @@ public class Controller {
 
     private void updatePreviousState() {
         allTasksPreviousState = allTasks;
+    }
+    
+    private void exitIfMissingArgs(String[] args) {
+        if (args.length == 0) {
+            System.err.println(ERROR_NO_FILE);
+            System.exit(0);
+        }
     }
 }
