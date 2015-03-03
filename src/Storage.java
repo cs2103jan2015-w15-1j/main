@@ -2,6 +2,8 @@ import java.io.File;
 import java.util.ArrayList;
 
 public class Storage {
+    private static final String MESSAGE_ERROR = "Error: %s\n";
+    
     private File saveFile;
 
     public Storage(String fileName) {
@@ -9,7 +11,14 @@ public class Storage {
         createMissingFile(saveFile);
     }
 
-    private void createMissingFile(File saveFile2) {
+    private void createMissingFile(File fileName) {
+        try {
+            if (!fileName.exists()) {
+                fileName.createNewFile();
+            }
+        } catch (Exception e) {
+            System.out.printf(MESSAGE_ERROR, e.getMessage());
+        }
     }
 
     public String writeTasksToFile(ArrayList<Task> input) {
