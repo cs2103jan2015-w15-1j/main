@@ -18,7 +18,7 @@ import java.util.Arrays;
  *                
  * NOTE THAT IF THE INFORMATION DOES NOT FOLLOW FORMAT OF DEADLINE AND TIMED TASK, IT WILL BE DEEMED AS FLOATING TASK
  * 
- * API: getInfo(), getDay(), getMonth(), getTime(), getTaskStatus(), markAsComplete()
+ * API: getRawInfo (), getInfo(), getDay(), getMonth(), getTime(), getTaskStatus(), markAsComplete()
  */
 
 public class Task {
@@ -34,6 +34,11 @@ public class Task {
 		isCompleted = false;
 	}
 	
+	// Get the raw info of the task
+	public String getRawInfo() {
+		return info;
+	}
+
 	// Get the description of the task
 	public String getInfo() {
 		if (isDeadline()) {
@@ -50,9 +55,7 @@ public class Task {
 		if (!(isDeadline() || isTimed())) {
 			return null;
 		}
-		String[] stringArr = info.split(" ");
-		int length = stringArr.length;
-		return stringArr[length-2];
+		return getWord(2);
 	}
 
 	// Get the month of the timed or deadline task. Return null if it is a floating task
@@ -60,9 +63,7 @@ public class Task {
 		if (!(isDeadline() || isTimed())) {
 			return null;
 		}
-		String[] stringArr = info.split(" ");
-		int length = stringArr.length;
-		return stringArr[length-1];
+		return getWord(1);
 	}
 	
 	// Get the time of the timed task. Return null if it is a deadline or floating task
@@ -72,9 +73,7 @@ public class Task {
 		if (!isTimed()) {
 			return null;
 		}
-		String[] stringArr = info.split(" ");
-		int length = stringArr.length;
-		return stringArr[length-4];
+		return getWord(4);
 	}
 
 	// Checks whether task has been done or not
@@ -85,6 +84,13 @@ public class Task {
 	// Mark a task as complete
 	public void markAsComplete() {
 		isCompleted = true;
+	}
+	
+	// Get the word which correspond with the index from behind
+	private String getWord(int indexFromBehind) {
+		String[] stringArr = info.split(" ");
+		int length = stringArr.length;
+		return stringArr[length-indexFromBehind];
 	}
 	
 	// Checks whether the task is a deadline task
@@ -128,7 +134,7 @@ public class Task {
 	// Delete the number of elements from behind an ArrayList
 	private void elementDeleter(ArrayList<String> array, int amountFromBack) {
 		for (int i = 1; i <= amountFromBack; i++) {
-			array.remove(array.size() - i);
+			array.remove(array.size() - 1);
 		}
 	}
 	
@@ -186,7 +192,7 @@ public class Task {
 		for (String word: strList) {
 			result += word + " ";
 		}
-		result.trim();
+		result = result.trim();
 		return result;
 	}
 }
