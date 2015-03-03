@@ -69,7 +69,7 @@ public class Storage {
                 if (isCompleted) {
                     task.markAsComplete();
                 }
-                storage.add(new Task(text));
+                storage.add(task);
             }
         } catch (Exception e) {
             System.out.printf(MESSAGE_ERROR, e.getMessage());
@@ -80,6 +80,7 @@ public class Storage {
     private Boolean checkCompletion(String text) {
         if (text.substring(0, text.indexOf(' ')).equals("T")) {
             return true;
+
         } else {
             return false;
         }
