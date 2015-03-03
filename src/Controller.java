@@ -22,11 +22,11 @@ public class Controller {
     
     private static final String ERROR_NO_FILE = "No file in argument";
 
-    String saveFileName;
-    Storage storage;
-    boolean timeToExit;
-    ArrayList<Task> allTasks;
-    ArrayList<Task> allTasksPreviousState;
+    private String saveFileName;
+    private Storage storage;
+    private boolean timeToExit;
+    private ArrayList<Task> allTasks;
+    private ArrayList<Task> allTasksPreviousState;
 
 
     public Controller(String[] args) {
