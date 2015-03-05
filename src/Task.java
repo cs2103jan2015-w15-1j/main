@@ -1,3 +1,4 @@
+import java.time.LocalDate;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,6 +33,7 @@ public class Task {
 	public Task (String information) {
 		info = information;
 		isCompleted = false;
+		LocalDate date = new Date(info).getDate();
 	}
 	
 	// Get the raw info of the task
