@@ -124,16 +124,18 @@ public class Task {
 	
 	// Checks whether the task is a deadline task
 	private boolean isDeadline() {
-		if (0 < stringList.lastIndexOf("by")) {
-			return isDeadlineHelper(stringList.subList(stringList.lastIndexOf("by"), sizeOfStringList));
+	    int index = stringList.lastIndexOf("by"); 
+		if (0 < index) {
+			return isDeadlineHelper(stringList.subList(index, sizeOfStringList));
 		}
 		return false;
 	}
 	
 	// Checks whether the task is a timed task
 	private boolean isTimed() {
-		if (0 < stringList.lastIndexOf("at")) {
-			return isTimedHelper(stringList.subList(stringList.lastIndexOf("at"), sizeOfStringList));
+	    int index = stringList.lastIndexOf("at");
+		if (0 < index) {
+			return isTimedHelper(stringList.subList(index, sizeOfStringList));
 		}
 		return false;
 	}
