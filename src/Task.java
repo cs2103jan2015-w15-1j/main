@@ -22,6 +22,9 @@ import java.util.Arrays;
  */
 
 public class Task {
+    public static enum Type {
+        FLOATING, TIMED, DEADLINE
+    };
 	
 	private static String[] months = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 	private static ArrayList<String> monthsArray = new ArrayList<String>(Arrays.asList(months));
