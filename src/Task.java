@@ -161,7 +161,8 @@ public class Task {
 		return rawInfo;
 	}
 	
-	// Helper function for "isDeadline" method 
+	// Checks the last 3 words of the rawInfo. It has to follow format in order to be
+	// considered a deadline task
 	private boolean isDeadlineHelper(List<String> list) {
 		if (list.size() != 3) {
 			return false;
@@ -177,7 +178,8 @@ public class Task {
 		return true;
 	}
 	
-	// Helper function for "isTimed" method
+	// Check the last 5 words of the rawInfo. It has to follow the format in order to be
+	// considered a timed task
 	private boolean isTimedHelper(List<String> list) {
 		if (list.size() != 5) {
 			return false;
