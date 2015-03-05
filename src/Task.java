@@ -32,15 +32,20 @@ public class Task {
 	private String day;
 	private boolean isCompleted;
 	
+	private transient ArrayList<String> stringList; // transient so that gson won't convert it to json
+	private transient int sizeOfStringList;
+	
 	public Task (String information) {
 		rawInfo = information;
 		isCompleted = false;
 		info = extractInfo();
 		month = extractMonth();
-		day = extractDay();	
+		day = extractDay();
+		initListOfInputs();
+
 	}
-	
-	// Get the raw info of the task
+
+    // Get the raw info of the task
 	public String getRawInfo() {
 		return rawInfo;
 	}
@@ -76,6 +81,12 @@ public class Task {
 	public void markAsComplete() {
 		isCompleted = true;
 	}
+	
+    private void initListOfInputs() {
+        String[] stringArr = rawInfo.split(" ");
+        stringList = new ArrayList<String>(Arrays.asList(stringArr));
+        sizeOfStringList = stringList.size();
+    }
 	
 	// Get the description of the task
 	private String extractInfo() {
@@ -113,38 +124,28 @@ public class Task {
 	
 	// Checks whether the task is a deadline task
 	private boolean isDeadline() {
-		String[] stringArr = rawInfo.split(" ");
-		ArrayList<String> stringList = new ArrayList<String>(Arrays.asList(stringArr));
-		int arrayLength = stringList.size();
 		if (0 < stringList.lastIndexOf("by")) {
-			return isDeadlineHelper(stringList.subList(stringList.lastIndexOf("by"), arrayLength));
+			return isDeadlineHelper(stringList.subList(stringList.lastIndexOf("by"), sizeOfStringList));
 		}
 		return false;
 	}
 	
 	// Checks whether the task is a timed task
 	private boolean isTimed() {
-		String[] stringArr = rawInfo.split(" ");
-		ArrayList<String> stringList = new ArrayList<String>(Arrays.asList(stringArr));
-		int arrayLength = stringList.size();
 		if (0 < stringList.lastIndexOf("at")) {
-			return isTimedHelper(stringList.subList(stringList.lastIndexOf("at"), arrayLength));
+			return isTimedHelper(stringList.subList(stringList.lastIndexOf("at"), sizeOfStringList));
 		}
 		return false;
 	}
 	
 	// Extract out the main info of a deadline task
 	private String extractInfoDeadline() {
-		String[] stringArr = rawInfo.split(" ");
-		ArrayList<String> stringList = new ArrayList<String>(Arrays.asList(stringArr));
 		elementDeleter(stringList, 3);
 		return stringFormatter(stringList);
 	}
 	
 	// Extract out the main info of a timed task
 	private String extractInfoTimed() {
-		String[] stringArr = rawInfo.split(" ");
-		ArrayList<String> stringList = new ArrayList<String>(Arrays.asList(stringArr));
 		elementDeleter(stringList, 5);
 		return stringFormatter(stringList);
 	}
