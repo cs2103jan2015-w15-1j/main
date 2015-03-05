@@ -36,13 +36,12 @@ public class Task {
 	private transient int sizeOfStringList;
 	
 	public Task (String information) {
+	    initListOfInputs(information);
 		rawInfo = information;
 		isCompleted = false;
 		info = extractInfo();
 		month = extractMonth();
 		day = extractDay();
-		initListOfInputs();
-
 	}
 
     // Get the raw info of the task
@@ -82,8 +81,8 @@ public class Task {
 		isCompleted = true;
 	}
 	
-    private void initListOfInputs() {
-        String[] stringArr = rawInfo.split(" ");
+    private void initListOfInputs(String information) {
+        String[] stringArr = information.split(" ");
         stringList = new ArrayList<String>(Arrays.asList(stringArr));
         sizeOfStringList = stringList.size();
     }
@@ -101,18 +100,18 @@ public class Task {
 
 	// Get the month of the timed or deadline task. Return null if it is a floating task
 	private String extractMonth() {
-		if (!(isDeadline() || isTimed())) {
-			return null;
+		if (isDeadline() || isTimed()) {
+		    return getWord(1);
 		}
-		return getWord(1);
+		return null;
 	}
 
 	// Get the day of the timed or deadline task. Return null if it is a floating task
 	private String extractDay() {
-		if (!(isDeadline() || isTimed())) {
-			return null;
+		if (isDeadline() || isTimed()) {
+		    return getWord(2);
 		}
-		return getWord(2);
+		return null;
 	}
 
 	// Get the word which correspond with the index from behind
@@ -142,14 +141,16 @@ public class Task {
 	
 	// Extract out the main info of a deadline task
 	private String extractInfoDeadline() {
-		elementDeleter(stringList, 3);
-		return stringFormatter(stringList);
+        ArrayList<String> localStringList = new ArrayList<String>(stringList);
+		elementDeleter(localStringList, 3);
+		return stringFormatter(localStringList);
 	}
 	
 	// Extract out the main info of a timed task
 	private String extractInfoTimed() {
-		elementDeleter(stringList, 5);
-		return stringFormatter(stringList);
+	    ArrayList<String> localStringList = new ArrayList<String>(stringList);
+		elementDeleter(localStringList, 5);
+		return stringFormatter(localStringList);
 	}
 	
 	// Delete the number of elements from behind an ArrayList
