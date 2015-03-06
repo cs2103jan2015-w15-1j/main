@@ -26,46 +26,37 @@ public class Task {
 	private static String[] months = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 	private static ArrayList<String> monthsArray = new ArrayList<String>(Arrays.asList(months));
 	
-	private String info;
+	private String rawInfo; // Unformatted argumuents
+	private String info; // arguments without the date and time
+	private String month;
+	private String day;
 	private boolean isCompleted;
-
+	
 	public Task (String information) {
-		info = information;
+		rawInfo = information;
 		isCompleted = false;
+		info = extractInfo();
+		month = extractMonth();
+		day = extractDay();	
 	}
 	
 	// Get the raw info of the task
 	public String getRawInfo() {
+		return rawInfo;
+	}
+	
+	public String getInfo() {
 		return info;
 	}
-
-	// Get the description of the task
-	public String getInfo() {
-		if (isDeadline()) {
-			return extractInfoDeadline();
-		} else if (isTimed()) {
-			return extractInfoTimed();
-		} else {
-			return extractInfoFloat();
-		}
-	}
 	
-	// Get the day of the timed or deadline task. Return null if it is a floating task
-	public String getDay() {
-		if (!(isDeadline() || isTimed())) {
-			return null;
-		}
-		return getWord(2);
-	}
-
-	// Get the month of the timed or deadline task. Return null if it is a floating task
 	public String getMonth() {
-		if (!(isDeadline() || isTimed())) {
-			return null;
-		}
-		return getWord(1);
+		return month;
 	}
 	
+	public String getDay() {
+		return day;
+	}
+
 	// Get the time of the timed task. Return null if it is a deadline or floating task
 	// Note that this method will return something like "1200-1400"
 	// You can use String.split("-") to separate the two numbers and store them in String[]
@@ -86,16 +77,43 @@ public class Task {
 		isCompleted = true;
 	}
 	
+	// Get the description of the task
+	private String extractInfo() {
+		if (isDeadline()) {
+			return extractInfoDeadline();
+		} else if (isTimed()) {
+			return extractInfoTimed();
+		} else {
+			return extractInfoFloat();
+		}
+	}
+
+	// Get the month of the timed or deadline task. Return null if it is a floating task
+	private String extractMonth() {
+		if (!(isDeadline() || isTimed())) {
+			return null;
+		}
+		return getWord(1);
+	}
+
+	// Get the day of the timed or deadline task. Return null if it is a floating task
+	private String extractDay() {
+		if (!(isDeadline() || isTimed())) {
+			return null;
+		}
+		return getWord(2);
+	}
+
 	// Get the word which correspond with the index from behind
 	private String getWord(int indexFromBehind) {
-		String[] stringArr = info.split(" ");
+		String[] stringArr = rawInfo.split(" ");
 		int length = stringArr.length;
 		return stringArr[length-indexFromBehind];
 	}
 	
 	// Checks whether the task is a deadline task
 	private boolean isDeadline() {
-		String[] stringArr = info.split(" ");
+		String[] stringArr = rawInfo.split(" ");
 		ArrayList<String> stringList = new ArrayList<String>(Arrays.asList(stringArr));
 		int arrayLength = stringList.size();
 		if (0 < stringList.lastIndexOf("by")) {
@@ -106,7 +124,7 @@ public class Task {
 	
 	// Checks whether the task is a timed task
 	private boolean isTimed() {
-		String[] stringArr = info.split(" ");
+		String[] stringArr = rawInfo.split(" ");
 		ArrayList<String> stringList = new ArrayList<String>(Arrays.asList(stringArr));
 		int arrayLength = stringList.size();
 		if (0 < stringList.lastIndexOf("at")) {
@@ -117,7 +135,7 @@ public class Task {
 	
 	// Extract out the main info of a deadline task
 	private String extractInfoDeadline() {
-		String[] stringArr = info.split(" ");
+		String[] stringArr = rawInfo.split(" ");
 		ArrayList<String> stringList = new ArrayList<String>(Arrays.asList(stringArr));
 		elementDeleter(stringList, 3);
 		return stringFormatter(stringList);
@@ -125,7 +143,7 @@ public class Task {
 	
 	// Extract out the main info of a timed task
 	private String extractInfoTimed() {
-		String[] stringArr = info.split(" ");
+		String[] stringArr = rawInfo.split(" ");
 		ArrayList<String> stringList = new ArrayList<String>(Arrays.asList(stringArr));
 		elementDeleter(stringList, 5);
 		return stringFormatter(stringList);
@@ -140,10 +158,11 @@ public class Task {
 	
 	// Extract out the main info for a floating task
 	private String extractInfoFloat() {
-		return info;
+		return rawInfo;
 	}
 	
-	// Helper function for "isDeadline" method 
+	// Checks the last 3 words of the rawInfo. It has to follow format in order to be
+	// considered a deadline task
 	private boolean isDeadlineHelper(List<String> list) {
 		if (list.size() != 3) {
 			return false;
@@ -159,7 +178,8 @@ public class Task {
 		return true;
 	}
 	
-	// Helper function for "isTimed" method
+	// Check the last 5 words of the rawInfo. It has to follow the format in order to be
+	// considered a timed task
 	private boolean isTimedHelper(List<String> list) {
 		if (list.size() != 5) {
 			return false;
