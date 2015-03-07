@@ -17,12 +17,12 @@ public class Date {
         DateTimeFormatter formatter = createFormatter();
 
         date = LocalDate.parse(input, formatter);
-        if (date.isBefore(LocalDate.now())) {
-            throw new DateTimeException(WARNING_DATE_BEFORE_TODAY);
-        }
+//        if (date.isBefore(LocalDate.now())) {
+//            throw new DateTimeException(WARNING_DATE_BEFORE_TODAY);
+//        }
     }
     
-    public LocalDate getDate() {
+    public LocalDate getLocalDateObj() {
         return date;
     }
 
