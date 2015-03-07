@@ -163,7 +163,7 @@ public class Controller {
 
         for (Task task : allTasks) {
             String taskInfo = task.getInfo();
-            if (input.equals(taskInfo)) {
+            if (taskInfo.contains(input)) {
                 searchResults.add(task);
             }
         }
