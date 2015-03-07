@@ -34,18 +34,31 @@ public class Task {
 	private String month;
 	private String day;
 	private boolean isCompleted;
+	private Type type;
 	
 	private transient ArrayList<String> stringList; // transient so that gson won't convert it to json
 	private transient int sizeOfStringList;
 	
-	public Task (String information) {
-	    initListOfInputs(information);
-		rawInfo = information;
-		isCompleted = false;
-		info = extractInfo();
-		month = extractMonth();
-		day = extractDay();
-	}
+    public Task(String information) {
+        rawInfo = information;
+        isCompleted = false;
+        initListOfInputs(information);
+        type = determineType();
+        info = extractInfo();
+        assert (info != null);
+        month = extractMonth();
+        day = extractDay();
+    }
+
+    private Type determineType() {
+        if (isDeadline()) {
+            return Type.DEADLINE;
+        } else if (isTimed()) {
+            return Type.TIMED;
+        } else {
+            return Type.FLOATING;
+        }
+    }
 
     // Get the raw info of the task
 	public String getRawInfo() {
@@ -92,18 +105,21 @@ public class Task {
 	
 	// Get the description of the task
 	private String extractInfo() {
-		if (isDeadline()) {
-			return extractInfoDeadline();
-		} else if (isTimed()) {
-			return extractInfoTimed();
-		} else {
-			return extractInfoFloat();
-		}
+	    switch (type) {
+	        case DEADLINE :
+	            return extractInfoDeadline();
+	        case TIMED :
+	            return extractInfoTimed();
+	        case FLOATING :
+	            return extractInfoFloat();
+	        default :
+	            return null;
+	    }
 	}
 
 	// Get the month of the timed or deadline task. Return null if it is a floating task
 	private String extractMonth() {
-		if (isDeadline() || isTimed()) {
+		if (type == Type.DEADLINE || type == Type.TIMED) {
 		    return getWord(1);
 		}
 		return null;
@@ -111,7 +127,7 @@ public class Task {
 
 	// Get the day of the timed or deadline task. Return null if it is a floating task
 	private String extractDay() {
-		if (isDeadline() || isTimed()) {
+		if (type == Type.DEADLINE || type == Type.TIMED) {
 		    return getWord(2);
 		}
 		return null;
