@@ -33,22 +33,24 @@ public class Storage {
         try {
             writer = new PrintWriter(settingsFile, "UTF-8");
             writer.println(fileName);
+            writer.close();
         } catch (FileNotFoundException | UnsupportedEncodingException e) {
             e.printStackTrace();
         }
     }
 
     private String getSaveFileNameFromSettingsFile(File fileName) {
-        String text;
+        String text = "";
         initBufferedReader(fileName);
         try {
-            if ((text = reader.readLine()) != null) {
-                return text;
+            if ((text = reader.readLine()) == null) {
+                text = DEFAULT_SAVE_FILE;
             }
         } catch (IOException e) {
-            return DEFAULT_SAVE_FILE;
+            e.printStackTrace();
         }
-        return DEFAULT_SAVE_FILE;
+        closeBufferedReader();
+        return text;
     }
 
     private void createIfMissingFile(File fileName) {
@@ -105,7 +107,16 @@ public class Storage {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        closeBufferedReader();
         return storage;
+    }
+
+    private void closeBufferedReader() {
+        try {
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private Boolean checkCompletion(String text) {
@@ -126,11 +137,18 @@ public class Storage {
     }
 
     public String setSaveFileDirectory(String input) {
-        if (saveFile.renameTo(new File(input))) {
-            updateSettingsFile(input);
+        saveFileName = input;
+        if (saveFile.renameTo(new File(saveFileName))) {
+            updateSettingsFile(saveFileName);
+            saveFile = new File(saveFileName);
+            createIfMissingFile(saveFile);
             return MESSAGE_DIR_CHANGED_SUCCESSFUL;
         } else {
             return MESSAGE_DIR_CHANGED_FAILED;
         }
+    }
+
+    public File getSaveFile() {
+        return saveFile;
     }
 }
