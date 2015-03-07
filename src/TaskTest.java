@@ -10,7 +10,7 @@ public class TaskTest {
 		assertEquals("attend meeting later today", testingTask.getInfo());
 		assertEquals(null, testingTask.getDay());
 		assertEquals(null, testingTask.getMonth());
-		assertEquals(null, testingTask.getTime());
+		assertEquals(null, testingTask.getStartTime());
 		assertFalse(testingTask.getTaskStatus());
 		testingTask.markAsComplete();
 		assertTrue(testingTask.getTaskStatus());
@@ -22,7 +22,8 @@ public class TaskTest {
 		assertEquals("attend meeting later", testingTask.getInfo());
 		assertEquals("20", testingTask.getDay().toString());
 		assertEquals("2", testingTask.getMonth().toString());
-		assertEquals("1200-1400", testingTask.getTime());
+		assertEquals("12:00", testingTask.getStartTime().toString());
+		assertEquals("14:00", testingTask.getEndTime().toString());
 		assertFalse(testingTask.getTaskStatus());
 		testingTask.markAsComplete();
 		assertTrue(testingTask.getTaskStatus());
@@ -34,7 +35,7 @@ public class TaskTest {
 		assertEquals("finish homework", testingTask.getInfo());
 		assertEquals("20", testingTask.getDay().toString());
 		assertEquals("2", testingTask.getMonth().toString());
-		assertEquals(null, testingTask.getTime());
+		assertEquals(null, testingTask.getStartTime());
 		assertFalse(testingTask.getTaskStatus());
 		testingTask.markAsComplete();
 		assertTrue(testingTask.getTaskStatus());

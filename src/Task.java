@@ -1,6 +1,7 @@
-import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.Month;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,8 +30,9 @@ public class Task {
         FLOATING, TIMED, DEADLINE
     };
     
-    private static final String KEYWORD_DEADLINE = "by";
-    private static final String KEYWORD_TIMED = "on";
+    private static final String KEYWORD_DEADLINE_DATE = "by";
+    private static final String KEYWORD_TIMED_DATE = "on";
+    private static final String KEYWORD_TIMED_TIME = "at";
 	
 	private static String[] months = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 	private static ArrayList<String> monthsArray = new ArrayList<String>(Arrays.asList(months));
@@ -41,6 +43,8 @@ public class Task {
 	private LocalDate date;
 	private Integer month;
 	private Integer day;
+	private LocalTime startTime;
+	private LocalTime endTime;
 	private boolean isCompleted;
 	
 	private transient ArrayList<String> stringArrayList; // transient so that gson won't convert it to json
@@ -54,6 +58,21 @@ public class Task {
         info = extractInfo();
         assert (info != null);
         initDate();
+        initTime();
+    }
+
+    private void initTime() {
+        if (type == Type.TIMED) {
+            int indexOfTime = stringArrayList.lastIndexOf(KEYWORD_TIMED_TIME) + 1;
+            String inputTime = stringArrayList.get(indexOfTime);
+            String[] inputTimes = inputTime.split("-");
+            
+            DateTimeFormatter formatter = new DateTimeFormatterBuilder().appendPattern("HHmm")
+                                                                        .toFormatter();
+            
+            startTime = LocalTime.parse(inputTimes[0], formatter);
+            endTime = LocalTime.parse(inputTimes[1], formatter);
+        }
     }
 
     private void initDate() {
@@ -68,10 +87,10 @@ public class Task {
         String inputDate;
         switch (type) {
             case DEADLINE :
-                inputDate = getInputDate(KEYWORD_DEADLINE);
+                inputDate = getInputDate(KEYWORD_DEADLINE_DATE);
                 return new Date(inputDate).getLocalDateObj();
             case TIMED :
-                inputDate = getInputDate(KEYWORD_TIMED);
+                inputDate = getInputDate(KEYWORD_TIMED_DATE);
                 return new Date(inputDate).getLocalDateObj();
             case FLOATING :
             default :
@@ -113,15 +132,13 @@ public class Task {
 		return day;
 	}
 
-	// Get the time of the timed task. Return null if it is a deadline or floating task
-	// Note that this method will return something like "1200-1400"
-	// You can use String.split("-") to separate the two numbers and store them in String[]
-	public String getTime() {
-		if (!isTimed()) {
-			return null;
-		}
-		return getWord(4);
+	public LocalTime getStartTime() {
+	    return startTime;
 	}
+	
+    public LocalTime getEndTime() {
+        return endTime;
+    }	
 
 	// Checks whether task has been done or not
 	public boolean getTaskStatus() {
@@ -153,17 +170,10 @@ public class Task {
 	    }
 	}
 
-
-	// Get the word which correspond with the index from behind
-	private String getWord(int indexFromBehind) {
-		String[] stringArr = rawInfo.split(" ");
-		int length = stringArr.length;
-		return stringArr[length-indexFromBehind];
-	}
 	
 	// Checks whether the task is a deadline task
 	private boolean isDeadline() {
-	    int index = stringArrayList.lastIndexOf("by"); 
+	    int index = stringArrayList.lastIndexOf(KEYWORD_DEADLINE_DATE); 
 		if (0 < index) {
 			return isDeadlineHelper(stringArrayList.subList(index, sizeOfStringList));
 		}
@@ -172,7 +182,7 @@ public class Task {
 	
 	// Checks whether the task is a timed task
 	private boolean isTimed() {
-	    int index = stringArrayList.lastIndexOf("at");
+	    int index = stringArrayList.lastIndexOf(KEYWORD_TIMED_TIME);
 		if (0 < index) {
 			return isTimedHelper(stringArrayList.subList(index, sizeOfStringList));
 		}
