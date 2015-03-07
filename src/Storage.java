@@ -2,44 +2,68 @@ import java.io.File;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 public class Storage {
-    private static final String MESSAGE_ERROR = "Error: %s\n";
     private static final String MESSAGE_ADDED = "File updated\n";
-
+    private static final String MESSAGE_DEST_CHANGED = "Save file destination changed\n";
+    private static final String DEFAULT_SAVE_FILE = "savefile.txt";
+    private static final String SETTINGS_FILE_NAME = "settings.txt";
+    
+    private File settingsFile;
     private File saveFile;
+    private String saveFileName;
     private BufferedReader reader;
+    private PrintWriter writer;
 
-    public Storage(String fileName) {
-        if (!fileName.contains(".txt")) {
-            fileName += ".txt";
-        }
-        saveFile = new File(fileName);
-        createMissingFile(saveFile);
+    public Storage() {
+        settingsFile = new File(SETTINGS_FILE_NAME);
+        createIfMissingFile(settingsFile);
+        saveFileName = getSaveFileNameFromSettingsFile(settingsFile);
+        updateSettingsFile(saveFileName);
+        saveFile = new File(saveFileName);
+        createIfMissingFile(saveFile);
     }
 
-    private void createMissingFile(File fileName) {
+    private void updateSettingsFile(String fileName) {
+    }
+
+    private String getSaveFileNameFromSettingsFile(File fileName) {
+        String text;
+        initBufferedReader(fileName);
+        try {
+            if ((text = reader.readLine()) != null) {
+                return text;
+            }
+        } catch (IOException e) {
+            return DEFAULT_SAVE_FILE;
+        }
+        return DEFAULT_SAVE_FILE;
+    }
+
+    private void createIfMissingFile(File fileName) {
         try {
             if (!fileName.exists()) {
                 fileName.createNewFile();
             }
-        } catch (Exception e) {
-            System.out.printf(MESSAGE_ERROR, e.getMessage());
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
     public String writeTasksToFile(ArrayList<Task> input) {
         try {
-            PrintWriter writer = new PrintWriter(saveFile, "UTF-8");
-            for (Task task : input) {
-                writer.println(taskToInfoString(task));
-            }
-            writer.close();
-        } catch (Exception e) {
-            return String.format(MESSAGE_ERROR, e.getMessage());
+            writer = new PrintWriter(saveFile, "UTF-8");
+        } catch (FileNotFoundException | UnsupportedEncodingException e) {
+            e.printStackTrace();
         }
+        for (Task task : input) {
+            writer.println(taskToInfoString(task));
+        }
+        writer.close();
         return String.format(MESSAGE_ADDED);
     }
 
@@ -60,8 +84,8 @@ public class Storage {
         String info;
         Boolean isCompleted = false;
 
+        initBufferedReader(saveFile);
         try {
-            initBufferedReader(saveFile);
             while ((text = reader.readLine()) != null) {
                 isCompleted = checkCompletion(text);
                 info = text.substring(text.indexOf(' ')).trim();
@@ -71,8 +95,8 @@ public class Storage {
                 }
                 storage.add(task);
             }
-        } catch (Exception e) {
-            System.out.printf(MESSAGE_ERROR, e.getMessage());
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         return storage;
     }
@@ -90,12 +114,11 @@ public class Storage {
         try {
             reader = new BufferedReader(new FileReader(file));
         } catch (FileNotFoundException e) {
-            System.out.printf(MESSAGE_ERROR, e.getMessage());
+            e.printStackTrace();
         }
     }
 
     public String setSaveFileDest(String input) {
-        // TODO Auto-generated method stub
-        return null;
+        return MESSAGE_DEST_CHANGED;
     }
 }
