@@ -9,10 +9,11 @@ import java.util.ArrayList;
 
 public class Storage {
     private static final String MESSAGE_ADDED = "File updated\n";
-    private static final String MESSAGE_DEST_CHANGED = "Save file destination changed\n";
+    private static final String MESSAGE_DIR_CHANGED_SUCCESSFUL = "Save file directory changed\n";
+    private static final String MESSAGE_DIR_CHANGED_FAILED = "Failed to change file directory";
     private static final String DEFAULT_SAVE_FILE = "savefile.txt";
     private static final String SETTINGS_FILE_NAME = "settings.txt";
-    
+
     private File settingsFile;
     private File saveFile;
     private String saveFileName;
@@ -124,9 +125,12 @@ public class Storage {
         }
     }
 
-    public String setSaveFileDest(String input) {
-        // move file
-        updateSettingsFile(input);
-        return MESSAGE_DEST_CHANGED;
+    public String setSaveFileDirectory(String input) {
+        if (saveFile.renameTo(new File(input))) {
+            updateSettingsFile(input);
+            return MESSAGE_DIR_CHANGED_SUCCESSFUL;
+        } else {
+            return MESSAGE_DIR_CHANGED_FAILED;
+        }
     }
 }

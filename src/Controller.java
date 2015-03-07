@@ -93,7 +93,7 @@ public class Controller {
     }
 
     private String setSaveFileDest(String input) {
-        return storage.setSaveFileDest(input);
+        return storage.setSaveFileDirectory(input);
     }
 
     private String addTask(String input) {
