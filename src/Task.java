@@ -15,7 +15,7 @@ import java.util.Arrays;
  *                (Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec)
  *                Example: "do assignment by 23 Mar"
  * 
- * Timed-task:    "at" followed by two 24-hour notation representing start and end (seperated by "-" without spacing,
+ * Timed-task:    "at" followed by two 24-hour notation representing start and end (separated by "-" without spacing,
  * 				  "on" followed by number representing day and the short-form name for month
  *			      (Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec)
  *                Example: "attend meeting at 1200-1400 on 20 Apr"
@@ -33,9 +33,6 @@ public class Task {
     private static final String KEYWORD_DEADLINE_DATE = "by";
     private static final String KEYWORD_TIMED_DATE = "on";
     private static final String KEYWORD_TIMED_TIME = "at";
-	
-	private static String[] months = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
-	private static ArrayList<String> monthsArray = new ArrayList<String>(Arrays.asList(months));
 	
 	private Type type;
 	private String rawInfo; // Unformatted arguments
@@ -220,8 +217,6 @@ public class Task {
 	private boolean isDeadlineHelper(List<String> list) {
 		if (list.size() != 3) {
 			return false;
-		} else if (!monthsArray.contains(list.get(2))) {
-			return false;
 		} else {
 			try {
 				Integer.parseInt(list.get(1));
@@ -237,9 +232,7 @@ public class Task {
 	private boolean isTimedHelper(List<String> list) {
 		if (list.size() != 5) {
 			return false;
-		} else if (!monthsArray.contains(list.get(4))) {
-			return false;
-		} else if (!list.get(2).equals("on")) {
+		} else if (!list.get(2).equals(KEYWORD_TIMED_DATE)) {
 			return false;
 		} else {
 			String[] array = list.get(1).split("-");
