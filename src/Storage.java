@@ -29,6 +29,12 @@ public class Storage {
     }
 
     private void updateSettingsFile(String fileName) {
+        try {
+            writer = new PrintWriter(settingsFile, "UTF-8");
+            writer.println(fileName);
+        } catch (FileNotFoundException | UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
     }
 
     private String getSaveFileNameFromSettingsFile(File fileName) {
@@ -119,6 +125,8 @@ public class Storage {
     }
 
     public String setSaveFileDest(String input) {
+        // move file
+        updateSettingsFile(input);
         return MESSAGE_DEST_CHANGED;
     }
 }
