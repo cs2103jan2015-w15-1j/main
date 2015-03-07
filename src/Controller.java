@@ -32,7 +32,7 @@ public class Controller {
     public Controller(String[] args) {
         exitIfMissingArgs(args);
         saveFileName = getFileNameFromArgs(args);
-        storage = new Storage(saveFileName);
+        storage = new Storage();
         timeToExit = false;
         allTasks = storage.getTasksFromFile();
         allTasksPreviousState = allTasks;
@@ -93,7 +93,7 @@ public class Controller {
     }
 
     private String setSaveFileDest(String input) {
-        return storage.setSaveFileDest(input);
+        return storage.setSaveFileDirectory(input);
     }
 
     private String addTask(String input) {
