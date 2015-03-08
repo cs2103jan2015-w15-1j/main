@@ -148,19 +148,25 @@ public class Controller {
         int editIndex = Integer.parseInt(inputArray[0]) - 1;
         String editType = inputArray[1];
 
+        StringBuilder editArgument = new StringBuilder();
+        for (int i = 2; i < inputArray.length; i++) {
+            editArgument.append(inputArray[i] + " ");
+        }
+
         try {
             Task task = allTasks.get(editIndex);
-
             if (editType.equals("d") || editType.equals("de")) {
                 return MESSAGE_INVALID_COMMAND;
             } else if ("description".contains(editType)) {
-                task.setDescription("foo");
+                task.setDescription(editArgument.toString());
             } else if ("deadline".contains(editType)) {
+                Date date = new Date(input);
+                date.getLocalDateObj();
                 task.setDeadLine(input);
+            } else {
+                return MESSAGE_INVALID_COMMAND;
             }
-
-
-
+            storage.writeTasksToFile(allTasks);
         } catch (Exception e) {
             return MESSAGE_INVALID_COMMAND;
         }
@@ -210,7 +216,7 @@ public class Controller {
 
     private String undo() {
         // TODO check if this method actually works
-        if (allTasksPreviousState.equals(allTasks)) {
+        if (allTasksPreviousState == allTasks) {
             return MESSAGE_NO_UNDO;
         } else {
             allTasks = allTasksPreviousState;
