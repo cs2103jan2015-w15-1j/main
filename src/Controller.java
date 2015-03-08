@@ -37,7 +37,7 @@ public class Controller {
         saveFileName = getFileNameFromArgs(args);
         storage = new Storage();
         timeToExit = false;
-        allTasks = storage.getTasksFromFile();
+        allTasks = storage.readTasksFromFile();
         allTasksPreviousState = allTasks;
     }
 
@@ -54,7 +54,7 @@ public class Controller {
 
         switch (commandType) {
             case SETSAVEFILE :
-                if (Boolean.parseBoolean(setSaveFileDest(input))) {
+                if (setSaveFileDest(input)) {
                     return MESSAGE_SAVE_DEST;
                 }
             case ADD :
@@ -97,7 +97,7 @@ public class Controller {
         return args[PARAM_POSITION_FILENAME];
     }
 
-    private String setSaveFileDest(String input) {
+    private Boolean setSaveFileDest(String input) {
         return storage.setSaveFileDirectory(input);
     }
 

@@ -11,9 +11,11 @@ import java.io.UnsupportedEncodingException;
 import org.junit.Test;
 
 public class StorageTest {
+    String defaultDirectory = "savefile.txt";
     String newDirectory = "C:\\Users\\user\\Documents\\GitHub\\saveRenamedFile.txt";
     String newDirectory2 = "C:\\Users\\user\\Documents\\GitHub\\main\\memory.txt";
     String SettingsDirectory = "settings.txt";
+    File defaultFile = new File(defaultDirectory);
     File testFile = new File(newDirectory);
     File testFile2 = new File(newDirectory2);
     File settingsFile = new File(SettingsDirectory);
@@ -22,17 +24,23 @@ public class StorageTest {
 
     @Test
     public void testSettings() {
+        // delete any existing file before testing
+        defaultFile.delete();
+        settingsFile.delete();
+
+        // creating the settings file for the first time
         Storage test = new Storage();
         String testData = "Data Testing";
         String text = "";
 
-        // test moving files
-        assertEquals(true, test.getSaveFile().exists());
+        // test moving save file
+        assertEquals(true, defaultFile.exists());
         assertEquals(false, testFile.exists());
-        test.setSaveFileDirectory(newDirectory);
-        assertEquals(true, test.getSaveFile().exists());
+        assertEquals(true, test.setSaveFileDirectory(newDirectory));
+        assertEquals(true, testFile.exists());
+        assertEquals(false, defaultFile.exists());
 
-        // test adding data and moving files with data
+        // test adding data and moving save file
         try {
             writer = new PrintWriter(testFile, "UTF-8");
             writer.println(testData);
@@ -41,8 +49,9 @@ public class StorageTest {
             e.printStackTrace();
         }
         assertEquals(false, testFile2.exists());
-        test.setSaveFileDirectory(newDirectory2);
+        assertEquals(true, test.setSaveFileDirectory(newDirectory2));
         assertEquals(true, testFile2.exists());
+        assertEquals(false, testFile.exists());
         try {
             reader = new BufferedReader(new FileReader(testFile2));
             text = reader.readLine();
