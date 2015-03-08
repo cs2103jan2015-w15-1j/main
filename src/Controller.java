@@ -36,7 +36,7 @@ public class Controller {
         saveFileName = getFileNameFromArgs(args);
         storage = new Storage();
         timeToExit = false;
-        allTasks = storage.getTasksFromFile();
+        allTasks = storage.readTasksFromFile();
         allTasksPreviousState = allTasks;
     }
 

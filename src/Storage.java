@@ -7,6 +7,8 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
+import com.google.gson.Gson;
+
 public class Storage {
     private static final String MESSAGE_ADDED = "File updated\n";
     private static final String DEFAULT_SAVE_FILE = "savefile.txt";
@@ -16,7 +18,8 @@ public class Storage {
     private File saveFile;
     private String saveFileName;
     private BufferedReader reader;
-    private PrintWriter writer;
+    private PrintWriter writer; 
+    Gson gson = new Gson();
 
     public Storage() {
         settingsFile = new File(SETTINGS_FILE_NAME);
@@ -76,30 +79,18 @@ public class Storage {
 
     private Object taskToInfoString(Task task) {
         String string = "";
-        if (task.getTaskStatus()) {
-            string += "T ";
-        } else {
-            string += "F ";
-        }
-        string += task.getRawInfo();
+        string = gson.toJson(task);
         return string;
     }
 
-    public ArrayList<Task> getTasksFromFile() {
+    public ArrayList<Task> readTasksFromFile() {
         ArrayList<Task> storage = new ArrayList<Task>();
         String text;
-        String info;
-        Boolean isCompleted = false;
 
         initBufferedReader(saveFile);
         try {
             while ((text = reader.readLine()) != null) {
-                isCompleted = checkCompletion(text);
-                info = text.substring(text.indexOf(' ')).trim();
-                Task task = new Task(info);
-                if (isCompleted) {
-                    task.markAsComplete();
-                }
+                Task task = gson.fromJson(text, Task.class);
                 storage.add(task);
             }
         } catch (IOException e) {
@@ -114,15 +105,6 @@ public class Storage {
             reader.close();
         } catch (IOException e) {
             e.printStackTrace();
-        }
-    }
-
-    private Boolean checkCompletion(String text) {
-        if (text.substring(0, text.indexOf(' ')).equals("T")) {
-            return true;
-
-        } else {
-            return false;
         }
     }
 
