@@ -90,7 +90,8 @@ public class StorageTest {
             assertEquals(tempData.get(i).getTaskStatus(), readData.get(i).getTaskStatus());
             assertEquals(tempData.get(i).getDay(), readData.get(i).getDay());
             assertEquals(tempData.get(i).getMonth(), readData.get(i).getMonth());
-            assertEquals(tempData.get(i).getTime(), readData.get(i).getTime());
+            assertEquals(tempData.get(i).getStartTime(), readData.get(i).getStartTime());
+            assertEquals(tempData.get(i).getEndTime(), readData.get(i).getEndTime());
         }
     }
 
