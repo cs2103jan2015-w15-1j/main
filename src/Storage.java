@@ -18,9 +18,10 @@ public class Storage {
     private File saveFile;
     private String saveFileName;
     private BufferedReader reader;
-    private PrintWriter writer; 
+    private PrintWriter writer;
     Gson gson = new Gson();
 
+    // search the settings file and open the save file
     public Storage() {
         settingsFile = new File(SETTINGS_FILE_NAME);
         createIfMissingFile(settingsFile);
@@ -30,6 +31,7 @@ public class Storage {
         createIfMissingFile(saveFile);
     }
 
+    // update settings file on the changes of save file directory
     private void updateSettingsFile(String fileName) {
         try {
             writer = new PrintWriter(settingsFile, "UTF-8");
@@ -40,6 +42,7 @@ public class Storage {
         }
     }
 
+    // get the directory of the save file from settings file
     private String getSaveFileNameFromSettingsFile(File fileName) {
         String text = "";
         initBufferedReader(fileName);
@@ -54,6 +57,7 @@ public class Storage {
         return text;
     }
 
+    // create the file if not found
     private void createIfMissingFile(File fileName) {
         try {
             if (!fileName.exists()) {
@@ -64,6 +68,7 @@ public class Storage {
         }
     }
 
+    // writes all task objects in the list to the save file
     public String writeTasksToFile(ArrayList<Task> input) {
         try {
             writer = new PrintWriter(saveFile, "UTF-8");
@@ -77,12 +82,14 @@ public class Storage {
         return String.format(MESSAGE_ADDED);
     }
 
+    // converts task object to string
     private Object taskToInfoString(Task task) {
         String string = "";
         string = gson.toJson(task);
         return string;
     }
 
+    // reads all task objects from the save file
     public ArrayList<Task> readTasksFromFile() {
         ArrayList<Task> storage = new ArrayList<Task>();
         String text;
@@ -100,6 +107,7 @@ public class Storage {
         return storage;
     }
 
+    // close buffered reader
     private void closeBufferedReader() {
         try {
             reader.close();
@@ -108,6 +116,7 @@ public class Storage {
         }
     }
 
+    // initialize buffered reader
     private void initBufferedReader(File file) {
         try {
             reader = new BufferedReader(new FileReader(file));
@@ -116,6 +125,7 @@ public class Storage {
         }
     }
 
+    // change save file directory
     public Boolean setSaveFileDirectory(String input) {
         if (input.contains(" ")) {
             input = input.substring(input.indexOf(' ')).trim();
@@ -129,9 +139,5 @@ public class Storage {
         } else {
             return false;
         }
-    }
-
-    public File getSaveFile() {
-        return saveFile;
     }
 }

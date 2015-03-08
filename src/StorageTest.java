@@ -34,10 +34,11 @@ public class StorageTest {
         String text = "";
 
         // test moving save file
-        assertEquals(true, test.getSaveFile().exists());
+        assertEquals(true, defaultFile.exists());
         assertEquals(false, testFile.exists());
-        test.setSaveFileDirectory(newDirectory);
-        assertEquals(true, test.getSaveFile().exists());
+        assertEquals(true, test.setSaveFileDirectory(newDirectory));
+        assertEquals(true, testFile.exists());
+        assertEquals(false, defaultFile.exists());
 
         // test adding data and moving save file
         try {
@@ -48,8 +49,9 @@ public class StorageTest {
             e.printStackTrace();
         }
         assertEquals(false, testFile2.exists());
-        test.setSaveFileDirectory(newDirectory2);
+        assertEquals(true, test.setSaveFileDirectory(newDirectory2));
         assertEquals(true, testFile2.exists());
+        assertEquals(false, testFile.exists());
         try {
             reader = new BufferedReader(new FileReader(testFile2));
             text = reader.readLine();
