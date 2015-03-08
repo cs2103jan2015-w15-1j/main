@@ -1,3 +1,7 @@
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,7 +15,7 @@ import java.util.Arrays;
  *                (Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec)
  *                Example: "do assignment by 23 Mar"
  * 
- * Timed-task:    "at" followed by two 24-hour notation representing start and end (seperated by "-" without spacing,
+ * Timed-task:    "at" followed by two 24-hour notation representing start and end (separated by "-" without spacing,
  * 				  "on" followed by number representing day and the short-form name for month
  *			      (Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec)
  *                Example: "attend meeting at 1200-1400 on 20 Apr"
@@ -22,25 +26,93 @@ import java.util.Arrays;
  */
 
 public class Task {
+    public static enum Type {
+        FLOATING, TIMED, DEADLINE
+    };
+    
+    private static final String KEYWORD_DEADLINE_DATE = "by";
+    private static final String KEYWORD_TIMED_DATE = "on";
+    private static final String KEYWORD_TIMED_TIME = "at";
 	
-	private static String[] months = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
-	private static ArrayList<String> monthsArray = new ArrayList<String>(Arrays.asList(months));
-	
-	private String rawInfo; // Unformatted argumuents
+	private Type type;
+	private String rawInfo; // Unformatted arguments
 	private String info; // arguments without the date and time
-	private String month;
-	private String day;
+	private LocalDate date;
+	private Integer month;
+	private Integer day;
+	private LocalTime startTime;
+	private LocalTime endTime;
 	private boolean isCompleted;
 	
-	public Task (String information) {
-		rawInfo = information;
-		isCompleted = false;
-		info = extractInfo();
-		month = extractMonth();
-		day = extractDay();	
-	}
+	private transient ArrayList<String> stringArrayList; // transient so that gson won't convert it to json
+	private transient int sizeOfStringList;
 	
-	// Get the raw info of the task
+    public Task(String information) {
+        rawInfo = information;
+        isCompleted = false;
+        initListOfInputs(information);
+        type = determineType();
+        info = extractInfo();
+        assert (info != null);
+        initDate();
+        initTime();
+    }
+
+    private void initTime() {
+        if (type == Type.TIMED) {
+            int indexOfTime = stringArrayList.lastIndexOf(KEYWORD_TIMED_TIME) + 1;
+            String inputTime = stringArrayList.get(indexOfTime);
+            String[] inputTimes = inputTime.split("-");
+            
+            DateTimeFormatter formatter = new DateTimeFormatterBuilder().appendPattern("HHmm")
+                                                                        .toFormatter();
+            
+            startTime = LocalTime.parse(inputTimes[0], formatter);
+            endTime = LocalTime.parse(inputTimes[1], formatter);
+        }
+    }
+
+    private void initDate() {
+        date = extractDate();
+        if (date != null) {
+            month = date.getMonthValue();
+            day = date.getDayOfMonth();
+        }
+    }
+
+    private LocalDate extractDate() {
+        String inputDate;
+        switch (type) {
+            case DEADLINE :
+                inputDate = getInputDate(KEYWORD_DEADLINE_DATE);
+                return new Date(inputDate).getLocalDateObj();
+            case TIMED :
+                inputDate = getInputDate(KEYWORD_TIMED_DATE);
+                return new Date(inputDate).getLocalDateObj();
+            case FLOATING :
+            default :
+                return null;
+        }
+    }
+
+    private String getInputDate(String keyword) {
+        int startIndexOfDate = rawInfo.lastIndexOf(keyword) + keyword.length() +
+                               1;
+        String inputDate = rawInfo.substring(startIndexOfDate);
+        return inputDate;
+    }
+
+    private Type determineType() {
+        if (isDeadline()) {
+            return Type.DEADLINE;
+        } else if (isTimed()) {
+            return Type.TIMED;
+        } else {
+            return Type.FLOATING;
+        }
+    }
+
+    // Get the raw info of the task
 	public String getRawInfo() {
 		return rawInfo;
 	}
@@ -49,23 +121,21 @@ public class Task {
 		return info;
 	}
 	
-	public String getMonth() {
+	public Integer getMonth() {
 		return month;
 	}
 	
-	public String getDay() {
+	public Integer getDay() {
 		return day;
 	}
 
-	// Get the time of the timed task. Return null if it is a deadline or floating task
-	// Note that this method will return something like "1200-1400"
-	// You can use String.split("-") to separate the two numbers and store them in String[]
-	public String getTime() {
-		if (!isTimed()) {
-			return null;
-		}
-		return getWord(4);
+	public LocalTime getStartTime() {
+	    return startTime;
 	}
+	
+    public LocalTime getEndTime() {
+        return endTime;
+    }	
 
 	// Checks whether task has been done or not
 	public boolean getTaskStatus() {
@@ -77,76 +147,57 @@ public class Task {
 		isCompleted = true;
 	}
 	
+    private void initListOfInputs(String information) {
+        String[] stringArr = information.split(" ");
+        stringArrayList = new ArrayList<String>(Arrays.asList(stringArr));
+        sizeOfStringList = stringArrayList.size();
+    }
+	
 	// Get the description of the task
 	private String extractInfo() {
-		if (isDeadline()) {
-			return extractInfoDeadline();
-		} else if (isTimed()) {
-			return extractInfoTimed();
-		} else {
-			return extractInfoFloat();
-		}
+	    switch (type) {
+	        case DEADLINE :
+	            return extractInfoDeadline();
+	        case TIMED :
+	            return extractInfoTimed();
+	        case FLOATING :
+	            return extractInfoFloat();
+	        default :
+	            return null;
+	    }
 	}
 
-	// Get the month of the timed or deadline task. Return null if it is a floating task
-	private String extractMonth() {
-		if (!(isDeadline() || isTimed())) {
-			return null;
-		}
-		return getWord(1);
-	}
-
-	// Get the day of the timed or deadline task. Return null if it is a floating task
-	private String extractDay() {
-		if (!(isDeadline() || isTimed())) {
-			return null;
-		}
-		return getWord(2);
-	}
-
-	// Get the word which correspond with the index from behind
-	private String getWord(int indexFromBehind) {
-		String[] stringArr = rawInfo.split(" ");
-		int length = stringArr.length;
-		return stringArr[length-indexFromBehind];
-	}
 	
 	// Checks whether the task is a deadline task
 	private boolean isDeadline() {
-		String[] stringArr = rawInfo.split(" ");
-		ArrayList<String> stringList = new ArrayList<String>(Arrays.asList(stringArr));
-		int arrayLength = stringList.size();
-		if (0 < stringList.lastIndexOf("by")) {
-			return isDeadlineHelper(stringList.subList(stringList.lastIndexOf("by"), arrayLength));
+	    int index = stringArrayList.lastIndexOf(KEYWORD_DEADLINE_DATE); 
+		if (0 < index) {
+			return isDeadlineHelper(stringArrayList.subList(index, sizeOfStringList));
 		}
 		return false;
 	}
 	
 	// Checks whether the task is a timed task
 	private boolean isTimed() {
-		String[] stringArr = rawInfo.split(" ");
-		ArrayList<String> stringList = new ArrayList<String>(Arrays.asList(stringArr));
-		int arrayLength = stringList.size();
-		if (0 < stringList.lastIndexOf("at")) {
-			return isTimedHelper(stringList.subList(stringList.lastIndexOf("at"), arrayLength));
+	    int index = stringArrayList.lastIndexOf(KEYWORD_TIMED_TIME);
+		if (0 < index) {
+			return isTimedHelper(stringArrayList.subList(index, sizeOfStringList));
 		}
 		return false;
 	}
 	
 	// Extract out the main info of a deadline task
 	private String extractInfoDeadline() {
-		String[] stringArr = rawInfo.split(" ");
-		ArrayList<String> stringList = new ArrayList<String>(Arrays.asList(stringArr));
-		elementDeleter(stringList, 3);
-		return stringFormatter(stringList);
+        ArrayList<String> localStringList = new ArrayList<String>(stringArrayList);
+		elementDeleter(localStringList, 3);
+		return stringFormatter(localStringList);
 	}
 	
 	// Extract out the main info of a timed task
 	private String extractInfoTimed() {
-		String[] stringArr = rawInfo.split(" ");
-		ArrayList<String> stringList = new ArrayList<String>(Arrays.asList(stringArr));
-		elementDeleter(stringList, 5);
-		return stringFormatter(stringList);
+	    ArrayList<String> localStringList = new ArrayList<String>(stringArrayList);
+		elementDeleter(localStringList, 5);
+		return stringFormatter(localStringList);
 	}
 	
 	// Delete the number of elements from behind an ArrayList
@@ -166,8 +217,6 @@ public class Task {
 	private boolean isDeadlineHelper(List<String> list) {
 		if (list.size() != 3) {
 			return false;
-		} else if (!monthsArray.contains(list.get(2))) {
-			return false;
 		} else {
 			try {
 				Integer.parseInt(list.get(1));
@@ -183,9 +232,7 @@ public class Task {
 	private boolean isTimedHelper(List<String> list) {
 		if (list.size() != 5) {
 			return false;
-		} else if (!monthsArray.contains(list.get(4))) {
-			return false;
-		} else if (!list.get(2).equals("on")) {
+		} else if (!list.get(2).equals(KEYWORD_TIMED_DATE)) {
 			return false;
 		} else {
 			String[] array = list.get(1).split("-");
