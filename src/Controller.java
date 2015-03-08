@@ -67,9 +67,8 @@ public class Controller {
                 updatePreviousState();
                 return editTask(arguments);
             case DISPLAY :
-//                ArrayList<Task> completedTasks = getCompletedTasks(allTasks);
-//                ArrayList<Task> completedTasks = allTasks.stream().filter(p -> p.isCompleted())
-                return formatTasksForDisplay(allTasks);
+                ArrayList<Task> completedTasks = getUncompletedTasks(allTasks);
+                return formatTasksForDisplay(completedTasks);
             case COMPLETE :
                 updatePreviousState();
                 return completeTask(arguments);
@@ -237,10 +236,13 @@ public class Controller {
         return searchResults;
     }
 
-    private ArrayList<Task> getCompletedTasks(ArrayList<Task> allTasks) {
+    private ArrayList<Task> getUncompletedTasks(ArrayList<Task> allTasks) {
+        // TODO consider using Java 8's fancy new FP methods, stream()
         ArrayList<Task> completedTasks = new ArrayList<Task>();
         for (Task task : allTasks){
-
+            if (!task.getTaskStatus()) {
+                completedTasks.add(task);
+            }
         }
         return completedTasks;
     }
