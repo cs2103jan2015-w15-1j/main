@@ -67,8 +67,8 @@ public class Controller {
                 updatePreviousState();
                 return editTask(arguments);
             case DISPLAY :
-                ArrayList<Task> completedTasks = getUncompletedTasks(allTasks);
-                return formatTasksForDisplay(completedTasks);
+                ArrayList<Task> uncompletedTasks = getUncompletedTasks(allTasks);
+                return formatTasksForDisplay(uncompletedTasks);
             case COMPLETE :
                 updatePreviousState();
                 return completeTask(arguments);
