@@ -1,3 +1,4 @@
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class Controller {
@@ -66,6 +67,8 @@ public class Controller {
                 updatePreviousState();
                 return editTask(arguments);
             case DISPLAY :
+//                ArrayList<Task> completedTasks = getCompletedTasks(allTasks);
+//                ArrayList<Task> completedTasks = allTasks.stream().filter(p -> p.isCompleted())
                 return formatTasksForDisplay(allTasks);
             case COMPLETE :
                 updatePreviousState();
@@ -183,6 +186,14 @@ public class Controller {
             }
         }
         return searchResults;
+    }
+
+    private ArrayList<Task> getCompletedTasks(ArrayList<Task> allTasks) {
+        ArrayList<Task> completedTasks = new ArrayList<Task>();
+        for (Task task : allTasks){
+
+        }
+        return completedTasks;
     }
     
     private String invalid() {
