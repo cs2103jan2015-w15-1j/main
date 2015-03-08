@@ -9,8 +9,6 @@ import java.util.ArrayList;
 
 public class Storage {
     private static final String MESSAGE_ADDED = "File updated\n";
-    private static final String MESSAGE_DIR_CHANGED_SUCCESSFUL = "Save file directory changed\n";
-    private static final String MESSAGE_DIR_CHANGED_FAILED = "Failed to change file directory";
     private static final String DEFAULT_SAVE_FILE = "savefile.txt";
     private static final String SETTINGS_FILE_NAME = "settings.txt";
 
@@ -136,15 +134,18 @@ public class Storage {
         }
     }
 
-    public String setSaveFileDirectory(String input) {
+    public Boolean setSaveFileDirectory(String input) {
+        if (input.contains(" ")) {
+            input = input.substring(input.indexOf(' ')).trim();
+        }
         saveFileName = input;
         if (saveFile.renameTo(new File(saveFileName))) {
             updateSettingsFile(saveFileName);
             saveFile = new File(saveFileName);
             createIfMissingFile(saveFile);
-            return MESSAGE_DIR_CHANGED_SUCCESSFUL;
+            return true;
         } else {
-            return MESSAGE_DIR_CHANGED_FAILED;
+            return false;
         }
     }
 
