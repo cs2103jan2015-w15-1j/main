@@ -7,7 +7,7 @@ public class Controller {
 
     private static final String MESSAGE_EMPTY = "There is currently no task.\n";
     private static final String MESSAGE_ADD = "Task has been successfully added:\n Description: %s, Deadline: %s";
-    private static final String MESSAGE_DELETE = "Task has been successfully deleted.\n";
+    private static final String MESSAGE_DELETE = "Task has been successfully deleted:\n Description: %s";
     private static final String MESSAGE_EDIT = "Task has been successfully edited.\n";
     private static final String MESSAGE_COMPLETE = "\"%s\" completed.";
     private static final String MESSAGE_EXIT = "Goodbye!";
@@ -117,9 +117,9 @@ public class Controller {
         // ArrayList is 0-indexed, but Tasks are displayed to users as 1-indexed
         try {
             int removalIndex = Integer.parseInt(input) - 1;
-            allTasks.remove(removalIndex);
+            Task task = allTasks.remove(removalIndex);
             storage.writeTasksToFile(allTasks);
-            return MESSAGE_DELETE;
+            return String.format(MESSAGE_DELETE, task.getInfo());
         } catch (Exception e) {
             return MESSAGE_INVALID_COMMAND;
         }
