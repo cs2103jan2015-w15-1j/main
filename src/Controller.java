@@ -20,7 +20,7 @@ public class Controller {
     private static final String MESSAGE_NO_UNDO = "Unable to undo. \n";
 
     private static final String DISPLAY_LINE = "%d. %s\n";
-    private static final String DISPLAY_LINE_DEADLINE = "Deadline: %s, %s \n";
+    private static final String DISPLAY_LINE_DEADLINE = "Deadline: %s/%s \n";
     private static final String DISPLAY_NO_DEADLINE = "No deadline \n";
 
     private static final String ERROR_NO_FILE = "No file in argument";
@@ -128,8 +128,51 @@ public class Controller {
         }
     }
 
+    /**
+     *
+     * Current implementation of Edit:
+     * 1. Does not allow user to change to a different deadline type. e.g. from Timed to Floating
+     * 2. Allows edit of description
+     * 3. Allows change of deadline from one type to the same type.
+     * 4. Allows user to type any substring of the words "description" / "deadline" as a substitution
+     * for its original word.
+     *
+     * @param input
+     * @return
+     */
     private String editTask(String input) {
         // TODO need to think this through
+
+        // Split the input into the index and the arguments
+        String[] inputArray = input.split(" ");
+        int editIndex = Integer.parseInt(inputArray[0]) - 1;
+        String editType = inputArray[1];
+
+        try {
+            Task task = allTasks.get(editIndex);
+
+            if (editType.equals("d") || editType.equals("de")) {
+                return MESSAGE_INVALID_COMMAND;
+            } else if ("description".contains(editType)) {
+                task.setDescription("foo");
+            } else if ("deadline".contains(editType)) {
+                task.setDeadLine(input);
+            }
+
+
+
+        } catch (Exception e) {
+            return MESSAGE_INVALID_COMMAND;
+        }
+
+
+
+
+
+
+
+
+
         return MESSAGE_EDIT;
     }
 
@@ -146,7 +189,7 @@ public class Controller {
             if (task.getMonth() == null) {
                 display += DISPLAY_NO_DEADLINE;
             } else {
-                display += String.format(DISPLAY_LINE_DEADLINE, task.getMonth(), task.getDay());
+                display += String.format(DISPLAY_LINE_DEADLINE, task.getDay(), task.getMonth());
             }
             counter++;
         }

@@ -58,6 +58,15 @@ public class Task {
         initTime();
     }
 
+	// Public setters
+	public void setDescription(String input) {
+		this.info = input;
+	}
+
+	public void setDeadLine(String input) {
+
+	}
+
     private void initTime() {
         if (type == Type.TIMED) {
             int indexOfTime = stringArrayList.lastIndexOf(KEYWORD_TIMED_TIME) + 1;

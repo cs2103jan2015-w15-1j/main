@@ -40,4 +40,12 @@ public class TaskTest {
 		testingTask.markAsComplete();
 		assertTrue(testingTask.getTaskStatus());
 	}
+
+	@Test
+	public void testSetDescription() {
+		Task task = new Task("finish homework by 20 Feb");
+		assertEquals("finish homework", task.getInfo());
+		task.setDescription("do not do homework");
+		assertEquals("do not do homework", task.getInfo());
+	}
 }
