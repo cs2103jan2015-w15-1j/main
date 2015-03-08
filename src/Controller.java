@@ -6,8 +6,8 @@ public class Controller {
     private static final String MESSAGE_SAVE_FILE_READY = "Welcome to Veto. %s is ready for use.";
 
     private static final String MESSAGE_EMPTY = "There is currently no task.\n";
-    private static final String MESSAGE_ADD = "Task has been successfully added.\n";
-    private static final String MESSAGE_DELETE = "Task has been successfully deleted.\n";
+    private static final String MESSAGE_ADD = "Task has been successfully added:\n Description: %s, Deadline: %s";
+    private static final String MESSAGE_DELETE = "Task has been successfully deleted:\n Description: %s";
     private static final String MESSAGE_EDIT = "Task has been successfully edited.\n";
     private static final String MESSAGE_COMPLETE = "\"%s\" completed.";
     private static final String MESSAGE_EXIT = "Goodbye!";
@@ -19,6 +19,8 @@ public class Controller {
     private static final String MESSAGE_NO_UNDO = "Unable to undo. \n";
 
     private static final String DISPLAY_LINE = "%d. %s\n";
+    private static final String DISPLAY_LINE_DEADLINE = "Deadline: %s, %s \n";
+    private static final String DISPLAY_NO_DEADLINE = "No deadline \n";
 
     private static final String ERROR_NO_FILE = "No file in argument";
 
@@ -34,7 +36,7 @@ public class Controller {
         saveFileName = getFileNameFromArgs(args);
         storage = new Storage();
         timeToExit = false;
-        allTasks = storage.getTasksFromFile();
+        allTasks = storage.readTasksFromFile();
         allTasksPreviousState = allTasks;
     }
 
@@ -51,7 +53,7 @@ public class Controller {
 
         switch (commandType) {
             case SETSAVEFILE :
-                if (Boolean.parseBoolean(setSaveFileDest(input))) {
+                if (setSaveFileDest(input)) {
                     return MESSAGE_SAVE_DEST;
                 }
             case ADD :
@@ -92,7 +94,7 @@ public class Controller {
         return args[PARAM_POSITION_FILENAME];
     }
 
-    private String setSaveFileDest(String input) {
+    private Boolean setSaveFileDest(String input) {
         return storage.setSaveFileDirectory(input);
     }
 
@@ -100,17 +102,25 @@ public class Controller {
         Task task = new Task(input);
         allTasks.add(task);
         storage.writeTasksToFile(allTasks);
-        return MESSAGE_ADD;
+
+        String description = task.getInfo();
+        if (task.getMonth() != null) { // task has a deadline
+            String deadline = String.format(DISPLAY_LINE_DEADLINE, task.getDay(), task.getMonth());
+            return String.format(MESSAGE_ADD, description, deadline);
+        } else {
+            return String.format(MESSAGE_ADD, description, DISPLAY_NO_DEADLINE);
+        }
+
     }
 
     private String deleteTask(String input) {
         // ArrayList is 0-indexed, but Tasks are displayed to users as 1-indexed
         try {
             int removalIndex = Integer.parseInt(input) - 1;
-            allTasks.remove(removalIndex);
+            Task task = allTasks.remove(removalIndex);
             storage.writeTasksToFile(allTasks);
-            return MESSAGE_DELETE;
-        } catch (NumberFormatException e) {
+            return String.format(MESSAGE_DELETE, task.getInfo());
+        } catch (Exception e) {
             return MESSAGE_INVALID_COMMAND;
         }
     }
@@ -130,6 +140,11 @@ public class Controller {
         int counter = 1;
         for (Task task : input) {
             display += String.format(DISPLAY_LINE, counter, task.getInfo());
+            if (task.getMonth() == null) {
+                display += DISPLAY_NO_DEADLINE;
+            } else {
+                display += String.format(DISPLAY_LINE_DEADLINE, task.getMonth(), task.getDay());
+            }
             counter++;
         }
         return display;

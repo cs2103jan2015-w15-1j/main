@@ -7,10 +7,10 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
+import com.google.gson.Gson;
+
 public class Storage {
     private static final String MESSAGE_ADDED = "File updated\n";
-    private static final String MESSAGE_DIR_CHANGED_SUCCESSFUL = "Save file directory changed\n";
-    private static final String MESSAGE_DIR_CHANGED_FAILED = "Failed to change file directory";
     private static final String DEFAULT_SAVE_FILE = "savefile.txt";
     private static final String SETTINGS_FILE_NAME = "settings.txt";
 
@@ -19,7 +19,9 @@ public class Storage {
     private String saveFileName;
     private BufferedReader reader;
     private PrintWriter writer;
+    Gson gson = new Gson();
 
+    // search the settings file and open the save file
     public Storage() {
         settingsFile = new File(SETTINGS_FILE_NAME);
         createIfMissingFile(settingsFile);
@@ -29,28 +31,33 @@ public class Storage {
         createIfMissingFile(saveFile);
     }
 
+    // update settings file on the changes of save file directory
     private void updateSettingsFile(String fileName) {
         try {
             writer = new PrintWriter(settingsFile, "UTF-8");
             writer.println(fileName);
+            writer.close();
         } catch (FileNotFoundException | UnsupportedEncodingException e) {
             e.printStackTrace();
         }
     }
 
+    // get the directory of the save file from settings file
     private String getSaveFileNameFromSettingsFile(File fileName) {
-        String text;
+        String text = "";
         initBufferedReader(fileName);
         try {
-            if ((text = reader.readLine()) != null) {
-                return text;
+            if ((text = reader.readLine()) == null) {
+                text = DEFAULT_SAVE_FILE;
             }
         } catch (IOException e) {
-            return DEFAULT_SAVE_FILE;
+            e.printStackTrace();
         }
-        return DEFAULT_SAVE_FILE;
+        closeBufferedReader();
+        return text;
     }
 
+    // create the file if not found
     private void createIfMissingFile(File fileName) {
         try {
             if (!fileName.exists()) {
@@ -61,6 +68,7 @@ public class Storage {
         }
     }
 
+    // writes all task objects in the list to the save file
     public String writeTasksToFile(ArrayList<Task> input) {
         try {
             writer = new PrintWriter(saveFile, "UTF-8");
@@ -74,49 +82,41 @@ public class Storage {
         return String.format(MESSAGE_ADDED);
     }
 
+    // converts task object to string
     private Object taskToInfoString(Task task) {
         String string = "";
-        if (task.getTaskStatus()) {
-            string += "T ";
-        } else {
-            string += "F ";
-        }
-        string += task.getRawInfo();
+        string = gson.toJson(task);
         return string;
     }
 
-    public ArrayList<Task> getTasksFromFile() {
+    // reads all task objects from the save file
+    public ArrayList<Task> readTasksFromFile() {
         ArrayList<Task> storage = new ArrayList<Task>();
         String text;
-        String info;
-        Boolean isCompleted = false;
 
         initBufferedReader(saveFile);
         try {
             while ((text = reader.readLine()) != null) {
-                isCompleted = checkCompletion(text);
-                info = text.substring(text.indexOf(' ')).trim();
-                Task task = new Task(info);
-                if (isCompleted) {
-                    task.markAsComplete();
-                }
+                Task task = gson.fromJson(text, Task.class);
                 storage.add(task);
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+        closeBufferedReader();
         return storage;
     }
 
-    private Boolean checkCompletion(String text) {
-        if (text.substring(0, text.indexOf(' ')).equals("T")) {
-            return true;
-
-        } else {
-            return false;
+    // close buffered reader
+    private void closeBufferedReader() {
+        try {
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
+    // initialize buffered reader
     private void initBufferedReader(File file) {
         try {
             reader = new BufferedReader(new FileReader(file));
@@ -125,12 +125,19 @@ public class Storage {
         }
     }
 
-    public String setSaveFileDirectory(String input) {
-        if (saveFile.renameTo(new File(input))) {
-            updateSettingsFile(input);
-            return MESSAGE_DIR_CHANGED_SUCCESSFUL;
+    // change save file directory
+    public Boolean setSaveFileDirectory(String input) {
+        if (input.contains(" ")) {
+            input = input.substring(input.indexOf(' ')).trim();
+        }
+        saveFileName = input;
+        if (saveFile.renameTo(new File(saveFileName))) {
+            updateSettingsFile(saveFileName);
+            saveFile = new File(saveFileName);
+            createIfMissingFile(saveFile);
+            return true;
         } else {
-            return MESSAGE_DIR_CHANGED_FAILED;
+            return false;
         }
     }
 }
