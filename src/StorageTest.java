@@ -7,7 +7,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 
+import org.junit.After;
 import org.junit.Test;
 
 public class StorageTest {
@@ -22,6 +24,7 @@ public class StorageTest {
     PrintWriter writer;
     BufferedReader reader;
 
+    // test initializing settings file and moving save file
     @Test
     public void testSettings() {
         // delete any existing file before testing
@@ -60,9 +63,42 @@ public class StorageTest {
             e.printStackTrace();
         }
         assertEquals(testData, text);
+    }
 
-        // reset to default
-        assertEquals(true, testFile2.delete());
-        assertEquals(true, settingsFile.delete());
+    // Test the write and read the task from the file
+    @Test
+    public void testWriteAndRead() {
+        // data for testing
+        String[] data = { "attend meeting later at 1200-1400 on 20 Feb",
+                "finish homework by 20 Feb", "meet boss later today" };
+        ArrayList<Task> tempData = new ArrayList<Task>();
+        ArrayList<Task> readData = new ArrayList<Task>();
+        for (String string : data) {
+            tempData.add(new Task(string));
+        }
+
+        Storage test = new Storage();
+        // write data to storage
+        assertEquals("File updated\n", test.writeTasksToFile(tempData));
+        // read data from storage
+        readData = test.readTasksFromFile();
+        // compare write data and read data
+        for (int i = 0; i < readData.size(); i++) {
+            assertEquals(tempData.get(i).getRawInfo(), readData.get(i).getRawInfo());
+            assertEquals(tempData.get(i).getTaskStatus(), readData.get(i).getTaskStatus());
+            assertEquals(tempData.get(i).getInfo(), readData.get(i).getInfo());
+            assertEquals(tempData.get(i).getTaskStatus(), readData.get(i).getTaskStatus());
+            assertEquals(tempData.get(i).getDay(), readData.get(i).getDay());
+            assertEquals(tempData.get(i).getMonth(), readData.get(i).getMonth());
+            assertEquals(tempData.get(i).getTime(), readData.get(i).getTime());
+        }
+    }
+
+    @After
+    public void deleteAllFile() {
+        testFile.delete();
+        testFile2.delete();
+        defaultFile.delete();
+        settingsFile.delete();
     }
 }
