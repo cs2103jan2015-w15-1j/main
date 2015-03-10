@@ -20,7 +20,7 @@ public class Controller {
 
 
     private static final String MESSAGE_INVALID_COMMAND = "Invalid command.";
-    private static final String MESSAGE_NO_UNDO = "Unable to undo. \n";
+    private static final String MESSAGE_NO_UNDO = "Already at oldest change, unable to undo. \n";
 
     private static final String DISPLAY_LINE = "%d. %s\n";
     private static final String DISPLAY_LINE_DEADLINE = "Deadline: %s/%s \n";
@@ -222,8 +222,37 @@ public class Controller {
     }
 
     private String undo() {
-        return null;
+        if (previousStates.empty()) {
+            return MESSAGE_NO_UNDO;
+        } else {
+            ArrayList<Task> previousCompleteTasks = previousStates.pop(); // update state pushes the complete first
+            ArrayList<Task> previousIncompleteTasks = previousStates.pop();
+
+            incompleteTasks = previousIncompleteTasks;
+            completeTasks = previousCompleteTasks;
+
+            updateStorageWithAllTasks();
+
+            return MESSAGE_UNDO;
+        }
     }
+
+    private ArrayList<Task> concatenateTasks(ArrayList<Task> first, ArrayList<Task> second) {
+        ArrayList<Task> output = first;
+        first.addAll(second);
+        return output;
+    }
+
+    private void updateStorageWithAllTasks() {
+        ArrayList<Task> allTasks = concatenateTasks(incompleteTasks, completeTasks);
+        storage.writeTasksToFile(allTasks);
+    }
+
+    private void updateState() {
+        previousStates.push(new ArrayList<Task>(incompleteTasks));
+        previousStates.push(new ArrayList<Task>(completeTasks));
+    }
+
 
     private ArrayList<Task> search(String input) {
         // TODO check Task.getInfo() implementation
@@ -239,32 +268,12 @@ public class Controller {
         return searchResults;
     }
 
-    private ArrayList<Task> concatenateTasks(ArrayList<Task> first, ArrayList<Task> second) {
-        ArrayList<Task> output = first;
-        first.addAll(second);
-        return output;
-    }
-
-    private void updateAllTasks() {
-
-    }
-
-    private void updateStorageWithAllTasks() {
-        ArrayList<Task> allTasks = concatenateTasks(incompleteTasks, completeTasks);
-        storage.writeTasksToFile(allTasks);
-    }
-
     private String invalid() {
         return MESSAGE_INVALID_COMMAND;
     }
 
     private String exit() {
         return MESSAGE_EXIT;
-    }
-
-    private void updateState() {
-        previousStates.push(incompleteTasks);
-        previousStates.push(completeTasks);
     }
 
     private void exitIfMissingArgs(String[] args) {
