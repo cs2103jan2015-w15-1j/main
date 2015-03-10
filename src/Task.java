@@ -60,11 +60,12 @@ public class Task {
 
 	// Public setters
 	public void setDescription(String input) {
-		this.info = input;
+		info = input;
 	}
 
-	public void setDeadLine(String input) {
+	public void setDeadLine(Date inputDateObj) {
 
+		initDate();
 	}
 
     private void initTime() {

@@ -1,5 +1,8 @@
-import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Stack;
+import java.util.stream.Collectors;
 
 public class Controller {
     private static final int PARAM_POSITION_FILENAME = 0;
@@ -31,6 +34,10 @@ public class Controller {
     private ArrayList<Task> allTasks;
     private ArrayList<Task> allTasksPreviousState;
 
+    private ArrayList<Task> incompleteTasks;
+    private ArrayList<Task> completeTasks;
+
+    private Stack<ArrayList<Task>> previousStates = new Stack<ArrayList<Task>>();
 
     public Controller(String[] args) {
         exitIfMissingArgs(args);
@@ -58,19 +65,20 @@ public class Controller {
                     return MESSAGE_SAVE_DEST;
                 }
             case ADD :
-                updatePreviousState();
+                updateState();
                 return addTask(arguments);
             case DELETE :
-                updatePreviousState();
+                updateState();
                 return deleteTask(arguments);
             case EDIT :
-                updatePreviousState();
+                updateState();
                 return editTask(arguments);
             case DISPLAY :
-                ArrayList<Task> uncompletedTasks = getUncompletedTasks(allTasks);
-                return formatTasksForDisplay(uncompletedTasks);
+                //ArrayList<Task> uncompletedTasks = getUncompletedTasks(allTasks);
+                ArrayList<Task> incompleteTasks = new ArrayList<Task>(getIncompleteTasks(allTasks));
+                return formatTasksForDisplay(incompleteTasks);
             case COMPLETE :
-                updatePreviousState();
+                updateState();
                 return completeTask(arguments);
             case UNDO :
                 return undo();
@@ -99,6 +107,20 @@ public class Controller {
     private Boolean setSaveFileDest(String input) {
         return storage.setSaveFileDirectory(input);
     }
+
+    private List<Task> getIncompleteTasks(ArrayList<Task> allTasks) {
+        List<Task> incompleteTasks = allTasks.stream().filter(task -> !task.getTaskStatus())
+                .collect(Collectors.toList());
+        return incompleteTasks;
+    }
+
+    private List<Task> getCompleteTasks(ArrayList<Task> allTasks) {
+        List<Task> completeTasks = allTasks.stream().filter(task -> task.getTaskStatus())
+                .collect(Collectors.toList());
+        return completeTasks;
+
+    }
+
 
     private String addTask(String input) {
         Task task = new Task(input);
@@ -159,9 +181,8 @@ public class Controller {
             } else if ("description".contains(editType)) {
                 task.setDescription(editArgument.toString());
             } else if ("deadline".contains(editType)) {
-                Date date = new Date(input);
-                date.getLocalDateObj();
-                task.setDeadLine(input);
+                Date date = new Date(editArgument.toString().trim());
+                task.setDeadLine(date);
             } else {
                 return MESSAGE_INVALID_COMMAND;
             }
@@ -169,15 +190,6 @@ public class Controller {
         } catch (Exception e) {
             return MESSAGE_INVALID_COMMAND;
         }
-
-
-
-
-
-
-
-
-
         return MESSAGE_EDIT;
     }
 
@@ -255,7 +267,7 @@ public class Controller {
         return MESSAGE_EXIT;
     }
 
-    private void updatePreviousState() {
+    private void updateState() {
         allTasksPreviousState = allTasks;
     }
 

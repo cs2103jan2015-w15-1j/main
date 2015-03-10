@@ -48,4 +48,10 @@ public class TaskTest {
 		task.setDescription("do not do homework");
 		assertEquals("do not do homework", task.getInfo());
 	}
+
+	@Test
+	public void testExtractDate() {
+		Task task = new Task("finish homework by 20 feb");
+		//task.extractDate();
+	}
 }
