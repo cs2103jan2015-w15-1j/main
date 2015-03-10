@@ -177,19 +177,27 @@ public class Controller {
             } else if ("description".contains(editType)) {
                 task.setDescription(editArgument.toString());
             } else if ("deadline".contains(editType)) {
-                Date date = new Date(editArgument.toString().trim());
-                task.setDeadLine(date);
+                String description = task.getInfo();
+                String date = editArgument.toString();
+                String newInput = description.trim() + " " + date.trim();
+
+                System.out.println(newInput);
+
+                Task newTask = new Task(newInput);
+                incompleteTasks.set(editIndex, newTask);
             } else {
                 return MESSAGE_INVALID_COMMAND;
             }
             updateStorageWithAllTasks();
         } catch (Exception e) {
+            e.printStackTrace();
             return MESSAGE_INVALID_COMMAND;
         }
         return MESSAGE_EDIT;
     }
 
     private String formatTasksForDisplay(ArrayList<Task> input) {
+        // TODO: this method will be depreciated after Task.toString() is completed
         if (input.isEmpty()) {
             return MESSAGE_EMPTY;
         }
