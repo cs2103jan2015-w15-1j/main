@@ -127,9 +127,6 @@ public class Storage {
 
     // change save file directory
     public Boolean setSaveFileDirectory(String input) {
-        if (input.contains(" ")) {
-            input = input.substring(input.indexOf(' ')).trim();
-        }
         saveFileName = input;
         if (saveFile.renameTo(new File(saveFileName))) {
             updateSettingsFile(saveFileName);

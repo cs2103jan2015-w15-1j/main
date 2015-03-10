@@ -61,7 +61,7 @@ public class Controller {
 
         switch (commandType) {
             case SETSAVEFILE :
-                if (setSaveFileDest(input)) {
+                if (setSaveFileDest(arguments)) {
                     return MESSAGE_SAVE_DEST;
                 }
             case ADD :
