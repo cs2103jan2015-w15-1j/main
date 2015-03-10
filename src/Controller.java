@@ -12,7 +12,7 @@ public class Controller {
 
     private static final String MESSAGE_EMPTY = "There is currently no task.\n";
     private static final String MESSAGE_ADD = "Task has been successfully added:\n Description: %s, Deadline: %s";
-    private static final String MESSAGE_DELETE = "Task has been successfully deleted:\n Description: %s";
+    private static final String MESSAGE_DELETE = "Task has been successfully deleted:\n Description: %s \n";
     private static final String MESSAGE_EDIT = "Task has been successfully edited.\n";
     private static final String MESSAGE_COMPLETE = "\"%s\" completed. \n";
     private static final String MESSAGE_EXIT = "Goodbye!";
