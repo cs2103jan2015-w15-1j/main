@@ -1,3 +1,4 @@
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -158,11 +159,16 @@ public class Controller {
      * @return
      */
     private String editTask(String input) {
-        // TODO need to think this through
+        String[] inputArray;
+        int editIndex;
 
         // Split the input into the index and the arguments
-        String[] inputArray = input.split(" ");
-        int editIndex = Integer.parseInt(inputArray[0]) - 1;
+        try {
+            inputArray = input.split(" ");
+            editIndex = Integer.parseInt(inputArray[0]) - 1;
+        } catch (Exception e) {
+            return MESSAGE_INVALID_COMMAND;
+        }
         String editType = inputArray[1];
 
         StringBuilder editArgument = new StringBuilder();
@@ -289,5 +295,19 @@ public class Controller {
             System.err.println(ERROR_NO_FILE);
             System.exit(0);
         }
+    }
+
+    // Testing methods
+    public ArrayList<Task> getIncompleteTasksPublic() {
+        return incompleteTasks;
+    }
+
+    public ArrayList<Task> getCompleteTasksPublic() {
+        return completeTasks;
+    }
+
+    public void clear() {
+        ArrayList<Task> emptyArr = new ArrayList<Task>();
+        storage.writeTasksToFile(emptyArr);
     }
 }
