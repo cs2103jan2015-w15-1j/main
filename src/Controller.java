@@ -228,7 +228,11 @@ public class Controller {
             int index = Integer.parseInt(input.trim()) - 1;
             Task task = incompleteTasks.get(index);
             task.markAsComplete();
+
+            // Move the completed task from incompleteTasks to completeTasks
+            completeTasks.add(incompleteTasks.remove(index));
             updateStorageWithAllTasks();
+
             return String.format(MESSAGE_COMPLETE, task.getInfo());
         } catch (NumberFormatException | IndexOutOfBoundsException e) {
             return MESSAGE_INVALID_COMMAND;
@@ -288,6 +292,7 @@ public class Controller {
     }
 
     private String exit() {
+        updateStorageWithAllTasks();
         return MESSAGE_EXIT;
     }
 
