@@ -189,8 +189,6 @@ public class Controller {
                 String date = editArgument.toString();
                 String newInput = description.trim() + " " + date.trim();
 
-                System.out.println(newInput);
-
                 Task newTask = new Task(newInput);
                 incompleteTasks.set(editIndex, newTask);
             } else {
