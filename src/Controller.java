@@ -13,20 +13,20 @@ public class Controller {
     private static final String MESSAGE_ADD = "Task has been successfully added:\n Description: %s, Deadline: %s";
     private static final String MESSAGE_DELETE = "Task has been successfully deleted:\n Description: %s";
     private static final String MESSAGE_EDIT = "Task has been successfully edited.\n";
-    private static final String MESSAGE_COMPLETE = "\"%s\" completed.";
+    private static final String MESSAGE_COMPLETE = "\"%s\" completed. \n";
     private static final String MESSAGE_EXIT = "Goodbye!";
     private static final String MESSAGE_SAVE_DEST = "File save destination has been confirmed. \n";
     private static final String MESSAGE_UNDO = "Last command has been undone. \n";
 
 
-    private static final String MESSAGE_INVALID_COMMAND = "Invalid command.";
+    private static final String MESSAGE_INVALID_COMMAND = "Invalid command. \n";
     private static final String MESSAGE_NO_UNDO = "Already at oldest change, unable to undo. \n";
 
     private static final String DISPLAY_LINE = "%d. %s\n";
     private static final String DISPLAY_LINE_DEADLINE = "%s/%s \n";
     private static final String DISPLAY_NO_DEADLINE = "No deadline \n";
 
-    private static final String ERROR_NO_FILE = "No file in argument";
+    private static final String ERROR_NO_FILE = "No file in argument \n";
 
     private String saveFileName;
     private Storage storage;
