@@ -23,7 +23,7 @@ public class Controller {
     private static final String MESSAGE_NO_UNDO = "Already at oldest change, unable to undo. \n";
 
     private static final String DISPLAY_LINE = "%d. %s\n";
-    private static final String DISPLAY_LINE_DEADLINE = "Deadline: %s/%s \n";
+    private static final String DISPLAY_LINE_DEADLINE = "%s/%s \n";
     private static final String DISPLAY_NO_DEADLINE = "No deadline \n";
 
     private static final String ERROR_NO_FILE = "No file in argument";
