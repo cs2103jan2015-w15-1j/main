@@ -108,14 +108,16 @@ public class Controller {
     }
 
     private List<Task> getIncompleteTasks(ArrayList<Task> allTasks) {
-        List<Task> incompleteTasks = allTasks.stream().filter(task -> !task.getTaskStatus())
-                .collect(Collectors.toList());
+        List<Task> incompleteTasks = allTasks.stream()
+                                             .filter(task -> !task.getTaskStatus())
+                                             .collect(Collectors.toList());
         return incompleteTasks;
     }
 
     private List<Task> getCompleteTasks(ArrayList<Task> allTasks) {
-        List<Task> completeTasks = allTasks.stream().filter(task -> task.getTaskStatus())
-                .collect(Collectors.toList());
+        List<Task> completeTasks = allTasks.stream()
+                                           .filter(task -> task.getTaskStatus())
+                                           .collect(Collectors.toList());
         return completeTasks;
     }
 
@@ -252,8 +254,9 @@ public class Controller {
     }
 
     private ArrayList<Task> concatenateTasks(ArrayList<Task> first, ArrayList<Task> second) {
-        ArrayList<Task> output = first;
-        first.addAll(second);
+        ArrayList<Task> output = new ArrayList<Task>();
+        output.addAll(first);
+        output.addAll(second);
         return output;
     }
 
