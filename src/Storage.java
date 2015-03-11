@@ -137,4 +137,8 @@ public class Storage {
             return false;
         }
     }
+   
+    public String getSaveFileName() {
+        return saveFileName;
+    }
 }

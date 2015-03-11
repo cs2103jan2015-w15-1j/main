@@ -5,7 +5,6 @@ import java.util.Stack;
 import java.util.stream.Collectors;
 
 public class Controller {
-    private static final int PARAM_POSITION_FILENAME = 0;
 
     private static final String MESSAGE_SAVE_FILE_READY = "Welcome to Veto. %s is ready for use.";
 
@@ -26,8 +25,6 @@ public class Controller {
     private static final String DISPLAY_LINE_DEADLINE = "%s/%s \n";
     private static final String DISPLAY_NO_DEADLINE = "No deadline \n";
 
-    private static final String ERROR_NO_FILE = "No file in argument \n";
-
     private String saveFileName;
     private Storage storage;
     private boolean timeToExit;
@@ -37,10 +34,9 @@ public class Controller {
 
     private Stack<ArrayList<Task>> previousStates;
 
-    public Controller(String[] args) {
-        exitIfMissingArgs(args);
-        saveFileName = getFileNameFromArgs(args);
+    public Controller() {
         storage = new Storage();
+        saveFileName = storage.getSaveFileName();
         timeToExit = false;
         ArrayList<Task> allTasks = storage.readTasksFromFile();
         incompleteTasks = new ArrayList<Task>(getIncompleteTasks(allTasks));
@@ -98,10 +94,6 @@ public class Controller {
     }
 
     // Private methods
-    private String getFileNameFromArgs(String[] args) {
-        return args[PARAM_POSITION_FILENAME];
-    }
-
     private Boolean setSaveFileDest(String input) {
         return storage.setSaveFileDirectory(input);
     }
@@ -285,12 +277,5 @@ public class Controller {
 
     private String exit() {
         return MESSAGE_EXIT;
-    }
-
-    private void exitIfMissingArgs(String[] args) {
-        if (args.length == 0) {
-            System.err.println(ERROR_NO_FILE);
-            System.exit(0);
-        }
     }
 }
