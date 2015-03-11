@@ -22,7 +22,7 @@ public class ControllerTest extends TestCase {
     private ArrayList<String> getTaskDesc(ArrayList<Task> input) {
         ArrayList<String> output = new ArrayList<String>();
         for (Task task : input) {
-            output.add(task.getInfo());
+            output.add(task.getDescription());
         }
 
         return output;

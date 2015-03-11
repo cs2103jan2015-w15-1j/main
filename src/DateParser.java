@@ -12,8 +12,10 @@ import com.joestelmach.natty.Parser;
  * This class helps parse date inputs using Natty.
  * new DateParser("do homework from 1600 - 1700 on 12 mar").getDates() will
  * return 2 arraylist with 2 dates.
+ * 
  * new DateParser("do homework on 12 mar").getDates() will return arraylist with
  * 1 date.
+ * 
  * new DateParser("do homework").getDates() will return empty arraylist.
  * 
  * @author Sebastian
@@ -21,6 +23,7 @@ import com.joestelmach.natty.Parser;
  */
 public class DateParser {
     private ArrayList<LocalDateTime> dates;
+    private String parsedWords;
 
     public DateParser(String input) {
         dates = new ArrayList<LocalDateTime>();
@@ -31,6 +34,7 @@ public class DateParser {
         // Natty uses DateGroups and the dates we want must be obtained using
         // getDates().
         for (DateGroup group : groups) {
+            parsedWords = group.getText();
             List<Date> listOfDates = group.getDates();
             for (Date d : listOfDates) {
                 // create new LocalDateTime objects which are added to the dates
@@ -39,8 +43,26 @@ public class DateParser {
                                                   ZoneId.systemDefault()));
             }
         }
+        
+        fixIncorrectDates();
     }
 
+    private void fixIncorrectDates() {
+        if (dates.size() == 2) {
+            LocalDateTime firstDateTime = dates.get(0);
+            LocalDateTime secondDateTime = dates.get(1);
+            if (firstDateTime.isAfter(secondDateTime)) {
+                // remove the second date
+                dates.remove(1);
+            }
+        }
+        
+    }
+
+    public String getParsedWords() {
+        return parsedWords;
+    }
+    
     public ArrayList<LocalDateTime> getDates() {
         return dates;
     }

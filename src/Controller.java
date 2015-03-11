@@ -101,14 +101,14 @@ public class Controller {
 
     private List<Task> getIncompleteTasks(ArrayList<Task> allTasks) {
         List<Task> incompleteTasks = allTasks.stream()
-                                             .filter(task -> !task.getTaskStatus())
+                                             .filter(task -> !task.isCompleted())
                                              .collect(Collectors.toList());
         return incompleteTasks;
     }
 
     private List<Task> getCompleteTasks(ArrayList<Task> allTasks) {
         List<Task> completeTasks = allTasks.stream()
-                                           .filter(task -> task.getTaskStatus())
+                                           .filter(task -> task.isCompleted())
                                            .collect(Collectors.toList());
         return completeTasks;
     }
@@ -118,7 +118,7 @@ public class Controller {
         incompleteTasks.add(task);
         updateStorageWithAllTasks();
 
-        String description = task.getInfo();
+        String description = task.getDescription();
         if (task.getType() == Task.Type.FLOATING) {
             return String.format(MESSAGE_ADD, description, DISPLAY_NO_DEADLINE);
         } else { // task has a deadline
@@ -136,7 +136,7 @@ public class Controller {
             Task task = incompleteTasks.remove(removalIndex);
             updateStorageWithAllTasks();
 
-            return String.format(MESSAGE_DELETE, task.getInfo());
+            return String.format(MESSAGE_DELETE, task.getDescription());
         } catch (Exception e) {
             return MESSAGE_INVALID_COMMAND;
         }
@@ -179,7 +179,7 @@ public class Controller {
             } else if ("description".contains(editType)) {
                 task.setDescription(editArgument.toString());
             } else if ("deadline".contains(editType)) {
-                String description = task.getInfo();
+                String description = task.getDescription();
                 String date = editArgument.toString();
                 String newInput = description.trim() + " " + date.trim();
 
@@ -207,7 +207,7 @@ public class Controller {
 
         int counter = 1;
         for (Task task : input) {
-            display += String.format(DISPLAY_LINE, counter, task.getInfo());
+            display += String.format(DISPLAY_LINE, counter, task.getDescription());
             if (task.getType() == Task.Type.FLOATING) {
                 display += DISPLAY_NO_DEADLINE;
             } else {
@@ -230,7 +230,7 @@ public class Controller {
             completeTasks.add(incompleteTasks.remove(index));
             updateStorageWithAllTasks();
 
-            return String.format(MESSAGE_COMPLETE, task.getInfo());
+            return String.format(MESSAGE_COMPLETE, task.getDescription());
         } catch (NumberFormatException | IndexOutOfBoundsException e) {
             return MESSAGE_INVALID_COMMAND;
         }
@@ -276,7 +276,7 @@ public class Controller {
 
         ArrayList<Task> allTasks = concatenateTasks(incompleteTasks, completeTasks);
         for (Task task : allTasks) {
-            String taskInfo = task.getInfo();
+            String taskInfo = task.getDescription();
             if (taskInfo.contains(input)) {
                 searchResults.add(task);
             }

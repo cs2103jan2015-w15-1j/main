@@ -36,4 +36,14 @@ public class DateParserTest {
         assertEquals("Number of dates", 0, dates.size());
     }
 
+    @Test
+    public void testInputWithDateAndIncorrectDuration() {
+        String input = "do homework from 6pm to 2pm on 15 mar";
+        ArrayList<LocalDateTime> dates = new DateParser(input).getDates();
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Start date & time", "2015-03-15T18:00", dates.get(0)
+                                                                   .toString());
+
+    }
+    
 }
