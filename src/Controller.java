@@ -1,6 +1,4 @@
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Stack;
 import java.util.stream.Collectors;
@@ -17,8 +15,6 @@ public class Controller {
     private static final String MESSAGE_EXIT = "Goodbye!";
     private static final String MESSAGE_SAVE_DEST = "File save destination has been confirmed. \n";
     private static final String MESSAGE_UNDO = "Last command has been undone. \n";
-
-
     private static final String MESSAGE_INVALID_COMMAND = "Invalid command. \n";
     private static final String MESSAGE_NO_UNDO = "Already at oldest change, unable to undo. \n";
 
@@ -31,17 +27,20 @@ public class Controller {
     private boolean timeToExit;
 
     private ArrayList<Task> incompleteTasks;
-    private ArrayList<Task> completeTasks;
+    private ArrayList<Task> completedTasks;
 
     private Stack<ArrayList<Task>> previousStates;
 
     public Controller() {
+        timeToExit = false;
+        
         storage = new Storage();
         saveFileName = storage.getSaveFileName();
-        timeToExit = false;
+        
         ArrayList<Task> allTasks = storage.readTasksFromFile();
         incompleteTasks = new ArrayList<Task>(getIncompleteTasks(allTasks));
-        completeTasks = new ArrayList<Task>(getCompleteTasks(allTasks));
+        completedTasks = new ArrayList<Task>(getCompletedTasks(allTasks));
+        
         previousStates = new Stack<ArrayList<Task>>();
     }
 
@@ -58,7 +57,7 @@ public class Controller {
 
         switch (commandType) {
             case SETSAVEFILE :
-                if (setSaveFileDest(arguments)) {
+                if (setSaveFileDirectory(arguments)) {
                     return MESSAGE_SAVE_DEST;
                 }
             case ADD :
@@ -95,7 +94,7 @@ public class Controller {
     }
 
     // Private methods
-    private Boolean setSaveFileDest(String input) {
+    private Boolean setSaveFileDirectory(String input) {
         return storage.setSaveFileDirectory(input);
     }
 
@@ -106,15 +105,16 @@ public class Controller {
         return incompleteTasks;
     }
 
-    private List<Task> getCompleteTasks(ArrayList<Task> allTasks) {
-        List<Task> completeTasks = allTasks.stream()
+    private List<Task> getCompletedTasks(ArrayList<Task> allTasks) {
+        List<Task> completedTasks = allTasks.stream()
                                            .filter(task -> task.isCompleted())
                                            .collect(Collectors.toList());
-        return completeTasks;
+        return completedTasks;
     }
 
     private String addTask(String input) {
         Task task = new Task(input);
+        
         incompleteTasks.add(task);
         updateStorageWithAllTasks();
 
@@ -227,7 +227,7 @@ public class Controller {
             task.markAsComplete();
 
             // Move the completed task from incompleteTasks to completeTasks
-            completeTasks.add(incompleteTasks.remove(index));
+            completedTasks.add(incompleteTasks.remove(index));
             updateStorageWithAllTasks();
 
             return String.format(MESSAGE_COMPLETE, task.getDescription());
@@ -244,7 +244,7 @@ public class Controller {
             ArrayList<Task> previousIncompleteTasks = previousStates.pop();
 
             incompleteTasks = previousIncompleteTasks;
-            completeTasks = previousCompleteTasks;
+            completedTasks = previousCompleteTasks;
 
             updateStorageWithAllTasks();
 
@@ -260,13 +260,13 @@ public class Controller {
     }
 
     private void updateStorageWithAllTasks() {
-        ArrayList<Task> allTasks = concatenateTasks(incompleteTasks, completeTasks);
+        ArrayList<Task> allTasks = concatenateTasks(incompleteTasks, completedTasks);
         storage.writeTasksToFile(allTasks);
     }
 
     private void updateState() {
         previousStates.push(new ArrayList<Task>(incompleteTasks));
-        previousStates.push(new ArrayList<Task>(completeTasks));
+        previousStates.push(new ArrayList<Task>(completedTasks));
     }
 
 
@@ -274,7 +274,7 @@ public class Controller {
         // TODO check Task.getInfo() implementation
         ArrayList<Task> searchResults = new ArrayList<Task>();
 
-        ArrayList<Task> allTasks = concatenateTasks(incompleteTasks, completeTasks);
+        ArrayList<Task> allTasks = concatenateTasks(incompleteTasks, completedTasks);
         for (Task task : allTasks) {
             String taskInfo = task.getDescription();
             if (taskInfo.contains(input)) {
@@ -299,7 +299,7 @@ public class Controller {
     }
 
     public ArrayList<Task> getCompleteTasksPublic() {
-        return completeTasks;
+        return completedTasks;
     }
 
     public void clear() {

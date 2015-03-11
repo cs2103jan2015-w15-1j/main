@@ -173,30 +173,34 @@ public class Task {
      */
     private String extractDescription(String input, String parsedWords) {
         
-        // convert input arguments to string arrays
-        String[] parsedWordsArr = parsedWords.split(" ");
-        String[] inputArr = input.split(" ");
-        
-        // convert input string array to arraylist of strings
-        ArrayList<String> inputArrayList = new ArrayList<String>(Arrays.asList(inputArr));
-        
-        // reverse as we want to delete words from the back
-        Collections.reverse(inputArrayList);
-
-        // delete words that were used to obtain the dates
-        for (String word : parsedWordsArr) {
-            inputArrayList.remove(word);
+        if (parsedWords != null) {
+            // convert input arguments to string arrays
+            String[] parsedWordsArr = parsedWords.split(" ");
+            String[] inputArr = input.split(" ");
+            
+            // convert input string array to arraylist of strings
+            ArrayList<String> inputArrayList = new ArrayList<String>(Arrays.asList(inputArr));
+            
+            // reverse as we want to delete words from the back
+            Collections.reverse(inputArrayList);
+    
+            // delete words that were used to obtain the dates
+            for (String word : parsedWordsArr) {
+                inputArrayList.remove(word);
+            }
+    
+            // delete keywords that do not make up the description of tasks
+            for (String word : KEYWORDS) {
+                inputArrayList.remove(word);
+            }
+    
+            Collections.reverse(inputArrayList);
+            
+            String description = stringFormatter(inputArrayList);
+            return description.replace("\"", "");
+        } else {
+            return input.replace("\"", "");
         }
-
-        // delete keywords that do not make up the description of tasks
-        for (String word : KEYWORDS) {
-            inputArrayList.remove(word);
-        }
-
-        Collections.reverse(inputArrayList);
-        
-        String description = stringFormatter(inputArrayList);
-        return description;
     }
 
 
