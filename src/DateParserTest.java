@@ -55,5 +55,12 @@ public class DateParserTest {
         input = "create 20 word poem";
         dates = new DateParser(input).getDates();
         assertEquals("Number of dates", 0, dates.size());
+        
+        input = "add finish SR for assignment 2 from 12pm to 6pm today";
+        DateParser p = new DateParser(input); 
+        dates = p.getDates();
+        assertEquals("Number of dates", 2, dates.size());
+        assertEquals("Parsed words", "12pm to 6pm today", p.getParsedWords());
+        
     }
 }

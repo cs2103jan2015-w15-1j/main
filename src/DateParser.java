@@ -74,8 +74,8 @@ public class DateParser {
             // add a " before and after the incorrectly used word so that it's
             // ignored by Natty.
             String modifiedWord = "\"" + incorrectlyParsedWord + "\"";
-            DateParser fixed = new DateParser(input.replace(incorrectlyParsedWord,
-                                                            modifiedWord));
+            DateParser fixed = new DateParser(input.replaceFirst(incorrectlyParsedWord,
+                                                                 modifiedWord));
             dates = fixed.getDates();
             parsedWords = fixed.getParsedWords();
         }
