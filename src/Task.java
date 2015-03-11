@@ -36,10 +36,8 @@ public class Task {
 	
 	private Type type;
 	private String rawInfo; // Unformatted arguments
-	private String info; // arguments without the date and time
+	private String description; // arguments without the date and time
 	private LocalDate date;
-	private Integer month;
-	private Integer day;
 	private LocalTime startTime;
 	private LocalTime endTime;
 	private boolean isCompleted;
@@ -47,24 +45,23 @@ public class Task {
 	private transient ArrayList<String> stringArrayList; // transient so that gson won't convert it to json
 	private transient int sizeOfStringList;
 	
-    public Task(String information) {
-        rawInfo = information;
+    public Task(String input) {
+        rawInfo = input;
         isCompleted = false;
-        initListOfInputs(information);
+        initListOfInputs(input);
         type = determineType();
-        info = extractInfo();
-        assert (info != null);
+        description = extractInfo();
+        assert (description != null);
         initDate();
         initTime();
     }
 
 	// Public setters
 	public void setDescription(String input) {
-		info = input;
+		description = input;
 	}
 
 	public void setDeadLine(Date inputDateObj) {
-
 		initDate();
 	}
 
@@ -84,10 +81,6 @@ public class Task {
 
     private void initDate() {
         date = extractDate();
-        if (date != null) {
-            month = date.getMonthValue();
-            day = date.getDayOfMonth();
-        }
     }
 
     private LocalDate extractDate() {
@@ -127,16 +120,16 @@ public class Task {
 		return rawInfo;
 	}
 	
+	public Type getType() {
+	    return type;
+	}
+	
 	public String getInfo() {
-		return info;
+		return description;
 	}
 	
-	public Integer getMonth() {
-		return month;
-	}
-	
-	public Integer getDay() {
-		return day;
+	public LocalDate getDate() {
+	    return date;
 	}
 
 	public LocalTime getStartTime() {

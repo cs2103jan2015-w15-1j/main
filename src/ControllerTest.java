@@ -13,7 +13,7 @@ public class ControllerTest extends TestCase {
     @Test
     public void testComplete() {
         String[] args = {"holaamigos.txt"};
-        Controller controller = new Controller(args);
+        Controller controller = new Controller();
 
         controller.executeCommand("add this by 4 feb");
         assertEquals("hello", getTaskDesc(controller.getIncompleteTasksPublic()));

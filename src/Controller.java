@@ -119,11 +119,13 @@ public class Controller {
         updateStorageWithAllTasks();
 
         String description = task.getInfo();
-        if (task.getMonth() != null) { // task has a deadline
-            String deadline = String.format(DISPLAY_LINE_DEADLINE, task.getDay(), task.getMonth());
-            return String.format(MESSAGE_ADD, description, deadline);
-        } else {
+        if (task.getType() == Task.Type.FLOATING) {
             return String.format(MESSAGE_ADD, description, DISPLAY_NO_DEADLINE);
+        } else { // task has a deadline
+            String deadline = String.format(DISPLAY_LINE_DEADLINE,
+                                            task.getDate().getDayOfMonth(),
+                                            task.getDate().getMonthValue());
+            return String.format(MESSAGE_ADD, description, deadline);
         }
     }
 
@@ -195,7 +197,8 @@ public class Controller {
     }
 
     private String formatTasksForDisplay(ArrayList<Task> input) {
-        // TODO: this method will be depreciated after Task.toString() is completed
+        // TODO: this method will be depreciated after Task.toString() is
+        // completed
         if (input.isEmpty()) {
             return MESSAGE_EMPTY;
         }
@@ -205,10 +208,12 @@ public class Controller {
         int counter = 1;
         for (Task task : input) {
             display += String.format(DISPLAY_LINE, counter, task.getInfo());
-            if (task.getMonth() == null) {
+            if (task.getType() == Task.Type.FLOATING) {
                 display += DISPLAY_NO_DEADLINE;
             } else {
-                display += String.format(DISPLAY_LINE_DEADLINE, task.getDay(), task.getMonth());
+                display += String.format(DISPLAY_LINE_DEADLINE,
+                                         task.getDate().getDayOfMonth(),
+                                         task.getDate().getMonthValue());
             }
             counter++;
         }

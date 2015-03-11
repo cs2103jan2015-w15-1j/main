@@ -8,8 +8,7 @@ public class TaskTest {
 	public void testFloat() {
 		Task testingTask = new Task("attend meeting later today");
 		assertEquals("attend meeting later today", testingTask.getInfo());
-		assertEquals(null, testingTask.getDay());
-		assertEquals(null, testingTask.getMonth());
+		assertEquals(null, testingTask.getDate());
 		assertEquals(null, testingTask.getStartTime());
 		assertFalse(testingTask.getTaskStatus());
 		testingTask.markAsComplete();
@@ -20,8 +19,8 @@ public class TaskTest {
 	public void testTimed() {
 		Task testingTask = new Task("attend meeting later at 1200-1400 on 20 Feb");
 		assertEquals("attend meeting later", testingTask.getInfo());
-		assertEquals("20", testingTask.getDay().toString());
-		assertEquals("2", testingTask.getMonth().toString());
+		assertEquals(20, testingTask.getDate().getDayOfMonth());
+		assertEquals(2, testingTask.getDate().getMonthValue());
 		assertEquals("12:00", testingTask.getStartTime().toString());
 		assertEquals("14:00", testingTask.getEndTime().toString());
 		assertFalse(testingTask.getTaskStatus());
@@ -33,8 +32,8 @@ public class TaskTest {
 	public void testDeadline() {
 		Task testingTask = new Task("finish homework by 20 Feb");
 		assertEquals("finish homework", testingTask.getInfo());
-		assertEquals("20", testingTask.getDay().toString());
-		assertEquals("2", testingTask.getMonth().toString());
+		assertEquals(20, testingTask.getDate().getDayOfMonth());
+		assertEquals(2, testingTask.getDate().getMonthValue());
 		assertEquals(null, testingTask.getStartTime());
 		assertFalse(testingTask.getTaskStatus());
 		testingTask.markAsComplete();
