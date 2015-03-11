@@ -11,19 +11,22 @@ import com.joestelmach.natty.Parser;
 /**
  * This class helps parse date inputs using Natty.
  * new DateParser("do homework from 1600 - 1700 on 12 mar").getDates() will
- * return 2 arraylist with 2 dates.
+ * return an arraylist with 2 dates.
  * 
- * new DateParser("do homework on 12 mar").getDates() will return arraylist with
+ * new DateParser("do homework on 12 mar").getDates() will return an arraylist with
  * 1 date.
  * 
- * new DateParser("do homework").getDates() will return empty arraylist.
+ * new DateParser("do homework").getDates() will return an empty arraylist.
  * 
  * @author Sebastian
  *
  */
 public class DateParser {
+    private static final int POSITION_FIRST_DATE = 0;
+    private static final int POSITION_SECOND_DATE = 1;
+    
     private ArrayList<LocalDateTime> dates;
-    private String parsedWords;
+    private String parsedWords; // words used when determining the date/s
 
     public DateParser(String input) {
         dates = new ArrayList<LocalDateTime>();
@@ -47,16 +50,15 @@ public class DateParser {
         fixIncorrectDates();
     }
 
+    // ensures the dates are in chronological order and on the same day
     private void fixIncorrectDates() {
         if (dates.size() == 2) {
-            LocalDateTime firstDateTime = dates.get(0);
-            LocalDateTime secondDateTime = dates.get(1);
+            LocalDateTime firstDateTime = dates.get(POSITION_FIRST_DATE);
+            LocalDateTime secondDateTime = dates.get(POSITION_SECOND_DATE);
             if (firstDateTime.isAfter(secondDateTime)) {
-                // remove the second date
-                dates.remove(1);
+                dates.remove(POSITION_SECOND_DATE);
             }
         }
-        
     }
 
     public String getParsedWords() {
