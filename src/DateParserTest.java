@@ -46,4 +46,14 @@ public class DateParserTest {
 
     }
     
+    @Test
+    public void testInputWithNumbers() {
+        String input = "do assignment 2 tomorrow";
+        ArrayList<LocalDateTime> dates = new DateParser(input).getDates();
+        assertEquals("Number of dates", 1, dates.size());
+        
+        input = "create 20 word poem";
+        dates = new DateParser(input).getDates();
+        assertEquals("Number of dates", 0, dates.size());
+    }
 }
