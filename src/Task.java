@@ -50,7 +50,7 @@ public class Task {
         isCompleted = false;
         initListOfInputs(input);
         type = determineType();
-        description = extractInfo();
+        description = extractDescription();
         assert (description != null);
         initDate();
         initTime();
@@ -157,7 +157,7 @@ public class Task {
     }
 	
 	// Get the description of the task
-	private String extractInfo() {
+	private String extractDescription() {
 	    switch (type) {
 	        case DEADLINE :
 	            return extractInfoDeadline();
