@@ -1,3 +1,4 @@
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -10,7 +11,7 @@ public class Controller {
 
     private static final String MESSAGE_EMPTY = "There is currently no task.\n";
     private static final String MESSAGE_ADD = "Task has been successfully added:\n Description: %s, Deadline: %s";
-    private static final String MESSAGE_DELETE = "Task has been successfully deleted:\n Description: %s";
+    private static final String MESSAGE_DELETE = "Task has been successfully deleted:\n Description: %s \n";
     private static final String MESSAGE_EDIT = "Task has been successfully edited.\n";
     private static final String MESSAGE_COMPLETE = "\"%s\" completed. \n";
     private static final String MESSAGE_EXIT = "Goodbye!";
@@ -152,11 +153,16 @@ public class Controller {
      * @return
      */
     private String editTask(String input) {
-        // TODO need to think this through
+        String[] inputArray;
+        int editIndex;
 
         // Split the input into the index and the arguments
-        String[] inputArray = input.split(" ");
-        int editIndex = Integer.parseInt(inputArray[0]) - 1;
+        try {
+            inputArray = input.split(" ");
+            editIndex = Integer.parseInt(inputArray[0]) - 1;
+        } catch (Exception e) {
+            return MESSAGE_INVALID_COMMAND;
+        }
         String editType = inputArray[1];
 
         StringBuilder editArgument = new StringBuilder();
@@ -174,8 +180,6 @@ public class Controller {
                 String description = task.getInfo();
                 String date = editArgument.toString();
                 String newInput = description.trim() + " " + date.trim();
-
-                System.out.println(newInput);
 
                 Task newTask = new Task(newInput);
                 incompleteTasks.set(editIndex, newTask);
@@ -216,7 +220,11 @@ public class Controller {
             int index = Integer.parseInt(input.trim()) - 1;
             Task task = incompleteTasks.get(index);
             task.markAsComplete();
+
+            // Move the completed task from incompleteTasks to completeTasks
+            completeTasks.add(incompleteTasks.remove(index));
             updateStorageWithAllTasks();
+
             return String.format(MESSAGE_COMPLETE, task.getInfo());
         } catch (NumberFormatException | IndexOutOfBoundsException e) {
             return MESSAGE_INVALID_COMMAND;
@@ -276,6 +284,21 @@ public class Controller {
     }
 
     private String exit() {
+        updateStorageWithAllTasks();
         return MESSAGE_EXIT;
+    }
+
+    // Testing methods
+    public ArrayList<Task> getIncompleteTasksPublic() {
+        return incompleteTasks;
+    }
+
+    public ArrayList<Task> getCompleteTasksPublic() {
+        return completeTasks;
+    }
+
+    public void clear() {
+        ArrayList<Task> emptyArr = new ArrayList<Task>();
+        storage.writeTasksToFile(emptyArr);
     }
 }

@@ -141,4 +141,7 @@ public class Storage {
     public String getSaveFileName() {
         return saveFileName;
     }
+
+    // debug method for clear
+    
 }
