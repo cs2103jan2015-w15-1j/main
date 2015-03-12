@@ -32,7 +32,12 @@ public class Task {
     public static enum Type {
         FLOATING, TIMED, DEADLINE
     };
-
+    
+    private static final String HEADER_DESC = "What to do: ";
+    private static final String HEADER_TIME = "\tDuration: ";
+    private static final String HEADER_DATE = "\tBy: ";
+    private static final String HEADER_NOT_APPL = "Not applicable";
+    
     private static final int POSITION_FIRST_DATE = 0;
     private static final int POSITION_SECOND_DATE = 1;
     private static final String[] KEYWORDS = {"by", "on", "at", "from"};
@@ -144,7 +149,6 @@ public class Task {
                 return Type.TIMED;
             case 1 :
                 return Type.DEADLINE;
-            case 0 :
             default :
                 return Type.FLOATING;
         }
@@ -216,5 +220,16 @@ public class Task {
             result += word + " ";
         }
         return result.trim();
+    }
+    
+    public String toString() {
+    	String result = getDescription();
+    	if (getDate() == null) {
+    		result += HEADER_DATE + HEADER_NOT_APPL + "\n";
+    	}
+    	if (getStartTime() == null || getEndTime() == null) {
+    		result += HEADER_TIME + HEADER_NOT_APPL; 
+    	}
+    	return result;
     }
 }
