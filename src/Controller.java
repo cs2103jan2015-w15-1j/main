@@ -99,7 +99,7 @@ public class Controller {
 
     
     // ================================================================
-    // Initialisation methods
+    // Initialization methods
     // ================================================================
     
     private Boolean setSaveFileDirectory(String input) {
@@ -139,17 +139,6 @@ public class Controller {
         	return String.format(MESSAGE_ADD, task.getDescription(), task.getDate(), formattedTime);
         }
     }
-        	
-        /*String description = task.getDescription();
-        if (task.getType() == Task.Type.FLOATING) {
-            return String.format(MESSAGE_ADD, description, DISPLAY_NO_DEADLINE);
-        } else { // task has a deadline
-            String deadline = String.format(DISPLAY_LINE_DEADLINE,
-                                            task.getDate().getDayOfMonth(),
-                                            task.getDate().getMonthValue());
-            return String.format(MESSAGE_ADD, description, deadline);
-        }
-    }*/
 
     private String deleteTask(String input) {
         // ArrayList is 0-indexed, but Tasks are displayed to users as 1-indexed
@@ -240,7 +229,7 @@ public class Controller {
             Task task = completedTasks.get(index);
             task.markAsIncomplete();
 
-            // Move the completed task from incompleteTasks to completeTasks
+            // Move the completed task from completeTasks to incompleteTasks
             incompleteTasks.add(completedTasks.remove(index));
             updateStorageWithAllTasks();
 
