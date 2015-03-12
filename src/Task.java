@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
+import org.apache.commons.lang.StringUtils;
+
 
 /**
  * This class contains the information of a task element.
@@ -38,6 +40,8 @@ public class Task {
     private static final String HEADER_DATE = "Deadline: ";
     private static final String HEADER_NOT_APPL = "Not applicable";
     
+    private static final char ESCAPE_CHAR = "\"".charAt(0); 
+    
     private static final int POSITION_FIRST_DATE = 0;
     private static final int POSITION_SECOND_DATE = 1;
     private static final String[] KEYWORDS = {"by", "on", "at", "from"};
@@ -55,6 +59,10 @@ public class Task {
         rawInfo = input;
         isCompleted = false;
 
+        if (hasTwoEscapeChars(input)) {
+            input = getWordsOutsideEscapeChars(input);
+        }
+
         DateParser parser = new DateParser(input);
 
         ArrayList<LocalDateTime> parsedDates = parser.getDates();
@@ -63,7 +71,7 @@ public class Task {
         initDateAndTime(type, parsedDates);
 
         String parsedWords = parser.getParsedWords();
-        description = extractDescription(input, parsedWords);
+        description = extractDescription(rawInfo, parsedWords);
     }
 
     
@@ -181,8 +189,9 @@ public class Task {
      * @return description
      */
     private String extractDescription(String input, String parsedWords) {
-        
-        if (parsedWords != null) {
+        if (hasTwoEscapeChars(input)) {
+            return getWordsWithinEscapeChars(input);
+        } else if (parsedWords != null) {
             // convert input arguments to string arrays
             String[] parsedWordsArr = parsedWords.split(" ");
             String[] inputArr = input.split(" ");
@@ -216,6 +225,44 @@ public class Task {
     // ================================================================
     // Utility Methods
     // ================================================================
+
+    private boolean hasTwoEscapeChars(String input) {
+        return StringUtils.countMatches(input, ESCAPE_CHAR + "") == 2;
+    }
+    
+    private String getWordsOutsideEscapeChars(String input) {
+        String output = "";
+        boolean withinEscapeChar = false;
+        for (char c : input.toCharArray()) {
+            if (c == ESCAPE_CHAR) {
+                if (withinEscapeChar) {
+                    withinEscapeChar = false;
+                } else {
+                    withinEscapeChar = true;
+                }
+            } else if (!withinEscapeChar) {
+                output += c;
+            }
+        }
+        return output;
+    }
+    
+    private String getWordsWithinEscapeChars(String input) {
+        String output = "";
+        boolean withinEscapeChar = false;
+        for (char c : input.toCharArray()) {
+            if (c == ESCAPE_CHAR) {
+                if (withinEscapeChar) {
+                    withinEscapeChar = false;
+                } else {
+                    withinEscapeChar = true;
+                }
+            } else if (withinEscapeChar) {
+                output += c;
+            }
+        }
+        return output;
+    }
 
     // Format the elements in the ArrayList to one single string
     private String stringFormatter(ArrayList<String> strList) {
