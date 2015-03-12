@@ -13,6 +13,7 @@ public class Controller {
     private static final String MESSAGE_DELETE = "Task has been successfully deleted:\n Description: %s \n";
     private static final String MESSAGE_EDIT = "Task has been successfully edited.\n";
     private static final String MESSAGE_COMPLETE = "\"%s\" completed. \n";
+    private static final String MESSAGE_INCOMPLETE = "\"%s\" incompleted. \n";
     private static final String MESSAGE_EXIT = "Goodbye!";
     private static final String MESSAGE_SAVE_DEST = "File save destination has been confirmed. \n";
     private static final String MESSAGE_UNDO = "Last command has been undone. \n";
@@ -74,6 +75,9 @@ public class Controller {
             case COMPLETE :
                 updateState();
                 return completeTask(arguments);
+            case INCOMPLETE :
+            	updateState();
+            	return incompleteTask(arguments);
             case UNDO :
                 return undo();
             case SEARCH :
@@ -225,6 +229,22 @@ public class Controller {
             updateStorageWithAllTasks();
 
             return String.format(MESSAGE_COMPLETE, task.getDescription());
+        } catch (NumberFormatException | IndexOutOfBoundsException e) {
+            return MESSAGE_INVALID_COMMAND;
+        }
+    }
+    
+    private String incompleteTask(String input) {
+    	try {
+            int index = Integer.parseInt(input.trim()) - 1;
+            Task task = completedTasks.get(index);
+            task.markAsIncomplete();
+
+            // Move the completed task from incompleteTasks to completeTasks
+            incompleteTasks.add(completedTasks.remove(index));
+            updateStorageWithAllTasks();
+
+            return String.format(MESSAGE_INCOMPLETE, task.getDescription());
         } catch (NumberFormatException | IndexOutOfBoundsException e) {
             return MESSAGE_INVALID_COMMAND;
         }
