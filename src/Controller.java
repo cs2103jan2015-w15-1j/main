@@ -231,7 +231,7 @@ public class Controller {
 
             // Move the completed task from incompleteTasks to completeTasks
             completeTasks.add(incompleteTasks.remove(index));
-            updateStorageWithAllTasks();
+            //updateStorageWithAllTasks();
 
             return String.format(MESSAGE_COMPLETE, task.getInfo());
         } catch (NumberFormatException | IndexOutOfBoundsException e) {
@@ -257,8 +257,16 @@ public class Controller {
 
     private ArrayList<Task> concatenateTasks(ArrayList<Task> first, ArrayList<Task> second) {
         ArrayList<Task> output = new ArrayList<Task>();
-        output.addAll(first);
-        output.addAll(second);
+//        output.addAll(first);
+//        output.addAll(second);
+
+        for (Task task : first) {
+            output.add(new Task(task, task.getTaskStatus()));
+        }
+
+        for (Task task : second) {
+            output.add(new Task(task, task.getTaskStatus()));
+        }
         return output;
     }
 

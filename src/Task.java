@@ -58,6 +58,17 @@ public class Task {
         initTime();
     }
 
+	public Task(Task aTask, boolean completeStatus) {
+		rawInfo = aTask.getRawInfo();
+		isCompleted = completeStatus;
+		initListOfInputs(rawInfo);
+		type = determineType();
+		info = extractInfo();
+		assert (info != null);
+		initDate();
+		initTime();
+	}
+
 	// Public setters
 	public void setDescription(String input) {
 		info = input;
