@@ -74,7 +74,6 @@ public class Task {
         description = extractDescription(rawInfo, parsedWords);
     }
 
-    
     // ================================================================
     // Public getters
     // ================================================================
