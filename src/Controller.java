@@ -8,7 +8,8 @@ public class Controller {
     private static final String MESSAGE_SAVE_FILE_READY = "Welcome to Veto. %s is ready for use.";
 
     private static final String MESSAGE_EMPTY = "There is currently no task.\n";
-    private static final String MESSAGE_ADD = "Task has been successfully added:\n Description: %s, Deadline: %s";
+    private static final String MESSAGE_ADD = "Task has been successfully added:\n     Description: %s\n     Deadline: %s\n     Time: %s\n";
+    private static final String MESSAGE_NOT_APPL = "Not applicable";
     private static final String MESSAGE_DELETE = "Task has been successfully deleted:\n Description: %s \n";
     private static final String MESSAGE_EDIT = "Task has been successfully edited.\n";
     private static final String MESSAGE_COMPLETE = "\"%s\" completed. \n";
@@ -17,10 +18,6 @@ public class Controller {
     private static final String MESSAGE_UNDO = "Last command has been undone. \n";
     private static final String MESSAGE_INVALID_COMMAND = "Invalid command. \n";
     private static final String MESSAGE_NO_UNDO = "Already at oldest change, unable to undo. \n";
-
-    private static final String DISPLAY_LINE = "%d. %s\n";
-    private static final String DISPLAY_LINE_DEADLINE = "%s/%s \n";
-    private static final String DISPLAY_NO_DEADLINE = "No deadline \n";
 
     private String saveFileName;
     private Storage storage;
@@ -117,8 +114,17 @@ public class Controller {
         
         incompleteTasks.add(task);
         updateStorageWithAllTasks();
-
-        String description = task.getDescription();
+        if (task.getType() == Task.Type.FLOATING) {
+        	return String.format(MESSAGE_ADD, task.getDescription(), MESSAGE_NOT_APPL, MESSAGE_NOT_APPL);
+        } else if (task.getType() == Task.Type.DEADLINE) {
+        	return String.format(MESSAGE_ADD, task.getDescription(), task.getDate(), MESSAGE_NOT_APPL);
+        } else {
+        	String formattedTime = task.getStartTime() + " to " + task.getEndTime();
+        	return String.format(MESSAGE_ADD, task.getDescription(), task.getDate(), formattedTime);
+        }
+    }
+        	
+        /*String description = task.getDescription();
         if (task.getType() == Task.Type.FLOATING) {
             return String.format(MESSAGE_ADD, description, DISPLAY_NO_DEADLINE);
         } else { // task has a deadline
@@ -127,7 +133,7 @@ public class Controller {
                                             task.getDate().getMonthValue());
             return String.format(MESSAGE_ADD, description, deadline);
         }
-    }
+    }*/
 
     private String deleteTask(String input) {
         // ArrayList is 0-indexed, but Tasks are displayed to users as 1-indexed
@@ -197,29 +203,14 @@ public class Controller {
     }
 
     private String formatTasksForDisplay(ArrayList<Task> input) {
-        // TODO: this method will be depreciated after Task.toString() is
-        // completed
         if (input.isEmpty()) {
             return MESSAGE_EMPTY;
         }
 
         String display = "";
-
         for (Task task : input) {
         	display += task;
         }
-       /* int counter = 1;
-        for (Task task : input) {
-            display += String.format(DISPLAY_LINE, counter, task.getDescription());
-            if (task.getType() == Task.Type.FLOATING) {
-                display += DISPLAY_NO_DEADLINE;
-            } else {
-                display += String.format(DISPLAY_LINE_DEADLINE,
-                                         task.getDate().getDayOfMonth(),
-                                         task.getDate().getMonthValue());
-            }
-            counter++;
-        }*/
         return display;
     }
 

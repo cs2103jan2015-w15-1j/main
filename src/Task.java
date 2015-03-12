@@ -33,9 +33,9 @@ public class Task {
         FLOATING, TIMED, DEADLINE
     };
     
-    private static final String HEADER_DESC = "What to do: ";
-    private static final String HEADER_TIME = "\tDuration: ";
-    private static final String HEADER_DATE = "\tBy: ";
+    private static final String HEADER_DESC = "Description: ";
+    private static final String HEADER_TIME = "Time: ";
+    private static final String HEADER_DATE = "Deadline: ";
     private static final String HEADER_NOT_APPL = "Not applicable";
     
     private static final int POSITION_FIRST_DATE = 0;
@@ -223,12 +223,16 @@ public class Task {
     }
     
     public String toString() {
-    	String result = HEADER_DESC + getDescription();
+    	String result = HEADER_DESC + getDescription() +"\n";
     	if (getDate() == null) {
     		result += HEADER_DATE + HEADER_NOT_APPL + "\n";
+    	} else {
+    		result += HEADER_DATE + getDate() + "\n";
     	}
     	if (getStartTime() == null || getEndTime() == null) {
-    		result += HEADER_TIME + HEADER_NOT_APPL + "\n"; 
+    		result += HEADER_TIME + HEADER_NOT_APPL + "\n\n"; 
+    	} else {
+    		result += HEADER_TIME + getStartTime() + " to " + getEndTime() + "\n\n";
     	}
     	return result;
     }
