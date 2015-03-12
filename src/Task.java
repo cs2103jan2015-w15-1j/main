@@ -40,7 +40,7 @@ public class Task {
     private static final String HEADER_DATE = "Deadline: ";
     private static final String HEADER_NOT_APPL = "Not applicable";
     
-    private static final char ESCAPE_CHAR = "\"".charAt(0); 
+    private static final char ESCAPE_CHAR = '"'; 
     
     private static final int POSITION_FIRST_DATE = 0;
     private static final int POSITION_SECOND_DATE = 1;

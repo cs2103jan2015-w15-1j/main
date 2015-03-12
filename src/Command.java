@@ -43,6 +43,8 @@ public class Command {
                 return Type.DISPLAY;
             case "complete" :
                 return Type.COMPLETE;
+            case "incomplete" :
+                return Type.INCOMPLETE;
             case "undo" :
                 return Type.UNDO;
             case "search" :
