@@ -105,13 +105,14 @@ public class Task {
 
     public void setDate(LocalDate inputDateObj) {
         date = inputDateObj;
+        if (type == Type.TIMED) {
+        	setType(Type.DEADLINE);
+        }
     }
 
     public void setTime(LocalTime inputStartTime, LocalTime inputEndTime) {
         if (inputStartTime.isBefore(inputEndTime)) {
-            if (startTime == null && endTime == null) {
-                setType(Type.TIMED);
-            }
+            setType(Type.TIMED);
             startTime = inputStartTime;
             endTime = inputEndTime;
         }
