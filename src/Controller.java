@@ -41,7 +41,10 @@ public class Controller {
         previousStates = new Stack<ArrayList<Task>>();
     }
 
+    // ================================================================
     // Public methods
+    // ================================================================
+    
     public String getWelcomeMessage() {
         return String.format(MESSAGE_SAVE_FILE_READY, saveFileName);
     }
@@ -90,7 +93,11 @@ public class Controller {
         return timeToExit;
     }
 
-    // Private methods
+    
+    // ================================================================
+    // Initialisation methods
+    // ================================================================
+    
     private Boolean setSaveFileDirectory(String input) {
         return storage.setSaveFileDirectory(input);
     }
@@ -108,6 +115,11 @@ public class Controller {
                                            .collect(Collectors.toList());
         return completedTasks;
     }
+    
+    
+    // ================================================================
+    // Logic methods
+    // ================================================================
 
     private String addTask(String input) {
         Task task = new Task(input);
@@ -202,18 +214,6 @@ public class Controller {
         return MESSAGE_EDIT;
     }
 
-    private String formatTasksForDisplay(ArrayList<Task> input) {
-        if (input.isEmpty()) {
-            return MESSAGE_EMPTY;
-        }
-
-        String display = "";
-        for (Task task : input) {
-        	display += task;
-        }
-        return display;
-    }
-
     private String completeTask(String input) {
         try {
             int index = Integer.parseInt(input.trim()) - 1;
@@ -246,24 +246,6 @@ public class Controller {
         }
     }
 
-    private ArrayList<Task> concatenateTasks(ArrayList<Task> first, ArrayList<Task> second) {
-        ArrayList<Task> output = new ArrayList<Task>();
-        output.addAll(first);
-        output.addAll(second);
-        return output;
-    }
-
-    private void updateStorageWithAllTasks() {
-        ArrayList<Task> allTasks = concatenateTasks(incompleteTasks, completedTasks);
-        storage.writeTasksToFile(allTasks);
-    }
-
-    private void updateState() {
-        previousStates.push(new ArrayList<Task>(incompleteTasks));
-        previousStates.push(new ArrayList<Task>(completedTasks));
-    }
-
-
     private ArrayList<Task> search(String input) {
         // TODO check Task.getInfo() implementation
         ArrayList<Task> searchResults = new ArrayList<Task>();
@@ -286,8 +268,46 @@ public class Controller {
         updateStorageWithAllTasks();
         return MESSAGE_EXIT;
     }
+    
+    
+    // ================================================================
+    // Utility methods
+    // ================================================================
+    
+    private String formatTasksForDisplay(ArrayList<Task> input) {
+        if (input.isEmpty()) {
+            return MESSAGE_EMPTY;
+        }
 
+        String display = "";
+        for (Task task : input) {
+            display += task;
+        }
+        return display;
+    }
+    
+    private ArrayList<Task> concatenateTasks(ArrayList<Task> first, ArrayList<Task> second) {
+        ArrayList<Task> output = new ArrayList<Task>();
+        output.addAll(first);
+        output.addAll(second);
+        return output;
+    }
+
+    private void updateStorageWithAllTasks() {
+        ArrayList<Task> allTasks = concatenateTasks(incompleteTasks, completedTasks);
+        storage.writeTasksToFile(allTasks);
+    }
+
+    private void updateState() {
+        previousStates.push(new ArrayList<Task>(incompleteTasks));
+        previousStates.push(new ArrayList<Task>(completedTasks));
+    }
+    
+
+    // ================================================================
     // Testing methods
+    // ================================================================
+    
     public ArrayList<Task> getIncompleteTasksPublic() {
         return incompleteTasks;
     }
