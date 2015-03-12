@@ -110,7 +110,7 @@ public class Task {
 
     public void setDate(LocalDate inputDateObj) {
         date = inputDateObj;
-        if (type == Type.TIMED) {
+        if (type == Type.FLOATING) {
         	setType(Type.DEADLINE);
         }
     }
