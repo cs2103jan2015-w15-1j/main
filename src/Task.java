@@ -127,6 +127,10 @@ public class Task {
         isCompleted = true;
     }
     
+    public void markAsIncomplete() {
+    	isCompleted = false;
+    }
+    
 
     // ================================================================
     // Private setters
@@ -138,7 +142,7 @@ public class Task {
     
 
     // ================================================================
-    // Initialisation Methods
+    // Initialization Methods
     // ================================================================
 
     // Determines type of task using the number of dates parsed.
