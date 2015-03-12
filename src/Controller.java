@@ -205,7 +205,10 @@ public class Controller {
 
         String display = "";
 
-        int counter = 1;
+        for (Task task : input) {
+        	display += task;
+        }
+       /* int counter = 1;
         for (Task task : input) {
             display += String.format(DISPLAY_LINE, counter, task.getDescription());
             if (task.getType() == Task.Type.FLOATING) {
@@ -216,7 +219,7 @@ public class Controller {
                                          task.getDate().getMonthValue());
             }
             counter++;
-        }
+        }*/
         return display;
     }
 

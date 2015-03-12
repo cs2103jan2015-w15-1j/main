@@ -228,7 +228,7 @@ public class Task {
     		result += HEADER_DATE + HEADER_NOT_APPL + "\n";
     	}
     	if (getStartTime() == null || getEndTime() == null) {
-    		result += HEADER_TIME + HEADER_NOT_APPL; 
+    		result += HEADER_TIME + HEADER_NOT_APPL + "\n"; 
     	}
     	return result;
     }
