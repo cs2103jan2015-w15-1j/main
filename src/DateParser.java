@@ -3,8 +3,10 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import com.joestelmach.natty.DateGroup;
+import com.joestelmach.natty.ParseLocation;
 import com.joestelmach.natty.Parser;
 
 
@@ -30,6 +32,8 @@ public class DateParser {
 
     private ArrayList<LocalDateTime> dates;
     private String parsedWords; // words used when determining the date/s
+    
+    public Map<String, List<ParseLocation>> parseLocations;
 
     public DateParser(String input) {
         dates = new ArrayList<LocalDateTime>();
@@ -43,7 +47,7 @@ public class DateParser {
         // Natty uses DateGroups and the dates we want must be obtained using
         // getDates().
         for (DateGroup group : groups) {
-
+            parseLocations = group.getParseLocations();
             // Natty sometimes incorrectly uses words in the input. When numbers
             // exist in the input, such as "create 20 word poem", Natty takes
             // the numbers thinking it's part of a date.
