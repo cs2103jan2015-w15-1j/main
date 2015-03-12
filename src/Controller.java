@@ -1,55 +1,51 @@
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
 public class Controller {
-    private static final int PARAM_POSITION_FILENAME = 0;
 
     private static final String MESSAGE_SAVE_FILE_READY = "Welcome to Veto. %s is ready for use.";
 
     private static final String MESSAGE_EMPTY = "There is currently no task.\n";
-    private static final String MESSAGE_ADD = "Task has been successfully added:\n Description: %s, Deadline: %s";
+    private static final String MESSAGE_ADD = "Task has been successfully added:\n     Description: %s\n     Deadline: %s\n     Time: %s\n";
+    private static final String MESSAGE_NOT_APPL = "Not applicable";
     private static final String MESSAGE_DELETE = "Task has been successfully deleted:\n Description: %s \n";
     private static final String MESSAGE_EDIT = "Task has been successfully edited.\n";
     private static final String MESSAGE_COMPLETE = "\"%s\" completed. \n";
+    private static final String MESSAGE_INCOMPLETE = "\"%s\" incompleted. \n";
     private static final String MESSAGE_EXIT = "Goodbye!";
     private static final String MESSAGE_SAVE_DEST = "File save destination has been confirmed. \n";
     private static final String MESSAGE_UNDO = "Last command has been undone. \n";
-
-
     private static final String MESSAGE_INVALID_COMMAND = "Invalid command. \n";
     private static final String MESSAGE_NO_UNDO = "Already at oldest change, unable to undo. \n";
-
-    private static final String DISPLAY_LINE = "%d. %s\n";
-    private static final String DISPLAY_LINE_DEADLINE = "%s/%s \n";
-    private static final String DISPLAY_NO_DEADLINE = "No deadline \n";
-
-    private static final String ERROR_NO_FILE = "No file in argument \n";
 
     private String saveFileName;
     private Storage storage;
     private boolean timeToExit;
 
     private ArrayList<Task> incompleteTasks;
-    private ArrayList<Task> completeTasks;
+    private ArrayList<Task> completedTasks;
 
     private Stack<ArrayList<Task>> previousStates;
 
-    public Controller(String[] args) {
-        exitIfMissingArgs(args);
-        saveFileName = getFileNameFromArgs(args);
-        storage = new Storage();
+    public Controller() {
         timeToExit = false;
+        
+        storage = new Storage();
+        saveFileName = storage.getSaveFileName();
+        
         ArrayList<Task> allTasks = storage.readTasksFromFile();
         incompleteTasks = new ArrayList<Task>(getIncompleteTasks(allTasks));
-        completeTasks = new ArrayList<Task>(getCompleteTasks(allTasks));
+        completedTasks = new ArrayList<Task>(getCompletedTasks(allTasks));
+        
         previousStates = new Stack<ArrayList<Task>>();
     }
 
+    // ================================================================
     // Public methods
+    // ================================================================
+    
     public String getWelcomeMessage() {
         return String.format(MESSAGE_SAVE_FILE_READY, saveFileName);
     }
@@ -62,7 +58,7 @@ public class Controller {
 
         switch (commandType) {
             case SETSAVEFILE :
-                if (setSaveFileDest(arguments)) {
+                if (setSaveFileDirectory(arguments)) {
                     return MESSAGE_SAVE_DEST;
                 }
             case ADD :
@@ -79,6 +75,9 @@ public class Controller {
             case COMPLETE :
                 updateState();
                 return completeTask(arguments);
+            case INCOMPLETE :
+            	updateState();
+            	return incompleteTask(arguments);
             case UNDO :
                 return undo();
             case SEARCH :
@@ -98,40 +97,46 @@ public class Controller {
         return timeToExit;
     }
 
-    // Private methods
-    private String getFileNameFromArgs(String[] args) {
-        return args[PARAM_POSITION_FILENAME];
-    }
-
-    private Boolean setSaveFileDest(String input) {
+    
+    // ================================================================
+    // Initialization methods
+    // ================================================================
+    
+    private Boolean setSaveFileDirectory(String input) {
         return storage.setSaveFileDirectory(input);
     }
 
     private List<Task> getIncompleteTasks(ArrayList<Task> allTasks) {
         List<Task> incompleteTasks = allTasks.stream()
-                                             .filter(task -> !task.getTaskStatus())
+                                             .filter(task -> !task.isCompleted())
                                              .collect(Collectors.toList());
         return incompleteTasks;
     }
 
-    private List<Task> getCompleteTasks(ArrayList<Task> allTasks) {
-        List<Task> completeTasks = allTasks.stream()
-                                           .filter(task -> task.getTaskStatus())
+    private List<Task> getCompletedTasks(ArrayList<Task> allTasks) {
+        List<Task> completedTasks = allTasks.stream()
+                                           .filter(task -> task.isCompleted())
                                            .collect(Collectors.toList());
-        return completeTasks;
+        return completedTasks;
     }
+    
+    
+    // ================================================================
+    // Logic methods
+    // ================================================================
 
     private String addTask(String input) {
         Task task = new Task(input);
+        
         incompleteTasks.add(task);
         updateStorageWithAllTasks();
-
-        String description = task.getInfo();
-        if (task.getMonth() != null) { // task has a deadline
-            String deadline = String.format(DISPLAY_LINE_DEADLINE, task.getDay(), task.getMonth());
-            return String.format(MESSAGE_ADD, description, deadline);
+        if (task.getType() == Task.Type.FLOATING) {
+        	return String.format(MESSAGE_ADD, task.getDescription(), MESSAGE_NOT_APPL, MESSAGE_NOT_APPL);
+        } else if (task.getType() == Task.Type.DEADLINE) {
+        	return String.format(MESSAGE_ADD, task.getDescription(), task.getDate(), MESSAGE_NOT_APPL);
         } else {
-            return String.format(MESSAGE_ADD, description, DISPLAY_NO_DEADLINE);
+        	String formattedTime = task.getStartTime() + " to " + task.getEndTime();
+        	return String.format(MESSAGE_ADD, task.getDescription(), task.getDate(), formattedTime);
         }
     }
 
@@ -142,7 +147,7 @@ public class Controller {
             Task task = incompleteTasks.remove(removalIndex);
             updateStorageWithAllTasks();
 
-            return String.format(MESSAGE_DELETE, task.getInfo());
+            return String.format(MESSAGE_DELETE, task.getDescription());
         } catch (Exception e) {
             return MESSAGE_INVALID_COMMAND;
         }
@@ -185,7 +190,7 @@ public class Controller {
             } else if ("description".contains(editType)) {
                 task.setDescription(editArgument.toString());
             } else if ("deadline".contains(editType)) {
-                String description = task.getInfo();
+                String description = task.getDescription();
                 String date = editArgument.toString();
                 String newInput = description.trim() + " " + date.trim();
 
@@ -202,27 +207,6 @@ public class Controller {
         return MESSAGE_EDIT;
     }
 
-    private String formatTasksForDisplay(ArrayList<Task> input) {
-        // TODO: this method will be depreciated after Task.toString() is completed
-        if (input.isEmpty()) {
-            return MESSAGE_EMPTY;
-        }
-
-        String display = "";
-
-        int counter = 1;
-        for (Task task : input) {
-            display += String.format(DISPLAY_LINE, counter, task.getInfo());
-            if (task.getMonth() == null) {
-                display += DISPLAY_NO_DEADLINE;
-            } else {
-                display += String.format(DISPLAY_LINE_DEADLINE, task.getDay(), task.getMonth());
-            }
-            counter++;
-        }
-        return display;
-    }
-
     private String completeTask(String input) {
         try {
             int index = Integer.parseInt(input.trim()) - 1;
@@ -230,10 +214,26 @@ public class Controller {
             task.markAsComplete();
 
             // Move the completed task from incompleteTasks to completeTasks
-            completeTasks.add(incompleteTasks.remove(index));
-            //updateStorageWithAllTasks();
+            completedTasks.add(incompleteTasks.remove(index));
+            updateStorageWithAllTasks();
 
-            return String.format(MESSAGE_COMPLETE, task.getInfo());
+            return String.format(MESSAGE_COMPLETE, task.getDescription());
+        } catch (NumberFormatException | IndexOutOfBoundsException e) {
+            return MESSAGE_INVALID_COMMAND;
+        }
+    }
+    
+    private String incompleteTask(String input) {
+    	try {
+            int index = Integer.parseInt(input.trim()) - 1;
+            Task task = completedTasks.get(index);
+            task.markAsIncomplete();
+
+            // Move the completed task from completeTasks to incompleteTasks
+            incompleteTasks.add(completedTasks.remove(index));
+            updateStorageWithAllTasks();
+
+            return String.format(MESSAGE_INCOMPLETE, task.getDescription());
         } catch (NumberFormatException | IndexOutOfBoundsException e) {
             return MESSAGE_INVALID_COMMAND;
         }
@@ -247,7 +247,7 @@ public class Controller {
             ArrayList<Task> previousIncompleteTasks = previousStates.pop();
 
             incompleteTasks = previousIncompleteTasks;
-            completeTasks = previousCompleteTasks;
+            completedTasks = previousCompleteTasks;
 
             updateStorageWithAllTasks();
 
@@ -255,39 +255,13 @@ public class Controller {
         }
     }
 
-    private ArrayList<Task> concatenateTasks(ArrayList<Task> first, ArrayList<Task> second) {
-        ArrayList<Task> output = new ArrayList<Task>();
-//        output.addAll(first);
-//        output.addAll(second);
-
-        for (Task task : first) {
-            output.add(new Task(task, task.getTaskStatus()));
-        }
-
-        for (Task task : second) {
-            output.add(new Task(task, task.getTaskStatus()));
-        }
-        return output;
-    }
-
-    private void updateStorageWithAllTasks() {
-        ArrayList<Task> allTasks = concatenateTasks(incompleteTasks, completeTasks);
-        storage.writeTasksToFile(allTasks);
-    }
-
-    private void updateState() {
-        previousStates.push(new ArrayList<Task>(incompleteTasks));
-        previousStates.push(new ArrayList<Task>(completeTasks));
-    }
-
-
     private ArrayList<Task> search(String input) {
         // TODO check Task.getInfo() implementation
         ArrayList<Task> searchResults = new ArrayList<Task>();
 
-        ArrayList<Task> allTasks = concatenateTasks(incompleteTasks, completeTasks);
+        ArrayList<Task> allTasks = concatenateTasks(incompleteTasks, completedTasks);
         for (Task task : allTasks) {
-            String taskInfo = task.getInfo();
+            String taskInfo = task.getDescription();
             if (taskInfo.contains(input)) {
                 searchResults.add(task);
             }
@@ -303,21 +277,52 @@ public class Controller {
         updateStorageWithAllTasks();
         return MESSAGE_EXIT;
     }
-
-    private void exitIfMissingArgs(String[] args) {
-        if (args.length == 0) {
-            System.err.println(ERROR_NO_FILE);
-            System.exit(0);
+    
+    
+    // ================================================================
+    // Utility methods
+    // ================================================================
+    
+    private String formatTasksForDisplay(ArrayList<Task> input) {
+        if (input.isEmpty()) {
+            return MESSAGE_EMPTY;
         }
+
+        String display = "";
+        for (Task task : input) {
+            display += task;
+        }
+        return display;
+    }
+    
+    private ArrayList<Task> concatenateTasks(ArrayList<Task> first, ArrayList<Task> second) {
+        ArrayList<Task> output = new ArrayList<Task>();
+        output.addAll(first);
+        output.addAll(second);
+        return output;
     }
 
+    private void updateStorageWithAllTasks() {
+        ArrayList<Task> allTasks = concatenateTasks(incompleteTasks, completedTasks);
+        storage.writeTasksToFile(allTasks);
+    }
+
+    private void updateState() {
+        previousStates.push(new ArrayList<Task>(incompleteTasks));
+        previousStates.push(new ArrayList<Task>(completedTasks));
+    }
+    
+
+    // ================================================================
     // Testing methods
+    // ================================================================
+    
     public ArrayList<Task> getIncompleteTasksPublic() {
         return incompleteTasks;
     }
 
     public ArrayList<Task> getCompleteTasksPublic() {
-        return completeTasks;
+        return completedTasks;
     }
 
     public void clear() {

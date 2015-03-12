@@ -85,11 +85,10 @@ public class StorageTest {
         // compare write data and read data
         for (int i = 0; i < readData.size(); i++) {
             assertEquals(tempData.get(i).getRawInfo(), readData.get(i).getRawInfo());
-            assertEquals(tempData.get(i).getTaskStatus(), readData.get(i).getTaskStatus());
-            assertEquals(tempData.get(i).getInfo(), readData.get(i).getInfo());
-            assertEquals(tempData.get(i).getTaskStatus(), readData.get(i).getTaskStatus());
-            assertEquals(tempData.get(i).getDay(), readData.get(i).getDay());
-            assertEquals(tempData.get(i).getMonth(), readData.get(i).getMonth());
+            assertEquals(tempData.get(i).isCompleted(), readData.get(i).isCompleted());
+            assertEquals(tempData.get(i).getDescription(), readData.get(i).getDescription());
+            assertEquals(tempData.get(i).isCompleted(), readData.get(i).isCompleted());
+            assertEquals(tempData.get(i).getDate(), readData.get(i).getDate());
             assertEquals(tempData.get(i).getStartTime(), readData.get(i).getStartTime());
             assertEquals(tempData.get(i).getEndTime(), readData.get(i).getEndTime());
         }

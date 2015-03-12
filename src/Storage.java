@@ -19,10 +19,11 @@ public class Storage {
     private String saveFileName;
     private BufferedReader reader;
     private PrintWriter writer;
-    Gson gson = new Gson();
+    private Gson gson;
 
     // search the settings file and open the save file
     public Storage() {
+        gson = new Gson();
         settingsFile = new File(SETTINGS_FILE_NAME);
         createIfMissingFile(settingsFile);
         saveFileName = getSaveFileNameFromSettingsFile(settingsFile);
@@ -84,9 +85,7 @@ public class Storage {
 
     // converts task object to string
     private Object taskToInfoString(Task task) {
-        String string = "";
-        string = gson.toJson(task);
-        return string;
+        return gson.toJson(task);
     }
 
     // reads all task objects from the save file
@@ -136,6 +135,10 @@ public class Storage {
         } else {
             return false;
         }
+    }
+   
+    public String getSaveFileName() {
+        return saveFileName;
     }
 
     // debug method for clear

@@ -1,6 +1,6 @@
 public class Command {
     public static enum Type {
-        ADD, DELETE, EDIT, DISPLAY, COMPLETE, UNDO, SEARCH, EXIT, SETSAVEFILE,
+        ADD, DELETE, EDIT, DISPLAY, COMPLETE, INCOMPLETE, UNDO, SEARCH, EXIT, SETSAVEFILE,
         INVALID
     };
 
