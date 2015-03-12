@@ -223,7 +223,7 @@ public class Task {
     }
     
     public String toString() {
-    	String result = getDescription();
+    	String result = HEADER_DESC + getDescription();
     	if (getDate() == null) {
     		result += HEADER_DATE + HEADER_NOT_APPL + "\n";
     	}
