@@ -45,22 +45,29 @@ public class DateParserTest {
                                                                    .toString());
 
     }
-    
+
     @Test
     public void testInputWithNumbers() {
         String input = "do assignment 2 tomorrow";
         ArrayList<LocalDateTime> dates = new DateParser(input).getDates();
         assertEquals("Number of dates", 1, dates.size());
-        
+
         input = "create 20 word poem";
         dates = new DateParser(input).getDates();
         assertEquals("Number of dates", 0, dates.size());
-        
+
         input = "add finish SR for assignment 2 from 12pm to 6pm today";
-        DateParser p = new DateParser(input); 
+        DateParser p = new DateParser(input);
         dates = p.getDates();
         assertEquals("Number of dates", 2, dates.size());
         assertEquals("Parsed words", "12pm to 6pm today", p.getParsedWords());
-        
+
+        input = "add attend meeting 23 march 1200 - 1400";
+        p = new DateParser(input);
+        dates = p.getDates();
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Deadline", "2015-03-23", dates.get(0)
+                                                    .toLocalDate()
+                                                    .toString());
     }
 }

@@ -5,6 +5,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.joestelmach.natty.DateGroup;
 import com.joestelmach.natty.ParseLocation;
 import com.joestelmach.natty.Parser;
@@ -25,6 +27,7 @@ import com.joestelmach.natty.Parser;
  *
  */
 public class DateParser {
+    private static final char ESCAPE_CHAR = '"';
     private static final int POSITION_FIRST_DATE = 0;
     private static final int POSITION_SECOND_DATE = 1;
 
@@ -32,8 +35,6 @@ public class DateParser {
 
     private ArrayList<LocalDateTime> dates;
     private String parsedWords; // words used when determining the date/s
-    
-    public Map<String, List<ParseLocation>> parseLocations;
 
     public DateParser(String input) {
         dates = new ArrayList<LocalDateTime>();
@@ -47,7 +48,6 @@ public class DateParser {
         // Natty uses DateGroups and the dates we want must be obtained using
         // getDates().
         for (DateGroup group : groups) {
-            parseLocations = group.getParseLocations();
             // Natty sometimes incorrectly uses words in the input. When numbers
             // exist in the input, such as "create 20 word poem", Natty takes
             // the numbers thinking it's part of a date.
@@ -75,11 +75,17 @@ public class DateParser {
         }
 
         if (isIncorrectlyParsingWords) {
+            // if the constructor has been called 2 times, stop recursing.
+            if (StringUtils.countMatches(input, ESCAPE_CHAR + "") > 2) {
+                return;
+            }
+            
             // add a " before and after the incorrectly used word so that it's
             // ignored by Natty.
-            String modifiedWord = "\"" + incorrectlyParsedWord + "\"";
-            DateParser fixed = new DateParser(input.replaceFirst(incorrectlyParsedWord,
-                                                                 modifiedWord));
+            String modifiedWord = ESCAPE_CHAR + incorrectlyParsedWord + ESCAPE_CHAR;
+            String newInput = input.replaceFirst(incorrectlyParsedWord,
+                                                 modifiedWord);
+            DateParser fixed = new DateParser(newInput);
             dates = fixed.getDates();
             parsedWords = fixed.getParsedWords();
         }
