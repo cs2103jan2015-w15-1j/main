@@ -1,8 +1,10 @@
+package main.java;
+
 import java.util.Scanner;
 
 
 public class Veto {
-    private static final String MESSAGE_COMMAND_PROMPT = "Command: ";
+    private static final String MESSAGE_COMMAND_PROMPT = "main.java.Command: ";
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);

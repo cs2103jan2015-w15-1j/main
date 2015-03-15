@@ -1,3 +1,5 @@
+package main.java;
+
 import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.Year;
@@ -9,8 +11,8 @@ import java.time.temporal.ChronoField;
 public class Date {
     private static final int DEFAULT_YEAR = Year.now().getValue();
     private static final String INPUT_FORMAT_PATTERN = "d MMM[ y]";
-//    private static final String WARNING_DATE_BEFORE_TODAY = "Date must be after today";
-    
+//    private static final String WARNING_DATE_BEFORE_TODAY = "main.java.Date must be after today";
+
     private LocalDate date;
 
     public Date(String input) throws DateTimeException {
@@ -21,7 +23,7 @@ public class Date {
 //            throw new DateTimeException(WARNING_DATE_BEFORE_TODAY);
 //        }
     }
-    
+
     public LocalDate getLocalDateObj() {
         return date;
     }

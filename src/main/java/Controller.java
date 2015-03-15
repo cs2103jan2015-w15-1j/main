@@ -1,3 +1,5 @@
+package main.java;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
@@ -5,13 +7,13 @@ import java.util.stream.Collectors;
 
 public class Controller {
 
-    private static final String MESSAGE_SAVE_FILE_READY = "Welcome to Veto. %s is ready for use.";
+    private static final String MESSAGE_SAVE_FILE_READY = "Welcome to main.java.Veto. %s is ready for use.";
 
     private static final String MESSAGE_EMPTY = "There is currently no task.\n";
-    private static final String MESSAGE_ADD = "Task has been successfully added:\n     Description: %s\n     Deadline: %s\n     Time: %s\n";
+    private static final String MESSAGE_ADD = "main.java.Task has been successfully added:\n     Description: %s\n     Deadline: %s\n     Time: %s\n";
     private static final String MESSAGE_NOT_APPL = "Not applicable";
-    private static final String MESSAGE_DELETE = "Task has been successfully deleted:\n Description: %s \n";
-    private static final String MESSAGE_EDIT = "Task has been successfully edited.\n";
+    private static final String MESSAGE_DELETE = "main.java.Task has been successfully deleted:\n Description: %s \n";
+    private static final String MESSAGE_EDIT = "main.java.Task has been successfully edited.\n";
     private static final String MESSAGE_COMPLETE = "\"%s\" completed. \n";
     private static final String MESSAGE_INCOMPLETE = "\"%s\" incompleted. \n";
     private static final String MESSAGE_EXIT = "Goodbye!";
@@ -31,21 +33,21 @@ public class Controller {
 
     public Controller() {
         timeToExit = false;
-        
+
         storage = new Storage();
         saveFileName = storage.getSaveFileName();
-        
+
         ArrayList<Task> allTasks = storage.readTasksFromFile();
         incompleteTasks = new ArrayList<Task>(getIncompleteTasks(allTasks));
         completedTasks = new ArrayList<Task>(getCompletedTasks(allTasks));
-        
+
         previousStates = new Stack<ArrayList<Task>>();
     }
 
     // ================================================================
     // Public methods
     // ================================================================
-    
+
     public String getWelcomeMessage() {
         return String.format(MESSAGE_SAVE_FILE_READY, saveFileName);
     }
@@ -97,11 +99,11 @@ public class Controller {
         return timeToExit;
     }
 
-    
+
     // ================================================================
     // Initialization methods
     // ================================================================
-    
+
     private Boolean setSaveFileDirectory(String input) {
         return storage.setSaveFileDirectory(input);
     }
@@ -119,15 +121,15 @@ public class Controller {
                                            .collect(Collectors.toList());
         return completedTasks;
     }
-    
-    
+
+
     // ================================================================
     // Logic methods
     // ================================================================
 
     private String addTask(String input) {
         Task task = new Task(input);
-        
+
         incompleteTasks.add(task);
         updateStorageWithAllTasks();
         if (task.getType() == Task.Type.FLOATING) {
@@ -195,7 +197,7 @@ public class Controller {
                 String newInput = description.trim() + " " + date.trim();
 
                 Task newTask = new Task(newInput);
-                incompleteTasks.set(editIndex, newTask); // replaces the old Task object with the newly created one
+                incompleteTasks.set(editIndex, newTask); // replaces the old main.java.Task object with the newly created one
             } else {
                 return MESSAGE_INVALID_COMMAND;
             }
@@ -222,7 +224,7 @@ public class Controller {
             return MESSAGE_INVALID_COMMAND;
         }
     }
-    
+
     private String incompleteTask(String input) {
     	try {
             int index = Integer.parseInt(input.trim()) - 1;
@@ -256,7 +258,7 @@ public class Controller {
     }
 
     private ArrayList<Task> search(String input) {
-        // TODO check Task.getInfo() implementation
+        // TODO check main.java.Task.getInfo() implementation
         ArrayList<Task> searchResults = new ArrayList<Task>();
 
         ArrayList<Task> allTasks = concatenateTasks(incompleteTasks, completedTasks);
@@ -277,12 +279,12 @@ public class Controller {
         updateStorageWithAllTasks();
         return MESSAGE_EXIT;
     }
-    
-    
+
+
     // ================================================================
     // Utility methods
     // ================================================================
-    
+
     private String formatTasksForDisplay(ArrayList<Task> input) {
         if (input.isEmpty()) {
             return MESSAGE_EMPTY;
@@ -294,7 +296,7 @@ public class Controller {
         }
         return display;
     }
-    
+
     private ArrayList<Task> concatenateTasks(ArrayList<Task> first, ArrayList<Task> second) {
         ArrayList<Task> output = new ArrayList<Task>();
         output.addAll(first);
@@ -311,12 +313,12 @@ public class Controller {
         previousStates.push(new ArrayList<Task>(incompleteTasks));
         previousStates.push(new ArrayList<Task>(completedTasks));
     }
-    
+
 
     // ================================================================
     // Testing methods
     // ================================================================
-    
+
     public ArrayList<Task> getIncompleteTasksPublic() {
         return incompleteTasks;
     }

@@ -1,9 +1,11 @@
+package main.java;
+
 import static org.junit.Assert.*;
 import org.junit.Test;
 
 
 public class TaskTest {
-	
+
 	@Test
 	public void testFloat() {
 		Task testingTask = new Task("attend meeting later today");
@@ -14,7 +16,7 @@ public class TaskTest {
 		testingTask.markAsComplete();
 		assertTrue(testingTask.isCompleted());
 	}
-	
+
 	@Test
 	public void testTimed() {
 		Task testingTask = new Task("attend meeting later at 1200 - 1400 on 20 Feb");
@@ -27,7 +29,7 @@ public class TaskTest {
 		testingTask.markAsComplete();
 		assertTrue(testingTask.isCompleted());
 	}
-	
+
 	@Test
 	public void testDeadline() {
 		Task testingTask = new Task("finish homework by 20 Feb");
