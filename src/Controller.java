@@ -195,7 +195,7 @@ public class Controller {
                 String newInput = description.trim() + " " + date.trim();
 
                 Task newTask = new Task(newInput);
-                incompleteTasks.set(editIndex, newTask);
+                incompleteTasks.set(editIndex, newTask); // replaces the old Task object with the newly created one
             } else {
                 return MESSAGE_INVALID_COMMAND;
             }
