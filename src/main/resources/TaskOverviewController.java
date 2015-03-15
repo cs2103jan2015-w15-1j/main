@@ -1,3 +1,8 @@
+package main.resources;
+
+import MainApp;
+
+
 /**
  * Created by mx on 15/3/15.
  */
@@ -14,3 +19,4 @@ public class TaskOverviewController {
         this.mainApp = mainApp;
     }
 }
+
