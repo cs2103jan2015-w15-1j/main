@@ -14,6 +14,8 @@ public class TaskOverviewController {
     private TableColumn<Task, String> taskDescription;
     @FXML
     private TableColumn<Task, String> taskDeadline;
+    @FXML
+    private TableColumn<Task, Integer> taskIndex;
 
     // Reference to the main application
     private MainApp mainApp;
@@ -24,10 +26,12 @@ public class TaskOverviewController {
      */
     @FXML
     private void initialize() {
+
+
         taskDescription.setCellValueFactory(
                 cellData -> cellData.getValue().getTaskDesc());
         taskDeadline.setCellValueFactory(
-                cellData -> cellData.getValue().getTaskDesc());
+                cellData -> cellData.getValue().getStringPropertyTaskDate());
     }
 
     /**
@@ -44,8 +48,6 @@ public class TaskOverviewController {
 
 
     public TaskOverviewController() {
-//        textLabel.setText("hello world!");
-
     }
 
 

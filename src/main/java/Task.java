@@ -67,6 +67,7 @@ public class Task {
     // Attributes
     private final StringProperty taskDesc;
     private final ObjectProperty<LocalDate> taskDate;
+    private final StringProperty stringPropertyTaskDate;
 
 
     // Methods
@@ -74,7 +75,13 @@ public class Task {
         return taskDesc;
     }
 
-    public ObjectProperty<LocalDate> getTaskDate() { return taskDate; }
+    public ObjectProperty<LocalDate> getTaskDate() {
+        return taskDate;
+    }
+
+    public StringProperty getStringPropertyTaskDate() {
+        return stringPropertyTaskDate;
+    }
 
 
 
@@ -106,9 +113,9 @@ public class Task {
         description = extractDescription(rawInfo, parsedWords);
 
         // MX edits within the constructor
-
         this.taskDesc = new SimpleStringProperty(getDescription());
-        this.taskDate = new SimpleObjectProperty<>(getDate());
+        this.taskDate = new SimpleObjectProperty<LocalDate>(getDate());
+        this.stringPropertyTaskDate = new SimpleStringProperty(getDate().toString());
     }
 
     // ================================================================
