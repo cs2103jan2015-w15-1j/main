@@ -4,6 +4,8 @@ import javafx.fxml.FXML;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TableColumn;
 
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import main.java.MainApp;
 import main.java.Task;
 
@@ -26,8 +28,6 @@ public class TaskOverviewController {
      */
     @FXML
     private void initialize() {
-
-
         taskDescription.setCellValueFactory(
                 cellData -> cellData.getValue().getTaskDesc());
         taskDeadline.setCellValueFactory(
@@ -46,10 +46,6 @@ public class TaskOverviewController {
         taskTable.setItems(mainApp.getTaskData());
     }
 
-
     public TaskOverviewController() {
     }
-
-
-
 }

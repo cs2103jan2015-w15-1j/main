@@ -65,30 +65,23 @@ public class Task {
     // ================================================================
 
     // Attributes
-    private final StringProperty taskDesc;
-    private final ObjectProperty<LocalDate> taskDate;
-    private final StringProperty stringPropertyTaskDate;
+//    private transient final StringProperty taskDesc;
+//    private transient final ObjectProperty<LocalDate> taskDate;
+//    private transient final StringProperty stringPropertyTaskDate;
 
 
     // Methods
     public StringProperty getTaskDesc() {
-        return taskDesc;
+        return new SimpleStringProperty(getDescription());
     }
 
     public ObjectProperty<LocalDate> getTaskDate() {
-        return taskDate;
+        return new SimpleObjectProperty<LocalDate>(getDate());
     }
 
     public StringProperty getStringPropertyTaskDate() {
-        return stringPropertyTaskDate;
+        return new SimpleStringProperty(getDate().toString());
     }
-
-
-
-
-
-
-
 
     // ================================================================
     // End of MX's edits
@@ -113,9 +106,7 @@ public class Task {
         description = extractDescription(rawInfo, parsedWords);
 
         // MX edits within the constructor
-        this.taskDesc = new SimpleStringProperty(getDescription());
-        this.taskDate = new SimpleObjectProperty<LocalDate>(getDate());
-        this.stringPropertyTaskDate = new SimpleStringProperty(getDate().toString());
+
     }
 
     // ================================================================
