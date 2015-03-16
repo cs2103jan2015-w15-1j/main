@@ -17,12 +17,18 @@ public class MainApp extends Application {
 	private Stage primaryStage;
 	private BorderPane rootLayout;
 
+	/**
+	 * The data as an ObservableList of Tasks
+	 */
 	private ObservableList<Task> taskData = FXCollections.observableArrayList();
 
 	public static void main(String[] args) {
 		launch(args);
 	}
 
+	/**
+	 * Constructor
+	 */
 	public MainApp() {
 		taskData.add(new Task("do this by 12 apr"));
 		taskData.add(new Task("do that by 13 apr"));
@@ -32,10 +38,17 @@ public class MainApp extends Application {
 		taskData.add(new Task("do thizxccs by 11 apr"));
 	}
 
+	/**
+	 * Returns the data as an observable list of Tasks
+	 */
 	public ObservableList<Task> getTaskData() {
 		return taskData;
 	}
 
+	/**
+	 * Returns the main stage
+	 * @return
+	 */
 	public Stage getPrimaryStage() {
 		return primaryStage;
 	}
@@ -70,6 +83,9 @@ public class MainApp extends Application {
 		}
 	}
 
+	/**
+	 * Shows the task overview inside the root layout.
+	 */
 	public void showTaskOverview() {
 		try {
 			// Load person overview.

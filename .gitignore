@@ -1,5 +1,5 @@
 .idea
 bin/
-Veto.iml
+main.java.Veto.iml
 *.txt
 target/

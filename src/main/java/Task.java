@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.apache.commons.lang.StringUtils;
@@ -59,14 +61,31 @@ public class Task {
     private boolean isCompleted;
 
     // ================================================================
-    // Ming Xuan
+    // Start of MX's edits
     // ================================================================
-    private final StringProperty taskDesc;
 
+    // Attributes
+    private final StringProperty taskDesc;
+    private final ObjectProperty<LocalDate> taskDate;
+
+
+    // Methods
     public StringProperty getTaskDesc() {
         return taskDesc;
     }
 
+    public ObjectProperty<LocalDate> getTaskDate() { return taskDate; }
+
+
+
+
+
+
+
+
+    // ================================================================
+    // End of MX's edits
+    // ================================================================
 
     public Task(String input) {
         rawInfo = input;
@@ -86,7 +105,10 @@ public class Task {
         String parsedWords = parser.getParsedWords();
         description = extractDescription(rawInfo, parsedWords);
 
-        this.taskDesc = new SimpleStringProperty("hello world");
+        // MX edits within the constructor
+
+        this.taskDesc = new SimpleStringProperty(getDescription());
+        this.taskDate = new SimpleObjectProperty<>(getDate());
     }
 
     // ================================================================
