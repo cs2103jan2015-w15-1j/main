@@ -45,7 +45,7 @@ public class TaskOverviewController {
      * The constructor is called before the initialize() method.
      */
     public TaskOverviewController() {
-        Storage storage = new Storage();
+        storage = new Storage();
         String saveFileName = storage.getSaveFileName();
 
         ArrayList<Task> allTasks = storage.readTasksFromFile();

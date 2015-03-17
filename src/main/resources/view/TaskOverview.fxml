@@ -5,15 +5,15 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane prefHeight="350.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.resources.view.TaskOverviewController">
+<AnchorPane prefHeight="350.0" prefWidth="599.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.resources.view.TaskOverviewController">
    <children>
-  <AnchorPane layoutX="-74.0" layoutY="14.0" prefHeight="364.0" prefWidth="500.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+  <AnchorPane layoutX="-74.0" layoutY="14.0" prefHeight="350.0" prefWidth="500.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
             <TableView fx:id="taskTable" prefHeight="350.0" prefWidth="500.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
               <columns>
-                  <TableColumn maxWidth="59.0" prefWidth="59.0" text="Index" />
-                <TableColumn fx:id="taskDescription" prefWidth="320.0" text="Description" />
-                  <TableColumn fx:id="taskDeadline" minWidth="6.0" prefWidth="120.0" text="Deadline" />
+                  <TableColumn maxWidth="82.0" prefWidth="82.0" text="Index" />
+                <TableColumn fx:id="taskDescription" prefWidth="372.0" text="Description" />
+                  <TableColumn fx:id="taskDeadline" minWidth="6.0" prefWidth="144.0" text="Deadline" />
               </columns>
             </TableView>
          </children>

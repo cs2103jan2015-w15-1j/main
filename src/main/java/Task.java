@@ -75,7 +75,11 @@ public class Task {
     }
 
     public StringProperty getStringPropertyTaskDate() {
-        return new SimpleStringProperty(getDate().toString());
+        if (getDate() != null) {
+            return new SimpleStringProperty(getDate().toString());
+        } else {
+            return new SimpleStringProperty("Not Applicable");
+        }
     }
 
     // ================================================================

@@ -32,12 +32,9 @@ public class RootLayoutController {
     @FXML
     public void handleEnterPressed(KeyEvent event) {
         if (event.getCode() == KeyCode.ENTER) {
-            Task task = new Task(userInput.getText());
-
-
-
-
+            taskOverviewController.executeCommand(userInput.getText());
             System.out.println(userInput.getText());
+            userInput.setText("");
         }
     }
 
