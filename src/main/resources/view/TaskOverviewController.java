@@ -57,11 +57,13 @@ public class TaskOverviewController {
      */
     @FXML
     private void initialize() {
+        // Populating the TableColumns (but are not directly shown in the UI yet)
         taskDescription.setCellValueFactory(
                 cellData -> cellData.getValue().getTaskDesc());
         taskDeadline.setCellValueFactory(
                 cellData -> cellData.getValue().getStringPropertyTaskDate());
 
+        // Add the observable list data to the table
         taskTable.setItems(taskData);
     }
 

@@ -1,10 +1,6 @@
 package main.resources.view;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TableColumn;
-
-import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -31,9 +27,6 @@ public class RootLayoutController {
     public void handleEnterPressed(KeyEvent event) {
         if (event.getCode() == KeyCode.ENTER) {
             Task task = new Task(userInput.getText());
-            
-
-
             System.out.println(userInput.getText());
         }
     }

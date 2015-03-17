@@ -99,9 +99,6 @@ public class Task {
 
         String parsedWords = parser.getParsedWords();
         description = extractDescription(rawInfo, parsedWords);
-
-        // MX edits within the constructor
-
     }
 
     // ================================================================

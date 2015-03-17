@@ -1,8 +1,6 @@
 package main.java;
 
 import javafx.application.Application;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
@@ -11,13 +9,18 @@ import javafx.stage.Stage;
 import main.resources.view.TaskOverviewController;
 
 import java.io.IOException;
-import java.util.ArrayList;
+
 
 public class MainApp extends Application {
-
+	// ================================================================
+	// Fields
+	// ================================================================
 	private Stage primaryStage;
 	private BorderPane rootLayout;
 
+	// ================================================================
+	// Methods
+	// ================================================================
 	public static void main(String[] args) {
 		launch(args);
 	}
