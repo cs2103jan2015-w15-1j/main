@@ -20,10 +20,7 @@ public class MainApp extends Application {
 	private Storage storage;
 	private String saveFileName;
 
-	/**
-	 * The data as an ObservableList of Tasks
-	 */
-	private ObservableList<Task> taskData = FXCollections.observableArrayList();
+
 
 	public static void main(String[] args) {
 		launch(args);
@@ -33,38 +30,7 @@ public class MainApp extends Application {
 	 * Constructor
 	 */
 	public MainApp() {
-		storage = new Storage();
-		saveFileName = storage.getSaveFileName();
-		ArrayList<Task> foo = new ArrayList<Task>();
 
-//		taskData.add(new Task("do this by 12 apr"));
-//		taskData.add(new Task("do that by 13 apr"));
-//		taskData.add(new Task("do foo by 15 apr"));
-//		taskData.add(new Task("do bar by 14 apr"));
-//		taskData.add(new Task("do asdfg by 10 apr"));
-//		taskData.add(new Task("do thizxccs by 11 apr"));
-
-		foo.add(new Task("do this by 12 apr"));
-		foo.add(new Task("do that by 13 apr"));
-		foo.add(new Task("do foo by 15 apr"));
-		foo.add(new Task("do bar by 14 apr"));
-		foo.add(new Task("do asdfg by 10 apr"));
-		foo.add(new Task("do thizxccs by 11 apr"));
-
-		storage.writeTasksToFile(foo);
-
-		ArrayList<Task> allTasks = storage.readTasksFromFile();
-
-		for (Task task : allTasks) {
-			taskData.add(task);
-		}
-	}
-
-	/**
-	 * Returns the data as an observable list of Tasks
-	 */
-	public ObservableList<Task> getTaskData() {
-		return taskData;
 	}
 
 	/**
