@@ -10,7 +10,15 @@ import java.util.ArrayList;
 
 public class ControllerTest extends TestCase {
     @Test
-    public void testUndo() {}
+    public void testUndo() {
+        Controller controller = new Controller();
+        controller.executeCommand("add this by 14 apr");
+        controller.executeCommand("add that by 20 mar");
+
+        controller.executeCommand("edit 1 desc foobar");
+        System.out.println(controller.getIncompleteTasksPublic());
+
+    }
 
     @Test
     public void testComplete() {
@@ -18,7 +26,7 @@ public class ControllerTest extends TestCase {
         Controller controller = new Controller();
 
         controller.executeCommand("add this by 4 feb");
-        assertEquals("hello", getTaskDesc(controller.getIncompleteTasksPublic()));
+        //assertEquals("hello", getTaskDesc(controller.getIncompleteTasksPublic()));
     }
 
     private ArrayList<String> getTaskDesc(ArrayList<Task> input) {

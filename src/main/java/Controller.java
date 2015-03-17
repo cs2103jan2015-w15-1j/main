@@ -1,11 +1,18 @@
 package main.java;
 
+import sun.rmi.runtime.Log;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public class Controller {
+
+    private static Logger LOGGER = Logger.getLogger("VetoController");
 
     private static final String MESSAGE_SAVE_FILE_READY = "Welcome to main.java.Veto. %s is ready for use.";
 
@@ -81,6 +88,7 @@ public class Controller {
             	updateState();
             	return incompleteTask(arguments);
             case UNDO :
+                LOGGER.info(incompleteTasks.toString());
                 return undo();
             case SEARCH :
                 ArrayList<Task> searchResults = search(arguments);
@@ -253,6 +261,8 @@ public class Controller {
 
             updateStorageWithAllTasks();
 
+            LOGGER.info(incompleteTasks.toString());
+
             return MESSAGE_UNDO;
         }
     }
@@ -308,17 +318,8 @@ public class Controller {
      */
     private ArrayList<Task> concatenateTasks(ArrayList<Task> first, ArrayList<Task> second) {
         ArrayList<Task> output = new ArrayList<Task>();
-
-        try {
-            for (Task task : first) {
-                output.add(task.clone());
-            }
-            for (Task task : second) {
-                output.add(task.clone());
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        output.addAll(first);
+        output.addAll(second);
         return output;
     }
 
@@ -328,8 +329,20 @@ public class Controller {
     }
 
     private void updateState() {
-        previousStates.push(new ArrayList<Task>(incompleteTasks));
-        previousStates.push(new ArrayList<Task>(completedTasks));
+        previousStates.push(cloneState(incompleteTasks));
+        previousStates.push(cloneState(completedTasks));
+    }
+
+    private ArrayList<Task> cloneState(ArrayList<Task> input) {
+        ArrayList<Task> output = new ArrayList<Task>();
+        try {
+            for (Task task : input) {
+                output.add(task.clone());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return output;
     }
 
 
