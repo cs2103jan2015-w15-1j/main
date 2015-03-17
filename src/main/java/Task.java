@@ -63,14 +63,9 @@ public class Task {
     // ================================================================
     // Start of MX's edits
     // ================================================================
-
-    // Attributes
-//    private transient final StringProperty taskDesc;
-//    private transient final ObjectProperty<LocalDate> taskDate;
-//    private transient final StringProperty stringPropertyTaskDate;
-
-
     // Methods
+    // Note: Property attributes are created on the fly because there was some problem with serialization
+
     public StringProperty getTaskDesc() {
         return new SimpleStringProperty(getDescription());
     }
