@@ -17,10 +17,6 @@ public class MainApp extends Application {
 
 	private Stage primaryStage;
 	private BorderPane rootLayout;
-	private Storage storage;
-	private String saveFileName;
-
-
 
 	public static void main(String[] args) {
 		launch(args);
@@ -30,12 +26,10 @@ public class MainApp extends Application {
 	 * Constructor
 	 */
 	public MainApp() {
-
 	}
 
 	/**
 	 * Returns the main stage
-	 * @return
 	 */
 	public Stage getPrimaryStage() {
 		return primaryStage;
@@ -50,14 +44,12 @@ public class MainApp extends Application {
 		showTaskOverview();
 	}
 
-
-
 	/**
 	 * Initializes the root layout.
 	 */
 	public void initRootLayout() {
 		try {
-			// Load root layout from fxml file.
+			// Load root layout from fxml file.`
 			FXMLLoader loader = new FXMLLoader();
 			loader.setLocation(MainApp.class.getResource("/view/RootLayout.fxml"));
 			rootLayout = (BorderPane) loader.load();
@@ -92,6 +84,4 @@ public class MainApp extends Application {
 			e.printStackTrace();
 		}
 	}
-
-
 }
