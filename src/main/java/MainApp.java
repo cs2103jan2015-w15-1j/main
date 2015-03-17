@@ -6,6 +6,7 @@ import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+import main.resources.view.RootLayoutController;
 import main.resources.view.TaskOverviewController;
 
 import java.io.IOException;
@@ -17,6 +18,8 @@ public class MainApp extends Application {
 	// ================================================================
 	private Stage primaryStage;
 	private BorderPane rootLayout;
+	private TaskOverviewController taskOverviewController;
+	private RootLayoutController rootLayoutController;
 
 	// ================================================================
 	// Methods
@@ -45,6 +48,8 @@ public class MainApp extends Application {
 
 		initRootLayout();
 		showTaskOverview();
+
+		rootLayoutController.setTaskOverviewController(taskOverviewController);
 	}
 
 	/**
@@ -56,6 +61,9 @@ public class MainApp extends Application {
 			FXMLLoader loader = new FXMLLoader();
 			loader.setLocation(MainApp.class.getResource("/view/RootLayout.fxml"));
 			rootLayout = (BorderPane) loader.load();
+
+			// Provide a handle in MainApp to rootLayoutController
+			rootLayoutController = loader.getController();
 
 			// Show the scene containing the root layout.
 			Scene scene = new Scene(rootLayout);
@@ -80,9 +88,8 @@ public class MainApp extends Application {
 			rootLayout.setCenter(taskOverview);
 
 			// Give the controller access to the main app.
-			TaskOverviewController taskOverviewController = loader.getController();
+			taskOverviewController = loader.getController();
 			taskOverviewController.setMainApp(this);
-
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

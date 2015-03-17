@@ -8,11 +8,17 @@ import main.java.MainApp;
 import main.java.Task;
 
 public class RootLayoutController {
+    // ================================================================
+    // FXML Fields
+    // ================================================================
     @FXML
     private TextField userInput;
 
-    // Reference to the main application
+    // ================================================================
+    // Non-FXML Fields
+    // ================================================================
     private MainApp mainApp;
+    private TaskOverviewController taskOverviewController = new TaskOverviewController();
 
     /**
      * Initializes the root layout class. This method is automatically called
@@ -27,6 +33,10 @@ public class RootLayoutController {
     public void handleEnterPressed(KeyEvent event) {
         if (event.getCode() == KeyCode.ENTER) {
             Task task = new Task(userInput.getText());
+
+
+
+
             System.out.println(userInput.getText());
         }
     }
@@ -38,5 +48,9 @@ public class RootLayoutController {
      */
     public void setMainApp(MainApp mainApp) {
         this.mainApp = mainApp;
+    }
+
+    public void setTaskOverviewController(TaskOverviewController controller) {
+        this.taskOverviewController = controller;
     }
 }
