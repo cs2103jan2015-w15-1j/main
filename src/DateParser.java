@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -27,6 +29,8 @@ import com.joestelmach.natty.Parser;
  *
  */
 public class DateParser {
+    private static final Logger logger = Logger.getLogger("Veto");
+    
     private static final char ESCAPE_CHAR = '"';
     private static final int POSITION_FIRST_DATE = 0;
     private static final int POSITION_SECOND_DATE = 1;
@@ -37,6 +41,7 @@ public class DateParser {
     private String parsedWords; // words used when determining the date/s
 
     public DateParser(String input) {
+        logger.setLevel(Level.INFO);
         dates = new ArrayList<LocalDateTime>();
 
         Parser parser = new Parser();
@@ -56,11 +61,13 @@ public class DateParser {
             // it should have 2 elements to indicate a start and end time.
             if (group.getParseLocations().containsKey(OFFENDING_NATTY_KEY) &&
                 group.getParseLocations().get(OFFENDING_NATTY_KEY).size() == 1) {
+                
                 isIncorrectlyParsingWords = true;
                 incorrectlyParsedWord = group.getParseLocations()
                                              .get(OFFENDING_NATTY_KEY)
                                              .get(0)
                                              .toString();
+                logger.log(Level.INFO, "Offending word: {0}, Input string: {1}", new Object[] {incorrectlyParsedWord, input});
                 break;
             }
 
@@ -85,6 +92,7 @@ public class DateParser {
             String modifiedWord = ESCAPE_CHAR + incorrectlyParsedWord + ESCAPE_CHAR;
             String newInput = input.replaceFirst(incorrectlyParsedWord,
                                                  modifiedWord);
+            logger.log(Level.INFO, "Modified input: {0}", newInput);
             DateParser fixed = new DateParser(newInput);
             dates = fixed.getDates();
             parsedWords = fixed.getParsedWords();
