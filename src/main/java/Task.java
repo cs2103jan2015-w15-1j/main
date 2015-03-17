@@ -36,7 +36,7 @@ import org.apache.commons.lang.StringUtils;
  * LocalTime), markAsComplete()
  */
 
-public class Task {
+public class Task implements Cloneable {
     public static enum Type {
         FLOATING, TIMED, DEADLINE
     };
@@ -178,6 +178,13 @@ public class Task {
         type = newType;
     }
 
+    private void setRawInfo(String rawInfo) {
+        this.rawInfo = rawInfo;
+    }
+
+    private void setIsCompleted(Boolean isCompleted) {
+        this.isCompleted = isCompleted;
+    }
 
     // ================================================================
     // Initialization Methods
@@ -317,4 +324,28 @@ public class Task {
     	}
     	return result;
     }
+
+    @Override
+    public Task clone() throws CloneNotSupportedException {
+        Task cloned = (Task) super.clone();
+
+        // Set all the attributes
+        cloned.setType(cloned.getType());
+        cloned.setRawInfo(cloned.getRawInfo());
+        cloned.setDescription(cloned.getDescription());
+
+        DateParser parser = new DateParser(cloned.getRawInfo());
+        ArrayList<LocalDateTime> parsedDates = parser.getDates();
+        cloned.initDateAndTime(cloned.getType(), parsedDates);
+
+//        if (cloned.getType() != Type.FLOATING) {
+//            cloned.setDate(cloned.getDate());
+//            cloned.setTime(cloned.getStartTime(), cloned.getEndTime());
+//        }
+        cloned.setIsCompleted(cloned.isCompleted());
+
+        return cloned;
+    }
+
+
 }

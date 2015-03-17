@@ -297,10 +297,28 @@ public class Controller {
         return display;
     }
 
+    /**
+     *
+     * Clones all the Task objects in the supplied ArrayList<Task> and adds them to the
+     * output ArrayList.
+     *
+     * @param first
+     * @param second
+     * @return
+     */
     private ArrayList<Task> concatenateTasks(ArrayList<Task> first, ArrayList<Task> second) {
         ArrayList<Task> output = new ArrayList<Task>();
-        output.addAll(first);
-        output.addAll(second);
+
+        try {
+            for (Task task : first) {
+                output.add(task.clone());
+            }
+            for (Task task : second) {
+                output.add(task.clone());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return output;
     }
 
