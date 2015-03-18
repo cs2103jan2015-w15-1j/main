@@ -41,7 +41,8 @@ public class StorageTest {
         // test moving save file
         assertEquals(true, defaultFile.exists());
         assertEquals(false, testFile.exists());
-        assertEquals("File save destination has been confirmed. \n", test.setSaveFileDirectory(newDirectory));
+        assertEquals("File save destination has been confirmed. \n",
+                test.setSaveFileDirectory(newDirectory));
         assertEquals(true, testFile.exists());
         assertEquals(false, defaultFile.exists());
 
@@ -54,7 +55,8 @@ public class StorageTest {
             e.printStackTrace();
         }
         assertEquals(false, testFile2.exists());
-        assertEquals("File save destination has been confirmed. \n", test.setSaveFileDirectory(newDirectory2));
+        assertEquals("File save destination has been confirmed. \n",
+                test.setSaveFileDirectory(newDirectory2));
         assertEquals(true, testFile2.exists());
         assertEquals(false, testFile.exists());
         try {
@@ -86,13 +88,17 @@ public class StorageTest {
         readData = test.readTasksFromFile();
         // compare write data and read data
         for (int i = 0; i < readData.size(); i++) {
-            assertEquals(tempData.get(i).getRawInfo(), readData.get(i).getRawInfo());
-            assertEquals(tempData.get(i).isCompleted(), readData.get(i).isCompleted());
-            assertEquals(tempData.get(i).getDescription(), readData.get(i).getDescription());
-            assertEquals(tempData.get(i).isCompleted(), readData.get(i).isCompleted());
+            assertEquals(tempData.get(i).isCompleted(), readData.get(i)
+                    .isCompleted());
+            assertEquals(tempData.get(i).getDescription(), readData.get(i)
+                    .getDescription());
+            assertEquals(tempData.get(i).isCompleted(), readData.get(i)
+                    .isCompleted());
             assertEquals(tempData.get(i).getDate(), readData.get(i).getDate());
-            assertEquals(tempData.get(i).getStartTime(), readData.get(i).getStartTime());
-            assertEquals(tempData.get(i).getEndTime(), readData.get(i).getEndTime());
+            assertEquals(tempData.get(i).getStartTime(), readData.get(i)
+                    .getStartTime());
+            assertEquals(tempData.get(i).getEndTime(), readData.get(i)
+                    .getEndTime());
         }
     }
 
