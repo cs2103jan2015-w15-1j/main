@@ -17,6 +17,8 @@ public class Storage {
     private static final String MESSAGE_ADDED = "File updated\n";
     private static final String DEFAULT_SAVE_FILE = "savefile.txt";
     private static final String SETTINGS_FILE_NAME = "settings.txt";
+    private static final String MESSAGE_SAVE_DEST = "File save destination has been confirmed. \n";
+    private static final String MESSAGE_SAVE_FAIL = "File save destination failed. \n";
 
     private File settingsFile;
     private File saveFile;
@@ -131,16 +133,16 @@ public class Storage {
     }
 
     // change save file directory
-    public Boolean setSaveFileDirectory(String input) {
+    public String setSaveFileDirectory(String input) {
         saveFileName = input;
         if (saveFile.renameTo(new File(saveFileName))) {
             updateSettingsFile(saveFileName);
             saveFile = new File(saveFileName);
             createIfMissingFile(saveFile);
             logger.log(Level.INFO, "File directory changed to " + saveFile.toString());
-            return true;
+            return MESSAGE_SAVE_DEST;
         } else {
-            return false;
+            return MESSAGE_SAVE_FAIL;
         }
     }
    

@@ -15,7 +15,6 @@ public class Controller {
     private static final String MESSAGE_COMPLETE = "\"%s\" completed. \n";
     private static final String MESSAGE_INCOMPLETE = "\"%s\" incompleted. \n";
     private static final String MESSAGE_EXIT = "Goodbye!";
-    private static final String MESSAGE_SAVE_DEST = "File save destination has been confirmed. \n";
     private static final String MESSAGE_UNDO = "Last command has been undone. \n";
     private static final String MESSAGE_INVALID_COMMAND = "Invalid command. \n";
     private static final String MESSAGE_NO_UNDO = "Already at oldest change, unable to undo. \n";
@@ -58,9 +57,7 @@ public class Controller {
 
         switch (commandType) {
             case SETSAVEFILE :
-                if (setSaveFileDirectory(arguments)) {
-                    return MESSAGE_SAVE_DEST;
-                }
+                return setSaveFileDirectory(arguments);
             case ADD :
                 updateState();
                 return addTask(arguments);
@@ -102,7 +99,7 @@ public class Controller {
     // Initialization methods
     // ================================================================
     
-    private Boolean setSaveFileDirectory(String input) {
+    private String setSaveFileDirectory(String input) {
         return storage.setSaveFileDirectory(input);
     }
 
