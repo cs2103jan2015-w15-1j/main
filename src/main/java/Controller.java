@@ -322,7 +322,7 @@ public class Controller {
 
     private void updateStorageWithAllTasks() {
         ArrayList<Task> allTasks = concatenateTasks(incompleteTasks, completedTasks);
-        storage.writeTasksToFile(allTasks);
+        storage.updateFiles(allTasks);
     }
 
     private void updateState() {
@@ -357,6 +357,6 @@ public class Controller {
 
     public void clear() {
         ArrayList<Task> emptyArr = new ArrayList<Task>();
-        storage.writeTasksToFile(emptyArr);
+        storage.updateFiles(emptyArr);
     }
 }

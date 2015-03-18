@@ -81,7 +81,7 @@ public class StorageTest {
 
         Storage test = new Storage();
         // write data to storage
-        assertEquals("File updated\n", test.writeTasksToFile(tempData));
+        assertEquals("File updated\n", test.updateFiles(tempData));
         // read data from storage
         readData = test.readTasksFromFile();
         // compare write data and read data
