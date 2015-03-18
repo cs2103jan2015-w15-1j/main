@@ -205,6 +205,9 @@ public class TaskOverviewController {
     private String addTask(String input) {
         Task task = new Task(input);
 
+        // Testing purpose. Remove this line in the future.
+        taskData.add(task);
+
         incompleteTasks.add(task);
         updateStorageWithAllTasks();
         if (task.getType() == Task.Type.FLOATING) {
@@ -215,6 +218,9 @@ public class TaskOverviewController {
             String formattedTime = task.getStartTime() + " to " + task.getEndTime();
             return String.format(MESSAGE_ADD, task.getDescription(), task.getDate(), formattedTime);
         }
+
+
+
     }
 
     private String deleteTask(String input) {
