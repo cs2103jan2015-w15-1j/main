@@ -5,12 +5,10 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-<<<<<<< HEAD:src/DateParser.java
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-=======
->>>>>>> gui:src/main/java/DateParser.java
+
 
 import org.apache.commons.lang.StringUtils;
 
@@ -34,7 +32,7 @@ import com.joestelmach.natty.Parser;
  */
 public class DateParser {
     private static final Logger logger = Logger.getLogger("Veto");
-    
+
     private static final char ESCAPE_CHAR = '"';
     private static final int POSITION_FIRST_DATE = 0;
     private static final int POSITION_SECOND_DATE = 1;
@@ -65,7 +63,7 @@ public class DateParser {
             // it should have 2 elements to indicate a start and end time.
             if (group.getParseLocations().containsKey(OFFENDING_NATTY_KEY) &&
                 group.getParseLocations().get(OFFENDING_NATTY_KEY).size() == 1) {
-                
+
                 isIncorrectlyParsingWords = true;
                 incorrectlyParsedWord = group.getParseLocations()
                                              .get(OFFENDING_NATTY_KEY)

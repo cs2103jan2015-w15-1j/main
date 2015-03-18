@@ -108,13 +108,8 @@ public class Controller {
     // ================================================================
     // Initialization methods
     // ================================================================
-<<<<<<< HEAD:src/Controller.java
-    
-    private String setSaveFileDirectory(String input) {
-=======
 
-    private Boolean setSaveFileDirectory(String input) {
->>>>>>> gui:src/main/java/Controller.java
+    private String setSaveFileDirectory(String input) {
         return storage.setSaveFileDirectory(input);
     }
 
