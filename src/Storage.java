@@ -6,10 +6,14 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.google.gson.Gson;
 
 public class Storage {
+    private static final Logger logger = Logger.getLogger("VetoStorage");
+    
     private static final String MESSAGE_ADDED = "File updated\n";
     private static final String DEFAULT_SAVE_FILE = "savefile.txt";
     private static final String SETTINGS_FILE_NAME = "settings.txt";
@@ -30,6 +34,7 @@ public class Storage {
         updateSettingsFile(saveFileName);
         saveFile = new File(saveFileName);
         createIfMissingFile(saveFile);
+        logger.log(Level.INFO, "Storage Initialised");
     }
 
     // update settings file on the changes of save file directory
@@ -63,6 +68,7 @@ public class Storage {
         try {
             if (!fileName.exists()) {
                 fileName.createNewFile();
+                logger.log(Level.INFO, fileName.toString() + " have been created");
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -131,6 +137,7 @@ public class Storage {
             updateSettingsFile(saveFileName);
             saveFile = new File(saveFileName);
             createIfMissingFile(saveFile);
+            logger.log(Level.INFO, "File directory changed to " + saveFile.toString());
             return true;
         } else {
             return false;
