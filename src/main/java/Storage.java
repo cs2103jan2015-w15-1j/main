@@ -1,3 +1,5 @@
+package main.java;
+
 import java.io.File;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -145,11 +147,11 @@ public class Storage {
             return MESSAGE_SAVE_FAIL;
         }
     }
-   
+
     public String getSaveFileName() {
         return saveFileName;
     }
 
     // debug method for clear
-    
+
 }

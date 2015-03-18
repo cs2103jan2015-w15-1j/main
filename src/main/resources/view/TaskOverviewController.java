@@ -1,20 +1,110 @@
+package main.resources.view;
+
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.fxml.FXML;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TableColumn;
+
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import main.java.Command;
+import main.java.MainApp;
+import main.java.Storage;
+import main.java.Task;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
-public class Controller {
+public class TaskOverviewController {
+    // ================================================================
+    // FXML Fields
+    // ================================================================
+    @FXML
+    private TableView<Task> taskTable;
+    @FXML
+    private TableColumn<Task, String> taskDescription;
+    @FXML
+    private TableColumn<Task, String> taskDeadline;
+    @FXML
+    private TableColumn<Task, Integer> taskIndex;
 
-    private static final String MESSAGE_SAVE_FILE_READY = "Welcome to Veto. %s is ready for use.";
+    // ================================================================
+    // Non-FXML Fields
+    // ================================================================
+    private ObservableList<Task> taskData = FXCollections.observableArrayList();
+    private MainApp mainApp;
+
+
+    // ================================================================
+    // Methods
+    // ================================================================
+    /**
+     * The constructor is called before the initialize() method.
+     */
+    public TaskOverviewController() {
+        storage = new Storage();
+        String saveFileName = storage.getSaveFileName();
+
+        ArrayList<Task> allTasks = storage.readTasksFromFile();
+
+        for (Task task : allTasks) {
+            taskData.add(task);
+        }
+
+
+
+        timeToExit = false;
+
+        storage = new Storage();
+        saveFileName = storage.getSaveFileName();
+
+        incompleteTasks = new ArrayList<Task>(getIncompleteTasks(allTasks));
+        completedTasks = new ArrayList<Task>(getCompletedTasks(allTasks));
+
+        previousStates = new Stack<ArrayList<Task>>();
+    }
+
+    /**
+     * Initializes the controller class. This method is automatically called
+     * after the fxml file has been loaded.
+     */
+    @FXML
+    private void initialize() {
+        // Populating the TableColumns (but are not directly shown in the UI yet)
+        taskDescription.setCellValueFactory(
+                cellData -> cellData.getValue().getTaskDesc());
+        taskDeadline.setCellValueFactory(
+                cellData -> cellData.getValue().getStringPropertyTaskDate());
+
+        // Add the observable list data to the table
+        taskTable.setItems(taskData);
+    }
+
+    /**
+     * Is called by the main application to give a reference back to itself.
+     */
+    public void setMainApp(MainApp mainApp) {
+        this.mainApp = mainApp;
+    }
+
+    // ================================================================
+    // Imported from Controller.java
+    // ================================================================
+
+    private static final String MESSAGE_SAVE_FILE_READY = "Welcome to main.java.Veto. %s is ready for use.";
 
     private static final String MESSAGE_EMPTY = "There is currently no task.\n";
-    private static final String MESSAGE_ADD = "Task has been successfully added:\n     Description: %s\n     Deadline: %s\n     Time: %s\n";
+    private static final String MESSAGE_ADD = "main.java.Task has been successfully added:\n     Description: %s\n     Deadline: %s\n     Time: %s\n";
     private static final String MESSAGE_NOT_APPL = "Not applicable";
-    private static final String MESSAGE_DELETE = "Task has been successfully deleted:\n Description: %s \n";
-    private static final String MESSAGE_EDIT = "Task has been successfully edited.\n";
+    private static final String MESSAGE_DELETE = "main.java.Task has been successfully deleted:\n Description: %s \n";
+    private static final String MESSAGE_EDIT = "main.java.Task has been successfully edited.\n";
     private static final String MESSAGE_COMPLETE = "\"%s\" completed. \n";
     private static final String MESSAGE_INCOMPLETE = "\"%s\" incompleted. \n";
     private static final String MESSAGE_EXIT = "Goodbye!";
+    private static final String MESSAGE_SAVE_DEST = "File save destination has been confirmed. \n";
     private static final String MESSAGE_UNDO = "Last command has been undone. \n";
     private static final String MESSAGE_INVALID_COMMAND = "Invalid command. \n";
     private static final String MESSAGE_NO_UNDO = "Already at oldest change, unable to undo. \n";
@@ -28,23 +118,11 @@ public class Controller {
 
     private Stack<ArrayList<Task>> previousStates;
 
-    public Controller() {
-        timeToExit = false;
-        
-        storage = new Storage();
-        saveFileName = storage.getSaveFileName();
-        
-        ArrayList<Task> allTasks = storage.readTasksFromFile();
-        incompleteTasks = new ArrayList<Task>(getIncompleteTasks(allTasks));
-        completedTasks = new ArrayList<Task>(getCompletedTasks(allTasks));
-        
-        previousStates = new Stack<ArrayList<Task>>();
-    }
 
     // ================================================================
     // Public methods
     // ================================================================
-    
+
     public String getWelcomeMessage() {
         return String.format(MESSAGE_SAVE_FILE_READY, saveFileName);
     }
@@ -57,7 +135,9 @@ public class Controller {
 
         switch (commandType) {
             case SETSAVEFILE :
-                return setSaveFileDirectory(arguments);
+                if (setSaveFileDirectory(arguments)) {
+                    return MESSAGE_SAVE_DEST;
+                }
             case ADD :
                 updateState();
                 return addTask(arguments);
@@ -73,8 +153,8 @@ public class Controller {
                 updateState();
                 return completeTask(arguments);
             case INCOMPLETE :
-            	updateState();
-            	return incompleteTask(arguments);
+                updateState();
+                return incompleteTask(arguments);
             case UNDO :
                 return undo();
             case SEARCH :
@@ -94,47 +174,53 @@ public class Controller {
         return timeToExit;
     }
 
-    
+
     // ================================================================
     // Initialization methods
     // ================================================================
-    
-    private String setSaveFileDirectory(String input) {
+
+    private Boolean setSaveFileDirectory(String input) {
         return storage.setSaveFileDirectory(input);
     }
 
     private List<Task> getIncompleteTasks(ArrayList<Task> allTasks) {
         List<Task> incompleteTasks = allTasks.stream()
-                                             .filter(task -> !task.isCompleted())
-                                             .collect(Collectors.toList());
+                .filter(task -> !task.isCompleted())
+                .collect(Collectors.toList());
         return incompleteTasks;
     }
 
     private List<Task> getCompletedTasks(ArrayList<Task> allTasks) {
         List<Task> completedTasks = allTasks.stream()
-                                           .filter(task -> task.isCompleted())
-                                           .collect(Collectors.toList());
+                .filter(task -> task.isCompleted())
+                .collect(Collectors.toList());
         return completedTasks;
     }
-    
-    
+
+
     // ================================================================
     // Logic methods
     // ================================================================
 
     private String addTask(String input) {
         Task task = new Task(input);
-        
+
+        // Testing purpose. Remove this line in the future.
+        taskData.add(task);
+
         incompleteTasks.add(task);
         updateStorageWithAllTasks();
         if (task.getType() == Task.Type.FLOATING) {
-        	return String.format(MESSAGE_ADD, task.getDescription(), MESSAGE_NOT_APPL, MESSAGE_NOT_APPL);
+            return String.format(MESSAGE_ADD, task.getDescription(), MESSAGE_NOT_APPL, MESSAGE_NOT_APPL);
         } else if (task.getType() == Task.Type.DEADLINE) {
-        	return String.format(MESSAGE_ADD, task.getDescription(), task.getDate(), MESSAGE_NOT_APPL);
+            return String.format(MESSAGE_ADD, task.getDescription(), task.getDate(), MESSAGE_NOT_APPL);
         } else {
-        	String formattedTime = task.getStartTime() + " to " + task.getEndTime();
-        	return String.format(MESSAGE_ADD, task.getDescription(), task.getDate(), formattedTime);
+            String formattedTime = task.getStartTime() + " to " + task.getEndTime();
+            return String.format(MESSAGE_ADD, task.getDescription(), task.getDate(), formattedTime);
         }
+
+
+
     }
 
     private String deleteTask(String input) {
@@ -192,7 +278,7 @@ public class Controller {
                 String newInput = description.trim() + " " + date.trim();
 
                 Task newTask = new Task(newInput);
-                incompleteTasks.set(editIndex, newTask);
+                incompleteTasks.set(editIndex, newTask); // replaces the old main.java.Task object with the newly created one
             } else {
                 return MESSAGE_INVALID_COMMAND;
             }
@@ -219,9 +305,9 @@ public class Controller {
             return MESSAGE_INVALID_COMMAND;
         }
     }
-    
+
     private String incompleteTask(String input) {
-    	try {
+        try {
             int index = Integer.parseInt(input.trim()) - 1;
             Task task = completedTasks.get(index);
             task.markAsIncomplete();
@@ -253,7 +339,7 @@ public class Controller {
     }
 
     private ArrayList<Task> search(String input) {
-        // TODO check Task.getInfo() implementation
+        // TODO check main.java.Task.getInfo() implementation
         ArrayList<Task> searchResults = new ArrayList<Task>();
 
         ArrayList<Task> allTasks = concatenateTasks(incompleteTasks, completedTasks);
@@ -274,12 +360,12 @@ public class Controller {
         updateStorageWithAllTasks();
         return MESSAGE_EXIT;
     }
-    
-    
+
+
     // ================================================================
     // Utility methods
     // ================================================================
-    
+
     private String formatTasksForDisplay(ArrayList<Task> input) {
         if (input.isEmpty()) {
             return MESSAGE_EMPTY;
@@ -291,7 +377,7 @@ public class Controller {
         }
         return display;
     }
-    
+
     private ArrayList<Task> concatenateTasks(ArrayList<Task> first, ArrayList<Task> second) {
         ArrayList<Task> output = new ArrayList<Task>();
         output.addAll(first);
@@ -308,12 +394,12 @@ public class Controller {
         previousStates.push(new ArrayList<Task>(incompleteTasks));
         previousStates.push(new ArrayList<Task>(completedTasks));
     }
-    
+
 
     // ================================================================
     // Testing methods
     // ================================================================
-    
+
     public ArrayList<Task> getIncompleteTasksPublic() {
         return incompleteTasks;
     }

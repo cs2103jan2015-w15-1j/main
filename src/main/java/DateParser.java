@@ -1,30 +1,34 @@
+package main.java;
+
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+<<<<<<< HEAD:src/DateParser.java
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+=======
+>>>>>>> gui:src/main/java/DateParser.java
 
 import org.apache.commons.lang.StringUtils;
 
 import com.joestelmach.natty.DateGroup;
-import com.joestelmach.natty.ParseLocation;
 import com.joestelmach.natty.Parser;
 
 
 /**
  * This class helps parse date inputs using Natty.
- * new DateParser("do homework from 1600 - 1700 on 12 mar").getDates() will
+ * new main.java.DateParser("do homework from 1600 - 1700 on 12 mar").getDates() will
  * return an arraylist with 2 dates.
- * 
- * new DateParser("do homework on 12 mar").getDates() will return an arraylist
+ *
+ * new main.java.DateParser("do homework on 12 mar").getDates() will return an arraylist
  * with
  * 1 date.
- * 
- * new DateParser("do homework").getDates() will return an empty arraylist.
- * 
+ *
+ * new main.java.DateParser("do homework").getDates() will return an empty arraylist.
+ *
  * @author Sebastian
  *
  */
@@ -86,7 +90,7 @@ public class DateParser {
             if (StringUtils.countMatches(input, ESCAPE_CHAR + "") > 2) {
                 return;
             }
-            
+
             // add a " before and after the incorrectly used word so that it's
             // ignored by Natty.
             String modifiedWord = ESCAPE_CHAR + incorrectlyParsedWord + ESCAPE_CHAR;
