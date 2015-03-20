@@ -9,6 +9,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 import org.junit.After;
@@ -81,9 +82,7 @@ public class StorageTest {
                 "finish homework by 20 Feb", "meet boss later today" };
         ArrayList<Task> tempData = new ArrayList<Task>();
         ArrayList<Task> readData = new ArrayList<Task>();
-        for (String string : data) {
-            tempData.add(new Task(string));
-        }
+        createArrayListOfTask(data, tempData);
 
         Storage test = new Storage();
         // write data to storage
@@ -103,9 +102,7 @@ public class StorageTest {
                 "finish homework by 20 Feb", "meet boss later today" };
         ArrayList<Task> tempData = new ArrayList<Task>();
         ArrayList<Task> readData = new ArrayList<Task>();
-        for (String string : data) {
-            tempData.add(new Task(string));
-        }
+        createArrayListOfTask(data, tempData);
 
         Storage test = new Storage();
         assertEquals("File updated\n", test.updateFiles(tempData));
@@ -144,6 +141,15 @@ public class StorageTest {
         assertEquals(true, readData.isEmpty());
         
         System.out.println("End of backup test");
+    }
+
+    private void createArrayListOfTask(String[] data, ArrayList<Task> tempData) {
+        for (String string : data) {
+            DateParser parser = new DateParser(string);
+            ArrayList<LocalDateTime> parsedDates = parser.getDates();
+            String parsedWords = parser.getParsedWords();
+            tempData.add(new Task(string, parsedDates, parsedWords));
+        }
     }
 
     private void compareData(ArrayList<Task> tempData, ArrayList<Task> readData) {

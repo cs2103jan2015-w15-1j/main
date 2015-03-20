@@ -5,14 +5,15 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TableColumn;
-
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import main.java.Command;
+import main.java.DateParser;
 import main.java.MainApp;
 import main.java.Storage;
 import main.java.Task;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
@@ -200,7 +201,10 @@ public class TaskOverviewController {
     // ================================================================
 
     private String addTask(String input) {
-        Task task = new Task(input);
+        DateParser parser = new DateParser(input);
+        ArrayList<LocalDateTime> parsedDates = parser.getDates();
+        String parsedWords = parser.getParsedWords();
+        Task task = new Task(input, parsedDates, parsedWords);
 
         // Testing purpose. Remove this line in the future.
         taskData.add(task);
@@ -270,12 +274,9 @@ public class TaskOverviewController {
             } else if ("description".contains(editType)) {
                 task.setDescription(editArgument.toString());
             } else if ("deadline".contains(editType)) {
-                String description = task.getDescription();
-                String date = editArgument.toString();
-                String newInput = description.trim() + " " + date.trim();
-
-                Task newTask = new Task(newInput);
-                incompleteTasks.set(editIndex, newTask); // replaces the old main.java.Task object with the newly created one
+                DateParser parser = new DateParser(input);
+                ArrayList<LocalDateTime> parsedDates = parser.getDates();
+                task.setTypeDateTime(parsedDates);
             } else {
                 return MESSAGE_INVALID_COMMAND;
             }
