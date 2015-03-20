@@ -19,7 +19,9 @@ public class StorageTest {
     String newDirectory = "C:\\Users\\user\\Documents\\GitHub\\saveRenamedFile.txt";
     String newDirectory2 = "C:\\Users\\user\\Documents\\GitHub\\main\\memory.txt";
     String SettingsDirectory = "settings.txt";
+    String backupDirectory = "backup.txt";
     File defaultFile = new File(defaultDirectory);
+    File backupFile = new File(backupDirectory);
     File testFile = new File(newDirectory);
     File testFile2 = new File(newDirectory2);
     File settingsFile = new File(SettingsDirectory);
@@ -67,6 +69,8 @@ public class StorageTest {
             e.printStackTrace();
         }
         assertEquals(testData, text);
+        
+        System.out.println("End of settings test");
     }
 
     // Test the write and read the task from the file
@@ -85,8 +89,64 @@ public class StorageTest {
         // write data to storage
         assertEquals("File updated\n", test.updateFiles(tempData));
         // read data from storage
-        readData = test.readTasksFromFile();
-        // compare write data and read data
+        readData = test.readFile();
+        compareData(tempData, readData);
+        
+        System.out.println("End of write and read test");
+    }
+
+    // Test backup file
+    @Test
+    public void testBackup() {
+        // data for testing
+        String[] data = { "attend meeting later at 1200-1400 on 20 Feb",
+                "finish homework by 20 Feb", "meet boss later today" };
+        ArrayList<Task> tempData = new ArrayList<Task>();
+        ArrayList<Task> readData = new ArrayList<Task>();
+        for (String string : data) {
+            tempData.add(new Task(string));
+        }
+
+        Storage test = new Storage();
+        assertEquals("File updated\n", test.updateFiles(tempData));
+        
+        // corrupting data
+        try {
+            writer = new PrintWriter(defaultFile, "UTF-8");
+            writer.println("corrupting the desired save file format");
+            writer.close();
+        } catch (FileNotFoundException | UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        readData = test.readFile();
+        compareData(tempData, readData);
+        
+        // if save file is not found
+        defaultFile.delete();
+        readData = test.readFile();
+        compareData(tempData, readData);
+        
+        // if backup is corrupted too, all data will be lost
+        try {
+            backupFile.setWritable(true);
+            writer = new PrintWriter(backupFile, "UTF-8");
+            writer.println("corrupting the desired save file format");
+            writer.close();
+            backupFile.setWritable(false);
+        } catch (FileNotFoundException | UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        readData = test.readFile();
+        assertEquals(true, readData.isEmpty());
+        
+        // if backup file is not found
+        readData = test.readFile();
+        assertEquals(true, readData.isEmpty());
+        
+        System.out.println("End of backup test");
+    }
+
+    private void compareData(ArrayList<Task> tempData, ArrayList<Task> readData) {
         for (int i = 0; i < readData.size(); i++) {
             assertEquals(tempData.get(i).isCompleted(), readData.get(i)
                     .isCompleted());
@@ -108,5 +168,6 @@ public class StorageTest {
         testFile2.delete();
         defaultFile.delete();
         settingsFile.delete();
+        backupFile.delete();
     }
 }
