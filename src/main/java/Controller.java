@@ -299,7 +299,7 @@ public class Controller {
 
         String display = "";
         for (Task task : input) {
-            display += task;
+            display += task.toString();
         }
         return display;
     }
