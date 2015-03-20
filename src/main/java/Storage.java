@@ -114,7 +114,7 @@ public class Storage {
         try {
             writer = new PrintWriter(fileName, "UTF-8");
             for (Task task : input) {
-                writer.println(taskToInfoString(task));
+                writer.println(taskToJson(task));
             }
         } catch (FileNotFoundException | UnsupportedEncodingException e) {
             e.printStackTrace();
@@ -126,7 +126,7 @@ public class Storage {
 
     // @Tan Chia Kai A0122393L
     // converts task object to string
-    private Object taskToInfoString(Task task) {
+    private Object taskToJson(Task task) {
         return gson.toJson(task);
     }
 
