@@ -10,6 +10,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
+
 import org.apache.commons.lang.StringUtils;
 
 import com.joestelmach.natty.DateGroup;
@@ -45,6 +46,10 @@ public class DateParser {
     public DateParser(String input) {
         logger.setLevel(Level.INFO);
         dates = new ArrayList<LocalDateTime>();
+        
+        if (hasTwoEscapeChars(input)) {
+            input = getWordsOutsideEscapeChars(input);
+        }
 
         Parser parser = new Parser();
         List<DateGroup> groups = parser.parse(input);
@@ -113,7 +118,28 @@ public class DateParser {
             }
         }
     }
+    
+    private boolean hasTwoEscapeChars(String input) {
+        return StringUtils.countMatches(input, ESCAPE_CHAR + "") == 2;
+    }
 
+    private String getWordsOutsideEscapeChars(String input) {
+        String output = "";
+        boolean withinEscapeChar = false;
+        for (char c : input.toCharArray()) {
+            if (c == ESCAPE_CHAR) {
+                if (withinEscapeChar) {
+                    withinEscapeChar = false;
+                } else {
+                    withinEscapeChar = true;
+                }
+            } else if (!withinEscapeChar) {
+                output += c;
+            }
+        }
+        return output;
+    }
+    
     public String getParsedWords() {
         return parsedWords;
     }

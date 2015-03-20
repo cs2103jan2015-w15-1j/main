@@ -2,11 +2,11 @@ package main.java;
 
 import sun.rmi.runtime.Log;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 import java.util.stream.Collectors;
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -133,7 +133,10 @@ public class Controller {
     // ================================================================
 
     private String addTask(String input) {
-        Task task = new Task(input);
+        DateParser parser = new DateParser(input);
+        ArrayList<LocalDateTime> parsedDates = parser.getDates();
+        String parsedWords = parser.getParsedWords();
+        Task task = new Task(input, parsedDates, parsedWords);
 
         incompleteTasks.add(task);
         updateStorageWithAllTasks();
@@ -197,12 +200,9 @@ public class Controller {
             } else if ("description".contains(editType)) {
                 task.setDescription(editArgument.toString());
             } else if ("deadline".contains(editType)) {
-                String description = task.getDescription();
-                String date = editArgument.toString();
-                String newInput = description.trim() + " " + date.trim();
-
-                Task newTask = new Task(newInput);
-                incompleteTasks.set(editIndex, newTask); // replaces the old main.java.Task object with the newly created one
+                DateParser parser = new DateParser(input);
+                ArrayList<LocalDateTime> parsedDates = parser.getDates();
+                task.setTypeDateTime(parsedDates);
             } else {
                 return MESSAGE_INVALID_COMMAND;
             }
