@@ -113,12 +113,12 @@ public class Storage {
     private Boolean writeTasksToFile(File fileName, ArrayList<Task> input) {
         try {
             writer = new PrintWriter(fileName, "UTF-8");
+            for (Task task : input) {
+                writer.println(taskToInfoString(task));
+            }
         } catch (FileNotFoundException | UnsupportedEncodingException e) {
             e.printStackTrace();
             return false;
-        }
-        for (Task task : input) {
-            writer.println(taskToInfoString(task));
         }
         writer.close();
         return true;
@@ -132,31 +132,34 @@ public class Storage {
 
     // @Tan Chia Kai A0122393L
     // reads all task objects from the save file
-    public ArrayList<Task> readTasksFromFile() {
+    public ArrayList<Task> readFile() {
         ArrayList<Task> storage = new ArrayList<Task>();
-        String text;
+        storage = readSavedTasks(saveFile);
+        if (storage.isEmpty()) {
+            logger.log(Level.INFO, "File corrupted, try restoring from backup file");
+            storage = readSavedTasks(backupFile);
+        }
+        return storage;
+    }
 
-        initBufferedReader(saveFile);
+    private ArrayList<Task> readSavedTasks(File saveFile) {
+        ArrayList<Task> storageData;
+        String text = "";
+        storageData = new ArrayList<Task>();
+
         try {
+            if (!initBufferedReader(saveFile)){
+                return storageData;
+            }
             while ((text = reader.readLine()) != null) {
                 Task task = gson.fromJson(text, Task.class);
-                storage.add(task);
+                storageData.add(task);
             }
-        } catch (IOException | JsonSyntaxException e1) {
-            closeBufferedReader();
-            initBufferedReader(backupFile);
-            logger.log(Level.INFO, "File corrupted, backup file used");
-            try {
-                while ((text = reader.readLine()) != null) {
-                    Task task = gson.fromJson(text, Task.class);
-                    storage.add(task);
-                }
-            } catch (IOException | JsonSyntaxException e) {
-                e.printStackTrace();
-            }
+        } catch (IOException | JsonSyntaxException e) {
+            storageData = new ArrayList<Task>();
         }
         closeBufferedReader();
-        return storage;
+        return storageData;
     }
 
     // @Tan Chia Kai A0122393L
@@ -171,12 +174,13 @@ public class Storage {
 
     // @Tan Chia Kai A0122393L
     // initialize buffered reader
-    private void initBufferedReader(File file) {
+    private Boolean initBufferedReader(File file) {
         try {
             reader = new BufferedReader(new FileReader(file));
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            return false;
         }
+        return true;
     }
 
     // @Tan Chia Kai A0122393L

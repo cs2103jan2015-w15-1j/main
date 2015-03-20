@@ -43,7 +43,7 @@ public class Controller {
         storage = new Storage();
         saveFileName = storage.getSaveFileName();
 
-        ArrayList<Task> allTasks = storage.readTasksFromFile();
+        ArrayList<Task> allTasks = storage.readFile();
         incompleteTasks = new ArrayList<Task>(getIncompleteTasks(allTasks));
         completedTasks = new ArrayList<Task>(getCompletedTasks(allTasks));
 

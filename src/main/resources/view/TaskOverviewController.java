@@ -48,7 +48,7 @@ public class TaskOverviewController {
         storage = new Storage();
         String saveFileName = storage.getSaveFileName();
 
-        ArrayList<Task> allTasks = storage.readTasksFromFile();
+        ArrayList<Task> allTasks = storage.readFile();
 
         for (Task task : allTasks) {
             taskData.add(task);
