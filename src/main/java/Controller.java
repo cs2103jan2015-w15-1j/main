@@ -1,7 +1,6 @@
 package main.java;
 
 import sun.rmi.runtime.Log;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,6 +8,7 @@ import java.util.Stack;
 import java.util.stream.Collectors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import edu.emory.mathcs.backport.java.util.Collections;
 
 public class Controller {
 
@@ -27,6 +27,7 @@ public class Controller {
     private static final String MESSAGE_UNDO = "Last command has been undone. \n";
     private static final String MESSAGE_INVALID_COMMAND = "Invalid command. \n";
     private static final String MESSAGE_NO_UNDO = "Already at oldest change, unable to undo. \n";
+    private static final String MESSAGE_SORTED = "All incomplete tasks sorted!";
 
     private String saveFileName;
     private Storage storage;
@@ -67,6 +68,8 @@ public class Controller {
         switch (commandType) {
             case SETSAVEFILE :
                 return setSaveFileDirectory(arguments);
+            case SORT :
+            	return sortIncompleteTasks();
             case ADD :
                 updateState();
                 return addTask(arguments);
@@ -148,6 +151,11 @@ public class Controller {
         	String formattedTime = task.getStartTime() + " to " + task.getEndTime();
         	return String.format(MESSAGE_ADD, task.getDescription(), task.getDate(), formattedTime);
         }
+    }
+    
+    private String sortIncompleteTasks() {
+    	Collections.sort(incompleteTasks);
+    	return MESSAGE_SORTED;
     }
 
     private String deleteTask(String input) {
