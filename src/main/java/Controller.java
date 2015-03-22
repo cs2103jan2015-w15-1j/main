@@ -1,6 +1,5 @@
 package main.java;
 
-import sun.rmi.runtime.Log;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +30,7 @@ public class Controller {
 
     private String saveFileName;
     private Storage storage;
+    private DateParser parser;
     private boolean timeToExit;
 
     private ArrayList<Task> incompleteTasks;
@@ -40,7 +40,7 @@ public class Controller {
 
     public Controller() {
         timeToExit = false;
-
+        parser = DateParser.getInstance();
         storage = new Storage();
         saveFileName = storage.getSaveFileName();
 
@@ -136,7 +136,7 @@ public class Controller {
     // ================================================================
 
     private String addTask(String input) {
-        DateParser parser = new DateParser(input);
+        parser.parse(input);
         ArrayList<LocalDateTime> parsedDates = parser.getDates();
         String parsedWords = parser.getParsedWords();
         Task task = new Task(input, parsedDates, parsedWords);
@@ -208,7 +208,7 @@ public class Controller {
             } else if ("description".contains(editType)) {
                 task.setDescription(editArgument.toString());
             } else if ("deadline".contains(editType)) {
-                DateParser parser = new DateParser(input);
+                parser.parse(input);
                 ArrayList<LocalDateTime> parsedDates = parser.getDates();
                 task.setTypeDateTime(parsedDates);
             } else {

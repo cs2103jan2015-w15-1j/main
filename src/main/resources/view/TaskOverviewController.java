@@ -37,7 +37,7 @@ public class TaskOverviewController {
     // ================================================================
     private ObservableList<Task> taskData = FXCollections.observableArrayList();
     private MainApp mainApp;
-
+    private DateParser parser;
 
     // ================================================================
     // Methods
@@ -46,6 +46,7 @@ public class TaskOverviewController {
      * The constructor is called before the initialize() method.
      */
     public TaskOverviewController() {
+        parser = DateParser.getInstance();
         storage = new Storage();
         String saveFileName = storage.getSaveFileName();
 
@@ -201,7 +202,7 @@ public class TaskOverviewController {
     // ================================================================
 
     private String addTask(String input) {
-        DateParser parser = new DateParser(input);
+        parser.parse(input);
         ArrayList<LocalDateTime> parsedDates = parser.getDates();
         String parsedWords = parser.getParsedWords();
         Task task = new Task(input, parsedDates, parsedWords);
@@ -274,7 +275,7 @@ public class TaskOverviewController {
             } else if ("description".contains(editType)) {
                 task.setDescription(editArgument.toString());
             } else if ("deadline".contains(editType)) {
-                DateParser parser = new DateParser(input);
+                parser.parse(input);
                 ArrayList<LocalDateTime> parsedDates = parser.getDates();
                 task.setTypeDateTime(parsedDates);
             } else {

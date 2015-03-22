@@ -1,9 +1,12 @@
-package main.java;
+package tests;
 
 import static org.junit.Assert.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+
+import main.java.DateParser;
+import main.java.Task;
 
 import org.junit.Test;
 
@@ -86,7 +89,8 @@ public class TaskTest {
     }
 
     public Task createNewTask(String input) {
-        DateParser parser = new DateParser(input);
+        DateParser parser = DateParser.getInstance();
+        parser.parse(input);
         ArrayList<LocalDateTime> parsedDates = parser.getDates();
         String parsedWords = parser.getParsedWords();
         return new Task(input, parsedDates, parsedWords);

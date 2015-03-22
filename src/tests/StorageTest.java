@@ -1,4 +1,4 @@
-package main.java;
+package tests;
 
 import static org.junit.Assert.*;
 
@@ -11,6 +11,10 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+
+import main.java.DateParser;
+import main.java.Storage;
+import main.java.Task;
 
 import org.junit.After;
 import org.junit.Test;
@@ -144,8 +148,9 @@ public class StorageTest {
     }
 
     private void createArrayListOfTask(String[] data, ArrayList<Task> tempData) {
+        DateParser parser = DateParser.getInstance();
         for (String string : data) {
-            DateParser parser = new DateParser(string);
+            parser.parse(string);
             ArrayList<LocalDateTime> parsedDates = parser.getDates();
             String parsedWords = parser.getParsedWords();
             tempData.add(new Task(string, parsedDates, parsedWords));
