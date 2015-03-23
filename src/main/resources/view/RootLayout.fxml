@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.text.*?>
 <?import javafx.scene.control.*?>
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.resources.view.RootLayoutController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.resources.view.RootLayoutController">
    <bottom>
-      <TextField fx:id="userInput" onKeyPressed="#handleEnterPressed" prefHeight="26.0" prefWidth="492.0" BorderPane.alignment="CENTER" />
+      <TextField fx:id="userInput" onKeyPressed="#handleEnterPressed" prefHeight="26.0" BorderPane.alignment="CENTER">
+         <font>
+            <Font size="16.0" />
+         </font></TextField>
    </bottom>
 </BorderPane>

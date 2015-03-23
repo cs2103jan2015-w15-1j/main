@@ -3,6 +3,7 @@ package main.java;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -283,16 +284,26 @@ public class Task implements Cloneable {
     }
 
     public String toString() {
-        String result = HEADER_DESC + getDescription() +"\n";
-        if (getDate() == null) {
-            result += HEADER_DATE + HEADER_NOT_APPL + "\n";
-        } else {
-            result += HEADER_DATE + getDate() + "\n";
+//        String result = HEADER_DESC + getDescription() +"\n";
+//        if (getDate() == null) {
+//            result += HEADER_DATE + HEADER_NOT_APPL + "\n";
+//        } else {
+//            result += HEADER_DATE + getDate() + "\n";
+//        }
+//        if (getStartTime() == null || getEndTime() == null) {
+//            result += HEADER_TIME + HEADER_NOT_APPL + "\n\n";
+//        } else {
+//            result += HEADER_TIME + getStartTime() + " to " + getEndTime() + "\n\n";
+//        }
+        String result = Character.toUpperCase(getDescription().charAt(0)) + getDescription().substring(1);
+        if (getDate() != null) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, d MMMM y");
+            // javadoc reference: http://goo.gl/GCyd5E
+            result += " on " + getDate().format(formatter);
         }
-        if (getStartTime() == null || getEndTime() == null) {
-            result += HEADER_TIME + HEADER_NOT_APPL + "\n\n";
-        } else {
-            result += HEADER_TIME + getStartTime() + " to " + getEndTime() + "\n\n";
+        if (getStartTime() != null) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("ha");
+            result += " from " + getStartTime().format(formatter) + " to " + getEndTime().format(formatter);
         }
         return result;
     }

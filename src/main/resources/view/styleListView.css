@@ -1,0 +1,13 @@
+ListView {
+    -fx-font-size: 14px;
+    -fx-background-color: transparent;
+    /* -fx-padding: 0 0 10 0; */
+}
+
+.list-cell {
+	-fx-padding: 8;
+}
+
+.check-box {
+	-fx-font-size: 10;
+}

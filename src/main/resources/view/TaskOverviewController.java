@@ -1,12 +1,18 @@
 package main.resources.view;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.cell.CheckBoxListCell;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.util.Callback;
 import main.java.Command;
 import main.java.DateParser;
 import main.java.MainApp;
@@ -32,10 +38,13 @@ public class TaskOverviewController {
     @FXML
     private TableColumn<Task, Integer> taskIndex;
 
+    @FXML
+    private ListView<String> listView;
     // ================================================================
     // Non-FXML Fields
     // ================================================================
     private ObservableList<Task> taskData = FXCollections.observableArrayList();
+    private ObservableList<String> taskStringData = FXCollections.observableArrayList();
     private MainApp mainApp;
     private DateParser parser;
 
@@ -52,8 +61,11 @@ public class TaskOverviewController {
 
         ArrayList<Task> allTasks = storage.readFile();
 
+        int i = 1;
         for (Task task : allTasks) {
-            taskData.add(task);
+//            taskData.add(task);
+            taskStringData.add(i + "\t" + task.toString());
+            i++;
         }
 
         timeToExit = false;
@@ -71,13 +83,25 @@ public class TaskOverviewController {
     @FXML
     private void initialize() {
         // Populating the TableColumns (but are not directly shown in the UI yet)
-        taskDescription.setCellValueFactory(
-                cellData -> cellData.getValue().getTaskDesc());
-        taskDeadline.setCellValueFactory(
-                cellData -> cellData.getValue().getStringPropertyTaskDate());
+//        taskDescription.setCellValueFactory(
+//                cellData -> cellData.getValue().getTaskDesc());
+//        taskDeadline.setCellValueFactory(
+//                cellData -> cellData.getValue().getStringPropertyTaskDate());
 
         // Add the observable list data to the table
-        taskTable.setItems(taskData);
+//        taskTable.setItems(taskData);
+        
+        listView.setCellFactory(CheckBoxListCell.forListView(new Callback<String, ObservableValue<Boolean>>() {
+            @Override
+            public ObservableValue<Boolean> call(String item) {
+                BooleanProperty observable = new SimpleBooleanProperty();
+                observable.addListener((obs, wasSelected, isNowSelected) -> 
+                    System.out.println("Checkbox for "+item+" changed from "+wasSelected+" to "+isNowSelected)
+                );
+                return observable ;
+            }
+        }));
+        listView.setItems(taskStringData);
     }
 
     /**
@@ -203,7 +227,7 @@ public class TaskOverviewController {
         Task task = new Task(input, parsedDates, parsedWords);
 
         // Testing purpose. Remove this line in the future.
-        taskData.add(task);
+        taskStringData.add((taskStringData.size() + 1) + "\t" + task.toString());
 
         incompleteTasks.add(task);
         updateStorageWithAllTasks();
