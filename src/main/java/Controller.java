@@ -68,8 +68,6 @@ public class Controller {
         switch (commandType) {
             case SETSAVEFILE :
                 return setSaveFileDirectory(arguments);
-            case SORT :
-            	return sortIncompleteTasks();
             case ADD :
                 updateState();
                 return addTask(arguments);
