@@ -47,7 +47,7 @@ public class TaskOverviewController {
      */
     public TaskOverviewController() {
         parser = DateParser.getInstance();
-        storage = new Storage();
+        storage = Storage.getInstance();
         String saveFileName = storage.getSaveFileName();
 
         ArrayList<Task> allTasks = storage.readFile();

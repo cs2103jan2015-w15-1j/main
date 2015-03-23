@@ -41,7 +41,7 @@ public class StorageTest {
         settingsFile.delete();
 
         // creating the settings file for the first time
-        Storage test = new Storage();
+        Storage test = Storage.getInstance();
         String testData = "Data Testing";
         String text = "";
 
@@ -88,7 +88,7 @@ public class StorageTest {
         ArrayList<Task> readData = new ArrayList<Task>();
         createArrayListOfTask(data, tempData);
 
-        Storage test = new Storage();
+        Storage test = Storage.getInstance();
         // write data to storage
         assertEquals("File updated\n", test.updateFiles(tempData));
         // read data from storage
@@ -108,7 +108,7 @@ public class StorageTest {
         ArrayList<Task> readData = new ArrayList<Task>();
         createArrayListOfTask(data, tempData);
 
-        Storage test = new Storage();
+        Storage test = Storage.getInstance();
         assertEquals("File updated\n", test.updateFiles(tempData));
         
         // corrupting data

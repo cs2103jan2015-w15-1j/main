@@ -41,7 +41,7 @@ public class Controller {
     public Controller() {
         timeToExit = false;
         parser = DateParser.getInstance();
-        storage = new Storage();
+        storage = Storage.getInstance();
         saveFileName = storage.getSaveFileName();
 
         ArrayList<Task> allTasks = storage.readFile();
