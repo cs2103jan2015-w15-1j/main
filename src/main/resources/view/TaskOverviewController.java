@@ -56,12 +56,7 @@ public class TaskOverviewController {
             taskData.add(task);
         }
 
-
-
         timeToExit = false;
-
-        storage = new Storage();
-        saveFileName = storage.getSaveFileName();
 
         incompleteTasks = new ArrayList<Task>(getIncompleteTasks(allTasks));
         completedTasks = new ArrayList<Task>(getCompletedTasks(allTasks));

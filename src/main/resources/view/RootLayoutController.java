@@ -18,7 +18,7 @@ public class RootLayoutController {
     // Non-FXML Fields
     // ================================================================
     private MainApp mainApp;
-    private TaskOverviewController taskOverviewController = new TaskOverviewController();
+    private TaskOverviewController taskOverviewController;
 
     /**
      * Initializes the root layout class. This method is automatically called
