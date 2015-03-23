@@ -3,6 +3,7 @@ package main.java;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -11,6 +12,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+
 import org.apache.commons.lang.StringUtils;
 
 
@@ -53,7 +55,6 @@ public class Task implements Cloneable {
     private static final String[] KEYWORDS = {"by", "on", "at", "from"};
 
     private Type type;
-    private String rawInfo; // Unformatted arguments
     private String description; // arguments without the date and time
     private LocalDate date;
     private LocalTime startTime;
@@ -86,32 +87,16 @@ public class Task implements Cloneable {
     // End of MX's edits
     // ================================================================
 
-    public Task(String input) {
-        rawInfo = input;
-        isCompleted = false;
-
-        if (hasTwoEscapeChars(input)) {
-            input = getWordsOutsideEscapeChars(input);
-        }
-
-        DateParser parser = new DateParser(input);
-
-        ArrayList<LocalDateTime> parsedDates = parser.getDates();
+    public Task(String input, ArrayList<LocalDateTime> parsedDates, String parsedWords) {
+        markAsIncomplete();
         type = determineType(parsedDates);
-
         initDateAndTime(type, parsedDates);
-
-        String parsedWords = parser.getParsedWords();
-        description = extractDescription(rawInfo, parsedWords);
+        description = extractDescription(input, parsedWords);
     }
 
     // ================================================================
     // Public getters
     // ================================================================
-
-    public String getRawInfo() {
-        return rawInfo;
-    }
 
     public Type getType() {
         return type;
@@ -146,13 +131,6 @@ public class Task implements Cloneable {
         description = input;
     }
 
-    public void setDate(LocalDate inputDateObj) {
-        date = inputDateObj;
-        if (type == Type.FLOATING) {
-        	setType(Type.DEADLINE);
-        }
-    }
-
     public void setTime(LocalTime inputStartTime, LocalTime inputEndTime) {
         if (inputStartTime.isBefore(inputEndTime)) {
             setType(Type.TIMED);
@@ -169,21 +147,33 @@ public class Task implements Cloneable {
     	isCompleted = false;
     }
 
+    public void setTypeDateTime(ArrayList<LocalDateTime> parsedDates) {
+        type = determineType(parsedDates);
+        initDateAndTime(type, parsedDates);
+    }
 
     // ================================================================
     // Private setters
     // ================================================================
 
-    private void setType(Type newType) {
-        type = newType;
+    private void setDate(LocalDate date) {
+        this.date = date;
     }
-
-    private void setRawInfo(String rawInfo) {
-        this.rawInfo = rawInfo;
+    
+    private void setType(Type type) {
+        this.type = type;
     }
 
     private void setIsCompleted(Boolean isCompleted) {
         this.isCompleted = isCompleted;
+    }
+
+    private void setStartTime(LocalTime startTime) {
+        this.startTime = startTime;
+    }
+
+    private void setEndTime(LocalTime endTime) {
+        this.endTime = endTime;
     }
 
     // ================================================================
@@ -262,28 +252,11 @@ public class Task implements Cloneable {
     // ================================================================
     // Utility Methods
     // ================================================================
-
+    
     private boolean hasTwoEscapeChars(String input) {
         return StringUtils.countMatches(input, ESCAPE_CHAR + "") == 2;
     }
-
-    private String getWordsOutsideEscapeChars(String input) {
-        String output = "";
-        boolean withinEscapeChar = false;
-        for (char c : input.toCharArray()) {
-            if (c == ESCAPE_CHAR) {
-                if (withinEscapeChar) {
-                    withinEscapeChar = false;
-                } else {
-                    withinEscapeChar = true;
-                }
-            } else if (!withinEscapeChar) {
-                output += c;
-            }
-        }
-        return output;
-    }
-
+    
     private String getWordsWithinEscapeChars(String input) {
         String output = "";
         boolean withinEscapeChar = false;
@@ -311,18 +284,28 @@ public class Task implements Cloneable {
     }
 
     public String toString() {
-    	String result = HEADER_DESC + getDescription() +"\n";
-    	if (getDate() == null) {
-    		result += HEADER_DATE + HEADER_NOT_APPL + "\n";
-    	} else {
-    		result += HEADER_DATE + getDate() + "\n";
-    	}
-    	if (getStartTime() == null || getEndTime() == null) {
-    		result += HEADER_TIME + HEADER_NOT_APPL + "\n\n";
-    	} else {
-    		result += HEADER_TIME + getStartTime() + " to " + getEndTime() + "\n\n";
-    	}
-    	return result;
+//        String result = HEADER_DESC + getDescription() +"\n";
+//        if (getDate() == null) {
+//            result += HEADER_DATE + HEADER_NOT_APPL + "\n";
+//        } else {
+//            result += HEADER_DATE + getDate() + "\n";
+//        }
+//        if (getStartTime() == null || getEndTime() == null) {
+//            result += HEADER_TIME + HEADER_NOT_APPL + "\n\n";
+//        } else {
+//            result += HEADER_TIME + getStartTime() + " to " + getEndTime() + "\n\n";
+//        }
+        String result = Character.toUpperCase(getDescription().charAt(0)) + getDescription().substring(1);
+        if (getDate() != null) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, d MMMM y");
+            // javadoc reference: http://goo.gl/GCyd5E
+            result += " on " + getDate().format(formatter);
+        }
+        if (getStartTime() != null) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("ha");
+            result += " from " + getStartTime().format(formatter) + " to " + getEndTime().format(formatter);
+        }
+        return result;
     }
 
     @Override
@@ -331,21 +314,12 @@ public class Task implements Cloneable {
 
         // Set all the attributes
         cloned.setType(cloned.getType());
-        cloned.setRawInfo(cloned.getRawInfo());
         cloned.setDescription(cloned.getDescription());
-
-        DateParser parser = new DateParser(cloned.getRawInfo());
-        ArrayList<LocalDateTime> parsedDates = parser.getDates();
-        cloned.initDateAndTime(cloned.getType(), parsedDates);
-
-//        if (cloned.getType() != Type.FLOATING) {
-//            cloned.setDate(cloned.getDate());
-//            cloned.setTime(cloned.getStartTime(), cloned.getEndTime());
-//        }
         cloned.setIsCompleted(cloned.isCompleted());
+        cloned.setDate(cloned.getDate());
+        cloned.setStartTime(cloned.getStartTime());
+        cloned.setEndTime(cloned.getEndTime());        
 
         return cloned;
     }
-
-
 }

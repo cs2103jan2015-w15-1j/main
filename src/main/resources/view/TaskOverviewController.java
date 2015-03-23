@@ -1,18 +1,25 @@
 package main.resources.view;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TableColumn;
-
+import javafx.scene.control.cell.CheckBoxListCell;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.util.Callback;
 import main.java.Command;
+import main.java.DateParser;
 import main.java.MainApp;
 import main.java.Storage;
 import main.java.Task;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
@@ -31,12 +38,15 @@ public class TaskOverviewController {
     @FXML
     private TableColumn<Task, Integer> taskIndex;
 
+    @FXML
+    private ListView<String> listView;
     // ================================================================
     // Non-FXML Fields
     // ================================================================
     private ObservableList<Task> taskData = FXCollections.observableArrayList();
+    private ObservableList<String> taskStringData = FXCollections.observableArrayList();
     private MainApp mainApp;
-
+    private DateParser parser;
 
     // ================================================================
     // Methods
@@ -45,21 +55,20 @@ public class TaskOverviewController {
      * The constructor is called before the initialize() method.
      */
     public TaskOverviewController() {
-        storage = new Storage();
+        parser = DateParser.getInstance();
+        storage = Storage.getInstance();
         String saveFileName = storage.getSaveFileName();
 
         ArrayList<Task> allTasks = storage.readFile();
 
+        int i = 1;
         for (Task task : allTasks) {
-            taskData.add(task);
+//            taskData.add(task);
+            taskStringData.add(i + "\t" + task.toString());
+            i++;
         }
 
-
-
         timeToExit = false;
-
-        storage = new Storage();
-        saveFileName = storage.getSaveFileName();
 
         incompleteTasks = new ArrayList<Task>(getIncompleteTasks(allTasks));
         completedTasks = new ArrayList<Task>(getCompletedTasks(allTasks));
@@ -74,13 +83,25 @@ public class TaskOverviewController {
     @FXML
     private void initialize() {
         // Populating the TableColumns (but are not directly shown in the UI yet)
-        taskDescription.setCellValueFactory(
-                cellData -> cellData.getValue().getTaskDesc());
-        taskDeadline.setCellValueFactory(
-                cellData -> cellData.getValue().getStringPropertyTaskDate());
+//        taskDescription.setCellValueFactory(
+//                cellData -> cellData.getValue().getTaskDesc());
+//        taskDeadline.setCellValueFactory(
+//                cellData -> cellData.getValue().getStringPropertyTaskDate());
 
         // Add the observable list data to the table
-        taskTable.setItems(taskData);
+//        taskTable.setItems(taskData);
+        
+        listView.setCellFactory(CheckBoxListCell.forListView(new Callback<String, ObservableValue<Boolean>>() {
+            @Override
+            public ObservableValue<Boolean> call(String item) {
+                BooleanProperty observable = new SimpleBooleanProperty();
+                observable.addListener((obs, wasSelected, isNowSelected) -> 
+                    System.out.println("Checkbox for "+item+" changed from "+wasSelected+" to "+isNowSelected)
+                );
+                return observable ;
+            }
+        }));
+        listView.setItems(taskStringData);
     }
 
     /**
@@ -200,10 +221,13 @@ public class TaskOverviewController {
     // ================================================================
 
     private String addTask(String input) {
-        Task task = new Task(input);
+        parser.parse(input);
+        ArrayList<LocalDateTime> parsedDates = parser.getDates();
+        String parsedWords = parser.getParsedWords();
+        Task task = new Task(input, parsedDates, parsedWords);
 
         // Testing purpose. Remove this line in the future.
-        taskData.add(task);
+        taskStringData.add((taskStringData.size() + 1) + "\t" + task.toString());
 
         incompleteTasks.add(task);
         updateStorageWithAllTasks();
@@ -270,12 +294,9 @@ public class TaskOverviewController {
             } else if ("description".contains(editType)) {
                 task.setDescription(editArgument.toString());
             } else if ("deadline".contains(editType)) {
-                String description = task.getDescription();
-                String date = editArgument.toString();
-                String newInput = description.trim() + " " + date.trim();
-
-                Task newTask = new Task(newInput);
-                incompleteTasks.set(editIndex, newTask); // replaces the old main.java.Task object with the newly created one
+                parser.parse(input);
+                ArrayList<LocalDateTime> parsedDates = parser.getDates();
+                task.setTypeDateTime(parsedDates);
             } else {
                 return MESSAGE_INVALID_COMMAND;
             }
@@ -338,11 +359,17 @@ public class TaskOverviewController {
     private ArrayList<Task> search(String input) {
         // TODO check main.java.Task.getInfo() implementation
         ArrayList<Task> searchResults = new ArrayList<Task>();
-
+        
+        parser.parse(input);
+        ArrayList<LocalDateTime> searchDate = parser.getDates();
         ArrayList<Task> allTasks = concatenateTasks(incompleteTasks, completedTasks);
+        
+        
         for (Task task : allTasks) {
             String taskInfo = task.getDescription();
             if (taskInfo.contains(input)) {
+                searchResults.add(task);
+            } else if (searchDate.size()>0 && searchDate.get(0).toLocalDate().equals(task.getDate())) {
                 searchResults.add(task);
             }
         }

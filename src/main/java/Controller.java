@@ -1,14 +1,13 @@
 package main.java;
 
-import sun.rmi.runtime.Log;
-
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 import java.util.stream.Collectors;
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import edu.emory.mathcs.backport.java.util.Collections;
 
 public class Controller {
 
@@ -27,9 +26,11 @@ public class Controller {
     private static final String MESSAGE_UNDO = "Last command has been undone. \n";
     private static final String MESSAGE_INVALID_COMMAND = "Invalid command. \n";
     private static final String MESSAGE_NO_UNDO = "Already at oldest change, unable to undo. \n";
+    private static final String MESSAGE_SORTED = "All incomplete tasks sorted!";
 
     private String saveFileName;
     private Storage storage;
+    private DateParser parser;
     private boolean timeToExit;
 
     private ArrayList<Task> incompleteTasks;
@@ -39,8 +40,8 @@ public class Controller {
 
     public Controller() {
         timeToExit = false;
-
-        storage = new Storage();
+        parser = DateParser.getInstance();
+        storage = Storage.getInstance();
         saveFileName = storage.getSaveFileName();
 
         ArrayList<Task> allTasks = storage.readFile();
@@ -133,7 +134,10 @@ public class Controller {
     // ================================================================
 
     private String addTask(String input) {
-        Task task = new Task(input);
+        parser.parse(input);
+        ArrayList<LocalDateTime> parsedDates = parser.getDates();
+        String parsedWords = parser.getParsedWords();
+        Task task = new Task(input, parsedDates, parsedWords);
 
         incompleteTasks.add(task);
         updateStorageWithAllTasks();
@@ -145,6 +149,11 @@ public class Controller {
         	String formattedTime = task.getStartTime() + " to " + task.getEndTime();
         	return String.format(MESSAGE_ADD, task.getDescription(), task.getDate(), formattedTime);
         }
+    }
+    
+    private String sortIncompleteTasks() {
+    	Collections.sort(incompleteTasks);
+    	return MESSAGE_SORTED;
     }
 
     private String deleteTask(String input) {
@@ -197,12 +206,9 @@ public class Controller {
             } else if ("description".contains(editType)) {
                 task.setDescription(editArgument.toString());
             } else if ("deadline".contains(editType)) {
-                String description = task.getDescription();
-                String date = editArgument.toString();
-                String newInput = description.trim() + " " + date.trim();
-
-                Task newTask = new Task(newInput);
-                incompleteTasks.set(editIndex, newTask); // replaces the old main.java.Task object with the newly created one
+                parser.parse(input);
+                ArrayList<LocalDateTime> parsedDates = parser.getDates();
+                task.setTypeDateTime(parsedDates);
             } else {
                 return MESSAGE_INVALID_COMMAND;
             }
@@ -267,11 +273,17 @@ public class Controller {
     private ArrayList<Task> search(String input) {
         // TODO check main.java.Task.getInfo() implementation
         ArrayList<Task> searchResults = new ArrayList<Task>();
-
+        
+        parser.parse(input);
+        ArrayList<LocalDateTime> searchDate = parser.getDates();
         ArrayList<Task> allTasks = concatenateTasks(incompleteTasks, completedTasks);
+        
+        
         for (Task task : allTasks) {
             String taskInfo = task.getDescription();
             if (taskInfo.contains(input)) {
+                searchResults.add(task);
+            } else if (searchDate.size()>0 && searchDate.get(0).toLocalDate().equals(task.getDate())) {
                 searchResults.add(task);
             }
         }
@@ -299,7 +311,7 @@ public class Controller {
 
         String display = "";
         for (Task task : input) {
-            display += task;
+            display += task.toString();
         }
         return display;
     }

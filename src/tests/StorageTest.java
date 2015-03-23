@@ -1,4 +1,4 @@
-package main.java;
+package tests;
 
 import static org.junit.Assert.*;
 
@@ -9,7 +9,12 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+
+import main.java.DateParser;
+import main.java.Storage;
+import main.java.Task;
 
 import org.junit.After;
 import org.junit.Test;
@@ -36,7 +41,7 @@ public class StorageTest {
         settingsFile.delete();
 
         // creating the settings file for the first time
-        Storage test = new Storage();
+        Storage test = Storage.getInstance();
         String testData = "Data Testing";
         String text = "";
 
@@ -81,11 +86,9 @@ public class StorageTest {
                 "finish homework by 20 Feb", "meet boss later today" };
         ArrayList<Task> tempData = new ArrayList<Task>();
         ArrayList<Task> readData = new ArrayList<Task>();
-        for (String string : data) {
-            tempData.add(new Task(string));
-        }
+        createArrayListOfTask(data, tempData);
 
-        Storage test = new Storage();
+        Storage test = Storage.getInstance();
         // write data to storage
         assertEquals("File updated\n", test.updateFiles(tempData));
         // read data from storage
@@ -103,11 +106,9 @@ public class StorageTest {
                 "finish homework by 20 Feb", "meet boss later today" };
         ArrayList<Task> tempData = new ArrayList<Task>();
         ArrayList<Task> readData = new ArrayList<Task>();
-        for (String string : data) {
-            tempData.add(new Task(string));
-        }
+        createArrayListOfTask(data, tempData);
 
-        Storage test = new Storage();
+        Storage test = Storage.getInstance();
         assertEquals("File updated\n", test.updateFiles(tempData));
         
         // corrupting data
@@ -144,6 +145,16 @@ public class StorageTest {
         assertEquals(true, readData.isEmpty());
         
         System.out.println("End of backup test");
+    }
+
+    private void createArrayListOfTask(String[] data, ArrayList<Task> tempData) {
+        DateParser parser = DateParser.getInstance();
+        for (String string : data) {
+            parser.parse(string);
+            ArrayList<LocalDateTime> parsedDates = parser.getDates();
+            String parsedWords = parser.getParsedWords();
+            tempData.add(new Task(string, parsedDates, parsedWords));
+        }
     }
 
     private void compareData(ArrayList<Task> tempData, ArrayList<Task> readData) {

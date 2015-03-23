@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
+//@author A0122393L
 public class Storage {
     private static final Logger logger = Logger.getLogger("VetoStorage");
 
@@ -25,7 +26,8 @@ public class Storage {
     private static final String MESSAGE_SAVE_DEST = "File save destination has been confirmed. \n";
     private static final String MESSAGE_SAVE_FAIL = "File save destination failed. \n";
 
-    private File settingsFile;
+    private static Storage storage;
+    private static File settingsFile;
     private File saveFile;
     private File backupFile;
     private String saveFileName;
@@ -33,9 +35,15 @@ public class Storage {
     private PrintWriter writer;
     private Gson gson;
 
-    // @Tan Chia Kai A0122393L
     // search the settings file and open the save file
-    public Storage() {
+    public static Storage getInstance() {
+        if (storage == null || !settingsFile.exists()) {
+            storage = new Storage();
+        }
+        return storage;
+    }
+
+    private Storage() {
         gson = new Gson();
         settingsFile = new File(SETTINGS_FILE_NAME);
         createIfMissingFile(settingsFile);
@@ -49,7 +57,6 @@ public class Storage {
         logger.log(Level.INFO, "Storage Initialised");
     }
 
-    // @Tan Chia Kai A0122393L
     // update settings file on the changes of save file directory
     private void updateSettingsFile(String fileName) {
         try {
@@ -61,7 +68,6 @@ public class Storage {
         }
     }
 
-    // @Tan Chia Kai A0122393L
     // get the directory of the save file from settings file
     private String getSaveFileNameFromSettingsFile(File fileName) {
         String text = "";
@@ -77,7 +83,6 @@ public class Storage {
         return text;
     }
 
-    // @Tan Chia Kai A0122393L
     // create the file if not found
     private void createIfMissingFile(File fileName) {
         try {
@@ -91,7 +96,6 @@ public class Storage {
         }
     }
 
-    // @Tan Chia Kai A0122393L
     // Update necessary files
     public String updateFiles(ArrayList<Task> input) {
         Boolean hasUpdatedSaveFile = false;
@@ -124,31 +128,31 @@ public class Storage {
         return true;
     }
 
-    // @Tan Chia Kai A0122393L
     // converts task object to string
     private Object taskToJson(Task task) {
         return gson.toJson(task);
     }
 
-    // @Tan Chia Kai A0122393L
-    // reads all task objects from the save file
+    // select file to read
     public ArrayList<Task> readFile() {
         ArrayList<Task> storage = new ArrayList<Task>();
         storage = readSavedTasks(saveFile);
         if (storage.isEmpty()) {
-            logger.log(Level.INFO, "File corrupted, try restoring from backup file");
+            logger.log(Level.INFO,
+                    "File corrupted, try restoring from backup file");
             storage = readSavedTasks(backupFile);
         }
         return storage;
     }
 
+    // reads tasks in the file
     private ArrayList<Task> readSavedTasks(File saveFile) {
         ArrayList<Task> storageData;
         String text = "";
         storageData = new ArrayList<Task>();
 
         try {
-            if (!initBufferedReader(saveFile)){
+            if (!initBufferedReader(saveFile)) {
                 return storageData;
             }
             while ((text = reader.readLine()) != null) {
@@ -162,7 +166,6 @@ public class Storage {
         return storageData;
     }
 
-    // @Tan Chia Kai A0122393L
     // close buffered reader
     private void closeBufferedReader() {
         try {
@@ -172,7 +175,6 @@ public class Storage {
         }
     }
 
-    // @Tan Chia Kai A0122393L
     // initialize buffered reader
     private Boolean initBufferedReader(File file) {
         try {
@@ -183,7 +185,6 @@ public class Storage {
         return true;
     }
 
-    // @Tan Chia Kai A0122393L
     // change save file directory
     public String setSaveFileDirectory(String input) {
         saveFileName = input;
@@ -199,7 +200,6 @@ public class Storage {
         }
     }
 
-    // @Tan Chia Kai A0122393L
     // get the name of save file
     public String getSaveFileName() {
         return saveFileName;

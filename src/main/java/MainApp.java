@@ -44,7 +44,7 @@ public class MainApp extends Application {
 	@Override
 	public void start(Stage primaryStage) throws Exception{
 		this.primaryStage = primaryStage;
-		this.primaryStage.setTitle("main.java.Veto");
+		this.primaryStage.setTitle("Veto");
 
 		initRootLayout();
 		showTaskOverview();
