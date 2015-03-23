@@ -275,11 +275,17 @@ public class Controller {
     private ArrayList<Task> search(String input) {
         // TODO check main.java.Task.getInfo() implementation
         ArrayList<Task> searchResults = new ArrayList<Task>();
-
+        
+        parser.parse(input);
+        ArrayList<LocalDateTime> searchDate = parser.getDates();
         ArrayList<Task> allTasks = concatenateTasks(incompleteTasks, completedTasks);
+        
+        
         for (Task task : allTasks) {
             String taskInfo = task.getDescription();
             if (taskInfo.contains(input)) {
+                searchResults.add(task);
+            } else if (searchDate.size()>0 && searchDate.get(0).toLocalDate().equals(task.getDate())) {
                 searchResults.add(task);
             }
         }
