@@ -47,7 +47,7 @@ public class MainApp extends Application {
 		this.primaryStage.setTitle("Veto");
 
 		initRootLayout();
-//		showTaskOverview();
+		showTaskOverview();
 
 		rootLayoutController.setTaskOverviewController(taskOverviewController);
 	}
