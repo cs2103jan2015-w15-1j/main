@@ -19,6 +19,7 @@ import main.java.MainApp;
 import main.java.Storage;
 import main.java.Task;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -220,6 +221,60 @@ public class TaskOverviewController {
     // Logic methods
     // ================================================================
 
+    private void sortToDisplay(ArrayList<Task> list) {
+    	ArrayList<Task> overdueTasks = new ArrayList<Task>();
+    	ArrayList<Task> floatingTasks = new ArrayList<Task>();
+    	ArrayList<Task> notOverdueTasks = new ArrayList<Task>();
+    	ArrayList<Task> finalList = new ArrayList<Task>();
+    	
+    	// Separate the floating, overdue and pending
+    	for (Task task: list) {
+    		if (task.getType() == Task.Type.FLOATING) {
+    			floatingTasks.add(task);
+    		} else if (task.isOverdue()) {
+    			overdueTasks.add(task);
+    		} else {
+    			notOverdueTasks.add(task);
+    		}
+    	}
+    	
+    	// Sort according to what we discussed
+    	overdueTasks = sortByDateAndType(overdueTasks);
+    	notOverdueTasks = sortByDateAndType(notOverdueTasks);
+    	
+    	finalList.addAll(floatingTasks);
+    	finalList.addAll(overdueTasks);
+    	finalList.addAll(notOverdueTasks);
+    	
+    	list = finalList;
+    	
+    }
+    
+    
+    private ArrayList<Task> sortByDateAndType(ArrayList<Task> list) {
+    	ArrayList<Task> output = new ArrayList<Task>();
+    	
+    	for (Task task: list) {
+    		if (output.size() == 0) {
+    			output.add(task);
+    		} else {
+    			for (Task something: output) {
+    				if (task.getDate().isBefore(something.getDate())) {
+    					output.add(output.indexOf(something), task);
+    					break;
+    				} else if (task.getDate().isEqual(something.getDate())) {
+    					if (something.getType() == Task.Type.TIMED && task.getType() == Task.Type.DEADLINE) {
+    						output.add(output.indexOf(something), task);
+    						break;
+    					} 
+    				} 
+    			}
+    			output.add(task);
+    		}
+    	}
+    	return output;
+    }
+    
     private String addTask(String input) {
         parser.parse(input);
         ArrayList<LocalDateTime> parsedDates = parser.getDates();
