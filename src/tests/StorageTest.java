@@ -147,6 +147,7 @@ public class StorageTest {
         System.out.println("End of backup test");
     }
 
+    // method to set-up the ArrayList
     private void createArrayListOfTask(String[] data, ArrayList<Task> tempData) {
         DateParser parser = DateParser.getInstance();
         for (String string : data) {
@@ -157,6 +158,7 @@ public class StorageTest {
         }
     }
 
+    // method to compare and check all variables of tasks
     private void compareData(ArrayList<Task> tempData, ArrayList<Task> readData) {
         for (int i = 0; i < readData.size(); i++) {
             assertEquals(tempData.get(i).isCompleted(), readData.get(i)

@@ -135,12 +135,17 @@ public class Storage {
 
     // select file to read
     public ArrayList<Task> readFile() {
-        ArrayList<Task> storage = new ArrayList<Task>();
+        ArrayList<Task> storage;
         storage = readSavedTasks(saveFile);
-        if (storage.isEmpty()) {
-            logger.log(Level.INFO,
-                    "File corrupted, try restoring from backup file");
+        if (storage == null) {
             storage = readSavedTasks(backupFile);
+            if (storage == null) {
+                storage = new ArrayList<Task>();
+                logger.log(Level.INFO, "File corrupted, backup failed");
+            } else if (!storage.isEmpty()) {
+                logger.log(Level.INFO,
+                        "File corrupted, restored data from backup file");
+            }
         }
         return storage;
     }
@@ -160,7 +165,7 @@ public class Storage {
                 storageData.add(task);
             }
         } catch (IOException | JsonSyntaxException e) {
-            storageData = new ArrayList<Task>();
+            return null;
         }
         closeBufferedReader();
         return storageData;
