@@ -5,6 +5,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import main.resources.view.RootLayoutController;
 import main.resources.view.TaskOverviewController;
@@ -45,6 +46,9 @@ public class MainApp extends Application {
 	public void start(Stage primaryStage) throws Exception{
 		this.primaryStage = primaryStage;
 		this.primaryStage.setTitle("Veto");
+
+
+
 
 		initRootLayout();
 		showTaskOverview();
@@ -91,6 +95,19 @@ public class MainApp extends Application {
 			taskOverviewController = loader.getController();
 			taskOverviewController.setMainApp(this);
 		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void addDayBox() {
+		try {
+			// Load root layout from fxml file.`
+			FXMLLoader loader = new FXMLLoader();
+			loader.setLocation(MainApp.class.getResource("/view/DayBox.fxml"));
+			HBox dayBox = (HBox) loader.load();
+
+			rootLayout.setCenter(dayBox);
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}

@@ -1,6 +1,7 @@
 package main.resources.view;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -13,6 +14,9 @@ public class RootLayoutController {
     // ================================================================
     @FXML
     private TextField userInput;
+
+    @FXML
+    private Label foo;
 
     // ================================================================
     // Non-FXML Fields
@@ -27,6 +31,7 @@ public class RootLayoutController {
     @FXML
     private void initialize() {
         userInput.setText("Enter your task here");
+        foo.setText("hola amigos");
     }
 
     @FXML

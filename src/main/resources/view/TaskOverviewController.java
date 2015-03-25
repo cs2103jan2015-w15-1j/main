@@ -6,6 +6,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TableColumn;
@@ -40,7 +41,7 @@ public class TaskOverviewController {
     private TableColumn<Task, Integer> taskIndex;
 
     @FXML
-    private ListView<String> listView;
+    private ListView<DayBox> listView;
     // ================================================================
     // Non-FXML Fields
     // ================================================================
@@ -48,6 +49,7 @@ public class TaskOverviewController {
     private ObservableList<String> taskStringData = FXCollections.observableArrayList();
     private MainApp mainApp;
     private DateParser parser;
+    private ObservableList<DayBox> dayBoxes = FXCollections.observableArrayList();
 
     // ================================================================
     // Methods
@@ -91,18 +93,31 @@ public class TaskOverviewController {
 
         // Add the observable list data to the table
 //        taskTable.setItems(taskData);
-        
-        listView.setCellFactory(CheckBoxListCell.forListView(new Callback<String, ObservableValue<Boolean>>() {
-            @Override
-            public ObservableValue<Boolean> call(String item) {
-                BooleanProperty observable = new SimpleBooleanProperty();
-                observable.addListener((obs, wasSelected, isNowSelected) -> 
-                    System.out.println("Checkbox for "+item+" changed from "+wasSelected+" to "+isNowSelected)
-                );
-                return observable ;
-            }
-        }));
-        listView.setItems(taskStringData);
+
+//        listView.setCellFactory(CheckBoxListCell.forListView(new Callback<String, ObservableValue<Boolean>>() {
+//            @Override
+//            public ObservableValue<Boolean> call(String item) {
+//                BooleanProperty observable = new SimpleBooleanProperty();
+//                observable.addListener((obs, wasSelected, isNowSelected) ->
+//                    System.out.println("Checkbox for "+item+" changed from "+wasSelected+" to "+isNowSelected)
+//                );
+//                return observable ;
+//            }
+//        }));
+//        listView.setItems(taskStringData);
+
+        createContent();
+
+    }
+
+    public void createContent() {
+
+
+        dayBoxes.add(new DayBox("monday"));
+        dayBoxes.add(new DayBox("tuesday"));
+        dayBoxes.add(new DayBox("wednesday"));
+
+        listView.setItems(dayBoxes);
     }
 
     /**
@@ -226,7 +241,7 @@ public class TaskOverviewController {
     	ArrayList<Task> floatingTasks = new ArrayList<Task>();
     	ArrayList<Task> notOverdueTasks = new ArrayList<Task>();
     	ArrayList<Task> finalList = new ArrayList<Task>();
-    	
+
     	// Separate the floating, overdue and pending
     	for (Task task: list) {
     		if (task.getType() == Task.Type.FLOATING) {
@@ -237,23 +252,23 @@ public class TaskOverviewController {
     			notOverdueTasks.add(task);
     		}
     	}
-    	
+
     	// Sort according to what we discussed
     	overdueTasks = sortByDateAndType(overdueTasks);
     	notOverdueTasks = sortByDateAndType(notOverdueTasks);
-    	
+
     	finalList.addAll(floatingTasks);
     	finalList.addAll(overdueTasks);
     	finalList.addAll(notOverdueTasks);
-    	
+
     	list = finalList;
-    	
+
     }
-    
-    
+
+
     private ArrayList<Task> sortByDateAndType(ArrayList<Task> list) {
     	ArrayList<Task> output = new ArrayList<Task>();
-    	
+
     	for (Task task: list) {
     		if (output.size() == 0) {
     			output.add(task);
@@ -266,15 +281,15 @@ public class TaskOverviewController {
     					if (something.getType() == Task.Type.TIMED && task.getType() == Task.Type.DEADLINE) {
     						output.add(output.indexOf(something), task);
     						break;
-    					} 
-    				} 
+    					}
+    				}
     			}
     			output.add(task);
     		}
     	}
     	return output;
     }
-    
+
     private String addTask(String input) {
         parser.parse(input);
         ArrayList<LocalDateTime> parsedDates = parser.getDates();
@@ -414,12 +429,12 @@ public class TaskOverviewController {
     private ArrayList<Task> search(String input) {
         // TODO check main.java.Task.getInfo() implementation
         ArrayList<Task> searchResults = new ArrayList<Task>();
-        
+
         parser.parse(input);
         ArrayList<LocalDateTime> searchDate = parser.getDates();
         ArrayList<Task> allTasks = concatenateTasks(incompleteTasks, completedTasks);
-        
-        
+
+
         for (Task task : allTasks) {
             String taskInfo = task.getDescription();
             if (taskInfo.contains(input)) {
