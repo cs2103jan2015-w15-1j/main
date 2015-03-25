@@ -6,14 +6,14 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import main.java.Task;
 
 public class DayBox extends VBox {
-    @FXML private ListView<String> tasks;
-    @FXML private Label hola;
+    @FXML
+    private ListView<String> tasks;
+
+    @FXML
+    private Label day;
 
     private ObservableList<String> taskData = FXCollections.observableArrayList();
     private String dayData;
@@ -31,18 +31,23 @@ public class DayBox extends VBox {
         }
         dayData = foo;
 
-        taskData.add("hello");
-        taskData.add("foo");
-        taskData.add("bar");
-        taskData.add("bye");
-        taskData.add("baz");
+        taskData.add("task1");
+        taskData.add("task2");
+        taskData.add("task3");
+        taskData.add("task4");
+        taskData.add("task5");
+        taskData.add("task6");
+        taskData.add("task7");
+        taskData.add("task1");
+        taskData.add("task2");
+        taskData.add("task3");
+        taskData.add("task4");
+        taskData.add("task5");
+        taskData.add("task6");
+        taskData.add("task7");
 
-
-    }
-
-    @FXML
-    private void initialize() {
-        hola.setText("MONDAY");
+        day.setText(dayData);
         tasks.setItems(taskData);
     }
+
 }

@@ -31,7 +31,6 @@ public class RootLayoutController {
     @FXML
     private void initialize() {
         userInput.setText("Enter your task here");
-        foo.setText("hola amigos");
     }
 
     @FXML

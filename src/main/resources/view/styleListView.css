@@ -1,13 +1,17 @@
-ListView {
-    -fx-font-size: 14px;
-    -fx-background-color: transparent;
-    /* -fx-padding: 0 0 10 0; */
+
+.list-view .scroll-bar:horizontal {
+    -fx-opacity: 0;
+    -fx-padding:-7;
 }
 
+
+.list-view .scroll-bar:vertical {
+    -fx-opacity: 0;
+    -fx-padding:-7;
+}
 .list-cell {
-	-fx-padding: 8;
+	-fx-padding: 10;
+	-fx-height:100%;
+	-fx-background-color:yellow;
 }
 
-.check-box {
-	-fx-font-size: 10;
-}

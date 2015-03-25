@@ -12,7 +12,4 @@
             <Font size="16.0" />
          </font></TextField>
    </bottom>
-   <top>
-      <Label fx:id="foo" text="Label" BorderPane.alignment="CENTER" />
-   </top>
 </BorderPane>
