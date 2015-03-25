@@ -8,11 +8,12 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import main.java.Task;
 
-public class DayBox extends HBox {
+public class DayBox extends VBox {
     @FXML private ListView<String> tasks;
-    @FXML private Label day;
+    @FXML private Label hola;
 
     private ObservableList<String> taskData = FXCollections.observableArrayList();
     private String dayData;
@@ -28,8 +29,6 @@ public class DayBox extends HBox {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-
         dayData = foo;
 
         taskData.add("hello");
@@ -43,7 +42,7 @@ public class DayBox extends HBox {
 
     @FXML
     private void initialize() {
-        day.setText(dayData);
+        hola.setText("MONDAY");
         tasks.setItems(taskData);
     }
 }

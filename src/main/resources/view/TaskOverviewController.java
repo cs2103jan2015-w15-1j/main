@@ -111,8 +111,6 @@ public class TaskOverviewController {
     }
 
     public void createContent() {
-
-
         dayBoxes.add(new DayBox("monday"));
         dayBoxes.add(new DayBox("tuesday"));
         dayBoxes.add(new DayBox("wednesday"));
