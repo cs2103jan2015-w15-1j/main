@@ -35,7 +35,11 @@ public class DayBox extends HBox {
         dayData = foo;
 
         day.setText(dayData);
-        this.date.setText("(" + date + ")");
+        if (!date.isEmpty()) {
+            this.date.setText("(" + date + ")");
+        } else {
+            this.date.setText("");
+        }
     }
 
 }

@@ -1,21 +1,13 @@
 package main.resources.view;
 
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.ListView;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.cell.CheckBoxListCell;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
-import javafx.util.Callback;
 import main.java.Command;
 import main.java.DateParser;
 import main.java.MainApp;
@@ -25,6 +17,7 @@ import main.java.Task;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
@@ -34,17 +27,6 @@ public class TaskOverviewController extends AnchorPane {
     // ================================================================
     // FXML Fields
     // ================================================================
-    @FXML
-    private TableView<Task> taskTable;
-    @FXML
-    private TableColumn<Task, String> taskDescription;
-    @FXML
-    private TableColumn<Task, String> taskDeadline;
-    @FXML
-    private TableColumn<Task, Integer> taskIndex;
-
-//    @FXML
-//    private ListView<DayBox> listView;
 
     @FXML
     private ListView<HBox> listView;
@@ -53,11 +35,10 @@ public class TaskOverviewController extends AnchorPane {
     // Non-FXML Fields
     // ================================================================
     private ObservableList<Task> taskData = FXCollections.observableArrayList();
-    private ObservableList<String> taskStringData = FXCollections.observableArrayList();
     private MainApp mainApp;
     private DateParser parser;
-//    private ObservableList<DayBox> dayBoxes = FXCollections.observableArrayList();
-    private ObservableList<HBox> dayBoxes = FXCollections.observableArrayList();
+
+    private ObservableList<HBox> displayBoxes = FXCollections.observableArrayList();
 
     private final static String TASK_OVERVIEW_LOCATION = "/view/TaskOverview.fxml";
 
@@ -84,13 +65,23 @@ public class TaskOverviewController extends AnchorPane {
 
         ArrayList<Task> allTasks = storage.readFile();
 
-        int i = 1;
+//        int i = 1;
         for (Task task : allTasks) {
-//            taskData.add(task);
-            taskStringData.add(i + "\t" + task.toString());
-            i++;
+            taskData.add(task);
+//            displayBoxes.add(new TaskBox(i, task.getDescription()));
+//            i++;
         }
 
+//        listView.setItems(displayBoxes);
+        updateDisplay(taskData);
+        
+        ListChangeListener<Task> listener = new ListChangeListener<Task>() {
+            public void onChanged(ListChangeListener.Change<? extends Task> c) {
+                updateDisplay(taskData);
+            }
+        };
+        taskData.addListener(listener);
+        
         timeToExit = false;
 
         incompleteTasks = new ArrayList<Task>(getIncompleteTasks(allTasks));
@@ -105,48 +96,26 @@ public class TaskOverviewController extends AnchorPane {
      */
     @FXML
     private void initialize() {
-        // Populating the TableColumns (but are not directly shown in the UI yet)
-//        taskDescription.setCellValueFactory(
-//                cellData -> cellData.getValue().getTaskDesc());
-//        taskDeadline.setCellValueFactory(
-//                cellData -> cellData.getValue().getStringPropertyTaskDate());
-
-        // Add the observable list data to the table
-//        taskTable.setItems(taskData);
-
-//        listView.setCellFactory(CheckBoxListCell.forListView(new Callback<String, ObservableValue<Boolean>>() {
-//            @Override
-//            public ObservableValue<Boolean> call(String item) {
-//                BooleanProperty observable = new SimpleBooleanProperty();
-//                observable.addListener((obs, wasSelected, isNowSelected) ->
-//                    System.out.println("Checkbox for "+item+" changed from "+wasSelected+" to "+isNowSelected)
-//                );
-//                return observable ;
-//            }
-//        }));
-//        listView.setItems(taskStringData);
-
-        createContent();
-
+//        createContent();
     }
 
     public void createContent() {
-        dayBoxes.add(new DayBox("Monday", "30 March"));
-        dayBoxes.add(new TaskBox(1, "Finish CS2103T v0.2"));
-        dayBoxes.add(new TaskBox(2, "Do CS2103T tutorial"));
-        dayBoxes.add(new DayBox("Tuesday", "31 March"));
-        dayBoxes.add(new TaskBox(3, "Prepare for April Fools"));
-        dayBoxes.add(new DayBox("Wednesday", "1 April"));
-        dayBoxes.add(new TaskBox(4, "April Foolssss"));
-        dayBoxes.add(new TaskBox(5, "April Foolssss"));
-        dayBoxes.add(new TaskBox(6, "April Foolssss"));
-        dayBoxes.add(new TaskBox(7, "April Foolssss"));
-        dayBoxes.add(new TaskBox(8, "April Foolssss"));
-        dayBoxes.add(new TaskBox(9, "April Foolssss"));
-        dayBoxes.add(new TaskBox(10, "April Foolssss"));
-        dayBoxes.add(new TaskBox(11, "April Foolssss"));
-        dayBoxes.add(new TaskBox(12, "April Foolssss"));
-        listView.setItems(dayBoxes);
+        displayBoxes.add(new DayBox("Monday", "30 March"));
+        displayBoxes.add(new TaskBox(1, "Finish CS2103T v0.2"));
+        displayBoxes.add(new TaskBox(2, "Do CS2103T tutorial"));
+        displayBoxes.add(new DayBox("Tuesday", "31 March"));
+        displayBoxes.add(new TaskBox(3, "Prepare for April Fools"));
+        displayBoxes.add(new DayBox("Wednesday", "1 April"));
+        displayBoxes.add(new TaskBox(4, "April Foolssss"));
+        displayBoxes.add(new TaskBox(5, "April Foolssss"));
+        displayBoxes.add(new TaskBox(6, "April Foolssss"));
+        displayBoxes.add(new TaskBox(7, "April Foolssss"));
+        displayBoxes.add(new TaskBox(8, "April Foolssss"));
+        displayBoxes.add(new TaskBox(9, "April Foolssss"));
+        displayBoxes.add(new TaskBox(10, "April Foolssss"));
+        displayBoxes.add(new TaskBox(11, "April Foolssss"));
+        displayBoxes.add(new TaskBox(12, "April Foolssss"));
+        listView.setItems(displayBoxes);
     }
 
     /**
@@ -326,10 +295,10 @@ public class TaskOverviewController extends AnchorPane {
         Task task = new Task(input, parsedDates, parsedWords);
 
         // Testing purpose. Remove this line in the future.
-        taskStringData.add((taskStringData.size() + 1) + "\t" + task.toString());
-
+        taskData.add(task);
         incompleteTasks.add(task);
         updateStorageWithAllTasks();
+        
         if (task.getType() == Task.Type.FLOATING) {
             return String.format(MESSAGE_ADD, task.getDescription(), MESSAGE_NOT_APPL, MESSAGE_NOT_APPL);
         } else if (task.getType() == Task.Type.DEADLINE) {
@@ -347,10 +316,14 @@ public class TaskOverviewController extends AnchorPane {
         // ArrayList is 0-indexed, but Tasks are displayed to users as 1-indexed
         try {
             int removalIndex = Integer.parseInt(input) - 1;
-            Task task = incompleteTasks.remove(removalIndex);
-            updateStorageWithAllTasks();
+//            Task task = incompleteTasks.remove(removalIndex);
+//            updateStorageWithAllTasks();
+            System.out.println("hi " + taskData.size());
+            taskData.remove(removalIndex);
+            System.out.println("bye " + taskData.size());
 
-            return String.format(MESSAGE_DELETE, task.getDescription());
+            return null;
+//            return String.format(MESSAGE_DELETE, task.getDescription());
         } catch (Exception e) {
             return MESSAGE_INVALID_COMMAND;
         }
@@ -488,7 +461,72 @@ public class TaskOverviewController extends AnchorPane {
     // ================================================================
     // Utility methods
     // ================================================================
+    
+    private void updateDisplay(ObservableList<Task> tasks) {
+        // TODO THIS METHOD NEEDS REFACTORING
+        // TODO THIS METHOD NEEDS REFACTORING
+        // TODO THIS METHOD NEEDS REFACTORING
+        ArrayList<Task> listOfTasks = new ArrayList<Task> (tasks);
+        sortToDisplay(listOfTasks);
+        
+        // re-initialise displayBoxes
+        displayBoxes = FXCollections.observableArrayList();
+        LocalDate now = LocalDate.now();
+        int i = 1;
+        
+        // add first category
+        displayBoxes.add(new DayBox("Floating", ""));
+        for (Task t : listOfTasks) {
+            if (t.getType() == Task.Type.FLOATING) {
+                displayBoxes.add(new TaskBox(i, t.getDescription()));
+                i++;
+            }
+        }
+        
+        // add second category
+        displayBoxes.add(new DayBox("Overdue", ""));
+        for (Task t : listOfTasks) {
+            if (t.isOverdue()) {
+                displayBoxes.add(new TaskBox(i, t.getDescription() + " on " + t.getDate()));
+                i++;
+            }
+        }
+        
+        // generate the dates of the 7 days from today
+        ArrayList<LocalDate> days = new ArrayList<LocalDate>();
+        days.add(now);
+        for (int j = 1; j < 7; j++) {
+            days.add(now.plusDays(j));
+        }
 
+        // formats the date for the day label, eg. Monday, Tuesday, etc
+        DateTimeFormatter dayFormatter = DateTimeFormatter.ofPattern("EEEE");
+        
+        // formats the date for the date label, eg. 1 April
+        DateTimeFormatter dateformatter = DateTimeFormatter.ofPattern("d MMMM");
+        
+        
+        for (LocalDate day : days) {
+            if (day.equals(now)) {
+                // special cases to show "Today" and "Tomorrow" instead
+                displayBoxes.add(new DayBox("Today", day.format(dateformatter)));
+            } else if (day.equals(now.plusDays(1))) {
+                displayBoxes.add(new DayBox("Tomorrow", day.format(dateformatter)));
+            } else {
+                displayBoxes.add(new DayBox(day.format(dayFormatter), day.format(dateformatter)));
+            }
+            for (Task t : listOfTasks) {
+                if (t.getDate() != null && t.getDate().isEqual(day)) {
+                    displayBoxes.add(new TaskBox(i, t.getDescription()));
+                    i++;
+                }
+            }
+        }
+        
+        listView.setItems(displayBoxes);
+        
+    }
+    
     private String formatTasksForDisplay(ArrayList<Task> input) {
         if (input.isEmpty()) {
             return MESSAGE_EMPTY;
