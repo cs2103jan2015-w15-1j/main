@@ -214,7 +214,7 @@ public class TaskOverviewController extends AnchorPane {
     // Logic methods
     // ================================================================
 
-    private void sortToDisplay(ArrayList<Task> list) {
+    private ArrayList<Task> sortToDisplay(ArrayList<Task> list) {
     	ArrayList<Task> overdueTasks = new ArrayList<Task>();
     	ArrayList<Task> floatingTasks = new ArrayList<Task>();
     	ArrayList<Task> notOverdueTasks = new ArrayList<Task>();
@@ -239,8 +239,7 @@ public class TaskOverviewController extends AnchorPane {
     	finalList.addAll(overdueTasks);
     	finalList.addAll(notOverdueTasks);
 
-    	list = finalList;
-
+        return finalList;
     }
 
     private ArrayList<Task> sortByDateAndType(ArrayList<Task> list) {
@@ -273,11 +272,11 @@ public class TaskOverviewController extends AnchorPane {
         String parsedWords = parser.getParsedWords();
         Task task = new Task(input, parsedDates, parsedWords);
 
-        // Testing purpose. Remove this line in the future.
         displayedTasks.add(task);
         incompleteTasks.add(task);
         updateStorageWithAllTasks();
 
+        // Legacy code return type
         if (task.getType() == Task.Type.FLOATING) {
             return String.format(MESSAGE_ADD, task.getDescription(), MESSAGE_NOT_APPL, MESSAGE_NOT_APPL);
         } else if (task.getType() == Task.Type.DEADLINE) {
@@ -294,8 +293,7 @@ public class TaskOverviewController extends AnchorPane {
             int removalIndex = Integer.parseInt(input) - 1;
 //            Task task = incompleteTasks.remove(removalIndex);
 //            updateStorageWithAllTasks();
-            Task foo = displayedTasks.remove(removalIndex);
-            System.out.println(foo);
+            displayedTasks.remove(removalIndex);
 
             return null;
 //            return String.format(MESSAGE_DELETE, task.getDescription());
@@ -334,6 +332,7 @@ public class TaskOverviewController extends AnchorPane {
             editArgument.append(inputArray[i] + " ");
         }
 
+        // Filter for edit Description or Deadline
         try {
             Task task = incompleteTasks.get(editIndex);
             if (editType.equals("d") || editType.equals("de")) {
@@ -444,8 +443,7 @@ public class TaskOverviewController extends AnchorPane {
         // TODO THIS METHOD NEEDS REFACTORING
         // TODO THIS METHOD NEEDS REFACTORING
         // TODO THIS METHOD NEEDS REFACTORING
-        ArrayList<Task> listOfTasks = new ArrayList<Task>(tasks);
-        sortToDisplay(listOfTasks);
+        ArrayList<Task> listOfTasks = sortToDisplay(new ArrayList<Task>(tasks));
 
         // re-initialise displayBoxes
         displayBoxes = FXCollections.observableArrayList();
@@ -574,4 +572,5 @@ public class TaskOverviewController extends AnchorPane {
         ArrayList<Task> emptyArr = new ArrayList<Task>();
         storage.updateFiles(emptyArr);
     }
+
 }

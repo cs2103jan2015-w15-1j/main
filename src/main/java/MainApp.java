@@ -29,7 +29,7 @@ public class MainApp extends Application {
 		initRootLayout();
 		showTaskOverview();
 
-		// Provide TOC handle in RLC so that user input can be passed to TOC
+		// Provide a TOC handle inside of RLC so that user input can be passed to TOC from RLC
 		rootLayoutController.setTaskOverviewController(taskOverviewController);
 	}
 
