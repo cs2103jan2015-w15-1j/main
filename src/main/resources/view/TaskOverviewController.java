@@ -436,15 +436,18 @@ public class TaskOverviewController extends AnchorPane {
         ArrayList<LocalDateTime> searchDate = parser.getDates();
         ArrayList<Task> allTasks = concatenateTasks(incompleteTasks, completedTasks);
 
-
         for (Task task : allTasks) {
-            String taskInfo = task.getDescription();
-            if (taskInfo.contains(input)) {
+            String taskInfo = task.getDescription().toLowerCase();
+            if (taskInfo.contains(input.toLowerCase())) {
                 searchResults.add(task);
             } else if (searchDate.size()>0 && searchDate.get(0).toLocalDate().equals(task.getDate())) {
                 searchResults.add(task);
             }
         }
+        
+        ObservableList<Task> results = FXCollections.observableArrayList();
+        results.addAll(searchResults);
+        updateDisplay(results);
         return searchResults;
     }
 
