@@ -5,6 +5,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
@@ -18,8 +19,11 @@ public class TaskBox extends HBox {
 
     @FXML
     private Label description;
+    
+    @FXML
+    private Button delete;
 
-    public TaskBox(int index, String description) {
+    public TaskBox(int idx, String desc) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/TaskBox.fxml"));
             loader.setRoot(this);
@@ -35,13 +39,15 @@ public class TaskBox extends HBox {
             public void changed(ObservableValue<? extends Boolean> ov,
                                 Boolean oldVal,
                                 Boolean newVal) {
-                System.out.println(index + " " + newVal);
+//                description.setStyle("-fx-strikethrough: true;");
+                System.out.println(idx + " " + newVal);
             }
         };
 
-        this.index.setText(index + "");
+        index.setText(idx + "");
         checkbox.selectedProperty().addListener(listener);
-        this.description.setText(description);
+        description.setText(desc);
+        delete.setText("X");
 
     }
 }
