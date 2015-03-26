@@ -121,10 +121,10 @@ public class Task implements Cloneable {
     public boolean isCompleted() {
         return isCompleted;
     }
-    
+
     public boolean isOverdue() {
     	LocalDate nowDate = LocalDate.now();
-    	return getDate().isAfter(nowDate);
+        return getDate() != null && nowDate.isAfter(getDate());
     }
 
 
@@ -164,7 +164,7 @@ public class Task implements Cloneable {
     private void setDate(LocalDate date) {
         this.date = date;
     }
-    
+
     private void setType(Type type) {
         this.type = type;
     }
@@ -257,11 +257,11 @@ public class Task implements Cloneable {
     // ================================================================
     // Utility Methods
     // ================================================================
-    
+
     private boolean hasTwoEscapeChars(String input) {
         return StringUtils.countMatches(input, ESCAPE_CHAR + "") == 2;
     }
-    
+
     private String getWordsWithinEscapeChars(String input) {
         String output = "";
         boolean withinEscapeChar = false;
@@ -323,7 +323,7 @@ public class Task implements Cloneable {
         cloned.setIsCompleted(cloned.isCompleted());
         cloned.setDate(cloned.getDate());
         cloned.setStartTime(cloned.getStartTime());
-        cloned.setEndTime(cloned.getEndTime());        
+        cloned.setEndTime(cloned.getEndTime());
 
         return cloned;
     }

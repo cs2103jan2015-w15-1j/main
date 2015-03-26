@@ -1,53 +1,46 @@
 package main.resources.view;
 
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.control.ListView;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.cell.CheckBoxListCell;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.util.Callback;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
 import main.java.Command;
 import main.java.DateParser;
 import main.java.MainApp;
 import main.java.Storage;
 import main.java.Task;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
-public class TaskOverviewController {
+public class TaskOverviewController extends AnchorPane {
     // ================================================================
     // FXML Fields
     // ================================================================
-    @FXML
-    private TableView<Task> taskTable;
-    @FXML
-    private TableColumn<Task, String> taskDescription;
-    @FXML
-    private TableColumn<Task, String> taskDeadline;
-    @FXML
-    private TableColumn<Task, Integer> taskIndex;
 
     @FXML
-    private ListView<String> listView;
+    private ListView<HBox> listView;
+
     // ================================================================
     // Non-FXML Fields
     // ================================================================
     private ObservableList<Task> taskData = FXCollections.observableArrayList();
-    private ObservableList<String> taskStringData = FXCollections.observableArrayList();
     private MainApp mainApp;
     private DateParser parser;
+
+    private ObservableList<HBox> displayBoxes = FXCollections.observableArrayList();
+
+    private final static String TASK_OVERVIEW_LOCATION = "/view/TaskOverview.fxml";
 
     // ================================================================
     // Methods
@@ -56,19 +49,39 @@ public class TaskOverviewController {
      * The constructor is called before the initialize() method.
      */
     public TaskOverviewController() {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource(TASK_OVERVIEW_LOCATION));
+        loader.setRoot(this);
+        loader.setController(this);
+
+        try {
+            loader.load();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         parser = DateParser.getInstance();
         storage = Storage.getInstance();
         String saveFileName = storage.getSaveFileName();
 
         ArrayList<Task> allTasks = storage.readFile();
 
-        int i = 1;
+//        int i = 1;
         for (Task task : allTasks) {
-//            taskData.add(task);
-            taskStringData.add(i + "\t" + task.toString());
-            i++;
+            taskData.add(task);
+//            displayBoxes.add(new TaskBox(i, task.getDescription()));
+//            i++;
         }
 
+//        listView.setItems(displayBoxes);
+        updateDisplay(taskData);
+        
+        ListChangeListener<Task> listener = new ListChangeListener<Task>() {
+            public void onChanged(ListChangeListener.Change<? extends Task> c) {
+                updateDisplay(taskData);
+            }
+        };
+        taskData.addListener(listener);
+        
         timeToExit = false;
 
         incompleteTasks = new ArrayList<Task>(getIncompleteTasks(allTasks));
@@ -83,26 +96,26 @@ public class TaskOverviewController {
      */
     @FXML
     private void initialize() {
-        // Populating the TableColumns (but are not directly shown in the UI yet)
-//        taskDescription.setCellValueFactory(
-//                cellData -> cellData.getValue().getTaskDesc());
-//        taskDeadline.setCellValueFactory(
-//                cellData -> cellData.getValue().getStringPropertyTaskDate());
+//        createContent();
+    }
 
-        // Add the observable list data to the table
-//        taskTable.setItems(taskData);
-        
-        listView.setCellFactory(CheckBoxListCell.forListView(new Callback<String, ObservableValue<Boolean>>() {
-            @Override
-            public ObservableValue<Boolean> call(String item) {
-                BooleanProperty observable = new SimpleBooleanProperty();
-                observable.addListener((obs, wasSelected, isNowSelected) -> 
-                    System.out.println("Checkbox for "+item+" changed from "+wasSelected+" to "+isNowSelected)
-                );
-                return observable ;
-            }
-        }));
-        listView.setItems(taskStringData);
+    public void createContent() {
+        displayBoxes.add(new DayBox("Monday", "30 March"));
+        displayBoxes.add(new TaskBox(1, "Finish CS2103T v0.2"));
+        displayBoxes.add(new TaskBox(2, "Do CS2103T tutorial"));
+        displayBoxes.add(new DayBox("Tuesday", "31 March"));
+        displayBoxes.add(new TaskBox(3, "Prepare for April Fools"));
+        displayBoxes.add(new DayBox("Wednesday", "1 April"));
+        displayBoxes.add(new TaskBox(4, "April Foolssss"));
+        displayBoxes.add(new TaskBox(5, "April Foolssss"));
+        displayBoxes.add(new TaskBox(6, "April Foolssss"));
+        displayBoxes.add(new TaskBox(7, "April Foolssss"));
+        displayBoxes.add(new TaskBox(8, "April Foolssss"));
+        displayBoxes.add(new TaskBox(9, "April Foolssss"));
+        displayBoxes.add(new TaskBox(10, "April Foolssss"));
+        displayBoxes.add(new TaskBox(11, "April Foolssss"));
+        displayBoxes.add(new TaskBox(12, "April Foolssss"));
+        listView.setItems(displayBoxes);
     }
 
     /**
@@ -226,7 +239,7 @@ public class TaskOverviewController {
     	ArrayList<Task> floatingTasks = new ArrayList<Task>();
     	ArrayList<Task> notOverdueTasks = new ArrayList<Task>();
     	ArrayList<Task> finalList = new ArrayList<Task>();
-    	
+
     	// Separate the floating, overdue and pending
     	for (Task task: list) {
     		if (task.getType() == Task.Type.FLOATING) {
@@ -237,23 +250,23 @@ public class TaskOverviewController {
     			notOverdueTasks.add(task);
     		}
     	}
-    	
+
     	// Sort according to what we discussed
     	overdueTasks = sortByDateAndType(overdueTasks);
     	notOverdueTasks = sortByDateAndType(notOverdueTasks);
-    	
+
     	finalList.addAll(floatingTasks);
     	finalList.addAll(overdueTasks);
     	finalList.addAll(notOverdueTasks);
-    	
+
     	list = finalList;
-    	
+
     }
-    
-    
+
+
     private ArrayList<Task> sortByDateAndType(ArrayList<Task> list) {
     	ArrayList<Task> output = new ArrayList<Task>();
-    	
+
     	for (Task task: list) {
     		if (output.size() == 0) {
     			output.add(task);
@@ -266,15 +279,15 @@ public class TaskOverviewController {
     					if (something.getType() == Task.Type.TIMED && task.getType() == Task.Type.DEADLINE) {
     						output.add(output.indexOf(something), task);
     						break;
-    					} 
-    				} 
+    					}
+    				}
     			}
     			output.add(task);
     		}
     	}
     	return output;
     }
-    
+
     private String addTask(String input) {
         parser.parse(input);
         ArrayList<LocalDateTime> parsedDates = parser.getDates();
@@ -282,10 +295,10 @@ public class TaskOverviewController {
         Task task = new Task(input, parsedDates, parsedWords);
 
         // Testing purpose. Remove this line in the future.
-        taskStringData.add((taskStringData.size() + 1) + "\t" + task.toString());
-
+        taskData.add(task);
         incompleteTasks.add(task);
         updateStorageWithAllTasks();
+        
         if (task.getType() == Task.Type.FLOATING) {
             return String.format(MESSAGE_ADD, task.getDescription(), MESSAGE_NOT_APPL, MESSAGE_NOT_APPL);
         } else if (task.getType() == Task.Type.DEADLINE) {
@@ -303,10 +316,14 @@ public class TaskOverviewController {
         // ArrayList is 0-indexed, but Tasks are displayed to users as 1-indexed
         try {
             int removalIndex = Integer.parseInt(input) - 1;
-            Task task = incompleteTasks.remove(removalIndex);
-            updateStorageWithAllTasks();
+//            Task task = incompleteTasks.remove(removalIndex);
+//            updateStorageWithAllTasks();
+            System.out.println("hi " + taskData.size());
+            taskData.remove(removalIndex);
+            System.out.println("bye " + taskData.size());
 
-            return String.format(MESSAGE_DELETE, task.getDescription());
+            return null;
+//            return String.format(MESSAGE_DELETE, task.getDescription());
         } catch (Exception e) {
             return MESSAGE_INVALID_COMMAND;
         }
@@ -414,20 +431,23 @@ public class TaskOverviewController {
     private ArrayList<Task> search(String input) {
         // TODO check main.java.Task.getInfo() implementation
         ArrayList<Task> searchResults = new ArrayList<Task>();
-        
+
         parser.parse(input);
         ArrayList<LocalDateTime> searchDate = parser.getDates();
         ArrayList<Task> allTasks = concatenateTasks(incompleteTasks, completedTasks);
-        
-        
+
         for (Task task : allTasks) {
-            String taskInfo = task.getDescription();
-            if (taskInfo.contains(input)) {
+            String taskInfo = task.getDescription().toLowerCase();
+            if (taskInfo.contains(input.toLowerCase())) {
                 searchResults.add(task);
             } else if (searchDate.size()>0 && searchDate.get(0).toLocalDate().equals(task.getDate())) {
                 searchResults.add(task);
             }
         }
+        
+        ObservableList<Task> results = FXCollections.observableArrayList();
+        results.addAll(searchResults);
+        updateDisplay(results);
         return searchResults;
     }
 
@@ -444,7 +464,94 @@ public class TaskOverviewController {
     // ================================================================
     // Utility methods
     // ================================================================
+    
+    private void updateDisplay(ObservableList<Task> tasks) {
+        // TODO THIS METHOD NEEDS REFACTORING
+        // TODO THIS METHOD NEEDS REFACTORING
+        // TODO THIS METHOD NEEDS REFACTORING
+        ArrayList<Task> listOfTasks = new ArrayList<Task>(tasks);
+        sortToDisplay(listOfTasks);
 
+        // re-initialise displayBoxes
+        displayBoxes = FXCollections.observableArrayList();
+        LocalDate now = LocalDate.now();
+        int i = 1;
+
+        // add first category
+        DayBox floating = new DayBox("Floating", "");
+        displayBoxes.add(floating);
+        boolean hasFloating = false;
+        for (Task t : listOfTasks) {
+            if (t.getType() == Task.Type.FLOATING) {
+                hasFloating = true;
+                displayBoxes.add(new TaskBox(i, t.getDescription()));
+                i++;
+            }
+        }
+        if (!hasFloating) {
+            floating.dim();
+        }
+
+        // add second category
+        DayBox overdue = new DayBox("Overdue", "");
+        displayBoxes.add(overdue);
+        boolean hasOverdue = false;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, d MMMM y");
+        for (Task t : listOfTasks) {
+            if (t.isOverdue()) {
+                hasOverdue = true;
+                displayBoxes.add(new TaskBox(i, t.getDescription() + " on " +
+                                                t.getDate().format(formatter)));
+                i++;
+            }
+        }
+        if (!hasOverdue) {
+            overdue.dim();
+        }
+
+        // generate the dates of the 7 days from today
+        ArrayList<LocalDate> days = new ArrayList<LocalDate>();
+        days.add(now);
+        for (int j = 1; j < 7; j++) {
+            days.add(now.plusDays(j));
+        }
+
+        // formats the date for the day label, eg. Monday, Tuesday, etc
+        DateTimeFormatter dayFormatter = DateTimeFormatter.ofPattern("EEEE");
+
+        // formats the date for the date label, eg. 1 April
+        DateTimeFormatter dateformatter = DateTimeFormatter.ofPattern("d MMMM");
+
+
+        for (LocalDate day : days) {
+            DayBox label;
+            if (day.equals(now)) {
+                // special cases to show "Today" and "Tomorrow" instead
+                label = new DayBox("Today", day.format(dateformatter));
+            } else if (day.equals(now.plusDays(1))) {
+                label = new DayBox("Tomorrow", day.format(dateformatter));
+            } else {
+                label = new DayBox(day.format(dayFormatter),
+                                            day.format(dateformatter));
+            }
+            displayBoxes.add(label);
+            boolean hasTaskOnThisDay = false;
+            for (Task t : listOfTasks) {
+                if (t.getDate() != null && t.getDate().isEqual(day)) {
+                    hasTaskOnThisDay = true;
+                    displayBoxes.add(new TaskBox(i, t.getDescription()));
+                    i++;
+                }
+            }
+            if (!hasTaskOnThisDay) {
+                label.dim();
+            }
+        }
+
+        listView.setItems(displayBoxes);
+        
+    }
+    
     private String formatTasksForDisplay(ArrayList<Task> input) {
         if (input.isEmpty()) {
             return MESSAGE_EMPTY;

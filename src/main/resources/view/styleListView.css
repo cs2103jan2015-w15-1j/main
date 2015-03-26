@@ -1,13 +1,136 @@
-ListView {
-    -fx-font-size: 14px;
-    -fx-background-color: transparent;
-    /* -fx-padding: 0 0 10 0; */
+@font-face {
+	font-family: Roboto;
+	font-weight: 400;
+	font-style: normal;
+	src: url("../../../src/main/resources/fonts/Roboto-Regular.ttf");
 }
+
+@font-face {
+	font-family: Roboto;
+	font-weight: 400;
+	font-style: italic;
+	src: url("../../../src/main/resources/fonts/Roboto-Italic.ttf");
+}
+
+@font-face {
+	font-family: Roboto;
+	font-weight: 700;
+	font-style: normal;
+	src: url("../../../src/main/resources/fonts/Roboto-Bold.ttf");
+}
+
+@font-face {
+	font-family: Roboto;
+	font-weight: 700;
+	font-style: italic;
+	src: url("../../../src/main/resources/fonts/Roboto-BoldItalic.ttf");
+}
+
+/*
+ * ================================================================
+ * RootLayout styles
+ * ================================================================
+ */
+ 
+.root {
+	-fx-background-color: white;
+	-fx-padding: 10;
+}
+
+.root #userInput {
+	-fx-font: 16px Roboto;
+}
+
+
+/*
+ * ================================================================
+ * ListView styles
+ * ================================================================
+ */
+
+.list-view .scroll-bar:horizontal {
+    -fx-opacity: 0;
+    -fx-padding:-7;
+}
+
+.list-view .scroll-bar:vertical {
+    -fx-opacity: 0;
+    -fx-padding:-7;
+}
+
+.list-view {
+	-fx-padding: 8;
+	-fx-background-color: transparent;
+}
+
+/*
+ * ================================================================
+ * list-cell styles
+ * ================================================================
+ */
 
 .list-cell {
-	-fx-padding: 8;
+	-fx-padding: 5;
+	-fx-height:100%;
+	/* -fx-background-color:yellow; */
+	-fx-background-color: white;
 }
 
-.check-box {
-	-fx-font-size: 10;
+
+/*
+ * ================================================================
+ * DayBox styles
+ * ================================================================
+ */
+
+.dayBox {
+	-fx-font-family: Roboto;
+	-fx-font-size: 20px;
+	-fx-font-style: italic;
+	-fx-background-color: white;
+	
 }
+
+.dayBox #day {
+	-fx-font-weight: 700;
+	-fx-text-fill: #333;
+}
+
+.dayBox #date {
+	-fx-padding: 0 0 0 5;
+	-fx-font-size: 14px;
+	-fx-text-fill: gray;
+}
+
+
+/*
+ * ================================================================
+ * TaskBox styles
+ * ================================================================
+ */
+
+.taskBox {
+	-fx-padding: 0 0 0 10;
+	-fx-font-family: Roboto;
+	-fx-font-size: 16px;
+}
+
+.root #checkbox {
+	-fx-font-size: 11px;
+} 
+
+.taskBox #index {
+	-fx-padding: 0 5 0 5;
+	-fx-text-fill: dimgray;
+}
+
+.taskBox #description {
+	-fx-padding: 0 0 0 5;
+	-fx-text-fill: black;
+}
+
+/* not implemented yet */
+.taskBox #delete {
+	-fx-font: 12px System;
+}
+
