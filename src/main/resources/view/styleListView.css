@@ -1,17 +1,87 @@
 
+
+/*
+ * ================================================================
+ * ListView styles
+ * ================================================================
+ */
+
 .list-view .scroll-bar:horizontal {
     -fx-opacity: 0;
     -fx-padding:-7;
 }
 
-
 .list-view .scroll-bar:vertical {
     -fx-opacity: 0;
     -fx-padding:-7;
 }
-.list-cell {
+
+.list-view {
 	-fx-padding: 10;
+}
+
+/*
+ * ================================================================
+ * list-cell styles
+ * ================================================================
+ */
+
+.list-cell {
+	-fx-padding: 8;
 	-fx-height:100%;
-	-fx-background-color:yellow;
+	/* -fx-background-color:yellow; */
+	-fx-background-color: white;
+}
+
+
+/*
+ * ================================================================
+ * DayBox styles
+ * ================================================================
+ */
+
+.dayBox {
+	-fx-font-family: Montserrat;
+	-fx-font-size: 18px;
+	-fx-background-color: white;
+	
+}
+
+.dayBox #day {
+	-fx-font-weight: bold;
+	-fx-text-fill: black;
+	
+}
+
+.dayBox #date {
+	-fx-padding: 0 0 0 5;
+	-fx-text-fill: grey;
+}
+
+
+/*
+ * ================================================================
+ * TaskBox styles
+ * ================================================================
+ */
+
+.taskBox {
+	-fx-padding: 0 0 0 10;
+	-fx-font: 15px System;
+}
+
+.taskBox #index {
+	-fx-padding: 0 5 0 5;
+	-fx-text-fill: black;
+}
+
+.taskBox #description {
+	-fx-padding: 0 0 0 5;
+	-fx-text-fill: black;
+}
+
+/* not implemented yet */
+.taskBox #delete {
+	-fx-font: 12px System;
 }
 

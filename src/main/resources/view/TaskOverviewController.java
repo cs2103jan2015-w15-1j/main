@@ -13,6 +13,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.cell.CheckBoxListCell;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.HBox;
 import javafx.util.Callback;
 import main.java.Command;
 import main.java.DateParser;
@@ -40,8 +41,12 @@ public class TaskOverviewController {
     @FXML
     private TableColumn<Task, Integer> taskIndex;
 
+//    @FXML
+//    private ListView<DayBox> listView;
+    
     @FXML
-    private ListView<DayBox> listView;
+    private ListView<HBox> listView;
+    
     // ================================================================
     // Non-FXML Fields
     // ================================================================
@@ -49,7 +54,8 @@ public class TaskOverviewController {
     private ObservableList<String> taskStringData = FXCollections.observableArrayList();
     private MainApp mainApp;
     private DateParser parser;
-    private ObservableList<DayBox> dayBoxes = FXCollections.observableArrayList();
+//    private ObservableList<DayBox> dayBoxes = FXCollections.observableArrayList();
+    private ObservableList<HBox> dayBoxes = FXCollections.observableArrayList();
 
     // ================================================================
     // Methods
@@ -111,10 +117,21 @@ public class TaskOverviewController {
     }
 
     public void createContent() {
-        dayBoxes.add(new DayBox("monday"));
-        dayBoxes.add(new DayBox("tuesday"));
-        dayBoxes.add(new DayBox("wednesday"));
-
+        dayBoxes.add(new DayBox("Monday", "30 March"));
+        dayBoxes.add(new TaskBox(1, "Finish CS2103T v0.2"));
+        dayBoxes.add(new TaskBox(2, "Do CS2103T tutorial"));
+        dayBoxes.add(new DayBox("Tuesday", "31 March"));
+        dayBoxes.add(new TaskBox(3, "Prepare for April Fools"));
+        dayBoxes.add(new DayBox("Wednesday", "1 April"));
+        dayBoxes.add(new TaskBox(4, "April Foolssss"));
+        dayBoxes.add(new TaskBox(5, "April Foolssss"));
+        dayBoxes.add(new TaskBox(6, "April Foolssss"));
+        dayBoxes.add(new TaskBox(7, "April Foolssss"));
+        dayBoxes.add(new TaskBox(8, "April Foolssss"));
+        dayBoxes.add(new TaskBox(9, "April Foolssss"));
+        dayBoxes.add(new TaskBox(10, "April Foolssss"));
+        dayBoxes.add(new TaskBox(11, "April Foolssss"));
+        dayBoxes.add(new TaskBox(12, "April Foolssss"));
         listView.setItems(dayBoxes);
     }
 

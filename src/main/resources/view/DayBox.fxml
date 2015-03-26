@@ -1,16 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<fx:root type="VBox" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root prefHeight="17.0" prefWidth="198.0" styleClass="dayBox" type="HBox" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <Label fx:id="day" text="Label" />
-      <VBox>
-         <children>
-            <ListView fx:id="tasks" stylesheets="@styleListView.css" />
-         </children>
-      </VBox>
+      <Label fx:id="date" text="Label" />
    </children>
 </fx:root>
