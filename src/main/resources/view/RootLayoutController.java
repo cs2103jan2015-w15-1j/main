@@ -1,6 +1,7 @@
 package main.resources.view;
 
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
@@ -23,6 +24,12 @@ public class RootLayoutController {
     // ================================================================
     private MainApp mainApp;
     private TaskOverviewController taskOverviewController;
+
+    public RootLayoutController() {
+        FXMLLoader loader = new FXMLLoader();
+        loader.setLocation(MainApp.class.getResource("/view/RootLayout.fxml"));
+    }
+
 
     /**
      * Initializes the root layout class. This method is automatically called

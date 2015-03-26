@@ -15,11 +15,10 @@ public class DayBox extends HBox {
 
     @FXML
     private Label day;
-    
+
     @FXML
     private Label date;
 
-//    private ObservableList<String> taskData = FXCollections.observableArrayList();
     private String dayData;
 
     public DayBox(String foo, String date) {
@@ -35,24 +34,8 @@ public class DayBox extends HBox {
         }
         dayData = foo;
 
-//        taskData.add("task1");
-//        taskData.add("task2");
-//        taskData.add("task3");
-//        taskData.add("task4");
-//        taskData.add("task5");
-//        taskData.add("task6");
-//        taskData.add("task7");
-//        taskData.add("task1");
-//        taskData.add("task2");
-//        taskData.add("task3");
-//        taskData.add("task4");
-//        taskData.add("task5");
-//        taskData.add("task6");
-//        taskData.add("task7");
-
         day.setText(dayData);
         this.date.setText("(" + date + ")");
-//        tasks.setItems(taskData);
     }
 
 }

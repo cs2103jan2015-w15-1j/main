@@ -30,12 +30,6 @@ public class MainApp extends Application {
 	}
 
 	/**
-	 * Constructor
-	 */
-	public MainApp() {
-	}
-
-	/**
 	 * Returns the main stage
 	 */
 	public Stage getPrimaryStage() {
@@ -46,6 +40,11 @@ public class MainApp extends Application {
 	public void start(Stage primaryStage) throws Exception{
 		this.primaryStage = primaryStage;
 		this.primaryStage.setTitle("Veto");
+
+		RootLayoutController rootLayoutController = new RootLayoutController();
+		Scene scene = new Scene(rootLayoutController);
+
+
 
 		initRootLayout();
 		showTaskOverview();
