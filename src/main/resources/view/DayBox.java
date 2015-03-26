@@ -41,5 +41,9 @@ public class DayBox extends HBox {
             this.date.setText("");
         }
     }
-
+    
+    public void dim() {
+        day.setStyle("-fx-text-fill: #E8E8E8;");
+        date.setStyle("-fx-text-fill: #E8E8E8;");
+    }
 }

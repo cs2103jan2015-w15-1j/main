@@ -475,23 +475,35 @@ public class TaskOverviewController extends AnchorPane {
         int i = 1;
 
         // add first category
-        displayBoxes.add(new DayBox("Floating", ""));
+        DayBox floating = new DayBox("Floating", "");
+        displayBoxes.add(floating);
+        boolean hasFloating = false;
         for (Task t : listOfTasks) {
             if (t.getType() == Task.Type.FLOATING) {
+                hasFloating = true;
                 displayBoxes.add(new TaskBox(i, t.getDescription()));
                 i++;
             }
         }
+        if (!hasFloating) {
+            floating.dim();
+        }
 
         // add second category
-        displayBoxes.add(new DayBox("Overdue", ""));
+        DayBox overdue = new DayBox("Overdue", "");
+        displayBoxes.add(overdue);
+        boolean hasOverdue = false;
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, d MMMM y");
         for (Task t : listOfTasks) {
             if (t.isOverdue()) {
+                hasOverdue = true;
                 displayBoxes.add(new TaskBox(i, t.getDescription() + " on " +
                                                 t.getDate().format(formatter)));
                 i++;
             }
+        }
+        if (!hasOverdue) {
+            overdue.dim();
         }
 
         // generate the dates of the 7 days from today
@@ -509,21 +521,27 @@ public class TaskOverviewController extends AnchorPane {
 
 
         for (LocalDate day : days) {
+            DayBox label;
             if (day.equals(now)) {
                 // special cases to show "Today" and "Tomorrow" instead
-                displayBoxes.add(new DayBox("Today", day.format(dateformatter)));
+                label = new DayBox("Today", day.format(dateformatter));
             } else if (day.equals(now.plusDays(1))) {
-                displayBoxes.add(new DayBox("Tomorrow",
-                                            day.format(dateformatter)));
+                label = new DayBox("Tomorrow", day.format(dateformatter));
             } else {
-                displayBoxes.add(new DayBox(day.format(dayFormatter),
-                                            day.format(dateformatter)));
+                label = new DayBox(day.format(dayFormatter),
+                                            day.format(dateformatter));
             }
+            displayBoxes.add(label);
+            boolean hasTaskOnThisDay = false;
             for (Task t : listOfTasks) {
                 if (t.getDate() != null && t.getDate().isEqual(day)) {
+                    hasTaskOnThisDay = true;
                     displayBoxes.add(new TaskBox(i, t.getDescription()));
                     i++;
                 }
+            }
+            if (!hasTaskOnThisDay) {
+                label.dim();
             }
         }
 
