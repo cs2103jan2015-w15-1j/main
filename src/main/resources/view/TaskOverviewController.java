@@ -466,14 +466,14 @@ public class TaskOverviewController extends AnchorPane {
         // TODO THIS METHOD NEEDS REFACTORING
         // TODO THIS METHOD NEEDS REFACTORING
         // TODO THIS METHOD NEEDS REFACTORING
-        ArrayList<Task> listOfTasks = new ArrayList<Task> (tasks);
+        ArrayList<Task> listOfTasks = new ArrayList<Task>(tasks);
         sortToDisplay(listOfTasks);
-        
+
         // re-initialise displayBoxes
         displayBoxes = FXCollections.observableArrayList();
         LocalDate now = LocalDate.now();
         int i = 1;
-        
+
         // add first category
         displayBoxes.add(new DayBox("Floating", ""));
         for (Task t : listOfTasks) {
@@ -482,16 +482,18 @@ public class TaskOverviewController extends AnchorPane {
                 i++;
             }
         }
-        
+
         // add second category
         displayBoxes.add(new DayBox("Overdue", ""));
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, d MMMM y");
         for (Task t : listOfTasks) {
             if (t.isOverdue()) {
-                displayBoxes.add(new TaskBox(i, t.getDescription() + " on " + t.getDate()));
+                displayBoxes.add(new TaskBox(i, t.getDescription() + " on " +
+                                                t.getDate().format(formatter)));
                 i++;
             }
         }
-        
+
         // generate the dates of the 7 days from today
         ArrayList<LocalDate> days = new ArrayList<LocalDate>();
         days.add(now);
@@ -501,19 +503,21 @@ public class TaskOverviewController extends AnchorPane {
 
         // formats the date for the day label, eg. Monday, Tuesday, etc
         DateTimeFormatter dayFormatter = DateTimeFormatter.ofPattern("EEEE");
-        
+
         // formats the date for the date label, eg. 1 April
         DateTimeFormatter dateformatter = DateTimeFormatter.ofPattern("d MMMM");
-        
-        
+
+
         for (LocalDate day : days) {
             if (day.equals(now)) {
                 // special cases to show "Today" and "Tomorrow" instead
                 displayBoxes.add(new DayBox("Today", day.format(dateformatter)));
             } else if (day.equals(now.plusDays(1))) {
-                displayBoxes.add(new DayBox("Tomorrow", day.format(dateformatter)));
+                displayBoxes.add(new DayBox("Tomorrow",
+                                            day.format(dateformatter)));
             } else {
-                displayBoxes.add(new DayBox(day.format(dayFormatter), day.format(dateformatter)));
+                displayBoxes.add(new DayBox(day.format(dayFormatter),
+                                            day.format(dateformatter)));
             }
             for (Task t : listOfTasks) {
                 if (t.getDate() != null && t.getDate().isEqual(day)) {
@@ -522,7 +526,7 @@ public class TaskOverviewController extends AnchorPane {
                 }
             }
         }
-        
+
         listView.setItems(displayBoxes);
         
     }

@@ -31,8 +31,10 @@
  * RootLayout styles
  * ================================================================
  */
+ 
 .root {
 	-fx-background-color: white;
+	-fx-padding: 10;
 }
 
 .root #userInput {
