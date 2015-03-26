@@ -5,9 +5,9 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<fx:root prefHeight="17.0" prefWidth="198.0" styleClass="dayBox" type="HBox" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root alignment="CENTER_LEFT" prefHeight="17.0" prefWidth="198.0" styleClass="dayBox" type="HBox" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <Label fx:id="day" text="Label" />
-      <Label fx:id="date" text="Label" />
+      <Label fx:id="day" text="Category" />
+      <Label fx:id="date" text="Date" />
    </children>
 </fx:root>

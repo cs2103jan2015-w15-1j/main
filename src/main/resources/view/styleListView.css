@@ -93,11 +93,12 @@
 
 .dayBox #day {
 	-fx-font-weight: 700;
-	-fx-text-fill: black;
+	-fx-text-fill: #333;
 }
 
 .dayBox #date {
 	-fx-padding: 0 0 0 5;
+	-fx-font-size: 14px;
 	-fx-text-fill: gray;
 }
 
