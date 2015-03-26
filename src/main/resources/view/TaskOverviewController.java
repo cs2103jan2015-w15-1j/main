@@ -10,7 +10,6 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import main.java.Command;
 import main.java.DateParser;
-import main.java.MainApp;
 import main.java.Storage;
 import main.java.Task;
 
@@ -27,23 +26,44 @@ public class TaskOverviewController extends AnchorPane {
     // ================================================================
     // FXML Fields
     // ================================================================
-
     @FXML
     private ListView<HBox> listView;
 
     // ================================================================
     // Non-FXML Fields
     // ================================================================
-    private ObservableList<Task> taskData = FXCollections.observableArrayList();
-    private MainApp mainApp;
+    private String saveFileName;
+    private Storage storage;
+    private boolean timeToExit;
+
+    private ArrayList<Task> incompleteTasks;
+    private ArrayList<Task> completedTasks;
+
+    private Stack<ArrayList<Task>> previousStates;
+
+    private ObservableList<Task> displayedTasks = FXCollections.observableArrayList();
+    private ObservableList<HBox> displayBoxes = FXCollections.observableArrayList();
     private DateParser parser;
 
-    private ObservableList<HBox> displayBoxes = FXCollections.observableArrayList();
-
+    // ================================================================
+    // Constants
+    // ================================================================
     private final static String TASK_OVERVIEW_LOCATION = "/view/TaskOverview.fxml";
+    private static final String MESSAGE_SAVE_FILE_READY = "Welcome to main.java.Veto. %s is ready for use.";
+    private static final String MESSAGE_EMPTY = "There is currently no task.\n";
+    private static final String MESSAGE_ADD = "main.java.Task has been successfully added:\n     Description: %s\n     Deadline: %s\n     Time: %s\n";
+    private static final String MESSAGE_NOT_APPL = "Not applicable";
+    private static final String MESSAGE_DELETE = "main.java.Task has been successfully deleted:\n Description: %s \n";
+    private static final String MESSAGE_EDIT = "main.java.Task has been successfully edited.\n";
+    private static final String MESSAGE_COMPLETE = "\"%s\" completed. \n";
+    private static final String MESSAGE_INCOMPLETE = "\"%s\" incompleted. \n";
+    private static final String MESSAGE_EXIT = "Goodbye!";
+    private static final String MESSAGE_UNDO = "Last command has been undone. \n";
+    private static final String MESSAGE_INVALID_COMMAND = "Invalid command. \n";
+    private static final String MESSAGE_NO_UNDO = "Already at oldest change, unable to undo. \n";
 
     // ================================================================
-    // Methods
+    // Constructor
     // ================================================================
     /**
      * The constructor is called before the initialize() method.
@@ -64,24 +84,20 @@ public class TaskOverviewController extends AnchorPane {
         String saveFileName = storage.getSaveFileName();
 
         ArrayList<Task> allTasks = storage.readFile();
-
-//        int i = 1;
         for (Task task : allTasks) {
-            taskData.add(task);
-//            displayBoxes.add(new TaskBox(i, task.getDescription()));
-//            i++;
+            displayedTasks.add(task);
         }
 
-//        listView.setItems(displayBoxes);
-        updateDisplay(taskData);
-        
+        // Causes GUI to display the tasks
+        updateDisplay(displayedTasks);
+
         ListChangeListener<Task> listener = new ListChangeListener<Task>() {
             public void onChanged(ListChangeListener.Change<? extends Task> c) {
-                updateDisplay(taskData);
+                updateDisplay(displayedTasks);
             }
         };
-        taskData.addListener(listener);
-        
+        displayedTasks.addListener(listener);
+
         timeToExit = false;
 
         incompleteTasks = new ArrayList<Task>(getIncompleteTasks(allTasks));
@@ -99,6 +115,9 @@ public class TaskOverviewController extends AnchorPane {
 //        createContent();
     }
 
+    // ================================================================
+    // Public methods
+    // ================================================================
     public void createContent() {
         displayBoxes.add(new DayBox("Monday", "30 March"));
         displayBoxes.add(new TaskBox(1, "Finish CS2103T v0.2"));
@@ -117,45 +136,6 @@ public class TaskOverviewController extends AnchorPane {
         displayBoxes.add(new TaskBox(12, "April Foolssss"));
         listView.setItems(displayBoxes);
     }
-
-    /**
-     * Is called by the main application to give a reference back to itself.
-     */
-    public void setMainApp(MainApp mainApp) {
-        this.mainApp = mainApp;
-    }
-
-    // ================================================================
-    // Imported from Controller.java
-    // ================================================================
-
-    private static final String MESSAGE_SAVE_FILE_READY = "Welcome to main.java.Veto. %s is ready for use.";
-
-    private static final String MESSAGE_EMPTY = "There is currently no task.\n";
-    private static final String MESSAGE_ADD = "main.java.Task has been successfully added:\n     Description: %s\n     Deadline: %s\n     Time: %s\n";
-    private static final String MESSAGE_NOT_APPL = "Not applicable";
-    private static final String MESSAGE_DELETE = "main.java.Task has been successfully deleted:\n Description: %s \n";
-    private static final String MESSAGE_EDIT = "main.java.Task has been successfully edited.\n";
-    private static final String MESSAGE_COMPLETE = "\"%s\" completed. \n";
-    private static final String MESSAGE_INCOMPLETE = "\"%s\" incompleted. \n";
-    private static final String MESSAGE_EXIT = "Goodbye!";
-    private static final String MESSAGE_UNDO = "Last command has been undone. \n";
-    private static final String MESSAGE_INVALID_COMMAND = "Invalid command. \n";
-    private static final String MESSAGE_NO_UNDO = "Already at oldest change, unable to undo. \n";
-
-    private String saveFileName;
-    private Storage storage;
-    private boolean timeToExit;
-
-    private ArrayList<Task> incompleteTasks;
-    private ArrayList<Task> completedTasks;
-
-    private Stack<ArrayList<Task>> previousStates;
-
-
-    // ================================================================
-    // Public methods
-    // ================================================================
 
     public String getWelcomeMessage() {
         return String.format(MESSAGE_SAVE_FILE_READY, saveFileName);
@@ -180,6 +160,7 @@ public class TaskOverviewController extends AnchorPane {
                 updateState();
                 return editTask(arguments);
             case DISPLAY :
+                updateDisplay(displayedTasks);
                 return formatTasksForDisplay(incompleteTasks);
             case COMPLETE :
                 updateState();
@@ -205,7 +186,6 @@ public class TaskOverviewController extends AnchorPane {
     public boolean isTimeToExit() {
         return timeToExit;
     }
-
 
     // ================================================================
     // Initialization methods
@@ -263,7 +243,6 @@ public class TaskOverviewController extends AnchorPane {
 
     }
 
-
     private ArrayList<Task> sortByDateAndType(ArrayList<Task> list) {
     	ArrayList<Task> output = new ArrayList<Task>();
 
@@ -295,10 +274,10 @@ public class TaskOverviewController extends AnchorPane {
         Task task = new Task(input, parsedDates, parsedWords);
 
         // Testing purpose. Remove this line in the future.
-        taskData.add(task);
+        displayedTasks.add(task);
         incompleteTasks.add(task);
         updateStorageWithAllTasks();
-        
+
         if (task.getType() == Task.Type.FLOATING) {
             return String.format(MESSAGE_ADD, task.getDescription(), MESSAGE_NOT_APPL, MESSAGE_NOT_APPL);
         } else if (task.getType() == Task.Type.DEADLINE) {
@@ -307,9 +286,6 @@ public class TaskOverviewController extends AnchorPane {
             String formattedTime = task.getStartTime() + " to " + task.getEndTime();
             return String.format(MESSAGE_ADD, task.getDescription(), task.getDate(), formattedTime);
         }
-
-
-
     }
 
     private String deleteTask(String input) {
@@ -318,9 +294,8 @@ public class TaskOverviewController extends AnchorPane {
             int removalIndex = Integer.parseInt(input) - 1;
 //            Task task = incompleteTasks.remove(removalIndex);
 //            updateStorageWithAllTasks();
-            System.out.println("hi " + taskData.size());
-            taskData.remove(removalIndex);
-            System.out.println("bye " + taskData.size());
+            Task foo = displayedTasks.remove(removalIndex);
+            System.out.println(foo);
 
             return null;
 //            return String.format(MESSAGE_DELETE, task.getDescription());
@@ -444,7 +419,7 @@ public class TaskOverviewController extends AnchorPane {
                 searchResults.add(task);
             }
         }
-        
+
         ObservableList<Task> results = FXCollections.observableArrayList();
         results.addAll(searchResults);
         updateDisplay(results);
@@ -464,7 +439,7 @@ public class TaskOverviewController extends AnchorPane {
     // ================================================================
     // Utility methods
     // ================================================================
-    
+
     private void updateDisplay(ObservableList<Task> tasks) {
         // TODO THIS METHOD NEEDS REFACTORING
         // TODO THIS METHOD NEEDS REFACTORING
@@ -520,19 +495,19 @@ public class TaskOverviewController extends AnchorPane {
         DateTimeFormatter dayFormatter = DateTimeFormatter.ofPattern("EEEE");
 
         // formats the date for the date label, eg. 1 April
-        DateTimeFormatter dateformatter = DateTimeFormatter.ofPattern("d MMMM");
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d MMMM");
 
 
         for (LocalDate day : days) {
             DayBox label;
             if (day.equals(now)) {
                 // special cases to show "Today" and "Tomorrow" instead
-                label = new DayBox("Today", day.format(dateformatter));
+                label = new DayBox("Today", day.format(dateFormatter));
             } else if (day.equals(now.plusDays(1))) {
-                label = new DayBox("Tomorrow", day.format(dateformatter));
+                label = new DayBox("Tomorrow", day.format(dateFormatter));
             } else {
                 label = new DayBox(day.format(dayFormatter),
-                                            day.format(dateformatter));
+                                            day.format(dateFormatter));
             }
             displayBoxes.add(label);
             boolean hasTaskOnThisDay = false;
@@ -547,11 +522,13 @@ public class TaskOverviewController extends AnchorPane {
                 label.dim();
             }
         }
-
         listView.setItems(displayBoxes);
-        
     }
-    
+
+    private void loadDisplayedTasks(ArrayList<Task> input) {
+        displayedTasks.setAll(input);
+    }
+
     private String formatTasksForDisplay(ArrayList<Task> input) {
         if (input.isEmpty()) {
             return MESSAGE_EMPTY;
@@ -580,7 +557,6 @@ public class TaskOverviewController extends AnchorPane {
         previousStates.push(new ArrayList<Task>(incompleteTasks));
         previousStates.push(new ArrayList<Task>(completedTasks));
     }
-
 
     // ================================================================
     // Testing methods
