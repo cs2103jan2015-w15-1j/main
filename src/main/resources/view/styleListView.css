@@ -70,7 +70,7 @@
  */
 
 .list-cell {
-	-fx-padding: 8;
+	-fx-padding: 5;
 	-fx-height:100%;
 	/* -fx-background-color:yellow; */
 	-fx-background-color: white;
