@@ -13,6 +13,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.cell.CheckBoxListCell;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.util.Callback;
 import main.java.Command;
@@ -21,6 +22,7 @@ import main.java.MainApp;
 import main.java.Storage;
 import main.java.Task;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -28,7 +30,7 @@ import java.util.List;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
-public class TaskOverviewController {
+public class TaskOverviewController extends AnchorPane {
     // ================================================================
     // FXML Fields
     // ================================================================
@@ -43,10 +45,10 @@ public class TaskOverviewController {
 
 //    @FXML
 //    private ListView<DayBox> listView;
-    
+
     @FXML
     private ListView<HBox> listView;
-    
+
     // ================================================================
     // Non-FXML Fields
     // ================================================================
@@ -57,6 +59,8 @@ public class TaskOverviewController {
 //    private ObservableList<DayBox> dayBoxes = FXCollections.observableArrayList();
     private ObservableList<HBox> dayBoxes = FXCollections.observableArrayList();
 
+    private final static String TASK_OVERVIEW_LOCATION = "/view/TaskOverview.fxml";
+
     // ================================================================
     // Methods
     // ================================================================
@@ -64,6 +68,16 @@ public class TaskOverviewController {
      * The constructor is called before the initialize() method.
      */
     public TaskOverviewController() {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource(TASK_OVERVIEW_LOCATION));
+        loader.setRoot(this);
+        loader.setController(this);
+
+        try {
+            loader.load();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         parser = DateParser.getInstance();
         storage = Storage.getInstance();
         String saveFileName = storage.getSaveFileName();

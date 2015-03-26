@@ -2,34 +2,38 @@ package main.resources.view;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import main.java.MainApp;
-import main.java.Task;
+import javafx.scene.layout.BorderPane;
 
-public class RootLayoutController {
+import java.io.IOException;
+
+public class RootLayoutController extends BorderPane {
     // ================================================================
     // FXML Fields
     // ================================================================
     @FXML
     private TextField userInput;
 
-    @FXML
-    private Label foo;
-
     // ================================================================
     // Non-FXML Fields
     // ================================================================
-    private MainApp mainApp;
     private TaskOverviewController taskOverviewController;
 
-    public RootLayoutController() {
-        FXMLLoader loader = new FXMLLoader();
-        loader.setLocation(MainApp.class.getResource("/view/RootLayout.fxml"));
-    }
+    private final String ROOT_LAYOUT_LOCATION = "/view/RootLayout.fxml";
 
+    public RootLayoutController() {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource(ROOT_LAYOUT_LOCATION));
+        loader.setRoot(this);
+        loader.setController(this);
+
+        try {
+            loader.load();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     /**
      * Initializes the root layout class. This method is automatically called
@@ -47,15 +51,6 @@ public class RootLayoutController {
             System.out.println(userInput.getText());
             userInput.setText("");
         }
-    }
-
-    /**
-     * Is called by the main application to give a reference back to itself.
-     *
-     * @param mainApp
-     */
-    public void setMainApp(MainApp mainApp) {
-        this.mainApp = mainApp;
     }
 
     public void setTaskOverviewController(TaskOverviewController controller) {

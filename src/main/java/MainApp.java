@@ -1,24 +1,16 @@
 package main.java;
 
 import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import main.resources.view.RootLayoutController;
 import main.resources.view.TaskOverviewController;
-
-import java.io.IOException;
-
 
 public class MainApp extends Application {
 	// ================================================================
 	// Fields
 	// ================================================================
 	private Stage primaryStage;
-	private BorderPane rootLayout;
 	private TaskOverviewController taskOverviewController;
 	private RootLayoutController rootLayoutController;
 
@@ -29,82 +21,26 @@ public class MainApp extends Application {
 		launch(args);
 	}
 
-	/**
-	 * Returns the main stage
-	 */
-	public Stage getPrimaryStage() {
-		return primaryStage;
-	}
-
 	@Override
 	public void start(Stage primaryStage) throws Exception{
 		this.primaryStage = primaryStage;
 		this.primaryStage.setTitle("Veto");
 
-		RootLayoutController rootLayoutController = new RootLayoutController();
-		Scene scene = new Scene(rootLayoutController);
-
-
-
 		initRootLayout();
 		showTaskOverview();
 
+		// Provide TOC handle in RLC so that user input can be passed to TOC
 		rootLayoutController.setTaskOverviewController(taskOverviewController);
 	}
 
-	/**
-	 * Initializes the root layout.
-	 */
 	public void initRootLayout() {
-		try {
-			// Load root layout from fxml file.`
-			FXMLLoader loader = new FXMLLoader();
-			loader.setLocation(MainApp.class.getResource("/view/RootLayout.fxml"));
-			rootLayout = (BorderPane) loader.load();
-
-			// Provide a handle in MainApp to rootLayoutController
-			rootLayoutController = loader.getController();
-
-			// Show the scene containing the root layout.
-			Scene scene = new Scene(rootLayout);
-			primaryStage.setScene(scene);
-			primaryStage.show();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		rootLayoutController = new RootLayoutController();
+		primaryStage.setScene(new Scene(rootLayoutController));
+		primaryStage.show();
 	}
 
-	/**
-	 * Shows the task overview inside the root layout.
-	 */
 	public void showTaskOverview() {
-		try {
-			// Load person overview.
-			FXMLLoader loader = new FXMLLoader();
-			loader.setLocation(MainApp.class.getResource("/view/TaskOverview.fxml"));
-			AnchorPane taskOverview = (AnchorPane) loader.load();
-
-			// Set person overview into the center of root layout.
-			rootLayout.setCenter(taskOverview);
-
-			// Give the controller access to the main app.
-			taskOverviewController = loader.getController();
-			taskOverviewController.setMainApp(this);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public void addDayBox() {
-		try {
-			// Load root layout from fxml file.`
-			FXMLLoader loader = new FXMLLoader();
-			loader.setLocation(MainApp.class.getResource("/view/DayBox.fxml"));
-			HBox dayBox = (HBox) loader.load();
-
-			rootLayout.setCenter(dayBox);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		taskOverviewController = new TaskOverviewController();
+		rootLayoutController.setCenter(taskOverviewController);
 	}
 }
