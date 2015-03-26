@@ -124,7 +124,7 @@ public class Task implements Cloneable {
     
     public boolean isOverdue() {
     	LocalDate nowDate = LocalDate.now();
-    	return getDate().isBefore(nowDate) || getDate().isEqual(nowDate);
+        return getDate() != null && nowDate.isAfter(getDate());
     }
 
 
