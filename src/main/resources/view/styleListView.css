@@ -37,8 +37,8 @@
 
 .root #userInput {
 	-fx-font: 16px Roboto;
-
 }
+
 
 /*
  * ================================================================
@@ -96,7 +96,7 @@
 
 .dayBox #date {
 	-fx-padding: 0 0 0 5;
-	-fx-text-fill: grey;
+	-fx-text-fill: gray;
 }
 
 
@@ -112,9 +112,13 @@
 	-fx-font-size: 16px;
 }
 
+.root #checkbox {
+	-fx-font-size: 11px;
+} 
+
 .taskBox #index {
 	-fx-padding: 0 5 0 5;
-	-fx-text-fill: black;
+	-fx-text-fill: dimgray;
 }
 
 .taskBox #description {
