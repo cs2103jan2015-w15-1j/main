@@ -5,11 +5,16 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.joestelmach.natty.DateGroup;
+import com.joestelmach.natty.ParseLocation;
 import com.joestelmach.natty.Parser;
+
+import edu.emory.mathcs.backport.java.util.Arrays;
 
 
 /**
@@ -24,7 +29,7 @@ import com.joestelmach.natty.Parser;
 
 //@author A0121520A
 public class DateParser {
-    private static final Logger logger = Logger.getLogger("Veto");
+    private static Logger logger;
 
     private static DateParser dateParser;
 
@@ -38,8 +43,14 @@ public class DateParser {
     private boolean isIncorrectlyParsingWords;
     private String incorrectlyParsedWord;
 
+    private String rawInput;
+
     private DateParser() {
-        logger.setLevel(Level.INFO);
+        logger = Logger.getLogger("Veto");
+        logger.setLevel(Level.OFF);
+        ConsoleHandler handler = new ConsoleHandler();
+        handler.setLevel(Level.OFF);
+        logger.addHandler(handler);
     }
 
     
@@ -55,7 +66,7 @@ public class DateParser {
     }
 
     public void parse(String input) {
-        initVariables();
+        initVariables(input);
         logger.log(Level.INFO, "Input: " + input);
         input = getWordsOutsideEscapeChars(input);
 
@@ -85,7 +96,8 @@ public class DateParser {
     // Methods to initialise and generate variables
     // ================================================================
 
-    private void initVariables() {
+    private void initVariables(String input) {
+        rawInput = input;
         dates = new ArrayList<LocalDateTime>();
         parsedWords = "";
         parser = new Parser();
@@ -113,7 +125,6 @@ public class DateParser {
 
     private void generateDatesAndParsedWords(List<DateGroup> groups) {
         for (DateGroup group : groups) {
-
             parsedWords = group.getText();
             logger.log(Level.INFO, "Parsed words: " + parsedWords);
             List<Date> listOfDates = group.getDates();
@@ -137,10 +148,10 @@ public class DateParser {
             // Natty sometimes incorrectly uses words in the input. When numbers
             // exist in the input, such as "create 20 word poem", Natty takes
             // the numbers thinking it's part of a date.
-
-            if (hasErrorCausingWord(group)) {
+            
+            incorrectlyParsedWord = getIncorrectlyParsedWord(group);
+            if (incorrectlyParsedWord != null) {
                 isIncorrectlyParsingWords = true;
-                incorrectlyParsedWord = getIncorrectlyParsedWord(group);
                 logger.log(Level.INFO, "Offending word: {0}",
                            incorrectlyParsedWord);
                 break;
@@ -148,23 +159,42 @@ public class DateParser {
         }
     }
 
-    private boolean hasErrorCausingWord(DateGroup group) {
+    private String getIncorrectlyParsedWord(DateGroup group) {
 
         // Natty generates several fields and if the "hour" field appears,
         // it should have 2 elements to indicate a start and end time. The
         // presense of only 1 element indicates an error.
 
-        return (group.getParseLocations().containsKey(OFFENDING_NATTY_KEY) && group.getParseLocations()
-                                                                                   .get(OFFENDING_NATTY_KEY)
-                                                                                   .size() == 1);
-    }
-
-    private String getIncorrectlyParsedWord(DateGroup group) {
-        return group.getParseLocations()
-                    .get(OFFENDING_NATTY_KEY)
+        Map<String, List<ParseLocation>> pLocations = group.getParseLocations();
+        logger.log(Level.FINE, "Parse locations: " + pLocations);
+        if (pLocations.containsKey(OFFENDING_NATTY_KEY) &&
+                                 pLocations.get(OFFENDING_NATTY_KEY).size() == 1) {
+            return pLocations.get(OFFENDING_NATTY_KEY)
                     .get(0)
                     .toString();
+        } else if (pLocations.containsKey("date") && !pLocations.containsKey("relaxed_month")) {
+            ArrayList<String> splitInput = new ArrayList<String> (Arrays.asList(rawInput.split(" ")));
+            for (ParseLocation day : pLocations.get("date")) {                
+                if (!splitInput.contains(day.toString())) {
+                    return day.toString();
+                }
+            }
+        }
+        return null;
     }
+
+//    private String getIncorrectlyParsedWord(DateGroup group) {
+//        Map<String, List<ParseLocation>> pLocations = group.getParseLocations();
+//        
+//        if (pLocations.containsKey(OFFENDING_NATTY_KEY) && pLocations.get(OFFENDING_NATTY_KEY).size() == 1) {
+//            return group.getParseLocations()
+//                        .get(OFFENDING_NATTY_KEY)
+//                        .get(0)
+//                        .toString();
+//        } else {
+//            
+//        }
+//    }
 
     private String modifyInput(String input) {
         // add the escape character before and after the incorrectly used word
