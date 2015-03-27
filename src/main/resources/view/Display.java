@@ -91,17 +91,17 @@ public class Display extends AnchorPane {
     // ================================================================
     // Logic methods
     // ================================================================
-    private int addFloatingTasks(ArrayList<Task> listOfTasks, int i) {
+    private int addFloatingTasks(ArrayList<Task> listOfTasks, int index) {
         DayBox floating = new DayBox(LABEL_FLOATING, "");
         displayBoxes.add(floating);
 
         boolean hasFloating = false;
 
-        for (Task t : listOfTasks) {
-            if (t.getType() == Task.Type.FLOATING) {
+        for (Task task : listOfTasks) {
+            if (task.getType() == Task.Type.FLOATING) {
                 hasFloating = true;
-                displayBoxes.add(new TaskBox(i, t.getDescription()));
-                i++;
+                displayBoxes.add(new TaskBox(index, task.getDescription()));
+                index++;
             }
         }
 
@@ -109,10 +109,10 @@ public class Display extends AnchorPane {
             floating.dim();
         }
 
-        return i;
+        return index;
     }
 
-    private int addOverdueTasks(ArrayList<Task> listOfTasks, int i) {
+    private int addOverdueTasks(ArrayList<Task> listOfTasks, int index) {
         // add second category
         DayBox overdue = new DayBox(LABEL_OVERDUE, "");
         displayBoxes.add(overdue);
@@ -120,12 +120,12 @@ public class Display extends AnchorPane {
         boolean hasOverdue = false;
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, d MMMM y");
 
-        for (Task t : listOfTasks) {
-            if (t.isOverdue()) {
+        for (Task task : listOfTasks) {
+            if (task.isOverdue()) {
                 hasOverdue = true;
-                displayBoxes.add(new TaskBox(i, t.getDescription() + " on " +
-                                                t.getDate().format(formatter)));
-                i++;
+                displayBoxes.add(new TaskBox(index, task.getDescription() + " on " +
+                                                task.getDate().format(formatter)));
+                index++;
             }
         }
 
@@ -133,12 +133,12 @@ public class Display extends AnchorPane {
             overdue.dim();
         }
 
-        return i;
+        return index;
     }
 
     private int addThisWeeksTasks(ArrayList<Task> listOfTasks,
                                   LocalDate now,
-                                  int i) {
+                                  int index) {
         // generate the dates of the 7 days from today
         ArrayList<LocalDate> days = generateDaysOfWeek(now);
 
@@ -155,11 +155,11 @@ public class Display extends AnchorPane {
 
             boolean hasTaskOnThisDay = false;
 
-            for (Task t : listOfTasks) {
-                if (day.equals(t.getDate())) {
+            for (Task task : listOfTasks) {
+                if (day.equals(task.getDate())) {
                     hasTaskOnThisDay = true;
-                    displayBoxes.add(new TaskBox(i, t.getDescription()));
-                    i++;
+                    displayBoxes.add(new TaskBox(index, task.getDescription()));
+                    index++;
                 }
             }
 
@@ -167,7 +167,7 @@ public class Display extends AnchorPane {
                 label.dim();
             }
         }
-        return i;
+        return index;
     }
 
     private DayBox generateDayLabel(LocalDate now,
