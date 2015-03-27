@@ -6,6 +6,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
+import main.java.Controller;
 
 import java.io.IOException;
 
@@ -19,7 +20,8 @@ public class RootLayoutController extends BorderPane {
     // ================================================================
     // Non-FXML Fields
     // ================================================================
-    private TaskOverviewController taskOverviewController;
+    private Display display;
+    private Controller controller;
 
     private final String ROOT_LAYOUT_LOCATION = "/view/RootLayout.fxml";
 
@@ -47,13 +49,17 @@ public class RootLayoutController extends BorderPane {
     @FXML
     public void handleEnterPressed(KeyEvent event) {
         if (event.getCode() == KeyCode.ENTER) {
-            taskOverviewController.executeCommand(userInput.getText());
+            controller.executeCommand(userInput.getText());
             System.out.println(userInput.getText());
             userInput.setText("");
         }
     }
 
-    public void setTaskOverviewController(TaskOverviewController controller) {
-        this.taskOverviewController = controller;
+    public void setDisplay(Display display) {
+        this.display = display;
+    }
+
+    public void setController(Controller controller) {
+        this.controller = controller;
     }
 }

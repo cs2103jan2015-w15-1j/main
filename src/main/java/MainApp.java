@@ -4,15 +4,16 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import main.resources.view.RootLayoutController;
-import main.resources.view.TaskOverviewController;
+import main.resources.view.Display;
 
 public class MainApp extends Application {
 	// ================================================================
 	// Fields
 	// ================================================================
 	private Stage primaryStage;
-	private TaskOverviewController taskOverviewController;
+	private Display display;
 	private RootLayoutController rootLayoutController;
+	private Controller controller;
 
 	// ================================================================
 	// Methods
@@ -27,10 +28,17 @@ public class MainApp extends Application {
 		this.primaryStage.setTitle("Veto");
 
 		initRootLayout();
-		showTaskOverview();
+		initDisplay();
+		initController();
 
 		// Provide a TOC handle inside of RLC so that user input can be passed to TOC from RLC
-		rootLayoutController.setTaskOverviewController(taskOverviewController);
+		rootLayoutController.setController(controller);
+
+		// Provide a display handle in controller so that controller can pass message to display
+		controller.setDisplay(display);
+
+		// Legacy code
+		rootLayoutController.setDisplay(display);
 	}
 
 	public void initRootLayout() {
@@ -39,8 +47,14 @@ public class MainApp extends Application {
 		primaryStage.show();
 	}
 
-	public void showTaskOverview() {
-		taskOverviewController = new TaskOverviewController();
-		rootLayoutController.setCenter(taskOverviewController);
+	public void initDisplay() {
+		display = new Display();
+		rootLayoutController.setCenter(display);
+	}
+
+	public void initController() {
+		controller = new Controller();
+		controller.setDisplay(display);
+		controller.onloadDisplay();
 	}
 }

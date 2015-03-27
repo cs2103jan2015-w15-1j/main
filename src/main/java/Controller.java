@@ -1,21 +1,54 @@
 package main.java;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.control.ListView;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
+import main.java.Command;
+import main.java.DateParser;
+import main.java.Storage;
+import main.java.Task;
+import main.resources.view.DayBox;
+import main.resources.view.Display;
+import main.resources.view.TaskBox;
+
+import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 import java.util.stream.Collectors;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 
 public class Controller {
+    // ================================================================
+    // Fields
+    // ================================================================
+    private String saveFileName;
+    private Storage storage;
+    private boolean timeToExit;
 
-    private static Logger LOGGER = Logger.getLogger("VetoController");
+    private ArrayList<Task> incompleteTasks;
+    private ArrayList<Task> completedTasks;
 
+    private Stack<ArrayList<Task>> previousStates;
+
+    private ObservableList<Task> displayedTasks = FXCollections.observableArrayList();
+    private ObservableList<HBox> displayBoxes = FXCollections.observableArrayList();
+    private DateParser parser;
+
+    private Display display;
+
+    // ================================================================
+    // Constants
+    // ================================================================
+    private final static String TASK_OVERVIEW_LOCATION = "/view/TaskOverview.fxml";
     private static final String MESSAGE_SAVE_FILE_READY = "Welcome to main.java.Veto. %s is ready for use.";
-
     private static final String MESSAGE_EMPTY = "There is currently no task.\n";
     private static final String MESSAGE_ADD = "main.java.Task has been successfully added:\n     Description: %s\n     Deadline: %s\n     Time: %s\n";
     private static final String MESSAGE_NOT_APPL = "Not applicable";
@@ -27,34 +60,47 @@ public class Controller {
     private static final String MESSAGE_UNDO = "Last command has been undone. \n";
     private static final String MESSAGE_INVALID_COMMAND = "Invalid command. \n";
     private static final String MESSAGE_NO_UNDO = "Already at oldest change, unable to undo. \n";
-   
-    private String saveFileName;
-    private Storage storage;
-    private DateParser parser;
-    private boolean timeToExit;
 
-    private ArrayList<Task> incompleteTasks;
-    private ArrayList<Task> completedTasks;
-
-    private Stack<ArrayList<Task>> previousStates;
-
+    // ================================================================
+    // Constructor
+    // ================================================================
+    /**
+     * The constructor is called before the initialize() method.
+     */
     public Controller() {
-        timeToExit = false;
         parser = DateParser.getInstance();
         storage = Storage.getInstance();
-        saveFileName = storage.getSaveFileName();
+        String saveFileName = storage.getSaveFileName();
 
         ArrayList<Task> allTasks = storage.readFile();
+        for (Task task : allTasks) {
+            displayedTasks.add(task);
+        }
+
+        timeToExit = false;
+
         incompleteTasks = new ArrayList<Task>(getIncompleteTasks(allTasks));
         completedTasks = new ArrayList<Task>(getCompletedTasks(allTasks));
 
         previousStates = new Stack<ArrayList<Task>>();
+
+        System.out.println(incompleteTasks.toString());
+        System.out.println(sortToDisplay(incompleteTasks).toString());
     }
+
+    public void onloadDisplay() {
+        display.updateDisplay(displayedTasks);
+    }
+
+    /**
+     * Initializes the controller class. This method is automatically called
+     * after the fxml file has been loaded.
+     */
+
 
     // ================================================================
     // Public methods
     // ================================================================
-
     public String getWelcomeMessage() {
         return String.format(MESSAGE_SAVE_FILE_READY, saveFileName);
     }
@@ -78,15 +124,14 @@ public class Controller {
                 updateState();
                 return editTask(arguments);
             case DISPLAY :
-                return formatTasksForDisplay(incompleteTasks);
+                return null;
             case COMPLETE :
                 updateState();
                 return completeTask(arguments);
             case INCOMPLETE :
-            	updateState();
-            	return incompleteTask(arguments);
+                updateState();
+                return incompleteTask(arguments);
             case UNDO :
-                LOGGER.info(incompleteTasks.toString());
                 return undo();
             case SEARCH :
                 ArrayList<Task> searchResults = search(arguments);
@@ -99,12 +144,12 @@ public class Controller {
             default :
                 return null;
         }
+        // put the refresh gui here
     }
 
     public boolean isTimeToExit() {
         return timeToExit;
     }
-
 
     // ================================================================
     // Initialization methods
@@ -116,22 +161,78 @@ public class Controller {
 
     private List<Task> getIncompleteTasks(ArrayList<Task> allTasks) {
         List<Task> incompleteTasks = allTasks.stream()
-                                             .filter(task -> !task.isCompleted())
-                                             .collect(Collectors.toList());
+                .filter(task -> !task.isCompleted())
+                .collect(Collectors.toList());
         return incompleteTasks;
     }
 
     private List<Task> getCompletedTasks(ArrayList<Task> allTasks) {
         List<Task> completedTasks = allTasks.stream()
-                                           .filter(task -> task.isCompleted())
-                                           .collect(Collectors.toList());
+                .filter(task -> task.isCompleted())
+                .collect(Collectors.toList());
         return completedTasks;
     }
 
+    public void setDisplay(Display display) {
+        this.display = display;
+    }
 
     // ================================================================
     // Logic methods
     // ================================================================
+
+    // TODO NEED TO REPLACE WITH ADAM'S UPDATED METHOD
+    private ArrayList<Task> sortToDisplay(ArrayList<Task> list) {
+        ArrayList<Task> overdueTasks = new ArrayList<Task>();
+        ArrayList<Task> floatingTasks = new ArrayList<Task>();
+        ArrayList<Task> notOverdueTasks = new ArrayList<Task>();
+        ArrayList<Task> finalList = new ArrayList<Task>();
+
+        // Separate the floating, overdue and pending
+        for (Task task: list) {
+            if (task.getType() == Task.Type.FLOATING) {
+                floatingTasks.add(task);
+            } else if (task.isOverdue()) {
+                overdueTasks.add(task);
+            } else {
+                notOverdueTasks.add(task);
+            }
+        }
+
+        // Sort according to what we discussed
+        overdueTasks = sortByDateAndType(overdueTasks);
+        notOverdueTasks = sortByDateAndType(notOverdueTasks);
+
+        finalList.addAll(floatingTasks);
+        finalList.addAll(overdueTasks);
+        finalList.addAll(notOverdueTasks);
+
+        return finalList;
+    }
+
+    private ArrayList<Task> sortByDateAndType(ArrayList<Task> list) {
+        ArrayList<Task> output = new ArrayList<Task>();
+
+        for (Task task: list) {
+            if (output.size() == 0) {
+                output.add(task);
+            } else {
+                for (Task something: output) {
+                    if (task.getDate().isBefore(something.getDate())) {
+                        output.add(output.indexOf(something), task);
+                        break;
+                    } else if (task.getDate().isEqual(something.getDate())) {
+                        if (something.getType() == Task.Type.TIMED && task.getType() == Task.Type.DEADLINE) {
+                            output.add(output.indexOf(something), task);
+                            break;
+                        }
+                    }
+                }
+                output.add(task);
+            }
+        }
+        return output;
+    }
 
     private String addTask(String input) {
         parser.parse(input);
@@ -139,81 +240,31 @@ public class Controller {
         String parsedWords = parser.getParsedWords();
         Task task = new Task(input, parsedDates, parsedWords);
 
+        displayedTasks.add(task);
         incompleteTasks.add(task);
-        sortToDisplay(incompleteTasks);
         updateStorageWithAllTasks();
+
+        // Legacy code return type
         if (task.getType() == Task.Type.FLOATING) {
-        	return String.format(MESSAGE_ADD, task.getDescription(), MESSAGE_NOT_APPL, MESSAGE_NOT_APPL);
+            return String.format(MESSAGE_ADD, task.getDescription(), MESSAGE_NOT_APPL, MESSAGE_NOT_APPL);
         } else if (task.getType() == Task.Type.DEADLINE) {
-        	return String.format(MESSAGE_ADD, task.getDescription(), task.getDate(), MESSAGE_NOT_APPL);
+            return String.format(MESSAGE_ADD, task.getDescription(), task.getDate(), MESSAGE_NOT_APPL);
         } else {
-        	String formattedTime = task.getStartTime() + " to " + task.getEndTime();
-        	return String.format(MESSAGE_ADD, task.getDescription(), task.getDate(), formattedTime);
+            String formattedTime = task.getStartTime() + " to " + task.getEndTime();
+            return String.format(MESSAGE_ADD, task.getDescription(), task.getDate(), formattedTime);
         }
-    }
-    
-    private void sortToDisplay(ArrayList<Task> list) {
-    	ArrayList<Task> overdueTasks = new ArrayList<Task>();
-    	ArrayList<Task> floatingTasks = new ArrayList<Task>();
-    	ArrayList<Task> notOverdueTasks = new ArrayList<Task>();
-    	ArrayList<Task> finalList = new ArrayList<Task>();
-    	
-    	// Separate the floating, overdue and pending
-    	for (Task task: list) {
-    		if (task.getType() == Task.Type.FLOATING) {
-    			floatingTasks.add(task);
-    		} else if (task.isOverdue()) {
-    			overdueTasks.add(task);
-    		} else {
-    			notOverdueTasks.add(task);
-    		}
-    	}
-    	
-    	// Sort according to what we discussed
-    	overdueTasks = sortByDateAndType(overdueTasks);
-    	notOverdueTasks = sortByDateAndType(notOverdueTasks);
-    	
-    	finalList.addAll(floatingTasks);
-    	finalList.addAll(overdueTasks);
-    	finalList.addAll(notOverdueTasks);
-    	
-    	list = finalList;
-    	
-    }
-    
-    private ArrayList<Task> sortByDateAndType(ArrayList<Task> list) {
-    	ArrayList<Task> output = new ArrayList<Task>();
-    	
-    	for (Task task: list) {
-    		if (output.size() == 0) {
-    			output.add(task);
-    		} else {
-    			for (Task something: output) {
-    				if (task.getDate().isBefore(something.getDate())) {
-    					output.add(output.indexOf(something), task);
-    					break;
-    				} else if (task.getDate().isEqual(something.getDate())) {
-    					if (something.getType() == Task.Type.TIMED && task.getType() == Task.Type.DEADLINE) {
-    						output.add(output.indexOf(something), task);
-    						break;
-    					} 
-    				} 
-    			}
-    			output.add(task);
-    		}
-    	}
-    	return output;
     }
 
     private String deleteTask(String input) {
         // ArrayList is 0-indexed, but Tasks are displayed to users as 1-indexed
         try {
             int removalIndex = Integer.parseInt(input) - 1;
-            Task task = incompleteTasks.remove(removalIndex);
-            updateStorageWithAllTasks();
-            sortToDisplay(incompleteTasks);
+//            Task task = incompleteTasks.remove(removalIndex);
+//            updateStorageWithAllTasks();
+            displayedTasks.remove(removalIndex);
 
-            return String.format(MESSAGE_DELETE, task.getDescription());
+            return null;
+//            return String.format(MESSAGE_DELETE, task.getDescription());
         } catch (Exception e) {
             return MESSAGE_INVALID_COMMAND;
         }
@@ -249,6 +300,7 @@ public class Controller {
             editArgument.append(inputArray[i] + " ");
         }
 
+        // Filter for edit Description or Deadline
         try {
             Task task = incompleteTasks.get(editIndex);
             if (editType.equals("d") || editType.equals("de")) {
@@ -267,7 +319,6 @@ public class Controller {
             e.printStackTrace();
             return MESSAGE_INVALID_COMMAND;
         }
-        sortToDisplay(incompleteTasks);
         return MESSAGE_EDIT;
     }
 
@@ -280,7 +331,6 @@ public class Controller {
             // Move the completed task from incompleteTasks to completeTasks
             completedTasks.add(incompleteTasks.remove(index));
             updateStorageWithAllTasks();
-            sortToDisplay(incompleteTasks);
 
             return String.format(MESSAGE_COMPLETE, task.getDescription());
         } catch (NumberFormatException | IndexOutOfBoundsException e) {
@@ -289,7 +339,7 @@ public class Controller {
     }
 
     private String incompleteTask(String input) {
-    	try {
+        try {
             int index = Integer.parseInt(input.trim()) - 1;
             Task task = completedTasks.get(index);
             task.markAsIncomplete();
@@ -297,7 +347,6 @@ public class Controller {
             // Move the completed task from completeTasks to incompleteTasks
             incompleteTasks.add(completedTasks.remove(index));
             updateStorageWithAllTasks();
-            sortToDisplay(incompleteTasks);
 
             return String.format(MESSAGE_INCOMPLETE, task.getDescription());
         } catch (NumberFormatException | IndexOutOfBoundsException e) {
@@ -316,9 +365,6 @@ public class Controller {
             completedTasks = previousCompleteTasks;
 
             updateStorageWithAllTasks();
-            sortToDisplay(incompleteTasks);
-
-            LOGGER.info(incompleteTasks.toString());
 
             return MESSAGE_UNDO;
         }
@@ -327,20 +373,22 @@ public class Controller {
     private ArrayList<Task> search(String input) {
         // TODO check main.java.Task.getInfo() implementation
         ArrayList<Task> searchResults = new ArrayList<Task>();
-        
+
         parser.parse(input);
         ArrayList<LocalDateTime> searchDate = parser.getDates();
         ArrayList<Task> allTasks = concatenateTasks(incompleteTasks, completedTasks);
-        
-        
+
         for (Task task : allTasks) {
-            String taskInfo = task.getDescription();
-            if (taskInfo.contains(input)) {
+            String taskInfo = task.getDescription().toLowerCase();
+            if (taskInfo.contains(input.toLowerCase())) {
                 searchResults.add(task);
             } else if (searchDate.size()>0 && searchDate.get(0).toLocalDate().equals(task.getDate())) {
                 searchResults.add(task);
             }
         }
+
+        ObservableList<Task> results = FXCollections.observableArrayList();
+        results.addAll(searchResults);
         return searchResults;
     }
 
@@ -358,6 +406,11 @@ public class Controller {
     // Utility methods
     // ================================================================
 
+
+    private void loadDisplayedTasks(ArrayList<Task> input) {
+        displayedTasks.setAll(input);
+    }
+
     private String formatTasksForDisplay(ArrayList<Task> input) {
         if (input.isEmpty()) {
             return MESSAGE_EMPTY;
@@ -365,20 +418,11 @@ public class Controller {
 
         String display = "";
         for (Task task : input) {
-            display += task.toString();
+            display += task;
         }
         return display;
     }
 
-    /**
-     *
-     * Clones all the Task objects in the supplied ArrayList<Task> and adds them to the
-     * output ArrayList.
-     *
-     * @param first
-     * @param second
-     * @return
-     */
     private ArrayList<Task> concatenateTasks(ArrayList<Task> first, ArrayList<Task> second) {
         ArrayList<Task> output = new ArrayList<Task>();
         output.addAll(first);
@@ -392,22 +436,9 @@ public class Controller {
     }
 
     private void updateState() {
-        previousStates.push(cloneState(incompleteTasks));
-        previousStates.push(cloneState(completedTasks));
+        previousStates.push(new ArrayList<Task>(incompleteTasks));
+        previousStates.push(new ArrayList<Task>(completedTasks));
     }
-
-    private ArrayList<Task> cloneState(ArrayList<Task> input) {
-        ArrayList<Task> output = new ArrayList<Task>();
-        try {
-            for (Task task : input) {
-                output.add(task.clone());
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return output;
-    }
-
 
     // ================================================================
     // Testing methods
@@ -425,4 +456,5 @@ public class Controller {
         ArrayList<Task> emptyArr = new ArrayList<Task>();
         storage.updateFiles(emptyArr);
     }
+
 }
