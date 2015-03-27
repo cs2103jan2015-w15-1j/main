@@ -112,85 +112,46 @@ public class Controller {
         boolean switchDisplay = false;
 
         switch (commandType) {
-<<<<<<< HEAD
-            case SETSAVEFILE :
-                return setSaveFileDirectory(arguments);
-            case ADD :  // DONE
-                updateState();
-                addTask(arguments);
-                break;
-            case DELETE :  // DONE
-                updateState();
-                deleteTask(arguments);
-                break;
-            case EDIT :
-                updateState();
-                editTask(arguments);
-                break;
-            case DISPLAY :
-            case COMPLETE :  // DONE
-                updateState();
-                completeTask(arguments);
-                break;
-            case INCOMPLETE :
-                updateState();
-                break;
-//                return incompleteTask(arguments);
-            case UNDO :
-                return undo();
-            case SEARCH :
-            	searchedList = search(arguments);
-            	this.arguments = arguments;
-            	switchDisplay = true;
-                break;
-            case INVALID :
-                return invalid();
-            case EXIT :
-                timeToExit = true;
-                return exit();
-            default :
-                return null;
-=======
-        case SETSAVEFILE:
-            feedback =  setSaveFileDirectory(arguments);
-        case ADD: // DONE
-            updateState();
-            feedback = addTask(arguments);
-            break;
-        case DELETE: // DONE
-            updateState();
-            feedback = deleteTask(arguments);
-            break;
-        case EDIT:
-            updateState();
-            feedback = editTask(arguments);
-            break;
-        case DISPLAY:
-            return null;
-        case COMPLETE: // DONE
-            updateState();
-            feedback = completeTask(arguments);
-            break;
-        case INCOMPLETE:
-            updateState();
-            break;
-        // return incompleteTask(arguments);
-        case UNDO:
-            feedback =  undo();
-            break;
-        case SEARCH:
-            searchedList = search(arguments);
-            this.arguments = arguments;
-            switchDisplay = true;
-            break;
-        case INVALID:
-            feedback =  invalid();
-        case EXIT:
-            timeToExit = true;
-            feedback =  exit();
-        default:
-            break;
->>>>>>> origin/master
+        	case SETSAVEFILE:
+	            feedback =  setSaveFileDirectory(arguments);
+	        case ADD: // DONE
+	            updateState();
+	            feedback = addTask(arguments);
+	            break;
+	        case DELETE: // DONE
+	            updateState();
+	            feedback = deleteTask(arguments);
+	            break;
+	        case EDIT:
+	            updateState();
+	            feedback = editTask(arguments);
+	            break;
+	        case DISPLAY:
+	            return null;
+	        case COMPLETE: // DONE
+	            updateState();
+	            feedback = completeTask(arguments);
+	            break;
+	        case INCOMPLETE:
+	            updateState();
+	            break;
+	        // return incompleteTask(arguments);
+	        case UNDO:
+	            feedback =  undo();
+	            break;
+	        case SEARCH:
+	            searchedList = search(arguments);
+	            this.arguments = arguments;
+	            switchDisplay = true;
+	            break;
+	        case INVALID:
+	            feedback =  invalid();
+	        case EXIT:
+	            timeToExit = true;
+	            feedback =  exit();
+	        default:
+	            break;
+
         }
         // I think need to sort all tasks so that the index is correct (my logic
         // could be wrong)
