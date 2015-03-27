@@ -91,6 +91,7 @@ public class TaskOverviewController extends AnchorPane {
         // Causes GUI to display the tasks
         updateDisplay(displayedTasks);
 
+        // Listener for any changes made to displayedTasks
         ListChangeListener<Task> listener = new ListChangeListener<Task>() {
             public void onChanged(ListChangeListener.Change<? extends Task> c) {
                 updateDisplay(displayedTasks);
@@ -104,6 +105,10 @@ public class TaskOverviewController extends AnchorPane {
         completedTasks = new ArrayList<Task>(getCompletedTasks(allTasks));
 
         previousStates = new Stack<ArrayList<Task>>();
+
+        System.out.println(incompleteTasks.toString());
+        System.out.println(sortToDisplay(incompleteTasks).toString());
+
     }
 
     /**
