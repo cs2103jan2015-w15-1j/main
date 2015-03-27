@@ -300,7 +300,8 @@ public class Task implements Cloneable {
 //        } else {
 //            result += HEADER_TIME + getStartTime() + " to " + getEndTime() + "\n\n";
 //        }
-        String result = Character.toUpperCase(getDescription().charAt(0)) + getDescription().substring(1);
+        String result = getDescription();
+//        String result = Character.toUpperCase(getDescription().charAt(0)) + getDescription().substring(1);
         if (getDate() != null) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, d MMMM y");
             // javadoc reference: http://goo.gl/GCyd5E
