@@ -76,7 +76,6 @@
 	-fx-background-color: white;
 }
 
-
 /*
  * ================================================================
  * DayBox styles
@@ -110,12 +109,12 @@
  */
 
 .taskBox {
-	-fx-padding: 0 0 0 10;
+	-fx-padding: 0 0 0 20;
 	-fx-font-family: Roboto;
 	-fx-font-size: 16px;
 }
 
-.root #checkbox {
+.taskBox #checkbox {
 	-fx-font-size: 11px;
 } 
 
@@ -128,6 +127,12 @@
 	-fx-padding: 0 0 0 5;
 	-fx-text-fill: black;
 }
+
+/*
+.taskBox #description .text {
+	-fx-strikethrough: true;
+}
+*/
 
 /* not implemented yet */
 .taskBox #delete {

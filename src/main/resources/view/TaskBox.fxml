@@ -6,11 +6,15 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.HBox?>
 
-<fx:root alignment="CENTER_LEFT" prefWidth="400.0" styleClass="taskBox" type="HBox" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root alignment="CENTER_LEFT" styleClass="taskBox" type="HBox" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <CheckBox fx:id="checkbox" mnemonicParsing="false" text="" />
       <Label fx:id="index" text="Index" />
       <Label fx:id="description" text="Description" />
-      <Button fx:id="delete" alignment="CENTER_RIGHT" contentDisplay="CENTER" mnemonicParsing="false" text="Delete" visible="false" />
+      <HBox alignment="CENTER_RIGHT" nodeOrientation="LEFT_TO_RIGHT" HBox.hgrow="ALWAYS">
+         <children>
+            <Button fx:id="delete" alignment="CENTER_RIGHT" contentDisplay="CENTER" graphicTextGap="0.0" mnemonicParsing="false" text="Delete" textAlignment="CENTER" visible="false" />
+         </children>
+      </HBox>
    </children>
 </fx:root>
