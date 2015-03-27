@@ -36,6 +36,7 @@ public class TaskOverviewController extends AnchorPane {
     private Storage storage;
     private boolean timeToExit;
 
+    private ArrayList<Task> allTasks;  // Newly added
     private ArrayList<Task> incompleteTasks;
     private ArrayList<Task> completedTasks;
 
@@ -49,12 +50,12 @@ public class TaskOverviewController extends AnchorPane {
     // Constants
     // ================================================================
     private final static String TASK_OVERVIEW_LOCATION = "/view/TaskOverview.fxml";
-    private static final String MESSAGE_SAVE_FILE_READY = "Welcome to main.java.Veto. %s is ready for use.";
+    private static final String MESSAGE_SAVE_FILE_READY = "Welcome to Veto. %s is ready for use.";
     private static final String MESSAGE_EMPTY = "There is currently no task.\n";
-    private static final String MESSAGE_ADD = "main.java.Task has been successfully added:\n     Description: %s\n     Deadline: %s\n     Time: %s\n";
+    private static final String MESSAGE_ADD = "Task has been successfully added:\n     Description: %s\n     Deadline: %s\n     Time: %s\n";
     private static final String MESSAGE_NOT_APPL = "Not applicable";
-    private static final String MESSAGE_DELETE = "main.java.Task has been successfully deleted:\n Description: %s \n";
-    private static final String MESSAGE_EDIT = "main.java.Task has been successfully edited.\n";
+    private static final String MESSAGE_DELETE = "Task has been successfully deleted:\n Description: %s \n";
+    private static final String MESSAGE_EDIT = "Task has been successfully edited.\n";
     private static final String MESSAGE_COMPLETE = "\"%s\" completed. \n";
     private static final String MESSAGE_INCOMPLETE = "\"%s\" incompleted. \n";
     private static final String MESSAGE_EXIT = "Goodbye!";
@@ -250,23 +251,29 @@ public class TaskOverviewController extends AnchorPane {
 
     private ArrayList<Task> sortByDateAndType(ArrayList<Task> list) {
     	ArrayList<Task> output = new ArrayList<Task>();
-
+    	boolean isSorted;
+    	
     	for (Task task: list) {
+    		isSorted = false;
     		if (output.size() == 0) {
     			output.add(task);
     		} else {
     			for (Task something: output) {
     				if (task.getDate().isBefore(something.getDate())) {
     					output.add(output.indexOf(something), task);
+    					isSorted = true;
     					break;
     				} else if (task.getDate().isEqual(something.getDate())) {
     					if (something.getType() == Task.Type.TIMED && task.getType() == Task.Type.DEADLINE) {
     						output.add(output.indexOf(something), task);
+        					isSorted = true;
     						break;
-    					}
-    				}
+    					} 
+    				} 
     			}
-    			output.add(task);
+    			if (!isSorted) {
+    				output.add(task);
+    			}
     		}
     	}
     	return output;
@@ -454,7 +461,7 @@ public class TaskOverviewController extends AnchorPane {
         // re-initialise displayBoxes
         displayBoxes = FXCollections.observableArrayList();
         LocalDate now = LocalDate.now();
-        int i = 1;
+        int index = 1;
 
         // add first category
         DayBox floating = new DayBox("Floating", "");
@@ -463,11 +470,11 @@ public class TaskOverviewController extends AnchorPane {
         for (Task t : listOfTasks) {
             if (t.getType() == Task.Type.FLOATING) {
                 hasFloating = true;
-                displayBoxes.add(new TaskBox(i, t.getDescription()));
-                i++;
+                displayBoxes.add(new TaskBox(index, t.getDescription()));
+                index++;
             }
         }
-        if (!hasFloating) {
+        if (!hasFloating) { // Dim category if there is no task in that category
             floating.dim();
         }
 
@@ -476,23 +483,23 @@ public class TaskOverviewController extends AnchorPane {
         displayBoxes.add(overdue);
         boolean hasOverdue = false;
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, d MMMM y");
-        for (Task t : listOfTasks) {
-            if (t.isOverdue()) {
+        for (Task task : listOfTasks) {
+            if (task.isOverdue()) {
                 hasOverdue = true;
-                displayBoxes.add(new TaskBox(i, t.getDescription() + " on " +
-                                                t.getDate().format(formatter)));
-                i++;
+                displayBoxes.add(new TaskBox(index, task.getDescription() + " on " +
+                                                task.getDate().format(formatter)));
+                index++;
             }
         }
-        if (!hasOverdue) {
+        if (!hasOverdue) { // Dim category if there is no task in that category
             overdue.dim();
         }
 
         // generate the dates of the 7 days from today
         ArrayList<LocalDate> days = new ArrayList<LocalDate>();
         days.add(now);
-        for (int j = 1; j < 7; j++) {
-            days.add(now.plusDays(j));
+        for (int nextDay = 1; nextDay < 7; nextDay++) {
+            days.add(now.plusDays(nextDay));
         }
 
         // formats the date for the day label, eg. Monday, Tuesday, etc
@@ -515,14 +522,14 @@ public class TaskOverviewController extends AnchorPane {
             }
             displayBoxes.add(label);
             boolean hasTaskOnThisDay = false;
-            for (Task t : listOfTasks) {
-                if (t.getDate() != null && t.getDate().isEqual(day)) {
+            for (Task task : listOfTasks) {
+                if (task.getDate() != null && task.getDate().isEqual(day)) {
                     hasTaskOnThisDay = true;
-                    displayBoxes.add(new TaskBox(i, t.getDescription()));
-                    i++;
+                    displayBoxes.add(new TaskBox(index, task.getDescription() + ", " + task.getStartTime() + " to " + task.getEndTime()));
+                    index++;
                 }
             }
-            if (!hasTaskOnThisDay) {
+            if (!hasTaskOnThisDay) { // Dim category if there is no task in that category
                 label.dim();
             }
         }
