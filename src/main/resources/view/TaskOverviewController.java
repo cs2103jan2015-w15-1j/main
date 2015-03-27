@@ -506,6 +506,9 @@ public class TaskOverviewController extends AnchorPane {
 
         // formats the date for the date label, eg. 1 April
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d MMMM");
+        
+        // formats the time for the time label, eg. 2PM to 4PM
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("h:mma");
 
 
         for (LocalDate day : days) {
@@ -524,7 +527,7 @@ public class TaskOverviewController extends AnchorPane {
             for (Task task : listOfTasks) {
                 if (task.getDate() != null && task.getDate().isEqual(day)) {
                     hasTaskOnThisDay = true;
-                    displayBoxes.add(new TaskBox(index, task.getDescription() + ", " + task.getStartTime() + " to " + task.getEndTime()));
+                    displayBoxes.add(new TaskBox(index, task.getDescription() + ", " + task.getStartTime().format(timeFormatter) + " to " + task.getEndTime().format(timeFormatter)));
                     index++;
                 }
             }
