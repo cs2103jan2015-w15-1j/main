@@ -186,6 +186,7 @@ public class TaskOverviewController extends AnchorPane {
             default :
                 return null;
         }
+        // put the refresh gui here
     }
 
     public boolean isTimeToExit() {
