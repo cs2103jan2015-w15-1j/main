@@ -249,23 +249,29 @@ public class TaskOverviewController extends AnchorPane {
 
     private ArrayList<Task> sortByDateAndType(ArrayList<Task> list) {
     	ArrayList<Task> output = new ArrayList<Task>();
-
+    	boolean isSorted;
+    	
     	for (Task task: list) {
+    		isSorted = false;
     		if (output.size() == 0) {
     			output.add(task);
     		} else {
     			for (Task something: output) {
     				if (task.getDate().isBefore(something.getDate())) {
     					output.add(output.indexOf(something), task);
+    					isSorted = true;
     					break;
     				} else if (task.getDate().isEqual(something.getDate())) {
     					if (something.getType() == Task.Type.TIMED && task.getType() == Task.Type.DEADLINE) {
     						output.add(output.indexOf(something), task);
+        					isSorted = true;
     						break;
-    					}
-    				}
+    					} 
+    				} 
     			}
-    			output.add(task);
+    			if (!isSorted) {
+    				output.add(task);
+    			}
     		}
     	}
     	return output;
