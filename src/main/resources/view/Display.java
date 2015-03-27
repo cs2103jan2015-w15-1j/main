@@ -75,7 +75,7 @@ public class Display extends AnchorPane {
 
         System.out.println(listOfTasks.toString());
 
-        // re-initialise displayBoxes
+        // re-initialize displayBoxes
         displayBoxes = FXCollections.observableArrayList();
         LocalDate now = LocalDate.now();
         int i = 1;

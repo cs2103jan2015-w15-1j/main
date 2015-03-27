@@ -123,7 +123,8 @@ public class Controller {
                 return null;
             case COMPLETE :
                 updateState();
-                return completeTask(arguments);
+                completeTask(arguments);
+                break;
             case INCOMPLETE :
                 updateState();
                 break;
