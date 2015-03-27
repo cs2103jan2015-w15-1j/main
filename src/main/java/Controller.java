@@ -118,7 +118,8 @@ public class Controller {
                 break;
             case EDIT :
                 updateState();
-                return editTask(arguments);
+                editTask(arguments);
+                break;
             case DISPLAY :
                 return null;
             case COMPLETE :  // DONE
@@ -258,7 +259,8 @@ public class Controller {
         // ArrayList is 0-indexed, but Tasks are displayed to users as 1-indexed
         try {
             int removalIndex = Integer.parseInt(input) - 1;
-            allTasks.remove(removalIndex);
+            Task task = displayedTasks.get(removalIndex);
+            allTasks.remove(task);
             updateStorageWithAllTasks();
 
             return null;
@@ -296,11 +298,12 @@ public class Controller {
         for (int i = 2; i < inputArray.length; i++) {
             editArgument.append(inputArray[i] + " ");
         }
+        
 
         // Filter for edit Description or Deadline
         try {
             // TODO something should be broken here
-            Task task = displayedTasks.get(editIndex);
+            Task task = allTasks.get(editIndex);
             if (editType.equals("d") || editType.equals("de")) {
                 return MESSAGE_INVALID_COMMAND;
             } else if ("description".contains(editType)) {
