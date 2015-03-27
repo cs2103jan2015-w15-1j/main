@@ -34,6 +34,7 @@ public class Controller {
     private boolean timeToExit;
 
     private ArrayList<Task> allTasks;
+    private ArrayList<Task> tasksToDisplay;
 
     private Stack<ArrayList<Task>> previousStates;
 
@@ -118,7 +119,7 @@ public class Controller {
 	        case ADD: // DONE
 	            updateState();
 	            feedback = addTask(arguments);
-	            break;
+	            break; 
 	        case DELETE: // DONE
 	            updateState();
 	            feedback = deleteTask(arguments);
@@ -182,11 +183,11 @@ public class Controller {
         return storage.setSaveFileDirectory(input);
     }
 
-    private List<Task> getIncompleteTasks(ArrayList<Task> allTasks) {
+    private ArrayList<Task> getIncompleteTasks(ArrayList<Task> allTasks) {
         List<Task> incompleteTasks = allTasks.stream()
                 .filter(task -> !task.isCompleted())
                 .collect(Collectors.toList());
-        return incompleteTasks;
+        return (ArrayList<Task>) incompleteTasks;
     }
 
     private List<Task> getCompletedTasks(ArrayList<Task> allTasks) {
@@ -294,7 +295,8 @@ public class Controller {
         // ArrayList is 0-indexed, but Tasks are displayed to users as 1-indexed
         try {
             int removalIndex = Integer.parseInt(input) - 1;
-            Task task = displayedTasks.get(removalIndex);
+            Task task = tasksToDisplay.get(removalIndex);
+            System.out.println(task);
             allTasks.remove(task);
             updateStorageWithAllTasks();
 
@@ -404,7 +406,7 @@ public class Controller {
 
     private ObservableList<Task> search(String input) {
         // TODO check main.java.Task.getInfo() implementation
-        ArrayList<Task> searchResults = new ArrayList<Task>();
+        tasksToDisplay = new ArrayList<Task>();
 
         parser.parse(input);
         ArrayList<LocalDateTime> searchDate = parser.getDates();
@@ -412,15 +414,15 @@ public class Controller {
         for (Task task : allTasks) {
             String taskInfo = task.getDescription().toLowerCase();
             if (taskInfo.contains(input.toLowerCase())) {
-                searchResults.add(task);
+                tasksToDisplay.add(task);
             } else if (searchDate.size() > 0
                     && searchDate.get(0).toLocalDate().equals(task.getDate())) {
-                searchResults.add(task);
+                tasksToDisplay.add(task);
             }
         }
-
+        
         ObservableList<Task> results = FXCollections.observableArrayList();
-        results.addAll(searchResults);
+        results.addAll(tasksToDisplay);
         return results;
     }
 
@@ -437,8 +439,8 @@ public class Controller {
     // Utility methods
     // ================================================================
     private void updateDisplayWithDefault() {
-        List<Task> incomplete = getIncompleteTasks(allTasks);
-        displayedTasks.setAll(incomplete);
+        tasksToDisplay = getIncompleteTasks(allTasks);
+        displayedTasks.setAll(tasksToDisplay);
         display.updateDisplay(displayedTasks);
     }
 
