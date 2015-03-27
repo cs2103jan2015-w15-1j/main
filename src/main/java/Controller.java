@@ -87,7 +87,7 @@ public class Controller {
         previousStates = new Stack<ArrayList<Task>>();
     }
 
-    // Hacky method to force the display to update
+    // To load the tasks into the display on the first load
     public void onloadDisplay() {
         display.updateDisplay(displayedTasks);
     }
@@ -141,6 +141,7 @@ public class Controller {
             default :
                 return null;
         }
+        sortAllTasks();
         updateDisplayWithDefault();
         return "hello";
     }
@@ -254,9 +255,6 @@ public class Controller {
         // ArrayList is 0-indexed, but Tasks are displayed to users as 1-indexed
         try {
             int removalIndex = Integer.parseInt(input) - 1;
-//            Task task = incompleteTasks.remove(removalIndex);
-//            updateStorageWithAllTasks();
-
             Task task = allTasks.remove(removalIndex);
             updateStorageWithAllTasks();
             return null;
@@ -405,6 +403,10 @@ public class Controller {
         List<Task> incomplete = getIncompleteTasks(allTasks);
         displayedTasks.setAll(incomplete);
         display.updateDisplay(displayedTasks);
+    }
+
+    private void sortAllTasks() {
+        allTasks = sortToDisplay(allTasks);
     }
 
     private void loadDisplayedTasks(ArrayList<Task> input) {
