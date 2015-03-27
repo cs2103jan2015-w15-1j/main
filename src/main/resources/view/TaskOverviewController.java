@@ -36,6 +36,7 @@ public class TaskOverviewController extends AnchorPane {
     private Storage storage;
     private boolean timeToExit;
 
+    private ArrayList<Task> allTasks;  // Newly added
     private ArrayList<Task> incompleteTasks;
     private ArrayList<Task> completedTasks;
 
@@ -520,10 +521,10 @@ public class TaskOverviewController extends AnchorPane {
             }
             displayBoxes.add(label);
             boolean hasTaskOnThisDay = false;
-            for (Task t : listOfTasks) {
-                if (t.getDate() != null && t.getDate().isEqual(day)) {
+            for (Task task : listOfTasks) {
+                if (task.getDate() != null && task.getDate().isEqual(day)) {
                     hasTaskOnThisDay = true;
-                    displayBoxes.add(new TaskBox(index, t.getDescription()));
+                    displayBoxes.add(new TaskBox(index, task.getDescription() + ", " + task.getStartTime() + " to " + task.getEndTime()));
                     index++;
                 }
             }
