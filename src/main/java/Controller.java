@@ -114,6 +114,7 @@ public class Controller {
         switch (commandType) {
         	case SETSAVEFILE:
 	            feedback =  setSaveFileDirectory(arguments);
+	            break;
 	        case ADD: // DONE
 	            updateState();
 	            feedback = addTask(arguments);
@@ -126,8 +127,8 @@ public class Controller {
 	            updateState();
 	            feedback = editTask(arguments);
 	            break;
-	        case DISPLAY:
-	            return null;
+	        case DISPLAY:  // DONE
+	            break;
 	        case COMPLETE: // DONE
 	            updateState();
 	            feedback = completeTask(arguments);
@@ -136,19 +137,21 @@ public class Controller {
 	            updateState();
 	            break;
 	        // return incompleteTask(arguments);
-	        case UNDO:
-	            feedback =  undo();
+	        case UNDO:  // DONE
+	            feedback = undo();
 	            break;
-	        case SEARCH:
+	        case SEARCH:  // DONE
 	            searchedList = search(arguments);
 	            this.arguments = arguments;
 	            switchDisplay = true;
 	            break;
 	        case INVALID:
 	            feedback =  invalid();
+	            break;
 	        case EXIT:
 	            timeToExit = true;
 	            feedback =  exit();
+	            break;
 	        default:
 	            break;
 
