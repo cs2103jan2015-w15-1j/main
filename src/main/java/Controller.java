@@ -140,7 +140,8 @@ public class Controller {
         Task task = new Task(input, parsedDates, parsedWords);
 
         incompleteTasks.add(task);
-        sortToDisplay(incompleteTasks);
+        sortToDisplay();
+        
         updateStorageWithAllTasks();
         if (task.getType() == Task.Type.FLOATING) {
         	return String.format(MESSAGE_ADD, task.getDescription(), MESSAGE_NOT_APPL, MESSAGE_NOT_APPL);
@@ -152,14 +153,14 @@ public class Controller {
         }
     }
     
-    private void sortToDisplay(ArrayList<Task> list) {
+    private void sortToDisplay() {
     	ArrayList<Task> overdueTasks = new ArrayList<Task>();
     	ArrayList<Task> floatingTasks = new ArrayList<Task>();
     	ArrayList<Task> notOverdueTasks = new ArrayList<Task>();
     	ArrayList<Task> finalList = new ArrayList<Task>();
     	
     	// Separate the floating, overdue and pending
-    	for (Task task: list) {
+    	for (Task task: incompleteTasks) {
     		if (task.getType() == Task.Type.FLOATING) {
     			floatingTasks.add(task);
     		} else if (task.isOverdue()) {
@@ -177,29 +178,35 @@ public class Controller {
     	finalList.addAll(overdueTasks);
     	finalList.addAll(notOverdueTasks);
     	
-    	list = finalList;
+    	incompleteTasks = finalList;
     	
     }
     
     private ArrayList<Task> sortByDateAndType(ArrayList<Task> list) {
     	ArrayList<Task> output = new ArrayList<Task>();
+    	boolean isSorted;
     	
     	for (Task task: list) {
+    		isSorted = false;
     		if (output.size() == 0) {
     			output.add(task);
     		} else {
     			for (Task something: output) {
     				if (task.getDate().isBefore(something.getDate())) {
     					output.add(output.indexOf(something), task);
+    					isSorted = true;
     					break;
     				} else if (task.getDate().isEqual(something.getDate())) {
     					if (something.getType() == Task.Type.TIMED && task.getType() == Task.Type.DEADLINE) {
     						output.add(output.indexOf(something), task);
+        					isSorted = true;
     						break;
     					} 
     				} 
     			}
-    			output.add(task);
+    			if (!isSorted) {
+    				output.add(task);
+    			}
     		}
     	}
     	return output;
@@ -211,7 +218,7 @@ public class Controller {
             int removalIndex = Integer.parseInt(input) - 1;
             Task task = incompleteTasks.remove(removalIndex);
             updateStorageWithAllTasks();
-            sortToDisplay(incompleteTasks);
+            sortToDisplay();
 
             return String.format(MESSAGE_DELETE, task.getDescription());
         } catch (Exception e) {
@@ -267,7 +274,7 @@ public class Controller {
             e.printStackTrace();
             return MESSAGE_INVALID_COMMAND;
         }
-        sortToDisplay(incompleteTasks);
+        sortToDisplay();
         return MESSAGE_EDIT;
     }
 
@@ -280,7 +287,7 @@ public class Controller {
             // Move the completed task from incompleteTasks to completeTasks
             completedTasks.add(incompleteTasks.remove(index));
             updateStorageWithAllTasks();
-            sortToDisplay(incompleteTasks);
+            sortToDisplay();
 
             return String.format(MESSAGE_COMPLETE, task.getDescription());
         } catch (NumberFormatException | IndexOutOfBoundsException e) {
@@ -297,7 +304,7 @@ public class Controller {
             // Move the completed task from completeTasks to incompleteTasks
             incompleteTasks.add(completedTasks.remove(index));
             updateStorageWithAllTasks();
-            sortToDisplay(incompleteTasks);
+            sortToDisplay();
 
             return String.format(MESSAGE_INCOMPLETE, task.getDescription());
         } catch (NumberFormatException | IndexOutOfBoundsException e) {
@@ -316,7 +323,7 @@ public class Controller {
             completedTasks = previousCompleteTasks;
 
             updateStorageWithAllTasks();
-            sortToDisplay(incompleteTasks);
+            sortToDisplay();
 
             LOGGER.info(incompleteTasks.toString());
 
