@@ -322,6 +322,7 @@ public class Controller {
         int editIndex;
 
         // Split the input into the index and the arguments
+        
         try {
             inputArray = input.split(" ");
             editIndex = Integer.parseInt(inputArray[0]) - 1;
@@ -338,7 +339,7 @@ public class Controller {
         // Filter for edit Description or Deadline
         try {
             // TODO something should be broken here
-            Task task = allTasks.get(editIndex);
+            Task task = tasksToDisplay.get(editIndex);
             if (editType.equals("d") || editType.equals("de")) {
                 return MESSAGE_INVALID_COMMAND;
             } else if ("description".contains(editType)) {
