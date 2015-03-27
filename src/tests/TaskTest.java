@@ -23,7 +23,7 @@ public class TaskTest {
         String text = "attend meeting later today";
         Task testingTask = createNewTask(text);
         assertEquals("attend meeting later", testingTask.getDescription());
-        assertEquals("2015-03-20", testingTask.getDate().toString());
+        assertEquals("2015-03-25", testingTask.getDate().toString());
         assertEquals(null, testingTask.getStartTime());
         assertFalse(testingTask.isCompleted());
         testingTask.markAsComplete();
