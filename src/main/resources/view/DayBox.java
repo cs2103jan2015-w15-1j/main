@@ -19,9 +19,7 @@ public class DayBox extends HBox {
     @FXML
     private Label date;
 
-    private String dayData;
-
-    public DayBox(String foo, String date) {
+    public DayBox(String day, String date) {
         try {
             // Load person overview.
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/DayBox.fxml"));
@@ -32,9 +30,8 @@ public class DayBox extends HBox {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        dayData = foo;
 
-        day.setText(dayData);
+        this.day.setText(day);
         if (!date.isEmpty()) {
             this.date.setText("(" + date + ")");
         } else {
