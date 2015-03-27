@@ -47,6 +47,7 @@ public class Controller {
     private DateParser parser;
 
     private Display display;
+    boolean switchDisplay = false;
 
     // They exist so that I can compile my program lol pls remove
     // private ArrayList<Task> incompleteTasks;
@@ -110,7 +111,6 @@ public class Controller {
         Command.Type commandType = currentCommand.getCommandType();
         String arguments = currentCommand.getArguments();
         String feedback = "";
-        boolean switchDisplay = false;
 
         switch (commandType) {
         	case SETSAVEFILE:
@@ -119,6 +119,7 @@ public class Controller {
 	        case ADD: // DONE
 	            updateState();
 	            feedback = addTask(arguments);
+	            switchDisplay = false;
 	            break; 
 	        case DELETE: // DONE
 	            updateState();
@@ -129,6 +130,9 @@ public class Controller {
 	            feedback = editTask(arguments);
 	            break;
 	        case DISPLAY:  // DONE
+	            // displaying is dumb now it only switches the display
+	            //TODO add a method to control display complete / display incomplete
+                switchDisplay = false;
 	            break;
 	        case COMPLETE: // DONE
 	            updateState();
@@ -296,8 +300,12 @@ public class Controller {
         try {
             int removalIndex = Integer.parseInt(input) - 1;
             Task task = tasksToDisplay.get(removalIndex);
-            System.out.println(task);
             allTasks.remove(task);
+            tasksToDisplay.remove(task);
+            
+            if (tasksToDisplay.isEmpty()) {
+                switchDisplay = false;
+            }
             updateStorageWithAllTasks();
 
             return null;
