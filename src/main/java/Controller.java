@@ -37,8 +37,10 @@ public class Controller {
 
     private Stack<ArrayList<Task>> previousStates;
 
-    private ObservableList<Task> displayedTasks = FXCollections.observableArrayList();
-    private ObservableList<HBox> displayBoxes = FXCollections.observableArrayList();
+    private ObservableList<Task> displayedTasks = FXCollections
+            .observableArrayList();
+    private ObservableList<HBox> displayBoxes = FXCollections
+            .observableArrayList();
     private ObservableList<Task> searchedList;
     private String arguments;
     private DateParser parser;
@@ -46,8 +48,8 @@ public class Controller {
     private Display display;
 
     // They exist so that I can compile my program lol pls remove
-//    private ArrayList<Task> incompleteTasks;
-//    private ArrayList<Task> completedTasks;
+    // private ArrayList<Task> incompleteTasks;
+    // private ArrayList<Task> completedTasks;
 
     // ================================================================
     // Constants
@@ -106,9 +108,11 @@ public class Controller {
 
         Command.Type commandType = currentCommand.getCommandType();
         String arguments = currentCommand.getArguments();
-        boolean switchDisplay = false;      
+        String feedback = "";
+        boolean switchDisplay = false;
 
         switch (commandType) {
+<<<<<<< HEAD
             case SETSAVEFILE :
                 return setSaveFileDirectory(arguments);
             case ADD :  // DONE
@@ -146,15 +150,60 @@ public class Controller {
                 return exit();
             default :
                 return null;
+=======
+        case SETSAVEFILE:
+            feedback =  setSaveFileDirectory(arguments);
+        case ADD: // DONE
+            updateState();
+            feedback = addTask(arguments);
+            break;
+        case DELETE: // DONE
+            updateState();
+            feedback = deleteTask(arguments);
+            break;
+        case EDIT:
+            updateState();
+            feedback = editTask(arguments);
+            break;
+        case DISPLAY:
+            return null;
+        case COMPLETE: // DONE
+            updateState();
+            feedback = completeTask(arguments);
+            break;
+        case INCOMPLETE:
+            updateState();
+            break;
+        // return incompleteTask(arguments);
+        case UNDO:
+            feedback =  undo();
+            break;
+        case SEARCH:
+            searchedList = search(arguments);
+            this.arguments = arguments;
+            switchDisplay = true;
+            break;
+        case INVALID:
+            feedback =  invalid();
+        case EXIT:
+            timeToExit = true;
+            feedback =  exit();
+        default:
+            break;
+>>>>>>> origin/master
         }
-        // I think need to sort all tasks so that the index is correct (my logic could be wrong)
+        // I think need to sort all tasks so that the index is correct (my logic
+        // could be wrong)
         sortAllTasks();
         if (switchDisplay) {
-        	updateDisplaySearch();
+            updateDisplaySearch();
         } else {
-        updateDisplayWithDefault();
+            updateDisplayWithDefault();
         }
-        return "hello"; // just so I have something to return, will remove once the whole switch case is done
+        
+        // just so I have something to return, will remove once the whole switch case is done
+        // added feedback so that it still returns the previous returns values from the methods -CK
+        return feedback;
     }
 
     public boolean isTimeToExit() {
@@ -199,7 +248,7 @@ public class Controller {
         ArrayList<Task> finalList = new ArrayList<Task>();
 
         // Separate the floating, overdue and pending
-        for (Task task: list) {
+        for (Task task : list) {
             if (task.getType() == Task.Type.FLOATING) {
                 floatingTasks.add(task);
             } else if (task.isOverdue()) {
@@ -224,18 +273,19 @@ public class Controller {
         ArrayList<Task> output = new ArrayList<Task>();
         boolean isSorted;
 
-        for (Task task: list) {
-            isSorted=false;
+        for (Task task : list) {
+            isSorted = false;
             if (output.size() == 0) {
                 output.add(task);
             } else {
-                for (Task something: output) {
+                for (Task something : output) {
                     if (task.getDate().isBefore(something.getDate())) {
                         output.add(output.indexOf(something), task);
                         isSorted = true;
                         break;
                     } else if (task.getDate().isEqual(something.getDate())) {
-                        if (something.getType() == Task.Type.TIMED && task.getType() == Task.Type.DEADLINE) {
+                        if (something.getType() == Task.Type.TIMED
+                                && task.getType() == Task.Type.DEADLINE) {
                             output.add(output.indexOf(something), task);
                             isSorted = true;
                             break;
@@ -250,7 +300,7 @@ public class Controller {
         return output;
     }
 
-    private void addTask(String input) {
+    private String addTask(String input) {
         parser.parse(input);
         ArrayList<LocalDateTime> parsedDates = parser.getDates();
         String parsedWords = parser.getParsedWords();
@@ -260,6 +310,20 @@ public class Controller {
 
         allTasks.add(task);
         updateStorageWithAllTasks();
+
+        // brought back previous return codes - CK
+        if (task.getType() == Task.Type.FLOATING) {
+            return String.format(MESSAGE_ADD, task.getDescription(),
+                    MESSAGE_NOT_APPL, MESSAGE_NOT_APPL);
+        } else if (task.getType() == Task.Type.DEADLINE) {
+            return String.format(MESSAGE_ADD, task.getDescription(),
+                    task.getDate(), MESSAGE_NOT_APPL);
+        } else {
+            String formattedTime = task.getStartTime() + " to "
+                    + task.getEndTime();
+            return String.format(MESSAGE_ADD, task.getDescription(),
+                    task.getDate(), formattedTime);
+        }
     }
 
     private String deleteTask(String input) {
@@ -278,12 +342,11 @@ public class Controller {
 
     /**
      *
-     * Current implementation of Edit:
-     * 1. Does not allow user to change to a different deadline type. e.g. from Timed to Floating
-     * 2. Allows edit of description
-     * 3. Allows change of deadline from one type to the same type.
-     * 4. Allows user to type any substring of the words "description" / "deadline" as a substitution
-     * for its original word.
+     * Current implementation of Edit: 1. Does not allow user to change to a
+     * different deadline type. e.g. from Timed to Floating 2. Allows edit of
+     * description 3. Allows change of deadline from one type to the same type.
+     * 4. Allows user to type any substring of the words "description" /
+     * "deadline" as a substitution for its original word.
      *
      * @param input
      * @return
@@ -305,7 +368,6 @@ public class Controller {
         for (int i = 2; i < inputArray.length; i++) {
             editArgument.append(inputArray[i] + " ");
         }
-        
 
         // Filter for edit Description or Deadline
         try {
@@ -346,35 +408,32 @@ public class Controller {
         }
     }
 
+    // private String incompleteTask(String input) {
+    // try {
+    // int index = Integer.parseInt(input.trim()) - 1;
+    // Task task = completedTasks.get(index);
+    // task.markAsIncomplete();
+    //
+    // // Move the completed task from completeTasks to incompleteTasks
+    // incompleteTasks.add(completedTasks.remove(index));
+    // updateStorageWithAllTasks();
+    //
+    // return String.format(MESSAGE_INCOMPLETE, task.getDescription());
+    // } catch (NumberFormatException | IndexOutOfBoundsException e) {
+    // return MESSAGE_INVALID_COMMAND;
+    // }
+    // }
 
-//    private String incompleteTask(String input) {
-//        try {
-//            int index = Integer.parseInt(input.trim()) - 1;
-//            Task task = completedTasks.get(index);
-//            task.markAsIncomplete();
-//
-//            // Move the completed task from completeTasks to incompleteTasks
-//            incompleteTasks.add(completedTasks.remove(index));
-//            updateStorageWithAllTasks();
-//
-//            return String.format(MESSAGE_INCOMPLETE, task.getDescription());
-//        } catch (NumberFormatException | IndexOutOfBoundsException e) {
-//            return MESSAGE_INVALID_COMMAND;
-//        }
-//    }
-
-    // TODO IS BROKEN
     private String undo() {
         if (previousStates.empty()) {
             return MESSAGE_NO_UNDO;
         } else {
-//            ArrayList<Task> previousCompleteTasks = previousStates.pop(); // update state pushes the complete first
-//            ArrayList<Task> previousIncompleteTasks = previousStates.pop();
-//
-//            incompleteTasks = previousIncompleteTasks;
-//            completedTasks = previousCompleteTasks;
-//
-//            updateStorageWithAllTasks();
+            ArrayList<Task> previousTasks = previousStates.pop(); // update state pushes the complete first
+
+            allTasks = previousTasks;
+
+            updateStorageWithAllTasks();
+
             return MESSAGE_UNDO;
         }
     }
@@ -390,7 +449,8 @@ public class Controller {
             String taskInfo = task.getDescription().toLowerCase();
             if (taskInfo.contains(input.toLowerCase())) {
                 searchResults.add(task);
-            } else if (searchDate.size()>0 && searchDate.get(0).toLocalDate().equals(task.getDate())) {
+            } else if (searchDate.size() > 0
+                    && searchDate.get(0).toLocalDate().equals(task.getDate())) {
                 searchResults.add(task);
             }
         }
@@ -409,7 +469,6 @@ public class Controller {
         return MESSAGE_EXIT;
     }
 
-
     // ================================================================
     // Utility methods
     // ================================================================
@@ -418,9 +477,9 @@ public class Controller {
         displayedTasks.setAll(incomplete);
         display.updateDisplay(displayedTasks);
     }
-    
+
     private void updateDisplaySearch() {
-    	display.updateSearchDisplay(searchedList, arguments);
+        display.updateSearchDisplay(searchedList, arguments);
     }
 
     private void sortAllTasks() {
@@ -448,7 +507,19 @@ public class Controller {
     }
 
     private void updateState() {
-        // TODO Need to do the cloning and shit
+        previousStates.push(cloneState(allTasks));
+    }
+
+    private ArrayList<Task> cloneState(ArrayList<Task> input) {
+        ArrayList<Task> output = new ArrayList<Task>();
+        try {
+            for (Task task : input) {
+                output.add(task.clone());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return output;
     }
 
     // ================================================================
