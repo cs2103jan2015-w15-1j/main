@@ -39,6 +39,8 @@ public class Controller {
 
     private ObservableList<Task> displayedTasks = FXCollections.observableArrayList();
     private ObservableList<HBox> displayBoxes = FXCollections.observableArrayList();
+    private ObservableList<Task> searchedList;
+    private String arguments;
     private DateParser parser;
 
     private Display display;
@@ -104,6 +106,7 @@ public class Controller {
 
         Command.Type commandType = currentCommand.getCommandType();
         String arguments = currentCommand.getArguments();
+        boolean switchDisplay = false;      
 
         switch (commandType) {
             case SETSAVEFILE :
@@ -133,8 +136,10 @@ public class Controller {
             case UNDO :
                 return undo();
             case SEARCH :
-                ArrayList<Task> searchResults = search(arguments);
-                return formatTasksForDisplay(searchResults);
+            	searchedList = search(arguments);
+            	this.arguments = arguments;
+            	switchDisplay = true;
+                break;
             case INVALID :
                 return invalid();
             case EXIT :
@@ -145,8 +150,11 @@ public class Controller {
         }
         // I think need to sort all tasks so that the index is correct (my logic could be wrong)
         sortAllTasks();
-
+        if (switchDisplay) {
+        	updateDisplaySearch();
+        } else {
         updateDisplayWithDefault();
+        }
         return "hello"; // just so I have something to return, will remove once the whole switch case is done
     }
 
@@ -372,7 +380,7 @@ public class Controller {
         }
     }
 
-    private ArrayList<Task> search(String input) {
+    private ObservableList<Task> search(String input) {
         // TODO check main.java.Task.getInfo() implementation
         ArrayList<Task> searchResults = new ArrayList<Task>();
 
@@ -390,7 +398,7 @@ public class Controller {
 
         ObservableList<Task> results = FXCollections.observableArrayList();
         results.addAll(searchResults);
-        return searchResults;
+        return results;
     }
 
     private String invalid() {
@@ -410,6 +418,10 @@ public class Controller {
         List<Task> incomplete = getIncompleteTasks(allTasks);
         displayedTasks.setAll(incomplete);
         display.updateDisplay(displayedTasks);
+    }
+    
+    private void updateDisplaySearch() {
+    	display.updateSearchDisplay(searchedList, arguments);
     }
 
     private void sortAllTasks() {
