@@ -77,7 +77,7 @@ public class Display extends AnchorPane {
 
         System.out.println(listOfTasks.toString());
 
-        // re-initialise displayBoxes
+        // re-initialize displayBoxes
         displayBoxes = FXCollections.observableArrayList();
         LocalDate now = LocalDate.now();
         int index = 1;
@@ -171,6 +171,9 @@ public class Display extends AnchorPane {
 
         // formats the date for the date label, eg. 1 April
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d MMMM");
+        
+        // formats the time for the time label, eg 2:00PM to 4:00PM
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("h:mma");
 
         for (LocalDate day : days) {
             DayBox label = generateDayLabel(now, dayFormatter, dateFormatter,
@@ -182,7 +185,13 @@ public class Display extends AnchorPane {
             for (Task task : listOfTasks) {
                 if (day.equals(task.getDate())) {
                     hasTaskOnThisDay = true;
+                    if (task.getType() == Task.Type.TIMED) {
+                    	displayBoxes.add(new TaskBox(index, task.getDescription() + ", " + 
+                    						task.getStartTime().format(timeFormatter) + " to " +
+                    						task.getEndTime().format(timeFormatter)));
+                    } else {
                     displayBoxes.add(new TaskBox(index, task.getDescription()));
+                    }
                     index++;
                 }
             }
