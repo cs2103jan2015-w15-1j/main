@@ -124,7 +124,6 @@ public class Controller {
                 editTask(arguments);
                 break;
             case DISPLAY :
-                return null;
             case COMPLETE :  // DONE
                 updateState();
                 completeTask(arguments);
