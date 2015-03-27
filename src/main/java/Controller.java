@@ -42,7 +42,6 @@ public class Controller {
             .observableArrayList();
     private ObservableList<HBox> displayBoxes = FXCollections
             .observableArrayList();
-    private ObservableList<Task> searchedList;
     private String arguments;
     private DateParser parser;
 
@@ -146,7 +145,7 @@ public class Controller {
 	            feedback = undo();
 	            break;
 	        case SEARCH:  // DONE
-	            searchedList = search(arguments);
+	            search(arguments);
 	            this.arguments = arguments;
 	            switchDisplay = true;
 	            break;
@@ -300,8 +299,8 @@ public class Controller {
         try {
             int removalIndex = Integer.parseInt(input) - 1;
             Task task = tasksToDisplay.get(removalIndex);
-            allTasks.remove(task);
             tasksToDisplay.remove(task);
+            allTasks.remove(task);
             
             if (tasksToDisplay.isEmpty()) {
                 switchDisplay = false;
@@ -413,7 +412,7 @@ public class Controller {
         }
     }
 
-    private ObservableList<Task> search(String input) {
+    private void search(String input) {
         // TODO check main.java.Task.getInfo() implementation
         tasksToDisplay = new ArrayList<Task>();
 
@@ -429,10 +428,6 @@ public class Controller {
                 tasksToDisplay.add(task);
             }
         }
-        
-        ObservableList<Task> results = FXCollections.observableArrayList();
-        results.addAll(tasksToDisplay);
-        return results;
     }
 
     private String invalid() {
@@ -454,6 +449,8 @@ public class Controller {
     }
 
     private void updateDisplaySearch() {
+        ObservableList<Task> searchedList = FXCollections.observableArrayList();
+        searchedList.addAll(tasksToDisplay);
         display.updateSearchDisplay(searchedList, arguments);
     }
 
