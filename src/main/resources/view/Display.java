@@ -47,6 +47,8 @@ public class Display extends AnchorPane {
     private static final String LABEL_TODAY = "Today";
     private static final String LABEL_TOMORROW = "Tomorrow";
     private static final String LABEL_OTHERS = "Everything else";
+    private static final String LABEL_SUCCESSFUL_SEARCH = "Results for \"%s\"";
+    private static final String LABEL_UNSUCCESSFUL_SEARCH = "No results for \"%s\"";
 
 
     // ================================================================
@@ -78,13 +80,35 @@ public class Display extends AnchorPane {
         // re-initialise displayBoxes
         displayBoxes = FXCollections.observableArrayList();
         LocalDate now = LocalDate.now();
-        int i = 1;
+        int index = 1;
 
-        i = addFloatingTasks(listOfTasks, i);
-        i = addOverdueTasks(listOfTasks, i);
-        i = addThisWeeksTasks(listOfTasks, now, i);
-        i = addAllOtherTasks(listOfTasks, now, i);
+        index = addFloatingTasks(listOfTasks, index);
+        index = addOverdueTasks(listOfTasks, index);
+        index = addThisWeeksTasks(listOfTasks, now, index);
+        index = addAllOtherTasks(listOfTasks, now, index);
 
+        listView.setItems(displayBoxes);
+    }
+    
+    public void updateSearchDisplay(ObservableList<Task> searchResults, String searchQuery) {
+        ArrayList<Task> listOfTasks = sortToDisplay(new ArrayList<Task>(searchResults));
+        
+        displayBoxes = FXCollections.observableArrayList();
+        DayBox search;
+        
+        if (searchResults.isEmpty()) {
+            search = new DayBox(String.format(LABEL_UNSUCCESSFUL_SEARCH, searchQuery), "");
+        } else {
+            search = new DayBox(String.format(LABEL_SUCCESSFUL_SEARCH, searchQuery), "");
+        }
+        displayBoxes.add(search);
+        
+        int index = 1;
+        for (Task task : searchResults) {
+            displayBoxes.add(new TaskBox(index, task.toString()));
+            index++;
+        }
+        
         listView.setItems(displayBoxes);
     }
 
