@@ -108,11 +108,11 @@ public class Controller {
         switch (commandType) {
             case SETSAVEFILE :
                 return setSaveFileDirectory(arguments);
-            case ADD :
+            case ADD :  // DONE
                 updateState();
                 addTask(arguments);
                 break;
-            case DELETE :
+            case DELETE :  // DONE
                 updateState();
                 deleteTask(arguments);
                 break;
@@ -121,7 +121,7 @@ public class Controller {
                 return editTask(arguments);
             case DISPLAY :
                 return null;
-            case COMPLETE :
+            case COMPLETE :  // DONE
                 updateState();
                 completeTask(arguments);
                 break;
@@ -258,7 +258,7 @@ public class Controller {
         // ArrayList is 0-indexed, but Tasks are displayed to users as 1-indexed
         try {
             int removalIndex = Integer.parseInt(input) - 1;
-            Task task = allTasks.remove(removalIndex);
+            allTasks.remove(removalIndex);
             updateStorageWithAllTasks();
 
             return null;
