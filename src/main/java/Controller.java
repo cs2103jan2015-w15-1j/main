@@ -141,9 +141,11 @@ public class Controller {
             default :
                 return null;
         }
+        // I think need to sort all tasks so that the index is correct (my logic could be wrong)
         sortAllTasks();
+
         updateDisplayWithDefault();
-        return "hello";
+        return "hello"; // just so I have something to return, will remove once the whole switch case is done
     }
 
     public boolean isTimeToExit() {
