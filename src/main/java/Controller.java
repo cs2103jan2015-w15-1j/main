@@ -259,8 +259,8 @@ public class Controller {
             int removalIndex = Integer.parseInt(input) - 1;
             Task task = allTasks.remove(removalIndex);
             updateStorageWithAllTasks();
+
             return null;
-//            return String.format(MESSAGE_DELETE, task.getDescription());
         } catch (Exception e) {
             return MESSAGE_INVALID_COMMAND;
         }
@@ -316,6 +316,7 @@ public class Controller {
             e.printStackTrace();
             return MESSAGE_INVALID_COMMAND;
         }
+
         return MESSAGE_EDIT;
     }
 
@@ -333,6 +334,7 @@ public class Controller {
             return MESSAGE_INVALID_COMMAND;
         }
     }
+
 
 //    private String incompleteTask(String input) {
 //        try {
@@ -362,7 +364,6 @@ public class Controller {
 //            completedTasks = previousCompleteTasks;
 //
 //            updateStorageWithAllTasks();
-
             return MESSAGE_UNDO;
         }
     }

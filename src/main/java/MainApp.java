@@ -25,7 +25,7 @@ public class MainApp extends Application {
 	@Override
 	public void start(Stage primaryStage) throws Exception{
 		this.primaryStage = primaryStage;
-		this.primaryStage.setTitle("Veto");
+		this.primaryStage.setTitle("Veto");  // --> This represent the name on the Windows Title Bar
 
 		initRootLayout();
 		initDisplay();
