@@ -79,6 +79,8 @@ public class Display extends AnchorPane {
         // TODO THIS METHOD NEEDS REFACTORING
         ArrayList<Task> listOfTasks = sortToDisplay(new ArrayList<Task>(tasks));
 
+        System.out.println(listOfTasks.toString());
+
         // re-initialise displayBoxes
         displayBoxes = FXCollections.observableArrayList();
         LocalDate now = LocalDate.now();
@@ -154,11 +156,8 @@ public class Display extends AnchorPane {
                 label.dim();
             }
         }
-        listView.setItems(displayBoxes);
-    }
 
-    public void loadDisplayedTasks(ArrayList<Task> input) {
-        displayedTasks.setAll(input);
+        listView.setItems(displayBoxes);
     }
 
     // ================================================================
