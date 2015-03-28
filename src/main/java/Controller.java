@@ -139,6 +139,7 @@ public class Controller {
 	            break;
 	        case INCOMPLETE:
 	            updateState();
+                feedback = incompleteTask(arguments);
 	            break;
 	        // return incompleteTask(arguments);
 	        case UNDO:  // DONE
@@ -369,9 +370,8 @@ public class Controller {
 
     private String completeTask(String input) {
         try {
-            // TODO something should be broken here
             int index = Integer.parseInt(input.trim()) - 1;
-            Task task = displayedTasks.get(index);
+            Task task = tasksToDisplay.get(index);
             task.markAsComplete();
 
             updateStorageWithAllTasks();
@@ -382,21 +382,19 @@ public class Controller {
         }
     }
 
-    // private String incompleteTask(String input) {
-    // try {
-    // int index = Integer.parseInt(input.trim()) - 1;
-    // Task task = completedTasks.get(index);
-    // task.markAsIncomplete();
-    //
-    // // Move the completed task from completeTasks to incompleteTasks
-    // incompleteTasks.add(completedTasks.remove(index));
-    // updateStorageWithAllTasks();
-    //
-    // return String.format(MESSAGE_INCOMPLETE, task.getDescription());
-    // } catch (NumberFormatException | IndexOutOfBoundsException e) {
-    // return MESSAGE_INVALID_COMMAND;
-    // }
-    // }
+    private String incompleteTask(String input) {
+        try {
+            int index = Integer.parseInt(input.trim()) - 1;
+            Task task = tasksToDisplay.get(index);
+            task.markAsIncomplete();
+
+            updateStorageWithAllTasks();
+
+            return String.format(MESSAGE_INCOMPLETE, task.getDescription());
+        } catch (NumberFormatException | IndexOutOfBoundsException e) {
+            return MESSAGE_INVALID_COMMAND;
+        }
+    }
 
     private String undo() {
         if (previousStates.empty()) {
