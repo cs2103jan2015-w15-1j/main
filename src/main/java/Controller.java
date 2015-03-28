@@ -35,21 +35,21 @@ public class Controller {
     private boolean timeToExit;
 
     private ArrayList<Task> allTasks;
-    private ArrayList<Task> tasksToDisplay;
+    //private ArrayList<Task> tasksToDisplay;
 
     private Stack<ArrayList<Task>> previousStates;
-
+    private Stack<ObservableList<Task>> previousStatesDisplayed;
+    
     private ObservableList<Task> displayedTasks = FXCollections.observableArrayList();
-    private ObservableList<HBox> displayBoxes = FXCollections.observableArrayList();
+    //private ObservableList<HBox> displayBoxes = FXCollections.observableArrayList();
     private String arguments;
     private DateParser parser;
 
+    private boolean switchDisplay = false;
+    
+    private UserDefinedSort uds;
+    
     private Display display;
-    boolean switchDisplay = false;
-
-    // They exist so that I can compile my program lol pls remove
-    // private ArrayList<Task> incompleteTasks;
-    // private ArrayList<Task> completedTasks;
 
     // ================================================================
     // Constants
@@ -77,21 +77,25 @@ public class Controller {
     public Controller() {
         parser = DateParser.getInstance();
         storage = Storage.getInstance();
-        tasksToDisplay = new ArrayList<Task>();
+        //tasksToDisplay = new ArrayList<Task>();
         saveFileName = storage.getSaveFileName();
 
         allTasks = storage.readFile();
-        Collections.sort(allTasks, new SortDefault());
-        //allTasks = sortToDisplay(allTasks);
+        
+        //Sorting process
+        uds = new UserDefinedSort(allTasks);
+        uds.executeSortDefault();
+        //Collections.sort(allTasks, new SortDefault());
 
-        // Load the incomplete tasks into displayedTasks
+        // Load the incomplete tasks into displayedTasks (MAIN VIEW WHEN APP STARTS)
         for (Task task : getIncompleteTasks(allTasks)) {
             displayedTasks.add(task);
-            tasksToDisplay.add(task);
+            //tasksToDisplay.add(task);
         }
 
         timeToExit = false;
         previousStates = new Stack<ArrayList<Task>>();
+        previousStatesDisplayed = new Stack<ObservableList<Task>>();
     }
 
     // To load the tasks into the display on the first load
@@ -131,8 +135,6 @@ public class Controller {
 	            feedback = editTask(arguments);
 	            break;
 	        case DISPLAY:  // DONE
-	            // displaying is dumb now it only switches the display
-	            //TODO add a method to control display complete / display incomplete
                 switchDisplay = false;
 	            break;
 	        case COMPLETE: // DONE
@@ -298,14 +300,16 @@ public class Controller {
         // ArrayList is 0-indexed, but Tasks are displayed to users as 1-indexed
         try {
             int removalIndex = Integer.parseInt(input) - 1;
-            Task task = tasksToDisplay.get(removalIndex);
-            tasksToDisplay.remove(task);
+            //Task task = tasksToDisplay.get(removalIndex);
+            Task task = displayedTasks.get(removalIndex);
+            //tasksToDisplay.remove(task);
+            displayedTasks.remove(task);
             allTasks.remove(task);
             
             // remove if statement if deleting last entry of search should remain at search display
-            if (tasksToDisplay.isEmpty()) {
-                switchDisplay = false;
-            }
+            //if (tasksToDisplay.isEmpty()) {
+                //switchDisplay = false;
+            //}
             updateStorageWithAllTasks();
 
             return null;
@@ -346,8 +350,8 @@ public class Controller {
 
         // Filter for edit Description or Deadline
         try {
-            // TODO something should be broken here
-            Task task = tasksToDisplay.get(editIndex);
+            //Task task = tasksToDisplay.get(editIndex);
+            Task task = displayedTasks.get(editIndex);
             if (editType.equals("d") || editType.equals("de")) {
                 return MESSAGE_INVALID_COMMAND;
             } else if ("description".contains(editType)) {
@@ -371,7 +375,8 @@ public class Controller {
     private String completeTask(String input) {
         try {
             int index = Integer.parseInt(input.trim()) - 1;
-            Task task = tasksToDisplay.get(index);
+            //Task task = tasksToDisplay.get(index);
+            Task task = displayedTasks.get(index);
             task.markAsComplete();
 
             updateStorageWithAllTasks();
@@ -385,7 +390,8 @@ public class Controller {
     private String incompleteTask(String input) {
         try {
             int index = Integer.parseInt(input.trim()) - 1;
-            Task task = tasksToDisplay.get(index);
+            //Task task = tasksToDisplay.get(index);
+            Task task = displayedTasks.get(index);
             task.markAsIncomplete();
 
             updateStorageWithAllTasks();
@@ -401,8 +407,10 @@ public class Controller {
             return MESSAGE_NO_UNDO;
         } else {
             ArrayList<Task> previousTasks = previousStates.pop(); // update state pushes the complete first
-
+            ObservableList<Task> previousDisplayed = previousStatesDisplayed.pop(); // update state pushes the complete first
+            
             allTasks = previousTasks;
+            displayedTasks = previousDisplayed;
 
             updateStorageWithAllTasks();
 
@@ -411,8 +419,8 @@ public class Controller {
     }
 
     private void search(String input) {
-        // TODO check main.java.Task.getInfo() implementation
-        tasksToDisplay = new ArrayList<Task>();
+        //tasksToDisplay = new ArrayList<Task>();
+        displayedTasks.clear();
 
         parser.parse(input);
         ArrayList<LocalDateTime> searchDate = parser.getDates();
@@ -420,10 +428,12 @@ public class Controller {
         for (Task task : allTasks) {
             String taskInfo = task.getDescription().toLowerCase();
             if (taskInfo.contains(input.toLowerCase())) {
-                tasksToDisplay.add(task);
+                //tasksToDisplay.add(task);
+                displayedTasks.add(task);
             } else if (searchDate.size() > 0
                     && searchDate.get(0).toLocalDate().equals(task.getDate())) {
-                tasksToDisplay.add(task);
+                //tasksToDisplay.add(task);
+                displayedTasks.add(task);
             }
         }
     }
@@ -441,20 +451,29 @@ public class Controller {
     // Utility methods
     // ================================================================
     private void updateDisplayWithDefault() {
-        tasksToDisplay = getIncompleteTasks(allTasks);
-        displayedTasks.setAll(tasksToDisplay);
+        //tasksToDisplay = getIncompleteTasks(allTasks);
+        displayedTasks.setAll(getIncompleteTasks(allTasks));
         display.updateDisplay(displayedTasks);
     }
 
     private void updateDisplaySearch() {
-        ObservableList<Task> searchedList = FXCollections.observableArrayList();
-        searchedList.addAll(tasksToDisplay);
-        display.updateSearchDisplay(searchedList, arguments);
+        //ObservableList<Task> searchedList = FXCollections.observableArrayList();
+        //searchedList.addAll(tasksToDisplay);
+    	sortSearchedTasks();
+        display.updateSearchDisplay(displayedTasks, arguments);
     }
 
     private void sortAllTasks() {
-    	Collections.sort(allTasks, new SortDefault());
-        //allTasks = sortToDisplay(allTasks);
+    	uds = new UserDefinedSort(allTasks);
+        uds.executeSortDefault();
+    	//Collections.sort(allTasks, new SortDefault());
+        
+    }
+    
+    private void sortSearchedTasks() {
+    	uds = new UserDefinedSort(new ArrayList<Task>(displayedTasks));
+        uds.executeSortSearch();
+        displayedTasks = FXCollections.observableArrayList(uds.getList());
     }
 
     private void loadDisplayedTasks(ArrayList<Task> input) {
@@ -479,6 +498,7 @@ public class Controller {
 
     private void updateState() {
         previousStates.push(cloneState(allTasks));
+        previousStatesDisplayed.push(cloneState(displayedTasks));
     }
 
     private ArrayList<Task> cloneState(ArrayList<Task> input) {
@@ -491,6 +511,18 @@ public class Controller {
             e.printStackTrace();
         }
         return output;
+    }
+    
+    private ObservableList<Task> cloneState(ObservableList<Task> input) {
+        ArrayList<Task> output = new ArrayList<Task>();
+        try {
+            for (Task task : input) {
+                output.add(task.clone());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return FXCollections.observableArrayList(output);
     }
 
     // ================================================================

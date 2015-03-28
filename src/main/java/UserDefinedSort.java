@@ -22,10 +22,19 @@ public class UserDefinedSort {
 		chain.add(comparator);
 	}
 	
-	public void executeSort() {
-		for (Comparator<Task> comparator: chain) {
-			Collections.sort(list, comparator);
-		}
+	public void executeSortDefault() {
+		//for (Comparator<Task> comparator: chain) {
+			Collections.sort(list, new SortType());
+			Collections.sort(list, new SortOverdue());
+			Collections.sort(list, new SortDate());
+		//}
+	}
+	
+	public void executeSortSearch() {
+		Collections.sort(list, new SortType());
+		Collections.sort(list, new SortOverdue());
+		Collections.sort(list, new SortDate());
+		Collections.sort(list, new SortIncomplete());
 	}
 }
 

@@ -78,7 +78,7 @@ public class Display extends AnchorPane {
     public void updateDisplay(ObservableList<Task> tasks) {
         //ArrayList<Task> listOfTasks = sortToDisplay(new ArrayList<Task>(tasks));
     	ArrayList<Task> listOfTasks = new ArrayList<Task>(tasks);
-    	Collections.sort(listOfTasks, new SortDefault());
+    	//Collections.sort(listOfTasks, new SortDefault());
     	
         System.out.println(listOfTasks.toString());
 
@@ -97,7 +97,7 @@ public class Display extends AnchorPane {
     
     public void updateSearchDisplay(ObservableList<Task> searchResults, String searchQuery) {
         // TODO Refactor this method
-        ArrayList<Task> listOfResults = sortToDisplay(new ArrayList<Task>(searchResults));
+        ArrayList<Task> listOfResults = new ArrayList<Task>(searchResults);
         
         displayBoxes = FXCollections.observableArrayList();
         ArrayList<HBox> incompleteTasks = new ArrayList<HBox>();
