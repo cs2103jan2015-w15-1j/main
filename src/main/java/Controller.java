@@ -76,7 +76,8 @@ public class Controller {
     public Controller() {
         parser = DateParser.getInstance();
         storage = Storage.getInstance();
-        String saveFileName = storage.getSaveFileName();
+        tasksToDisplay = new ArrayList<Task>();
+        saveFileName = storage.getSaveFileName();
 
         allTasks = storage.readFile();
         allTasks = sortToDisplay(allTasks);
@@ -84,6 +85,7 @@ public class Controller {
         // Load the incomplete tasks into displayedTasks
         for (Task task : getIncompleteTasks(allTasks)) {
             displayedTasks.add(task);
+            tasksToDisplay.add(task);
         }
 
         timeToExit = false;
