@@ -91,23 +91,54 @@ public class Display extends AnchorPane {
     }
     
     public void updateSearchDisplay(ObservableList<Task> searchResults, String searchQuery) {
-        ArrayList<Task> listOfTasks = sortToDisplay(new ArrayList<Task>(searchResults));
+        // TODO Refactor this method
+        ArrayList<Task> listOfResults = sortToDisplay(new ArrayList<Task>(searchResults));
         
         displayBoxes = FXCollections.observableArrayList();
-        DayBox search;
+        ArrayList<HBox> incompleteTasks = new ArrayList<HBox>();
+        ArrayList<HBox> completedTasks = new ArrayList<HBox>();
+        
+        DayBox searchLabel;
+        
+        if (searchQuery.isEmpty()) {
+            searchQuery = "all tasks";
+        }
         
         if (searchResults.isEmpty()) {
-            search = new DayBox(String.format(LABEL_UNSUCCESSFUL_SEARCH, searchQuery), "");
+            searchLabel = new DayBox(String.format(LABEL_UNSUCCESSFUL_SEARCH, searchQuery), "");
         } else {
-            search = new DayBox(String.format(LABEL_SUCCESSFUL_SEARCH, searchQuery), "");
+            searchLabel = new DayBox(String.format(LABEL_SUCCESSFUL_SEARCH, searchQuery), "");
         }
-        displayBoxes.add(search);
+        displayBoxes.add(searchLabel);
         
         int index = 1;
-        for (Task task : searchResults) {
-            displayBoxes.add(new TaskBox(index, task.toString()));
-            index++;
+        for (Task task : listOfResults) {
+            if (!task.isCompleted()) {
+                incompleteTasks.add(new TaskBox(index, task.toString()));
+                index++;
+            }
         }
+        
+        for (Task task : listOfResults) {
+            if (task.isCompleted()) {
+                completedTasks.add(new TaskBox(index, task.toString(), true));
+                index++;
+            }
+        }
+        
+        DayBox incompleteLabel = new DayBox("Incomplete", "");
+        if (incompleteTasks.isEmpty()) {
+            incompleteLabel.dim();
+        }
+        displayBoxes.add(incompleteLabel);
+        displayBoxes.addAll(incompleteTasks);
+        
+        DayBox completedLabel = new DayBox("Completed", "");
+        if (completedTasks.isEmpty()) {
+            completedLabel.dim();
+        }
+        displayBoxes.add(completedLabel);
+        displayBoxes.addAll(completedTasks);
         
         listView.setItems(displayBoxes);
     }

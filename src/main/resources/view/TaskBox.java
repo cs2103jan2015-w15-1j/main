@@ -48,6 +48,22 @@ public class TaskBox extends HBox {
         checkbox.selectedProperty().addListener(listener);
         description.setText(desc);
         delete.setText("X");
+    }
+    
+    public TaskBox(int idx, String desc, boolean completed) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/TaskBox.fxml"));
+            loader.setRoot(this);
+            loader.setController(this);
+            loader.load();
 
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        index.setText(idx + "");
+        checkbox.setDisable(true);
+        description.setText(desc);
+        delete.setText("X");
     }
 }
