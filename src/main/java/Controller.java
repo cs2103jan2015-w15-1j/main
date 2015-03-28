@@ -81,7 +81,8 @@ public class Controller {
         saveFileName = storage.getSaveFileName();
 
         allTasks = storage.readFile();
-        allTasks = sortToDisplay(allTasks);
+        Collections.sort(allTasks, new SortDefault());
+        //allTasks = sortToDisplay(allTasks);
 
         // Load the incomplete tasks into displayedTasks
         for (Task task : getIncompleteTasks(allTasks)) {
@@ -142,7 +143,6 @@ public class Controller {
 	            updateState();
                 feedback = incompleteTask(arguments);
 	            break;
-	        // return incompleteTask(arguments);
 	        case UNDO:  // DONE
 	            feedback = undo();
 	            break;
@@ -154,7 +154,7 @@ public class Controller {
 	        case INVALID:
 	            feedback =  invalid();
 	            break;
-	        case EXIT:
+	        case EXIT:  // WINDOWS WILL NOT CLOSE AFTER THIS COMMAND
 	            timeToExit = true;
 	            feedback =  exit();
 	            break;
@@ -162,8 +162,6 @@ public class Controller {
 	            break;
 
         }
-        // I think need to sort all tasks so that the index is correct (my logic
-        // could be wrong)
         sortAllTasks();
         if (switchDisplay) {
             updateDisplaySearch();
@@ -210,65 +208,64 @@ public class Controller {
     // Logic methods
     // ================================================================
 
-    // TODO NEED TO REPLACE WITH ADAM'S UPDATED METHOD
-    private ArrayList<Task> sortToDisplay(ArrayList<Task> list) {
-        ArrayList<Task> overdueTasks = new ArrayList<Task>();
-        ArrayList<Task> floatingTasks = new ArrayList<Task>();
-        ArrayList<Task> notOverdueTasks = new ArrayList<Task>();
-        ArrayList<Task> finalList = new ArrayList<Task>();
-
-        // Separate the floating, overdue and pending
-        for (Task task : list) {
-            if (task.getType() == Task.Type.FLOATING) {
-                floatingTasks.add(task);
-            } else if (task.isOverdue()) {
-                overdueTasks.add(task);
-            } else {
-                notOverdueTasks.add(task);
-            }
-        }
-
-        // Sort according to what we discussed
-        overdueTasks = sortByDateAndType(overdueTasks);
-        notOverdueTasks = sortByDateAndType(notOverdueTasks);
-
-        finalList.addAll(floatingTasks);
-        finalList.addAll(overdueTasks);
-        finalList.addAll(notOverdueTasks);
-
-        return finalList;
-    }
-
-    private ArrayList<Task> sortByDateAndType(ArrayList<Task> list) {
-        ArrayList<Task> output = new ArrayList<Task>();
-        boolean isSorted;
-
-        for (Task task : list) {
-            isSorted = false;
-            if (output.size() == 0) {
-                output.add(task);
-            } else {
-                for (Task something : output) {
-                    if (task.getDate().isBefore(something.getDate())) {
-                        output.add(output.indexOf(something), task);
-                        isSorted = true;
-                        break;
-                    } else if (task.getDate().isEqual(something.getDate())) {
-                        if (something.getType() == Task.Type.TIMED
-                                && task.getType() == Task.Type.DEADLINE) {
-                            output.add(output.indexOf(something), task);
-                            isSorted = true;
-                            break;
-                        }
-                    }
-                }
-                if (!isSorted) {
-                    output.add(task);
-                }
-            }
-        }
-        return output;
-    }
+//    private ArrayList<Task> sortToDisplay(ArrayList<Task> list) {
+//        ArrayList<Task> overdueTasks = new ArrayList<Task>();
+//        ArrayList<Task> floatingTasks = new ArrayList<Task>();
+//        ArrayList<Task> notOverdueTasks = new ArrayList<Task>();
+//        ArrayList<Task> finalList = new ArrayList<Task>();
+//
+//        // Separate the floating, overdue and pending
+//        for (Task task : list) {
+//            if (task.getType() == Task.Type.FLOATING) {
+//                floatingTasks.add(task);
+//            } else if (task.isOverdue()) {
+//                overdueTasks.add(task);
+//            } else {
+//                notOverdueTasks.add(task);
+//            }
+//        }
+//
+//        // Sort according to what we discussed
+//        overdueTasks = sortByDateAndType(overdueTasks);
+//        notOverdueTasks = sortByDateAndType(notOverdueTasks);
+//
+//        finalList.addAll(floatingTasks);
+//        finalList.addAll(overdueTasks);
+//        finalList.addAll(notOverdueTasks);
+//
+//        return finalList;
+//    }
+//
+//    private ArrayList<Task> sortByDateAndType(ArrayList<Task> list) {
+//        ArrayList<Task> output = new ArrayList<Task>();
+//        boolean isSorted;
+//
+//        for (Task task : list) {
+//            isSorted = false;
+//            if (output.size() == 0) {
+//                output.add(task);
+//            } else {
+//                for (Task something : output) {
+//                    if (task.getDate().isBefore(something.getDate())) {
+//                        output.add(output.indexOf(something), task);
+//                        isSorted = true;
+//                        break;
+//                    } else if (task.getDate().isEqual(something.getDate())) {
+//                        if (something.getType() == Task.Type.TIMED
+//                                && task.getType() == Task.Type.DEADLINE) {
+//                            output.add(output.indexOf(something), task);
+//                            isSorted = true;
+//                            break;
+//                        }
+//                    }
+//                }
+//                if (!isSorted) {
+//                    output.add(task);
+//                }
+//            }
+//        }
+//        return output;
+//    }
 
     private String addTask(String input) {
         parser.parse(input);

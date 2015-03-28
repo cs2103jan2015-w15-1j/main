@@ -10,6 +10,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import main.java.Command;
 import main.java.DateParser;
+import main.java.SortDefault;
 import main.java.Storage;
 import main.java.Task;
 
@@ -21,6 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 import java.util.stream.Collectors;
+
+import edu.emory.mathcs.backport.java.util.Collections;
 
 public class Display extends AnchorPane {
 
@@ -73,8 +76,10 @@ public class Display extends AnchorPane {
     // Public methods
     // ================================================================
     public void updateDisplay(ObservableList<Task> tasks) {
-        ArrayList<Task> listOfTasks = sortToDisplay(new ArrayList<Task>(tasks));
-
+        //ArrayList<Task> listOfTasks = sortToDisplay(new ArrayList<Task>(tasks));
+    	ArrayList<Task> listOfTasks = new ArrayList<Task>(tasks);
+    	Collections.sort(listOfTasks, new SortDefault());
+    	
         System.out.println(listOfTasks.toString());
 
         // re-initialize displayBoxes
