@@ -1,11 +1,17 @@
 package main.resources.view;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.util.Duration;
 import main.java.Controller;
 
 import java.io.IOException;
@@ -18,6 +24,8 @@ public class RootLayoutController extends BorderPane {
     @FXML
     private TextField userInput;
 
+    @FXML
+    private Label feedbackLabel;
     // ================================================================
     // Non-FXML Fields
     // ================================================================
@@ -53,13 +61,15 @@ public class RootLayoutController extends BorderPane {
     @FXML
     private void initialize() {
         userInput.setText("Enter your task here");
+        addFeedback("Welcome to Veto!");
     }
 
     @FXML
     public void handleEnterPressed(KeyEvent event) {
-        
         if (event.getCode() == KeyCode.ENTER) {
-            controller.executeCommand(userInput.getText());
+            String feedback = controller.executeCommand(userInput.getText());
+            System.out.println(feedback);
+            addFeedback(feedback);
             System.out.println(userInput.getText());
             pointer = history.size();
             history.add(pointer - 1, userInput.getText());
@@ -79,6 +89,19 @@ public class RootLayoutController extends BorderPane {
 //            System.out.println("up " + pointer);
             userInput.setText(history.get(pointer));
         }
+    }
+
+    private void addFeedback(String feedback) {
+        feedbackLabel.setText(feedback);
+        Timeline timeline = new Timeline();
+        timeline.getKeyFrames().add(new KeyFrame(Duration.seconds(10),
+            new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent event) {
+                    feedbackLabel.setText("");
+                }
+            }));
+        timeline.play();
     }
 
     public void setDisplay(Display display) {

@@ -33,12 +33,21 @@
  */
  
 .root {
-	-fx-background-color: white;
+	-fx-background-color: transparent;
 	-fx-padding: 10;
 }
 
 .root #userInput {
 	-fx-font: 16px Roboto;
+	-fx-focus-color: tomato;
+	-fx-faint-focus-color: transparent;
+}
+
+.root #feedbackLabel {
+	-fx-padding: 0 0 5 0;
+	-fx-font: 14px Roboto;
+	-fx-text-fill: tomato;
+	-fx-font-style: italic;
 }
 
 
@@ -92,7 +101,7 @@
 
 .dayBox #day {
 	-fx-font-weight: 700;
-	-fx-text-fill: #333;
+	-fx-text-fill: tomato;
 }
 
 .dayBox #date {

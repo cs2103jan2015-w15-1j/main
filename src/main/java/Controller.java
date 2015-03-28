@@ -278,19 +278,20 @@ public class Controller {
         allTasks.add(task);
         updateStorageWithAllTasks();
 
+        return "Task has been added: " + task.toString();
         // brought back previous return codes - CK
-        if (task.getType() == Task.Type.FLOATING) {
-            return String.format(MESSAGE_ADD, task.getDescription(),
-                    MESSAGE_NOT_APPL, MESSAGE_NOT_APPL);
-        } else if (task.getType() == Task.Type.DEADLINE) {
-            return String.format(MESSAGE_ADD, task.getDescription(),
-                    task.getDate(), MESSAGE_NOT_APPL);
-        } else {
-            String formattedTime = task.getStartTime() + " to "
-                    + task.getEndTime();
-            return String.format(MESSAGE_ADD, task.getDescription(),
-                    task.getDate(), formattedTime);
-        }
+//        if (task.getType() == Task.Type.FLOATING) {
+//            return String.format(MESSAGE_ADD, task.getDescription(),
+//                    MESSAGE_NOT_APPL, MESSAGE_NOT_APPL);
+//        } else if (task.getType() == Task.Type.DEADLINE) {
+//            return String.format(MESSAGE_ADD, task.getDescription(),
+//                    task.getDate(), MESSAGE_NOT_APPL);
+//        } else {
+//            String formattedTime = task.getStartTime() + " to "
+//                    + task.getEndTime();
+//            return String.format(MESSAGE_ADD, task.getDescription(),
+//                    task.getDate(), formattedTime);
+//        }
     }
 
     private String deleteTask(String input) {
