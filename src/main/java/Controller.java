@@ -476,21 +476,21 @@ public class Controller {
         displayedTasks = FXCollections.observableArrayList(uds.getList());
     }
 
-    private void loadDisplayedTasks(ArrayList<Task> input) {
-        displayedTasks.setAll(input);
-    }
+//    private void loadDisplayedTasks(ArrayList<Task> input) {
+//        displayedTasks.setAll(input);
+//    }
 
-    private String formatTasksForDisplay(ArrayList<Task> input) {
-        if (input.isEmpty()) {
-            return MESSAGE_EMPTY;
-        }
-
-        String display = "";
-        for (Task task : input) {
-            display += task;
-        }
-        return display;
-    }
+//    private String formatTasksForDisplay(ArrayList<Task> input) {
+//        if (input.isEmpty()) {
+//            return MESSAGE_EMPTY;
+//        }
+//
+//        String display = "";
+//        for (Task task : input) {
+//            display += task;
+//        }
+//        return display;
+//    }
 
     private void updateStorageWithAllTasks() {
         storage.updateFiles(allTasks);
