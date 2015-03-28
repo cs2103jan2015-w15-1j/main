@@ -40,7 +40,7 @@ import org.apache.commons.lang.StringUtils;
 
 public class Task implements Cloneable {
     public static enum Type {
-        FLOATING, TIMED, DEADLINE
+        FLOATING, DEADLINE, TIMED
     };
 
     private static final String HEADER_DESC = "Description: ";
