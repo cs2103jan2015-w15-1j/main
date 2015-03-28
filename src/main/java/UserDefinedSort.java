@@ -82,6 +82,10 @@ class SortOverdue implements Comparator<Task> {
 class SortDate implements Comparator<Task> {
 	
 	/*
+	 * NULL EXIST
+	 * EXIST NULL
+	 * NULL NULL
+	 * EXIST EXIST
 	 * EARLY LATER
 	 * LATER EARLY
 	 * SAME DAY
@@ -92,7 +96,15 @@ class SortDate implements Comparator<Task> {
 		LocalDate date1 = task1.getDate();
 		LocalDate date2 = task2.getDate();
 		
-		if (date1.isBefore(date2)) {
+		if (date1 == null && date2 != null) {
+			return -1;
+		} else if (date1 != null && date2 == null) {
+			return 1;
+		} else if (date1 == null && date2 == null) {
+			return 0;
+		} else if (date1 != null && date2 != null) {
+			return 0;
+		} else if (date1.isBefore(date2)) {
 			return -1;
 		} else if (date1.isAfter(date2)) {
 			return 1;
