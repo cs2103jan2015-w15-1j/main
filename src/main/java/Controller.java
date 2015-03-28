@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
+import edu.emory.mathcs.backport.java.util.Collections;
+
 public class Controller {
     // ================================================================
     // Fields
@@ -455,7 +457,8 @@ public class Controller {
     }
 
     private void sortAllTasks() {
-        allTasks = sortToDisplay(allTasks);
+    	Collections.sort(allTasks, new SortDefault());
+        //allTasks = sortToDisplay(allTasks);
     }
 
     private void loadDisplayedTasks(ArrayList<Task> input) {
