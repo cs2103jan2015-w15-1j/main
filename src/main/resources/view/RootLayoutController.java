@@ -9,6 +9,7 @@ import javafx.scene.layout.BorderPane;
 import main.java.Controller;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class RootLayoutController extends BorderPane {
     // ================================================================
@@ -22,6 +23,9 @@ public class RootLayoutController extends BorderPane {
     // ================================================================
     private Display display;
     private Controller controller;
+    
+    private ArrayList<String> history;
+    private int pointer;
 
     private final String ROOT_LAYOUT_LOCATION = "/view/RootLayout.fxml";
 
@@ -35,6 +39,10 @@ public class RootLayoutController extends BorderPane {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        
+        history = new ArrayList<String>();
+        history.add("");
+        pointer = history.size();
     }
 
     /**
@@ -51,7 +59,21 @@ public class RootLayoutController extends BorderPane {
         if (event.getCode() == KeyCode.ENTER) {
             controller.executeCommand(userInput.getText());
             System.out.println(userInput.getText());
+            history.add(userInput.getText());
+            pointer = history.size();
             userInput.setText("");
+        } else if (event.getCode() == KeyCode.DOWN) {
+            if (pointer < history.size() - 1) {
+                pointer++;
+                userInput.setText(history.get(pointer));
+            } else {
+                userInput.setText("");
+            }
+        } else if (event.getCode() == KeyCode.UP) {
+            if (pointer > 0) {
+                pointer--;
+            }
+            userInput.setText(history.get(pointer));
         }
     }
 

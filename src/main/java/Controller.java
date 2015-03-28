@@ -38,10 +38,8 @@ public class Controller {
 
     private Stack<ArrayList<Task>> previousStates;
 
-    private ObservableList<Task> displayedTasks = FXCollections
-            .observableArrayList();
-    private ObservableList<HBox> displayBoxes = FXCollections
-            .observableArrayList();
+    private ObservableList<Task> displayedTasks = FXCollections.observableArrayList();
+    private ObservableList<HBox> displayBoxes = FXCollections.observableArrayList();
     private String arguments;
     private DateParser parser;
 
