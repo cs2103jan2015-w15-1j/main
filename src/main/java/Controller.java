@@ -303,6 +303,7 @@ public class Controller {
             tasksToDisplay.remove(task);
             allTasks.remove(task);
             
+            // remove if statement if deleting last entry of search should remain at search display
             if (tasksToDisplay.isEmpty()) {
                 switchDisplay = false;
             }
