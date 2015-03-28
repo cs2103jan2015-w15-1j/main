@@ -76,8 +76,8 @@ public class RootLayoutController extends BorderPane {
             if (pointer > 0) {
                 pointer--;
             }
-            System.out.println("up " + pointer);
-//            userInput.setText(history.get(pointer));
+//            System.out.println("up " + pointer);
+            userInput.setText(history.get(pointer));
         }
     }
 
