@@ -42,7 +42,8 @@ public class RootLayoutController extends BorderPane {
         
         history = new ArrayList<String>();
         history.add("");
-        pointer = history.size();
+        history.add("");
+        pointer = history.size() - 1;
     }
 
     /**
@@ -56,12 +57,13 @@ public class RootLayoutController extends BorderPane {
 
     @FXML
     public void handleEnterPressed(KeyEvent event) {
+        
         if (event.getCode() == KeyCode.ENTER) {
             controller.executeCommand(userInput.getText());
             System.out.println(userInput.getText());
-            history.add(userInput.getText());
             pointer = history.size();
-            userInput.setText("");
+            history.add(pointer - 1, userInput.getText());
+            userInput.setText("");            
         } else if (event.getCode() == KeyCode.DOWN) {
             if (pointer < history.size() - 1) {
                 pointer++;
@@ -69,11 +71,13 @@ public class RootLayoutController extends BorderPane {
             } else {
                 userInput.setText("");
             }
+//            System.out.println("down " + pointer);
         } else if (event.getCode() == KeyCode.UP) {
             if (pointer > 0) {
                 pointer--;
             }
-            userInput.setText(history.get(pointer));
+            System.out.println("up " + pointer);
+//            userInput.setText(history.get(pointer));
         }
     }
 
