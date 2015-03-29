@@ -38,8 +38,6 @@ public class Display extends AnchorPane {
     // ================================================================
     // Non-FXML Fields
     // ================================================================
-    private ObservableList<HBox> displayBoxes = FXCollections.observableArrayList();
-
 
     // ================================================================
     // Constants
@@ -75,36 +73,82 @@ public class Display extends AnchorPane {
     // ================================================================
     // Public methods
     // ================================================================
-    public void updateDisplay(ObservableList<Task> tasks) {
-        //ArrayList<Task> listOfTasks = sortToDisplay(new ArrayList<Task>(tasks));
+    public void updateOverviewDisplay(ObservableList<Task> tasks) {
     	ArrayList<Task> listOfTasks = new ArrayList<Task>(tasks);
-    	//Collections.sort(listOfTasks, new SortDefault());
-    	
-        System.out.println(listOfTasks.toString());
+//        System.out.println(listOfTasks.toString());
 
-        // re-initialize displayBoxes
-        displayBoxes = FXCollections.observableArrayList();
+    	ObservableList<HBox> displayBoxes = FXCollections.observableArrayList();
         LocalDate now = LocalDate.now();
         int index = 1;
-
-        index = addFloatingTasks(listOfTasks, index);
-        index = addOverdueTasks(listOfTasks, index);
-        index = addThisWeeksTasks(listOfTasks, now, index);
-        index = addAllOtherTasks(listOfTasks, now, index);
+        
+        index = addOverdueTasks(displayBoxes, listOfTasks, index);
+        index = addFloatingTasks(displayBoxes, listOfTasks, index);
+        index = addThisWeeksTasks(displayBoxes, listOfTasks, now, index);
+        index = addAllOtherTasks(displayBoxes, listOfTasks, now, index);
 
         listView.setItems(displayBoxes);
     }
     
     public void updateSearchDisplay(ObservableList<Task> searchResults, String searchQuery) {
-        // TODO Refactor this method
         ArrayList<Task> listOfResults = new ArrayList<Task>(searchResults);
+//        System.out.println(listOfResults);
         
-        displayBoxes = FXCollections.observableArrayList();
+        ObservableList<HBox> displayBoxes = FXCollections.observableArrayList();
         ArrayList<HBox> incompleteTasks = new ArrayList<HBox>();
         ArrayList<HBox> completedTasks = new ArrayList<HBox>();
         
-        DayBox searchLabel;
+        addSearchLabel(displayBoxes, searchResults, searchQuery);
         
+        categoriseTasks(listOfResults, incompleteTasks, completedTasks);
+        
+        addIncompleteTasks(displayBoxes, incompleteTasks);
+        addCompletedTasks(displayBoxes, completedTasks);
+        
+        listView.setItems(displayBoxes);
+    }
+
+    private void addSearchLabel(ObservableList<HBox> displayBoxes,
+                                ObservableList<Task> searchResults,
+                                String searchQuery) {
+        DayBox searchLabel = generateSearchLabel(searchResults, searchQuery);
+        displayBoxes.add(searchLabel);
+    }
+
+    private void addCompletedTasks(ObservableList<HBox> displayBoxes, ArrayList<HBox> completedTasks) {
+        DayBox completedLabel = new DayBox("Completed", "");
+        if (completedTasks.isEmpty()) {
+            completedLabel.dim();
+        }
+        displayBoxes.add(completedLabel);
+        displayBoxes.addAll(completedTasks);
+    }
+
+    private void addIncompleteTasks(ObservableList<HBox> displayBoxes, ArrayList<HBox> incompleteTasks) {
+        DayBox incompleteLabel = new DayBox("Incomplete", "");
+        if (incompleteTasks.isEmpty()) {
+            incompleteLabel.dim();
+        }
+        displayBoxes.add(incompleteLabel);
+        displayBoxes.addAll(incompleteTasks);
+    }
+
+    private void categoriseTasks(ArrayList<Task> listOfResults,
+                                 ArrayList<HBox> incompleteTasks,
+                                 ArrayList<HBox> completedTasks) {
+        int index = 1;
+        for (Task task : listOfResults) {
+            if (!task.isCompleted()) {
+                incompleteTasks.add(new TaskBox(index, task.toString()));
+            } else {
+                completedTasks.add(new TaskBox(index, task.toString(), true));
+            }
+            index++;
+        }
+    }
+
+    private DayBox generateSearchLabel(ObservableList<Task> searchResults,
+                                       String searchQuery) {
+        DayBox searchLabel;
         if (searchQuery.isEmpty()) {
             searchQuery = "all tasks";
         }
@@ -114,44 +158,13 @@ public class Display extends AnchorPane {
         } else {
             searchLabel = new DayBox(String.format(LABEL_SUCCESSFUL_SEARCH, searchQuery), "");
         }
-        displayBoxes.add(searchLabel);
-        
-        int index = 1;
-        for (Task task : listOfResults) {
-            if (!task.isCompleted()) {
-                incompleteTasks.add(new TaskBox(index, task.toString()));
-                index++;
-            }
-        }
-        
-        for (Task task : listOfResults) {
-            if (task.isCompleted()) {
-                completedTasks.add(new TaskBox(index, task.toString(), true));
-                index++;
-            }
-        }
-        
-        DayBox incompleteLabel = new DayBox("Incomplete", "");
-        if (incompleteTasks.isEmpty()) {
-            incompleteLabel.dim();
-        }
-        displayBoxes.add(incompleteLabel);
-        displayBoxes.addAll(incompleteTasks);
-        
-        DayBox completedLabel = new DayBox("Completed", "");
-        if (completedTasks.isEmpty()) {
-            completedLabel.dim();
-        }
-        displayBoxes.add(completedLabel);
-        displayBoxes.addAll(completedTasks);
-        
-        listView.setItems(displayBoxes);
+        return searchLabel;
     }
 
     // ================================================================
     // Logic methods
     // ================================================================
-    private int addFloatingTasks(ArrayList<Task> listOfTasks, int index) {
+    private int addFloatingTasks(ObservableList<HBox> displayBoxes, ArrayList<Task> listOfTasks, int index) {
         DayBox floating = new DayBox(LABEL_FLOATING, "");
         displayBoxes.add(floating);
 
@@ -172,7 +185,7 @@ public class Display extends AnchorPane {
         return index;
     }
 
-    private int addOverdueTasks(ArrayList<Task> listOfTasks, int index) {
+    private int addOverdueTasks(ObservableList<HBox> displayBoxes, ArrayList<Task> listOfTasks, int index) {
         // add second category
         DayBox overdue = new DayBox(LABEL_OVERDUE, "");
         displayBoxes.add(overdue);
@@ -196,7 +209,7 @@ public class Display extends AnchorPane {
         return index;
     }
 
-    private int addThisWeeksTasks(ArrayList<Task> listOfTasks,
+    private int addThisWeeksTasks(ObservableList<HBox> displayBoxes, ArrayList<Task> listOfTasks,
                                   LocalDate now,
                                   int index) {
         // generate the dates of the 7 days from today
@@ -265,7 +278,7 @@ public class Display extends AnchorPane {
         return days;
     }
 
-    private int addAllOtherTasks(ArrayList<Task> listOfTasks,
+    private int addAllOtherTasks(ObservableList<HBox> displayBoxes, ArrayList<Task> listOfTasks,
                                  LocalDate now,
                                  int i) {
         DayBox otherTasks = new DayBox(LABEL_OTHERS, "");

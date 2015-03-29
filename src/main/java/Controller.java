@@ -86,7 +86,7 @@ public class Controller {
 
     // To load the tasks into the display on the first load
     public void onloadDisplay() {
-        display.updateDisplay(displayedTasks);
+        display.updateOverviewDisplay(displayedTasks);
     }
 
     // ================================================================
@@ -367,7 +367,7 @@ public class Controller {
     
     private void updateDisplayWithDefault() {
         displayedTasks.setAll(getIncompleteTasks(allTasks));
-        display.updateDisplay(displayedTasks);
+        display.updateOverviewDisplay(displayedTasks);
     }
 
     private void updateDisplaySearch() {
