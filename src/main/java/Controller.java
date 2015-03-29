@@ -22,12 +22,13 @@ public class Controller {
     private boolean timeToExit;
 
     private ArrayList<Task> allTasks;
+    private ObservableList<Task> displayedTasks = FXCollections.observableArrayList();
 
     private Stack<ArrayList<Task>> previousStates;
     private Stack<ObservableList<Task>> previousStatesDisplayed;
     
-    private ObservableList<Task> displayedTasks = FXCollections.observableArrayList();
-    //private ObservableList<HBox> displayBoxes = FXCollections.observableArrayList();
+    
+
     private String arguments;
     private DateParser parser;
 
