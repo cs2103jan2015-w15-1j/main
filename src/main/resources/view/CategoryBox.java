@@ -7,6 +7,8 @@ import javafx.scene.layout.HBox;
 
 public class CategoryBox extends HBox {
 
+    private static final String LOCATION_CATEGORY_BOX_FXML = "/view/CategoryBox.fxml";
+
     @FXML
     private Label category;
 
@@ -15,7 +17,7 @@ public class CategoryBox extends HBox {
 
     public CategoryBox(String category, String date) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/DayBox.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(LOCATION_CATEGORY_BOX_FXML));
             loader.setRoot(this);
             loader.setController(this);
             loader.load();

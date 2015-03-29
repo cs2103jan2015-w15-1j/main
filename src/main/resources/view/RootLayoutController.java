@@ -68,9 +68,9 @@ public class RootLayoutController extends BorderPane {
     public void handleEnterPressed(KeyEvent event) {
         if (event.getCode() == KeyCode.ENTER) {
             String feedback = controller.executeCommand(userInput.getText());
-            System.out.println(feedback);
+//            System.out.println(feedback);
             addFeedback(feedback);
-            System.out.println(userInput.getText());
+//            System.out.println(userInput.getText());
             pointer = history.size();
             history.add(pointer - 1, userInput.getText());
             userInput.setText("");            
