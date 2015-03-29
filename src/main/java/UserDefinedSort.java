@@ -12,6 +12,7 @@ public class UserDefinedSort {
 	
 	public UserDefinedSort(ArrayList<Task> list) {
 		this.list = list;
+		chain = new ArrayList<Comparator<Task>>();
 	}
 	
 	public ArrayList<Task> getList() {
@@ -22,19 +23,10 @@ public class UserDefinedSort {
 		chain.add(comparator);
 	}
 	
-	public void executeSortDefault() {
-		//for (Comparator<Task> comparator: chain) {
-			Collections.sort(list, new SortType());
-			Collections.sort(list, new SortOverdue());
-			Collections.sort(list, new SortDate());
-		//}
-	}
-	
-	public void executeSortSearch() {
-		Collections.sort(list, new SortType());
-		Collections.sort(list, new SortOverdue());
-		Collections.sort(list, new SortDate());
-		Collections.sort(list, new SortIncomplete());
+	public void executeSort() {
+		for (Comparator<Task> comparator: chain) {
+			Collections.sort(list, comparator);
+		}
 	}
 }
 
