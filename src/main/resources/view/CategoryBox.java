@@ -1,27 +1,20 @@
 package main.resources.view;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 
-public class DayBox extends HBox {
-//    @FXML
-//    private ListView<String> tasks;
+public class CategoryBox extends HBox {
 
     @FXML
-    private Label day;
+    private Label category;
 
     @FXML
     private Label date;
 
-    public DayBox(String day, String date) {
+    public CategoryBox(String category, String date) {
         try {
-            // Load person overview.
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/DayBox.fxml"));
             loader.setRoot(this);
             loader.setController(this);
@@ -31,7 +24,7 @@ public class DayBox extends HBox {
             e.printStackTrace();
         }
 
-        this.day.setText(day);
+        this.category.setText(category);
         if (!date.isEmpty()) {
             this.date.setText("(" + date + ")");
         } else {
@@ -40,7 +33,7 @@ public class DayBox extends HBox {
     }
     
     public void dim() {
-        day.setStyle("-fx-text-fill: #E8E8E8;");
+        category.setStyle("-fx-text-fill: #E8E8E8;");
         date.setStyle("-fx-text-fill: #E8E8E8;");
     }
 }

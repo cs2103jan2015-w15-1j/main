@@ -1,6 +1,5 @@
 package main.resources.view;
 
-import main.java.Task;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -51,19 +50,7 @@ public class TaskBox extends HBox {
     }
     
     public TaskBox(int idx, String desc, boolean completed) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/TaskBox.fxml"));
-            loader.setRoot(this);
-            loader.setController(this);
-            loader.load();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        index.setText(idx + "");
+        this(idx, desc);
         checkbox.setDisable(true);
-        description.setText(desc);
-        delete.setText("X");
     }
 }

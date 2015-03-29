@@ -1,32 +1,22 @@
 package main.resources.view;
 
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
-import main.java.Command;
-import main.java.DateParser;
-import main.java.SortDefault;
-import main.java.Storage;
 import main.java.Task;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
-import java.util.stream.Collectors;
-
-import edu.emory.mathcs.backport.java.util.Collections;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Display extends AnchorPane {
-
 
     // ================================================================
     // FXML Fields
@@ -34,15 +24,17 @@ public class Display extends AnchorPane {
     @FXML
     private ListView<HBox> listView;
 
-
     // ================================================================
     // Non-FXML Fields
     // ================================================================
+    private static Logger logger;
 
     // ================================================================
     // Constants
     // ================================================================
+
     private final static String TASK_OVERVIEW_LOCATION = "/view/TaskOverview.fxml";
+
     private static final String LABEL_FLOATING = "Floating";
     private static final String LABEL_OVERDUE = "Overdue";
     private static final String LABEL_TODAY = "Today";
@@ -50,6 +42,9 @@ public class Display extends AnchorPane {
     private static final String LABEL_OTHERS = "Everything else";
     private static final String LABEL_SUCCESSFUL_SEARCH = "Results for \"%s\"";
     private static final String LABEL_UNSUCCESSFUL_SEARCH = "No results for \"%s\"";
+    private static final String LABEL_DEFAULT_SEARCH_QUERY = "all tasks";
+    private static final String LABEL_INCOMPLETE = "Incomplete";
+    private static final String LABEL_COMPLETED = "Completed";
 
 
     // ================================================================
@@ -59,6 +54,9 @@ public class Display extends AnchorPane {
      * The constructor is called before the initialize() method.
      */
     public Display() {
+        logger = Logger.getLogger("Display");
+        logger.setLevel(Level.INFO);
+
         FXMLLoader loader = new FXMLLoader(getClass().getResource(TASK_OVERVIEW_LOCATION));
         loader.setRoot(this);
         loader.setController(this);
@@ -73,14 +71,15 @@ public class Display extends AnchorPane {
     // ================================================================
     // Public methods
     // ================================================================
-    public void updateOverviewDisplay(ObservableList<Task> tasks) {
-    	ArrayList<Task> listOfTasks = new ArrayList<Task>(tasks);
-//        System.out.println(listOfTasks.toString());
 
-    	ObservableList<HBox> displayBoxes = FXCollections.observableArrayList();
+    public void updateOverviewDisplay(ObservableList<Task> tasks) {
+        ArrayList<Task> listOfTasks = new ArrayList<Task>(tasks);
+        logger.log(Level.INFO, "List of tasks: " + listOfTasks.toString());
+
+        ObservableList<HBox> displayBoxes = FXCollections.observableArrayList();
         LocalDate now = LocalDate.now();
         int index = 1;
-        
+
         index = addOverdueTasks(displayBoxes, listOfTasks, index);
         index = addFloatingTasks(displayBoxes, listOfTasks, index);
         index = addThisWeeksTasks(displayBoxes, listOfTasks, now, index);
@@ -88,84 +87,33 @@ public class Display extends AnchorPane {
 
         listView.setItems(displayBoxes);
     }
-    
-    public void updateSearchDisplay(ObservableList<Task> searchResults, String searchQuery) {
+
+    public void updateSearchDisplay(ObservableList<Task> searchResults,
+                                    String searchQuery) {
         ArrayList<Task> listOfResults = new ArrayList<Task>(searchResults);
-//        System.out.println(listOfResults);
-        
+        logger.log(Level.INFO, "List of results: " + listOfResults.toString());
+
         ObservableList<HBox> displayBoxes = FXCollections.observableArrayList();
-        ArrayList<HBox> incompleteTasks = new ArrayList<HBox>();
-        ArrayList<HBox> completedTasks = new ArrayList<HBox>();
-        
+
         addSearchLabel(displayBoxes, searchResults, searchQuery);
-        
-        categoriseTasks(listOfResults, incompleteTasks, completedTasks);
-        
-        addIncompleteTasks(displayBoxes, incompleteTasks);
-        addCompletedTasks(displayBoxes, completedTasks);
-        
+
+        int index = 1;
+
+        index = addIncompleteTasks(displayBoxes, listOfResults, index);
+        index = addCompletedTasks(displayBoxes, listOfResults, index);
+
         listView.setItems(displayBoxes);
     }
 
-    private void addSearchLabel(ObservableList<HBox> displayBoxes,
-                                ObservableList<Task> searchResults,
-                                String searchQuery) {
-        DayBox searchLabel = generateSearchLabel(searchResults, searchQuery);
-        displayBoxes.add(searchLabel);
-    }
-
-    private void addCompletedTasks(ObservableList<HBox> displayBoxes, ArrayList<HBox> completedTasks) {
-        DayBox completedLabel = new DayBox("Completed", "");
-        if (completedTasks.isEmpty()) {
-            completedLabel.dim();
-        }
-        displayBoxes.add(completedLabel);
-        displayBoxes.addAll(completedTasks);
-    }
-
-    private void addIncompleteTasks(ObservableList<HBox> displayBoxes, ArrayList<HBox> incompleteTasks) {
-        DayBox incompleteLabel = new DayBox("Incomplete", "");
-        if (incompleteTasks.isEmpty()) {
-            incompleteLabel.dim();
-        }
-        displayBoxes.add(incompleteLabel);
-        displayBoxes.addAll(incompleteTasks);
-    }
-
-    private void categoriseTasks(ArrayList<Task> listOfResults,
-                                 ArrayList<HBox> incompleteTasks,
-                                 ArrayList<HBox> completedTasks) {
-        int index = 1;
-        for (Task task : listOfResults) {
-            if (!task.isCompleted()) {
-                incompleteTasks.add(new TaskBox(index, task.toString()));
-            } else {
-                completedTasks.add(new TaskBox(index, task.toString(), true));
-            }
-            index++;
-        }
-    }
-
-    private DayBox generateSearchLabel(ObservableList<Task> searchResults,
-                                       String searchQuery) {
-        DayBox searchLabel;
-        if (searchQuery.isEmpty()) {
-            searchQuery = "all tasks";
-        }
-        
-        if (searchResults.isEmpty()) {
-            searchLabel = new DayBox(String.format(LABEL_UNSUCCESSFUL_SEARCH, searchQuery), "");
-        } else {
-            searchLabel = new DayBox(String.format(LABEL_SUCCESSFUL_SEARCH, searchQuery), "");
-        }
-        return searchLabel;
-    }
 
     // ================================================================
-    // Logic methods
+    // Logic methods for updateOverviewDisplay
     // ================================================================
-    private int addFloatingTasks(ObservableList<HBox> displayBoxes, ArrayList<Task> listOfTasks, int index) {
-        DayBox floating = new DayBox(LABEL_FLOATING, "");
+
+    private int addFloatingTasks(ObservableList<HBox> displayBoxes,
+                                 ArrayList<Task> listOfTasks,
+                                 int index) {
+        CategoryBox floating = new CategoryBox(LABEL_FLOATING, "");
         displayBoxes.add(floating);
 
         boolean hasFloating = false;
@@ -185,9 +133,11 @@ public class Display extends AnchorPane {
         return index;
     }
 
-    private int addOverdueTasks(ObservableList<HBox> displayBoxes, ArrayList<Task> listOfTasks, int index) {
+    private int addOverdueTasks(ObservableList<HBox> displayBoxes,
+                                ArrayList<Task> listOfTasks,
+                                int index) {
         // add second category
-        DayBox overdue = new DayBox(LABEL_OVERDUE, "");
+        CategoryBox overdue = new CategoryBox(LABEL_OVERDUE, "");
         displayBoxes.add(overdue);
 
         boolean hasOverdue = false;
@@ -196,8 +146,10 @@ public class Display extends AnchorPane {
         for (Task task : listOfTasks) {
             if (task.isOverdue()) {
                 hasOverdue = true;
-                displayBoxes.add(new TaskBox(index, task.getDescription() + " on " +
-                                                task.getDate().format(formatter)));
+                displayBoxes.add(new TaskBox(index, task.getDescription() +
+                                                    " on " +
+                                                    task.getDate()
+                                                        .format(formatter)));
                 index++;
             }
         }
@@ -209,7 +161,8 @@ public class Display extends AnchorPane {
         return index;
     }
 
-    private int addThisWeeksTasks(ObservableList<HBox> displayBoxes, ArrayList<Task> listOfTasks,
+    private int addThisWeeksTasks(ObservableList<HBox> displayBoxes,
+                                  ArrayList<Task> listOfTasks,
                                   LocalDate now,
                                   int index) {
         // generate the dates of the 7 days from today
@@ -220,12 +173,12 @@ public class Display extends AnchorPane {
 
         // formats the date for the date label, eg. 1 April
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d MMMM");
-        
+
         // formats the time for the time label, eg 2:00PM to 4:00PM
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("h:mma");
 
         for (LocalDate day : days) {
-            DayBox label = generateDayLabel(now, dayFormatter, dateFormatter,
+            CategoryBox label = generateDayLabel(now, dayFormatter, dateFormatter,
                                             day);
             displayBoxes.add(label);
 
@@ -235,11 +188,17 @@ public class Display extends AnchorPane {
                 if (day.equals(task.getDate())) {
                     hasTaskOnThisDay = true;
                     if (task.getType() == Task.Type.TIMED) {
-                    	displayBoxes.add(new TaskBox(index, task.getDescription() + ", " + 
-                    						task.getStartTime().format(timeFormatter) + " to " +
-                    						task.getEndTime().format(timeFormatter)));
+                        displayBoxes.add(new TaskBox(index,
+                                                     task.getDescription() +
+                                                             ", " +
+                                                             task.getStartTime()
+                                                                 .format(timeFormatter) +
+                                                             " to " +
+                                                             task.getEndTime()
+                                                                 .format(timeFormatter)));
                     } else {
-                    displayBoxes.add(new TaskBox(index, task.getDescription()));
+                        displayBoxes.add(new TaskBox(index,
+                                                     task.getDescription()));
                     }
                     index++;
                 }
@@ -252,18 +211,18 @@ public class Display extends AnchorPane {
         return index;
     }
 
-    private DayBox generateDayLabel(LocalDate now,
+    private CategoryBox generateDayLabel(LocalDate now,
                                     DateTimeFormatter dayFormatter,
                                     DateTimeFormatter dateFormatter,
                                     LocalDate day) {
-        DayBox label;
+        CategoryBox label;
         // special cases to show "Today" and "Tomorrow" instead of day
         if (day.equals(now)) {
-            label = new DayBox(LABEL_TODAY, day.format(dateFormatter));
+            label = new CategoryBox(LABEL_TODAY, day.format(dateFormatter));
         } else if (day.equals(now.plusDays(1))) {
-            label = new DayBox(LABEL_TOMORROW, day.format(dateFormatter));
+            label = new CategoryBox(LABEL_TOMORROW, day.format(dateFormatter));
         } else {
-            label = new DayBox(day.format(dayFormatter),
+            label = new CategoryBox(day.format(dayFormatter),
                                day.format(dateFormatter));
         }
         return label;
@@ -278,10 +237,11 @@ public class Display extends AnchorPane {
         return days;
     }
 
-    private int addAllOtherTasks(ObservableList<HBox> displayBoxes, ArrayList<Task> listOfTasks,
+    private int addAllOtherTasks(ObservableList<HBox> displayBoxes,
+                                 ArrayList<Task> listOfTasks,
                                  LocalDate now,
                                  int i) {
-        DayBox otherTasks = new DayBox(LABEL_OTHERS, "");
+        CategoryBox otherTasks = new CategoryBox(LABEL_OTHERS, "");
         displayBoxes.add(otherTasks);
 
         boolean hasOtherTasks = false;
@@ -302,5 +262,80 @@ public class Display extends AnchorPane {
         }
 
         return i;
+    }
+
+
+    // ================================================================
+    // Logic methods for updateSearchDisplay
+    // ================================================================
+
+    private void addSearchLabel(ObservableList<HBox> displayBoxes,
+                                ObservableList<Task> searchResults,
+                                String searchQuery) {
+        CategoryBox searchLabel = generateSearchLabel(searchResults, searchQuery);
+        displayBoxes.add(searchLabel);
+    }
+
+    private CategoryBox generateSearchLabel(ObservableList<Task> searchResults,
+                                       String searchQuery) {
+        CategoryBox searchLabel;
+        if (searchQuery.isEmpty()) {
+            searchQuery = LABEL_DEFAULT_SEARCH_QUERY;
+        }
+
+        if (searchResults.isEmpty()) {
+            searchLabel = new CategoryBox(String.format(LABEL_UNSUCCESSFUL_SEARCH,
+                                                   searchQuery), "");
+        } else {
+            searchLabel = new CategoryBox(String.format(LABEL_SUCCESSFUL_SEARCH,
+                                                   searchQuery), "");
+        }
+        return searchLabel;
+    }
+
+    private int addIncompleteTasks(ObservableList<HBox> displayBoxes,
+                                   ArrayList<Task> listOfResults,
+                                   int index) {
+        CategoryBox incompleteLabel = new CategoryBox(LABEL_INCOMPLETE, "");
+        displayBoxes.add(incompleteLabel);
+
+        boolean hasIncompleteTask = false;
+
+        for (Task task : listOfResults) {
+            if (!task.isCompleted()) {
+                hasIncompleteTask = true;
+                displayBoxes.add(new TaskBox(index, task.toString()));
+                index++;
+            }
+        }
+
+        if (!hasIncompleteTask) {
+            incompleteLabel.dim();
+        }
+
+        return index;
+    }
+
+    private int addCompletedTasks(ObservableList<HBox> displayBoxes,
+                                  ArrayList<Task> listOfResults,
+                                  int index) {
+        CategoryBox completedLabel = new CategoryBox(LABEL_COMPLETED, "");
+        displayBoxes.add(completedLabel);
+
+        boolean hasCompletedTask = false;
+
+        for (Task task : listOfResults) {
+            if (task.isCompleted()) {
+                hasCompletedTask = true;
+                displayBoxes.add(new TaskBox(index, task.toString(), true));
+                index++;
+            }
+        }
+
+        if (!hasCompletedTask) {
+            completedLabel.dim();
+        }
+
+        return index;
     }
 }

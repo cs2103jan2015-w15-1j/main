@@ -43,10 +43,10 @@ public class Task implements Cloneable {
         FLOATING, DEADLINE, TIMED
     };
 
-    private static final String HEADER_DESC = "Description: ";
-    private static final String HEADER_TIME = "Time: ";
-    private static final String HEADER_DATE = "Deadline: ";
-    private static final String HEADER_NOT_APPL = "Not applicable";
+//    private static final String HEADER_DESC = "Description: ";
+//    private static final String HEADER_TIME = "Time: ";
+//    private static final String HEADER_DATE = "Deadline: ";
+//    private static final String HEADER_NOT_APPL = "Not applicable";
 
     private static final char ESCAPE_CHAR = '"';
 
