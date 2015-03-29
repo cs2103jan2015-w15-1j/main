@@ -33,7 +33,7 @@ public class Display extends AnchorPane {
     // Constants
     // ================================================================
 
-    private final static String TASK_OVERVIEW_LOCATION = "/view/TaskOverview.fxml";
+    private final static String LOCATION_TASK_OVERVIEW = "/view/TaskOverview.fxml";
 
     private static final String LABEL_FLOATING = "Floating";
     private static final String LABEL_OVERDUE = "Overdue";
@@ -57,7 +57,7 @@ public class Display extends AnchorPane {
         logger = Logger.getLogger("Display");
         logger.setLevel(Level.INFO);
 
-        FXMLLoader loader = new FXMLLoader(getClass().getResource(TASK_OVERVIEW_LOCATION));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource(LOCATION_TASK_OVERVIEW));
         loader.setRoot(this);
         loader.setController(this);
 
