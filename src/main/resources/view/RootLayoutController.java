@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class RootLayoutController extends BorderPane {
+    private static final int FEEDBACK_FADE_SECONDS = 10;
+
     // ================================================================
     // FXML Fields
     // ================================================================
@@ -34,6 +36,8 @@ public class RootLayoutController extends BorderPane {
     
     private ArrayList<String> history;
     private int pointer;
+    
+    private Timeline timeline;
 
     private final String ROOT_LAYOUT_LOCATION = "/view/RootLayout.fxml";
 
@@ -52,6 +56,7 @@ public class RootLayoutController extends BorderPane {
         history.add("");
         history.add("");
         pointer = history.size() - 1;
+
     }
 
     /**
@@ -61,6 +66,7 @@ public class RootLayoutController extends BorderPane {
     @FXML
     private void initialize() {
         userInput.setText("Enter your task here");
+        timeline = new Timeline();
         addFeedback("Welcome to Veto!");
     }
 
@@ -93,14 +99,15 @@ public class RootLayoutController extends BorderPane {
 
     private void addFeedback(String feedback) {
         feedbackLabel.setText(feedback);
-        Timeline timeline = new Timeline();
-        timeline.getKeyFrames().add(new KeyFrame(Duration.seconds(10),
-            new EventHandler<ActionEvent>() {
-                @Override
-                public void handle(ActionEvent event) {
-                    feedbackLabel.setText("");
-                }
-            }));
+        timeline.stop();
+        timeline.getKeyFrames()
+                .add(new KeyFrame(Duration.seconds(FEEDBACK_FADE_SECONDS),
+                                  new EventHandler<ActionEvent>() {
+                                      @Override
+                                      public void handle(ActionEvent event) {
+                                          feedbackLabel.setText("");
+                                      }
+                                  }));
         timeline.play();
     }
 
