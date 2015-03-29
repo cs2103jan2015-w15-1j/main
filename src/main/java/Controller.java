@@ -35,7 +35,6 @@ public class Controller {
     private boolean timeToExit;
 
     private ArrayList<Task> allTasks;
-    //private ArrayList<Task> tasksToDisplay;
 
     private Stack<ArrayList<Task>> previousStates;
     private Stack<ObservableList<Task>> previousStatesDisplayed;
@@ -77,20 +76,20 @@ public class Controller {
     public Controller() {
         parser = DateParser.getInstance();
         storage = Storage.getInstance();
-        //tasksToDisplay = new ArrayList<Task>();
         saveFileName = storage.getSaveFileName();
 
         allTasks = storage.readFile();
         
         //Sorting process
         uds = new UserDefinedSort(allTasks);
-        uds.executeSortDefault();
-        //Collections.sort(allTasks, new SortDefault());
+        uds.addComparator(new SortType());
+        uds.addComparator(new SortOverdue());
+        uds.addComparator(new SortDate());
+        uds.executeSort();
 
         // Load the incomplete tasks into displayedTasks (MAIN VIEW WHEN APP STARTS)
         for (Task task : getIncompleteTasks(allTasks)) {
             displayedTasks.add(task);
-            //tasksToDisplay.add(task);
         }
 
         timeToExit = false;
@@ -210,65 +209,6 @@ public class Controller {
     // Logic methods
     // ================================================================
 
-//    private ArrayList<Task> sortToDisplay(ArrayList<Task> list) {
-//        ArrayList<Task> overdueTasks = new ArrayList<Task>();
-//        ArrayList<Task> floatingTasks = new ArrayList<Task>();
-//        ArrayList<Task> notOverdueTasks = new ArrayList<Task>();
-//        ArrayList<Task> finalList = new ArrayList<Task>();
-//
-//        // Separate the floating, overdue and pending
-//        for (Task task : list) {
-//            if (task.getType() == Task.Type.FLOATING) {
-//                floatingTasks.add(task);
-//            } else if (task.isOverdue()) {
-//                overdueTasks.add(task);
-//            } else {
-//                notOverdueTasks.add(task);
-//            }
-//        }
-//
-//        // Sort according to what we discussed
-//        overdueTasks = sortByDateAndType(overdueTasks);
-//        notOverdueTasks = sortByDateAndType(notOverdueTasks);
-//
-//        finalList.addAll(floatingTasks);
-//        finalList.addAll(overdueTasks);
-//        finalList.addAll(notOverdueTasks);
-//
-//        return finalList;
-//    }
-//
-//    private ArrayList<Task> sortByDateAndType(ArrayList<Task> list) {
-//        ArrayList<Task> output = new ArrayList<Task>();
-//        boolean isSorted;
-//
-//        for (Task task : list) {
-//            isSorted = false;
-//            if (output.size() == 0) {
-//                output.add(task);
-//            } else {
-//                for (Task something : output) {
-//                    if (task.getDate().isBefore(something.getDate())) {
-//                        output.add(output.indexOf(something), task);
-//                        isSorted = true;
-//                        break;
-//                    } else if (task.getDate().isEqual(something.getDate())) {
-//                        if (something.getType() == Task.Type.TIMED
-//                                && task.getType() == Task.Type.DEADLINE) {
-//                            output.add(output.indexOf(something), task);
-//                            isSorted = true;
-//                            break;
-//                        }
-//                    }
-//                }
-//                if (!isSorted) {
-//                    output.add(task);
-//                }
-//            }
-//        }
-//        return output;
-//    }
-
     private String addTask(String input) {
         parser.parse(input);
         ArrayList<LocalDateTime> parsedDates = parser.getDates();
@@ -300,16 +240,10 @@ public class Controller {
         // ArrayList is 0-indexed, but Tasks are displayed to users as 1-indexed
         try {
             int removalIndex = Integer.parseInt(input) - 1;
-            //Task task = tasksToDisplay.get(removalIndex);
             Task task = displayedTasks.get(removalIndex);
-            //tasksToDisplay.remove(task);
             displayedTasks.remove(task);
             allTasks.remove(task);
             
-            // remove if statement if deleting last entry of search should remain at search display
-            //if (tasksToDisplay.isEmpty()) {
-                //switchDisplay = false;
-            //}
             updateStorageWithAllTasks();
 
             return null;
@@ -350,7 +284,6 @@ public class Controller {
 
         // Filter for edit Description or Deadline
         try {
-            //Task task = tasksToDisplay.get(editIndex);
             Task task = displayedTasks.get(editIndex);
             if (editType.equals("d") || editType.equals("de")) {
                 return MESSAGE_INVALID_COMMAND;
@@ -375,7 +308,6 @@ public class Controller {
     private String completeTask(String input) {
         try {
             int index = Integer.parseInt(input.trim()) - 1;
-            //Task task = tasksToDisplay.get(index);
             Task task = displayedTasks.get(index);
             task.markAsComplete();
 
@@ -390,7 +322,6 @@ public class Controller {
     private String incompleteTask(String input) {
         try {
             int index = Integer.parseInt(input.trim()) - 1;
-            //Task task = tasksToDisplay.get(index);
             Task task = displayedTasks.get(index);
             task.markAsIncomplete();
 
@@ -419,20 +350,16 @@ public class Controller {
     }
 
     private void search(String input) {
-        //tasksToDisplay = new ArrayList<Task>();
         displayedTasks.clear();
-
         parser.parse(input);
         ArrayList<LocalDateTime> searchDate = parser.getDates();
 
         for (Task task : allTasks) {
             String taskInfo = task.getDescription().toLowerCase();
             if (taskInfo.contains(input.toLowerCase())) {
-                //tasksToDisplay.add(task);
                 displayedTasks.add(task);
             } else if (searchDate.size() > 0
                     && searchDate.get(0).toLocalDate().equals(task.getDate())) {
-                //tasksToDisplay.add(task);
                 displayedTasks.add(task);
             }
         }
@@ -450,47 +377,34 @@ public class Controller {
     // ================================================================
     // Utility methods
     // ================================================================
+    
     private void updateDisplayWithDefault() {
-        //tasksToDisplay = getIncompleteTasks(allTasks);
         displayedTasks.setAll(getIncompleteTasks(allTasks));
         display.updateDisplay(displayedTasks);
     }
 
     private void updateDisplaySearch() {
-        //ObservableList<Task> searchedList = FXCollections.observableArrayList();
-        //searchedList.addAll(tasksToDisplay);
     	sortSearchedTasks();
         display.updateSearchDisplay(displayedTasks, arguments);
     }
 
     private void sortAllTasks() {
     	uds = new UserDefinedSort(allTasks);
-        uds.executeSortDefault();
-    	//Collections.sort(allTasks, new SortDefault());
-        
+    	uds.addComparator(new SortType());
+        uds.addComparator(new SortOverdue());
+        uds.addComparator(new SortDate());
+        uds.executeSort();  
     }
     
     private void sortSearchedTasks() {
     	uds = new UserDefinedSort(new ArrayList<Task>(displayedTasks));
-        uds.executeSortSearch();
+        uds.addComparator(new SortType());
+        uds.addComparator(new SortOverdue());
+        uds.addComparator(new SortDate());
+        uds.addComparator(new SortIncomplete());
+        uds.executeSort();
         displayedTasks = FXCollections.observableArrayList(uds.getList());
     }
-
-//    private void loadDisplayedTasks(ArrayList<Task> input) {
-//        displayedTasks.setAll(input);
-//    }
-
-//    private String formatTasksForDisplay(ArrayList<Task> input) {
-//        if (input.isEmpty()) {
-//            return MESSAGE_EMPTY;
-//        }
-//
-//        String display = "";
-//        for (Task task : input) {
-//            display += task;
-//        }
-//        return display;
-//    }
 
     private void updateStorageWithAllTasks() {
         storage.updateFiles(allTasks);
