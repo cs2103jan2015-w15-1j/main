@@ -87,11 +87,12 @@ public class Task implements Cloneable {
     // End of MX's edits
     // ================================================================
 
-    public Task(String input, ArrayList<LocalDateTime> parsedDates, String parsedWords) {
+    public Task(String input, ArrayList<LocalDateTime> parsedDates,
+                String parsedWords, String nonParsedWords) {
         markAsIncomplete();
         type = determineType(parsedDates);
         initDateAndTime(type, parsedDates);
-        description = extractDescription(input, parsedWords);
+        description = extractDescription(input, nonParsedWords);
     }
 
     // ================================================================
@@ -220,36 +221,29 @@ public class Task implements Cloneable {
      * @param parsedWords - words that were used to obtain the dates from user input
      * @return description
      */
-    private String extractDescription(String input, String parsedWords) {
+    private String extractDescription(String input, String nonParsedWords) {
         if (hasTwoEscapeChars(input)) {
             return getWordsWithinEscapeChars(input);
-        } else if (parsedWords != null) {
+        } else {
             // convert input arguments to string arrays
-            String[] parsedWordsArr = parsedWords.split(" ");
-            String[] inputArr = input.split(" ");
+            String[] wordArr = nonParsedWords.split(" ");
 
             // convert input string array to arraylist of strings
-            ArrayList<String> inputArrayList = new ArrayList<String>(Arrays.asList(inputArr));
+            ArrayList<String> wordArrayList = new ArrayList<String>(Arrays.asList(wordArr));
 
             // reverse as we want to delete words from the back
-            Collections.reverse(inputArrayList);
-
-            // delete words that were used to obtain the dates
-            for (String word : parsedWordsArr) {
-                inputArrayList.remove(word);
-            }
+            Collections.reverse(wordArrayList);
 
             // delete keywords that do not make up the description of tasks
             for (String word : KEYWORDS) {
-                inputArrayList.remove(word);
+                wordArrayList.remove(word);
             }
 
-            Collections.reverse(inputArrayList);
+            Collections.reverse(wordArrayList);
 
-            String description = stringFormatter(inputArrayList);
+            String description = stringFormatter(wordArrayList);
+//            return description;
             return description.replace("\"", "");
-        } else {
-            return input.replace("\"", "");
         }
     }
 
@@ -308,7 +302,7 @@ public class Task implements Cloneable {
             result += " on " + getDate().format(formatter);
         }
         if (getStartTime() != null) {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("ha");
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("h.mma");
             result += " from " + getStartTime().format(formatter) + " to " + getEndTime().format(formatter);
         }
         return result;

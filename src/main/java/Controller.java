@@ -201,9 +201,10 @@ public class Controller {
         parser.parse(input);
         ArrayList<LocalDateTime> parsedDates = parser.getDates();
         String parsedWords = parser.getParsedWords();
+        String nonParsedWords = parser.getNonParsedWords();
 
         // Instantiate a new Task object
-        Task task = new Task(input, parsedDates, parsedWords);
+        Task task = new Task(input, parsedDates, parsedWords, nonParsedWords);
 
         allTasks.add(task);
         updateStorageWithAllTasks();
