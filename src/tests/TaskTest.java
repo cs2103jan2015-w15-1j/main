@@ -93,6 +93,7 @@ public class TaskTest {
         parser.parse(input);
         ArrayList<LocalDateTime> parsedDates = parser.getDates();
         String parsedWords = parser.getParsedWords();
-        return new Task(input, parsedDates, parsedWords);
+        String nonParsedWords = parser.getNonParsedWords();
+        return new Task(input, parsedDates, parsedWords, nonParsedWords);
     }
 }
