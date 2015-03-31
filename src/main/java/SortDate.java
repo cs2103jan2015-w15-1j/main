@@ -26,8 +26,6 @@ public class SortDate implements Comparator<Task> {
 			return 1;
 		} else if (date1 == null && date2 == null) {
 			return 0;
-		} else if (date1 != null && date2 != null) {
-			return 0;
 		} else if (date1.isBefore(date2)) {
 			return -1;
 		} else if (date1.isAfter(date2)) {

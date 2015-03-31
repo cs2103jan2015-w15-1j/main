@@ -51,7 +51,7 @@ public class DateParser {
 
     private DateParser() {
         logger = Logger.getLogger("Veto");
-        logger.setLevel(Level.FINE);
+        logger.setLevel(Level.OFF);
     }
 
 
