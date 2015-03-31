@@ -65,7 +65,7 @@ public class Task implements Cloneable {
     // Start of MX's edits
     // ================================================================
     // Methods
-    // Note: Property attributes are created on the fly because there was some problem with serialization
+    // Note: Property attributes (part of JavaFX) are created on the fly as there were problems with serialization
 
     public StringProperty getTaskDesc() {
         return new SimpleStringProperty(getDescription());
@@ -153,9 +153,8 @@ public class Task implements Cloneable {
     	isCompleted = false;
     }
 
-    public void setTypeDateTime(ArrayList<LocalDateTime> parsedDates) {
-        type = determineType(parsedDates);
-        initDateAndTime(type, parsedDates);
+    public boolean updateTypeDateTime(ArrayList<LocalDateTime> parsedDates) {
+        return updateDateAndTime(determineType(parsedDates), parsedDates);
     }
 
     // ================================================================
@@ -214,11 +213,50 @@ public class Task implements Cloneable {
         }
     }
 
+    private boolean updateDateAndTime(Type newType, ArrayList<LocalDateTime> parsedDates) {
+        // parsedDates correspond to the parsedDates of the update
+        // type refers to CURRENT type
+        switch (newType) {
+            case FLOATING :
+                setDate(null);
+                setStartTime(null);
+                setEndTime(null);
+                break;
+            case DEADLINE :
+                if (type.equals(Type.FLOATING)) {
+                    setDate(parsedDates.get(POSITION_FIRST_DATE).toLocalDate());
+                } else if (type.equals(Type.DEADLINE)) {
+                    setDate(parsedDates.get(POSITION_FIRST_DATE).toLocalDate());
+                } else { // current: TIMED
+                    setDate(parsedDates.get(POSITION_FIRST_DATE).toLocalDate());
+                    return true;
+                }
+                break;
+            case TIMED :
+                if (type.equals(Type.FLOATING)) {
+                    setDate(parsedDates.get(POSITION_FIRST_DATE).toLocalDate());
+                    setStartTime(parsedDates.get(POSITION_FIRST_DATE).toLocalTime());
+                    setEndTime(parsedDates.get(POSITION_SECOND_DATE).toLocalTime());
+                } else if (type.equals(Type.DEADLINE)) {
+                    setStartTime(parsedDates.get(POSITION_FIRST_DATE).toLocalTime());
+                    setEndTime(parsedDates.get(POSITION_SECOND_DATE).toLocalTime());
+                } else { // current: TIMED
+                    setStartTime(parsedDates.get(POSITION_FIRST_DATE).toLocalTime());
+                    setEndTime(parsedDates.get(POSITION_SECOND_DATE).toLocalTime());
+                }
+                break;
+            default :
+                break;
+        }
+        setType(newType);
+        return true;
+    }
+
     /**
      * Get the description of the task
      *
      * @param input - user's raw input
-     * @param parsedWords - words that were used to obtain the dates from user input
+     * @param nonParsedWords - words that were used to obtain the dates from user input
      * @return description
      */
     private String extractDescription(String input, String nonParsedWords) {

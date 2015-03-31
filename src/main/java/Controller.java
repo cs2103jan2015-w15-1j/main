@@ -27,8 +27,6 @@ public class Controller {
 
     private Stack<ArrayList<Task>> previousStates;
     private Stack<ObservableList<Task>> previousStatesDisplayed;
-    
-    
 
     private String arguments;
     private DateParser parser;
@@ -47,10 +45,11 @@ public class Controller {
     private final static String TASK_OVERVIEW_LOCATION = "/view/TaskOverview.fxml";
     private static final String MESSAGE_SAVE_FILE_READY = "Welcome to main.java.Veto. %s is ready for use.";
     private static final String MESSAGE_EMPTY = "There is currently no task.\n";
-    private static final String MESSAGE_ADD = "main.java.Task has been successfully added:\n     Description: %s\n     Deadline: %s\n     Time: %s\n";
+    private static final String MESSAGE_ADD = "Task has been successfully added:\n     Description: %s\n     Deadline: %s\n     Time: %s\n";
     private static final String MESSAGE_NOT_APPL = "Not applicable";
-    private static final String MESSAGE_DELETE = "main.java.Task has been successfully deleted:\n Description: %s \n";
-    private static final String MESSAGE_EDIT = "main.java.Task has been successfully edited.\n";
+    private static final String MESSAGE_DELETE = "Task has been successfully deleted:\n Description: %s \n";
+    private static final String MESSAGE_EDIT = "Task has been successfully edited.\n";
+    private static final String MESSAGE_EDIT_FAILED = "Task could not be edited.\n";
     private static final String MESSAGE_COMPLETE = "\"%s\" completed. \n";
     private static final String MESSAGE_INCOMPLETE = "\"%s\" incompleted. \n";
     private static final String MESSAGE_EXIT = "Goodbye!";
@@ -262,11 +261,10 @@ public class Controller {
 
     /**
      *
-     * Current implementation of Edit: 1. Does not allow user to change to a
-     * different deadline type. e.g. from Timed to Floating 2. Allows edit of
-     * description 3. Allows change of deadline from one type to the same type.
-     * 4. Allows user to type any substring of the words "description" /
-     * "deadline" as a substitution for its original word.
+     * Current implementation of Edit:
+     * 1. Allows users to change FLOATING to any type of tasks.
+     * 2. Allows users to change DEADLINE to any type of tasks, except TIMED with DAY
+     * 3. Allows users to change TIMED to any type of tasks, except TIMED with DAY
      *
      * @param input
      * @return
@@ -285,6 +283,7 @@ public class Controller {
         String editType = inputArray[1];
 
         StringBuilder editArgument = new StringBuilder();
+        // format: edit 1 deadline /desc ..., so 2 is the arg's starting word
         for (int i = 2; i < inputArray.length; i++) {
             editArgument.append(inputArray[i] + " ");
         }
@@ -299,8 +298,9 @@ public class Controller {
             } else if ("deadline".contains(editType)) {
                 parser.parse(input);
                 ArrayList<LocalDateTime> parsedDates = parser.getDates();
-                task.setTypeDateTime(parsedDates);
-                // TODO BUG
+                if (!task.updateTypeDateTime(parsedDates)) {
+                    return MESSAGE_EDIT_FAILED;
+                }
             } else {
                 return MESSAGE_INVALID_COMMAND;
             }
