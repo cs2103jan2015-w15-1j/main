@@ -21,8 +21,8 @@ import org.junit.Test;
 
 public class StorageTest {
     String defaultDirectory = "savefile.txt";
-    String newDirectory = "C:\\Users\\user\\Documents\\GitHub\\saveRenamedFile.txt";
-    String newDirectory2 = "C:\\Users\\user\\Documents\\GitHub\\main\\memory.txt";
+    String newDirectory = "saveRenamedFile.txt";
+    String newDirectory2 = "memory.txt";
     String SettingsDirectory = "settings.txt";
     String backupDirectory = "backup.txt";
     File defaultFile = new File(defaultDirectory);
