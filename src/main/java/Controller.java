@@ -143,6 +143,10 @@ public class Controller {
 	            this.arguments = arguments;
 	            switchDisplay = true;
 	            break;
+	        case CLEAR: 
+	        	updateState();
+	        	clear();
+	        	break;
 	        case INVALID:
 	            feedback =  invalid();
 	            break;
@@ -446,6 +450,7 @@ public class Controller {
 
     public void clear() {
         ArrayList<Task> emptyArr = new ArrayList<Task>();
+        allTasks = emptyArr;
         storage.updateFiles(emptyArr);
     }
 

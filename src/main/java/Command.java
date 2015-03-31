@@ -3,7 +3,7 @@ package main.java;
 public class Command {
     public static enum Type {
         ADD, DELETE, EDIT, DISPLAY, COMPLETE, INCOMPLETE, UNDO, SEARCH, EXIT, SETSAVEFILE,
-        INVALID
+        INVALID, CLEAR
     };
 
     private static final int PARAM_POSITION_COMMAND = 0;
@@ -55,6 +55,8 @@ public class Command {
                 return Type.EXIT;
             case "set" :
                 return Type.SETSAVEFILE;
+            case "clear" :
+            	return  Type.CLEAR;
             default :
                 return Type.INVALID;
         }
