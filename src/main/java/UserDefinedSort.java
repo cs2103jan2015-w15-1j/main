@@ -25,7 +25,6 @@ public class UserDefinedSort {
 	public ArrayList<Task> executeSort() {
 		for (Comparator<Task> comparator: chain) {
 			Collections.sort(list, comparator);
-			System.out.println(list.toString());
 		}
 
 		return list;

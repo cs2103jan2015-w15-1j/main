@@ -125,7 +125,14 @@ public class Controller {
 	            feedback = editTask(arguments);
 	            break;
 	        case DISPLAY:  // DONE
-                switchDisplay = false;
+                if (displayTask(arguments)) {
+                    // Display Completed check
+                    this.arguments = arguments;
+                    switchDisplay = true;
+                } else {
+                    this.arguments = null;
+                    switchDisplay = false;
+                }
 	            break;
 	        case COMPLETE: // DONE
 	            updateState();
@@ -150,7 +157,7 @@ public class Controller {
 	        case INVALID:
 	            feedback =  invalid();
 	            break;
-	        case EXIT:  // WINDOWS WILL NOT CLOSE AFTER THIS COMMAND
+	        case EXIT:  // DONE, BUT CONSOLE OUTPUTS WEIRD ERROR MESSAGES
 	            timeToExit = true;
 	            feedback =  exit();
                 stage.close();
@@ -199,6 +206,10 @@ public class Controller {
 
     public void setDisplay(Display display) {
         this.display = display;
+    }
+
+    public void setStage(Stage stage) {
+        this.stage = stage;
     }
 
     // ================================================================
@@ -362,6 +373,17 @@ public class Controller {
         }
     }
 
+    private boolean displayTask(String input) {
+        displayedTasks.clear();
+
+        if (input.equals("completed")) {
+            updateDisplayWithCompleted();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     private String invalid() {
         return MESSAGE_INVALID_COMMAND;
     }
@@ -377,6 +399,11 @@ public class Controller {
     
     private void updateDisplayWithDefault() {
         displayedTasks.setAll(getIncompleteTasks(allTasks));
+        display.updateOverviewDisplay(displayedTasks);
+    }
+
+    private void updateDisplayWithCompleted() {
+        displayedTasks.setAll(getCompletedTasks(allTasks));
         display.updateOverviewDisplay(displayedTasks);
     }
 
@@ -454,8 +481,6 @@ public class Controller {
         storage.updateFiles(emptyArr);
     }
 
-    public void setStage(Stage stage) {
-        this.stage = stage;
-    }
+
 
 }
