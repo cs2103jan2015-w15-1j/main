@@ -36,6 +36,7 @@ public class MainApp extends Application {
 
 		// Provide a display handle in controller so that controller can pass message to display
 		controller.setDisplay(display);
+		controller.setStage(primaryStage);
 
 		// Legacy code
 		rootLayoutController.setDisplay(display);

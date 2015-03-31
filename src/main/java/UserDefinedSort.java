@@ -22,9 +22,12 @@ public class UserDefinedSort {
 		chain.add(comparator);
 	}
 	
-	public void executeSort() {
+	public ArrayList<Task> executeSort() {
 		for (Comparator<Task> comparator: chain) {
 			Collections.sort(list, comparator);
+			System.out.println(list.toString());
 		}
+
+		return list;
 	}
 }

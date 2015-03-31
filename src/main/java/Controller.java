@@ -2,6 +2,7 @@ package main.java;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.stage.Stage;
 import main.java.Command;
 import main.java.DateParser;
 import main.java.Storage;
@@ -37,6 +38,8 @@ public class Controller {
     private UserDefinedSort uds;
     
     private Display display;
+
+    private Stage stage;
 
     // ================================================================
     // Constants
@@ -146,6 +149,7 @@ public class Controller {
 	        case EXIT:  // WINDOWS WILL NOT CLOSE AFTER THIS COMMAND
 	            timeToExit = true;
 	            feedback =  exit();
+                stage.close();
 	            break;
 	        default:
 	            break;
@@ -257,7 +261,6 @@ public class Controller {
         int editIndex;
 
         // Split the input into the index and the arguments
-        
         try {
             inputArray = input.split(" ");
             editIndex = Integer.parseInt(inputArray[0]) - 1;
@@ -282,6 +285,7 @@ public class Controller {
                 parser.parse(input);
                 ArrayList<LocalDateTime> parsedDates = parser.getDates();
                 task.setTypeDateTime(parsedDates);
+                // TODO BUG
             } else {
                 return MESSAGE_INVALID_COMMAND;
             }
@@ -382,7 +386,7 @@ public class Controller {
     	uds.addComparator(new SortType());
         uds.addComparator(new SortOverdue());
         uds.addComparator(new SortDate());
-        uds.executeSort();  
+        allTasks = uds.executeSort();
     }
     
     private void sortSearchedTasks() {
@@ -443,6 +447,10 @@ public class Controller {
     public void clear() {
         ArrayList<Task> emptyArr = new ArrayList<Task>();
         storage.updateFiles(emptyArr);
+    }
+
+    public void setStage(Stage stage) {
+        this.stage = stage;
     }
 
 }
