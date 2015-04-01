@@ -415,16 +415,16 @@ public class Controller {
     private void sortAllTasks() {
     	uds = new UserDefinedSort(allTasks);
     	uds.addComparator(new SortType());
-        uds.addComparator(new SortOverdue());
-        uds.addComparator(new SortDate());
+    	uds.addComparator(new SortDate());
+        uds.addComparator(new SortOverdue());   
         allTasks = uds.executeSort();
     }
     
     private void sortSearchedTasks() {
     	uds = new UserDefinedSort(new ArrayList<Task>(displayedTasks));
         uds.addComparator(new SortType());
-        uds.addComparator(new SortOverdue());
         uds.addComparator(new SortDate());
+        uds.addComparator(new SortOverdue());
         uds.addComparator(new SortIncomplete());
         uds.executeSort();
         displayedTasks = FXCollections.observableArrayList(uds.getList());
