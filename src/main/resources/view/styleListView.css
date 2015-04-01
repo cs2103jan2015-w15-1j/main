@@ -80,7 +80,7 @@
  */
 
 .list-cell {
-	-fx-padding: 5;
+	-fx-padding: 0;
 	-fx-height:100%;
 	/* -fx-background-color:yellow; */
 	-fx-background-color: white;
@@ -93,6 +93,7 @@
  */
 
 .categoryBox {
+	-fx-padding: 5 0 5 0;
 	-fx-font-family: Roboto;
 	-fx-font-size: 20px;
 	-fx-font-style: italic;
@@ -119,9 +120,10 @@
  */
 
 .taskBox {
-	-fx-padding: 0 0 0 20;
+	-fx-padding: 5 0 5 20;
 	-fx-font-family: Roboto;
 	-fx-font-size: 16px;
+	/* -fx-background-color: tomato; */
 }
 
 .taskBox #checkbox {
