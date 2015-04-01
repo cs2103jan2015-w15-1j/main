@@ -149,7 +149,7 @@ public class Controller {
 	            this.arguments = arguments;
 	            switchDisplay = true;
 	            break;
-	        case CLEAR: 
+	        case CLEAR:    // DONE
 	        	updateState();
 	        	clear();
 	        	break;
