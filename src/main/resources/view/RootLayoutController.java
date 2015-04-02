@@ -1,5 +1,6 @@
 package main.resources.view;
 
+import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
@@ -18,7 +19,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class RootLayoutController extends BorderPane {
-    private static final int FEEDBACK_FADE_SECONDS = 10;
 
     // ================================================================
     // FXML Fields
@@ -40,6 +40,10 @@ public class RootLayoutController extends BorderPane {
     private Timeline timeline;
 
     private final String ROOT_LAYOUT_LOCATION = "/view/RootLayout.fxml";
+    private static final int FEEDBACK_FADE_IN_MILLISECONDS = 500;
+    private static final int FEEDBACK_FADE_OUT_MILLISECONDS = 1000;
+    private static final int FEEDBACK_DISPLAY_SECONDS = 8;
+
 
     public RootLayoutController() {
         FXMLLoader loader = new FXMLLoader(getClass().getResource(ROOT_LAYOUT_LOCATION));
@@ -98,16 +102,33 @@ public class RootLayoutController extends BorderPane {
     }
 
     private void addFeedback(String feedback) {
-        feedbackLabel.setText(feedback);
+        FadeTransition fadein = new FadeTransition(new Duration(FEEDBACK_FADE_IN_MILLISECONDS));
+        fadein.setNode(feedbackLabel);
+        fadein.setToValue(1);
+
+        FadeTransition fadeout = new FadeTransition(new Duration(FEEDBACK_FADE_OUT_MILLISECONDS));
+        fadeout.setNode(feedbackLabel);
+        fadeout.setToValue(0);
+        
         timeline.stop();
-        timeline.getKeyFrames()
-                .add(new KeyFrame(Duration.seconds(FEEDBACK_FADE_SECONDS),
-                                  new EventHandler<ActionEvent>() {
-                                      @Override
-                                      public void handle(ActionEvent event) {
-                                          feedbackLabel.setText("");
-                                      }
-                                  }));
+
+        timeline = new Timeline(new KeyFrame(Duration.seconds(0),
+                                             new EventHandler<ActionEvent>() {
+                                                 @Override
+                                                 public void handle(ActionEvent event) {
+                                                     feedbackLabel.setOpacity(0);
+                                                     feedbackLabel.setText(feedback);
+                                                     fadein.play();
+                                                 }
+                                             }),
+                                new KeyFrame(Duration.seconds(FEEDBACK_DISPLAY_SECONDS),
+                                             new EventHandler<ActionEvent>() {
+                                                 @Override
+                                                 public void handle(ActionEvent event) {
+                                                     fadeout.play();
+                                                 }
+                                             }));
+
         timeline.play();
     }
 

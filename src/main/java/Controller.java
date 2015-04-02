@@ -45,9 +45,8 @@ public class Controller {
     private final static String TASK_OVERVIEW_LOCATION = "/view/TaskOverview.fxml";
     private static final String MESSAGE_SAVE_FILE_READY = "Welcome to main.java.Veto. %s is ready for use.";
     private static final String MESSAGE_EMPTY = "There is currently no task.\n";
-    private static final String MESSAGE_ADD = "Task has been successfully added:\n     Description: %s\n     Deadline: %s\n     Time: %s\n";
-    private static final String MESSAGE_NOT_APPL = "Not applicable";
-    private static final String MESSAGE_DELETE = "Task has been successfully deleted:\n Description: %s \n";
+    private static final String MESSAGE_ADD = "Task has been added: ";
+    private static final String MESSAGE_DELETE = "Task has been deleted: ";
     private static final String MESSAGE_EDIT = "Task has been successfully edited.\n";
     private static final String MESSAGE_EDIT_FAILED = "Task could not be edited.\n";
     private static final String MESSAGE_COMPLETE = "\"%s\" completed. \n";
@@ -137,11 +136,11 @@ public class Controller {
 	            updateState();
 	            feedback = completeTask(arguments);
 	            break;
-	        case INCOMPLETE:
+	        case INCOMPLETE:  // NOT TESTED YET
 	            updateState();
                 feedback = incompleteTask(arguments);
 	            break;
-	        case UNDO:  // DONE
+	        case UNDO:  // BUGGED
 	            feedback = undo();
 	            break;
 	        case SEARCH:  // DONE
@@ -153,17 +152,14 @@ public class Controller {
 	        	updateState();
 	        	clear();
 	        	break;
-	        case INVALID:
+	        case INVALID:  // DONE
 	            feedback =  invalid();
 	            break;
-	        case EXIT:  // DONE, BUT CONSOLE OUTPUTS WEIRD ERROR MESSAGES
+	        case EXIT:  // DONE
 	            timeToExit = true;
 	            feedback =  exit();
                 stage.close();
 	            break;
-	        default:
-	            break;
-
         }
         sortAllTasks();
         if (switchDisplay) {
@@ -227,20 +223,7 @@ public class Controller {
         allTasks.add(task);
         updateStorageWithAllTasks();
 
-        return "Task has been added: " + task.toString();
-        // brought back previous return codes - CK
-//        if (task.getType() == Task.Type.FLOATING) {
-//            return String.format(MESSAGE_ADD, task.getDescription(),
-//                    MESSAGE_NOT_APPL, MESSAGE_NOT_APPL);
-//        } else if (task.getType() == Task.Type.DEADLINE) {
-//            return String.format(MESSAGE_ADD, task.getDescription(),
-//                    task.getDate(), MESSAGE_NOT_APPL);
-//        } else {
-//            String formattedTime = task.getStartTime() + " to "
-//                    + task.getEndTime();
-//            return String.format(MESSAGE_ADD, task.getDescription(),
-//                    task.getDate(), formattedTime);
-//        }
+        return MESSAGE_ADD + task.toString();
     }
 
     private String deleteTask(String input) {
@@ -253,7 +236,7 @@ public class Controller {
             
             updateStorageWithAllTasks();
 
-            return null;
+            return MESSAGE_DELETE + task.toString();
         } catch (Exception e) {
             return MESSAGE_INVALID_COMMAND;
         }
