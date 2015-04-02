@@ -253,7 +253,7 @@ public class Controller {
             
             updateStorageWithAllTasks();
 
-            return null;
+            return "Task has been deleted: " + task.toString();
         } catch (Exception e) {
             return MESSAGE_INVALID_COMMAND;
         }
