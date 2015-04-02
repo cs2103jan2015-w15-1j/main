@@ -7,6 +7,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.UUID;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -60,6 +61,7 @@ public class Task implements Cloneable {
     private LocalTime startTime;
     private LocalTime endTime;
     private boolean isCompleted;
+    private String recurID;
 
     // ================================================================
     // Start of MX's edits
@@ -122,6 +124,10 @@ public class Task implements Cloneable {
     public boolean isCompleted() {
         return isCompleted;
     }
+    
+    public String getID() {
+        return recurID;
+    }
 
     public boolean isOverdue() {
     	LocalDate nowDate = LocalDate.now();
@@ -133,6 +139,10 @@ public class Task implements Cloneable {
     // Public setters
     // ================================================================
 
+    public void setID(String input){
+        recurID = input;
+    }
+    
     public void setDescription(String input) {
         description = input;
     }
