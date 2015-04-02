@@ -7,8 +7,9 @@ import java.util.UUID;
 public class TaskCreator {
     // VERY VERY VERY VERY BUGGY!!!!
     // seem to be working add for recuring:
-    // "add do homework every 2 monday from 3 apr to 25 may"
-    // normal task seem to be fine
+    // "add do homework every 2 monday from 3 apr to 25 jul"
+    // "add do nothing every week from today to 30 jul"
+    // needs more testing
     public static enum Type {
         YEARLY, MONTHLY, WEEKLY, DAILY,
     };
@@ -16,10 +17,10 @@ public class TaskCreator {
     private static String keyword = "every";
     private static String[] mainWords = { "daily", "everyday", "monthly",
             "weekly", "yearly" };
-    private static String[] yearWords = { "yaer" };
+    private static String[] yearWords = { "year" };
     private static String[] monthWords = { "month", "jan", "feb", "mar", "apr",
             "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec" };
-    private static String[] weekWords = { "mon", "tue", "wed", "thu", "fri",
+    private static String[] weekWords = { "week", "mon", "tue", "wed", "thu", "fri",
             "sat", "sun" };
     private static String[] dayWords = { "day" };
 
@@ -51,54 +52,20 @@ public class TaskCreator {
         if (type != null) {
             switch (type) {
             case YEARLY:
-                while (recurDate.get(0).isBefore(
-                        parsedDates.get(parsedDates.size() - 1))) {
-                    task = new Task(input, recurDate, parsedWords,
-                            nonParsedWords);
-                    task.setID(recurID);
-                    tempList.add(task);
-                    LocalDateTime nextDate = recurDate.get(0).plusYears(
-                            recurRate);
-                    recurDate.set(0, nextDate);
-                }
+                createYearly(input, parsedDates, parsedWords, nonParsedWords,
+                        recurDate, recurID);
                 break;
             case MONTHLY:
-                while (recurDate.get(0).isBefore(
-                        parsedDates.get(parsedDates.size() - 1))) {
-                    task = new Task(input, recurDate, parsedWords,
-                            nonParsedWords);
-                    task.setID(recurID);
-                    tempList.add(task);
-                    LocalDateTime nextDate = recurDate.get(0).plusMonths(
-                            recurRate);
-                    recurDate.set(0, nextDate);
-                    // TESTING NONSENSE
-                    System.out.println("recuring date:" + recurDate.get(0));
-                }
+                createMonthly(input, parsedDates, parsedWords, nonParsedWords,
+                        recurDate, recurID);
                 break;
             case WEEKLY:
-                while (recurDate.get(0).isBefore(
-                        parsedDates.get(parsedDates.size() - 1))) {
-                    task = new Task(input, recurDate, parsedWords,
-                            nonParsedWords);
-                    task.setID(recurID);
-                    tempList.add(task);
-                    LocalDateTime nextDate = recurDate.get(0).plusWeeks(
-                            recurRate);
-                    recurDate.set(0, nextDate);
-                }
+                createWeekly(input, parsedDates, parsedWords, nonParsedWords,
+                        recurDate, recurID);
                 break;
             case DAILY:
-                while (recurDate.get(0).isBefore(
-                        parsedDates.get(parsedDates.size() - 1))) {
-                    task = new Task(input, recurDate, parsedWords,
-                            nonParsedWords);
-                    task.setID(recurID);
-                    tempList.add(task);
-                    LocalDateTime nextDate = recurDate.get(0).plusDays(
-                            recurRate);
-                    recurDate.set(0, nextDate);
-                }
+                createDaily(input, parsedDates, parsedWords, nonParsedWords,
+                        recurDate, recurID);
                 break;
             default:
                 break;
@@ -113,6 +80,76 @@ public class TaskCreator {
         System.out.println("rate: " + recurRate);
         System.out.println("type: " + type);
         return tempList;
+    }
+
+    private void createDaily(String input,
+            ArrayList<LocalDateTime> parsedDates, String parsedWords,
+            String nonParsedWords, ArrayList<LocalDateTime> recurDate,
+            String recurID) {
+        Task task;
+        while (recurDate.get(0).isBefore(
+                parsedDates.get(parsedDates.size() - 1))) {
+            task = new Task(input, recurDate, parsedWords,
+                    nonParsedWords);
+            task.setID(recurID);
+            tempList.add(task);
+            LocalDateTime nextDate = recurDate.get(0).plusDays(
+                    recurRate);
+            recurDate.set(0, nextDate);
+        }
+    }
+
+    private void createWeekly(String input,
+            ArrayList<LocalDateTime> parsedDates, String parsedWords,
+            String nonParsedWords, ArrayList<LocalDateTime> recurDate,
+            String recurID) {
+        Task task;
+        while (recurDate.get(0).isBefore(
+                parsedDates.get(parsedDates.size() - 1))) {
+            task = new Task(input, recurDate, parsedWords,
+                    nonParsedWords);
+            task.setID(recurID);
+            tempList.add(task);
+            LocalDateTime nextDate = recurDate.get(0).plusWeeks(
+                    recurRate);
+            recurDate.set(0, nextDate);
+        }
+    }
+
+    private void createMonthly(String input,
+            ArrayList<LocalDateTime> parsedDates, String parsedWords,
+            String nonParsedWords, ArrayList<LocalDateTime> recurDate,
+            String recurID) {
+        Task task;
+        while (recurDate.get(0).isBefore(
+                parsedDates.get(parsedDates.size() - 1))) {
+            task = new Task(input, recurDate, parsedWords,
+                    nonParsedWords);
+            task.setID(recurID);
+            tempList.add(task);
+            LocalDateTime nextDate = recurDate.get(0).plusMonths(
+                    recurRate);
+            recurDate.set(0, nextDate);
+            // TESTING NONSENSE
+            System.out.println("recuring date:" + recurDate.get(0));
+        }
+    }
+
+    private void createYearly(String input,
+            ArrayList<LocalDateTime> parsedDates, String parsedWords,
+            String nonParsedWords, ArrayList<LocalDateTime> recurDate,
+            String recurID) {
+        Task task;
+        while (recurDate.get(0).isBefore(
+                parsedDates.get(parsedDates.size() - 1))) {
+            task = new Task(input, recurDate, parsedWords,
+                    nonParsedWords);
+            task.setID(recurID);
+            tempList.add(task);
+            LocalDateTime nextDate = recurDate.get(0).plusYears(
+                    recurRate);
+            recurDate.set(0, nextDate);
+        }
     }
 
     // Checks if the input contains words to indicate recurring tasks
@@ -137,24 +174,32 @@ public class TaskCreator {
             String check = input.substring(input.lastIndexOf(keyword) + 6,
                     input.length());
             String[] split = check.split(" ");
+            try {
             recurRate = Integer.parseInt(split[0]);
+            } catch (NumberFormatException e) {
+                recurRate = 1;
+            }
             for (String find : yearWords) {
-                if (split[0].toLowerCase().contains(find) || split[1].toLowerCase().contains(find)) {
+                if (split[0].toLowerCase().contains(find)
+                        || split[1].toLowerCase().contains(find)) {
                     return Type.YEARLY;
                 }
             }
             for (String find : monthWords) {
-                if (split[0].toLowerCase().contains(find) || split[1].toLowerCase().contains(find)) {
+                if (split[0].toLowerCase().contains(find)
+                        || split[1].toLowerCase().contains(find)) {
                     return Type.MONTHLY;
                 }
             }
             for (String find : weekWords) {
-                if (split[0].toLowerCase().contains(find) || split[1].toLowerCase().contains(find)) {
+                if (split[0].toLowerCase().contains(find)
+                        || split[1].toLowerCase().contains(find)) {
                     return Type.WEEKLY;
                 }
             }
             for (String find : dayWords) {
-                if (split[0].toLowerCase().contains(find) || split[1].toLowerCase().contains(find)) {
+                if (split[0].toLowerCase().contains(find)
+                        || split[1].toLowerCase().contains(find)) {
                     return Type.DAILY;
                 }
             }
