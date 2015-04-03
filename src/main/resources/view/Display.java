@@ -45,7 +45,7 @@ public class Display extends VBox {
     // ================================================================
     // Constants
     // ================================================================
-    private final static String LOCATION_TASK_OVERVIEW = "/view/TaskOverview.fxml";
+    private final static String LOCATION_TASK_OVERVIEW_FXML = "/view/TaskOverview.fxml";
 
     private static final String LABEL_FLOATING = "Floating";
     private static final String LABEL_OVERDUE = "Overdue";
@@ -73,7 +73,7 @@ public class Display extends VBox {
         logger = Logger.getLogger("Display");
         logger.setLevel(Level.INFO);
 
-        FXMLLoader loader = new FXMLLoader(getClass().getResource(LOCATION_TASK_OVERVIEW));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource(LOCATION_TASK_OVERVIEW_FXML));
         loader.setRoot(this);
         loader.setController(this);
 

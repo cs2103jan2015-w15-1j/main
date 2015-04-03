@@ -89,12 +89,7 @@ public class Controller {
 
         allTasks = storage.readFile();
         
-        //Sorting process
-        uds = new UserDefinedSort(allTasks);
-        uds.addComparator(new SortType());
-        uds.addComparator(new SortOverdue());
-        uds.addComparator(new SortDate());
-        uds.executeSort();
+        sortAllTasks();
 
         // Load the incomplete tasks into displayedTasks (MAIN VIEW WHEN APP STARTS)
         for (Task task : getIncompleteTasks(allTasks)) {
