@@ -99,6 +99,9 @@ public class Controller {
         timeToExit = false;
         previousStates = new Stack<ArrayList<Task>>();
         previousStatesDisplayed = new Stack<ObservableList<Task>>();
+        
+        // THIS FIXES THE SLOW ADDITION OF FIRST TASK
+        parser.parse("hello");
     }
 
 
