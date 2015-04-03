@@ -51,6 +51,7 @@ public class Controller {
     private static final String MESSAGE_EDIT = "Task has been successfully edited.\n";
     private static final String MESSAGE_EDIT_FAILED = "Task could not be edited.\n";
     private static final String MESSAGE_COMPLETE = "\"%s\" completed. \n";
+    private static final String MESSAGE_COMPLETE_FAILED = "\"%s\" already completed. \n";
     private static final String MESSAGE_INCOMPLETE = "\"%s\" incompleted. \n";
     private static final String MESSAGE_EXIT = "Goodbye!";
     private static final String MESSAGE_UNDO = "Last command has been undone. \n";
@@ -315,6 +316,11 @@ public class Controller {
         try {
             int index = Integer.parseInt(input.trim()) - 1;
             Task task = displayedTasks.get(index);
+            
+            if (task.isCompleted()) {
+                return String.format(MESSAGE_COMPLETE_FAILED, task.getDescription());
+            }
+            
             task.markAsComplete();
 
             updateStorageWithAllTasks();
