@@ -8,7 +8,7 @@ public class Veto {
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        Controller controller = new Controller();
+        Controller controller = Controller.getInstance();
         showLine(controller.getWelcomeMessage());
 
         while (!controller.isTimeToExit()) {

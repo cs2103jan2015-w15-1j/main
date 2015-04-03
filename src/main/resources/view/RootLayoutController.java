@@ -75,7 +75,7 @@ public class RootLayoutController extends BorderPane {
     }
 
     @FXML
-    public void handleEnterPressed(KeyEvent event) {
+    public void handleKeyPress(KeyEvent event) {
         if (event.getCode() == KeyCode.ENTER) {
             String feedback = controller.executeCommand(userInput.getText());
 //            System.out.println(feedback);
@@ -130,10 +130,6 @@ public class RootLayoutController extends BorderPane {
                                              }));
 
         timeline.play();
-    }
-
-    public void setDisplay(Display display) {
-        this.display = display;
     }
 
     public void setController(Controller controller) {

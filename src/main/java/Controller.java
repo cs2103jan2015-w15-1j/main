@@ -18,6 +18,8 @@ public class Controller {
     // ================================================================
     // Fields
     // ================================================================
+    private static Controller controller;
+
     private String saveFileName;
     private Storage storage;
     private boolean timeToExit;
@@ -28,7 +30,7 @@ public class Controller {
     private Stack<ArrayList<Task>> previousStates;
     private Stack<ObservableList<Task>> previousStatesDisplayed;
 
-    private String arguments;
+    private String searchArgument;
     private DateParser parser;
     private TaskCreator taskCreator;
 
@@ -57,14 +59,32 @@ public class Controller {
     private static final String MESSAGE_UNDO = "Last command has been undone. \n";
     private static final String MESSAGE_INVALID_COMMAND = "Invalid command. \n";
     private static final String MESSAGE_NO_UNDO = "Already at oldest change, unable to undo. \n";
+    
+    private static final String HELP_ADD = "add <arguments>";
+    private static final String HELP_EDIT = "edit <index> <desc/dead> <arguments>";
+    private static final String HELP_DELETE = "delete <index>";
+    private static final String HELP_COMPLETE = "complete <index>";
+    private static final String HELP_INCOMPLETE = "incomplete <index>";
+    private static final String HELP_UNDO = "undo";
+    private static final String HELP_SET_SAVE_LOCATION = "set <directory>";
+    private static final String HELP_SEARCH = "search <keyworrd/date>";
+    private static final String HELP_EXIT = "exit";
 
     // ================================================================
     // Constructor
     // ================================================================
+    // Singleton pattern for Controller
+    public static Controller getInstance() {
+        if (controller == null) {
+            controller = new Controller();
+        }
+        return controller;
+    }
+
     /**
      * The constructor is called before the initialize() method.
      */
-    public Controller() {
+    private Controller() {
         parser = DateParser.getInstance();
         storage = Storage.getInstance();
         taskCreator = TaskCreator.getInstance();
@@ -88,6 +108,7 @@ public class Controller {
         previousStates = new Stack<ArrayList<Task>>();
         previousStatesDisplayed = new Stack<ObservableList<Task>>();
     }
+
 
     // To load the tasks into the display on the first load
     public void onloadDisplay() {
@@ -126,14 +147,7 @@ public class Controller {
 	            feedback = editTask(arguments);
 	            break;
 	        case DISPLAY:  // DONE
-                if (displayTask(arguments)) {
-                    // Display Completed check
-                    this.arguments = arguments;
-                    switchDisplay = true;
-                } else {
-                    this.arguments = null;
-                    switchDisplay = false;
-                }
+                displayTask(arguments);
 	            break;
 	        case COMPLETE: // DONE
 	            updateState();
@@ -148,7 +162,7 @@ public class Controller {
 	            break;
 	        case SEARCH:  // DONE
 	            search(arguments);
-	            this.arguments = arguments;
+                searchArgument = arguments;
 	            switchDisplay = true;
 	            break;
 	        case CLEAR:    // DONE
@@ -378,14 +392,16 @@ public class Controller {
         }
     }
 
-    private boolean displayTask(String input) {
+    private void displayTask(String input) {
         displayedTasks.clear();
 
         if (input.equals("completed")) {
+            switchDisplay = true;
+            searchArgument = input;
             updateDisplayWithCompleted();
-            return true;
         } else {
-            return false;
+            switchDisplay = false;
+            searchArgument = null;
         }
     }
 
@@ -414,7 +430,7 @@ public class Controller {
 
     private void updateDisplaySearch() {
     	sortSearchedTasks();
-        display.updateSearchDisplay(displayedTasks, arguments);
+        display.updateSearchDisplay(displayedTasks, searchArgument);
     }
 
     private void sortAllTasks() {

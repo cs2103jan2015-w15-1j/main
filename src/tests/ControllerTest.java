@@ -12,7 +12,7 @@ import java.util.ArrayList;
 public class ControllerTest extends TestCase {
     @Test
     public void testUndo() {
-        Controller controller = new Controller();
+        Controller controller = Controller.getInstance();
         controller.executeCommand("add this by 14 apr");
         controller.executeCommand("add that by 20 mar");
 
@@ -24,7 +24,7 @@ public class ControllerTest extends TestCase {
     @Test
     public void testComplete() {
         String[] args = {"holaamigos.txt"};
-        Controller controller = new Controller();
+        Controller controller = Controller.getInstance();
 
         controller.executeCommand("add this by 4 feb");
         //assertEquals("hello", getTaskDesc(controller.getIncompleteTasksPublic()));
