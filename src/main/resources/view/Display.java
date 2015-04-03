@@ -231,7 +231,7 @@ public class Display extends AnchorPane {
     private ArrayList<LocalDate> generateDaysOfWeek(LocalDate now) {
         ArrayList<LocalDate> days = new ArrayList<LocalDate>();
         days.add(now);
-        for (int j = 1; j < 7; j++) {
+        for (int j = 1; j < 8; j++) {
             days.add(now.plusDays(j));
         }
         return days;
