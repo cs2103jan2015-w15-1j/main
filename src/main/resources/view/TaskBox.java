@@ -1,5 +1,6 @@
 package main.resources.view;
 
+import main.java.Controller;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -39,7 +40,8 @@ public class TaskBox extends HBox {
                                 Boolean oldVal,
                                 Boolean newVal) {
 //                description.setStyle("-fx-strikethrough: true;");
-                System.out.println(idx + " " + newVal);
+                Controller controller = Controller.getInstance();
+                controller.executeCommand("complete " + idx);
             }
         };
 
