@@ -56,6 +56,16 @@ public class Controller {
     private static final String MESSAGE_UNDO = "Last command has been undone. \n";
     private static final String MESSAGE_INVALID_COMMAND = "Invalid command. \n";
     private static final String MESSAGE_NO_UNDO = "Already at oldest change, unable to undo. \n";
+    
+    private static final String HELP_ADD = "add <arguments>";
+    private static final String HELP_EDIT = "edit <index> <desc/dead> <arguments>";
+    private static final String HELP_DELETE = "delete <index>";
+    private static final String HELP_COMPLETE = "complete <index>";
+    private static final String HELP_INCOMPLETE = "incomplete <index>";
+    private static final String HELP_UNDO = "undo";
+    private static final String HELP_SET_SAVE_LOCATION = "set <directory>";
+    private static final String HELP_SEARCH = "search <keyworrd/date>";
+    private static final String HELP_EXIT = "exit";
 
     // ================================================================
     // Constructor
