@@ -1,14 +1,5 @@
 package main.resources.view;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.control.ListView;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBox;
-import main.java.Task;
-
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -16,7 +7,23 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class Display extends AnchorPane {
+import javafx.animation.FadeTransition;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.util.Duration;
+import main.java.Task;
+
+public class Display extends VBox {
 
     // ================================================================
     // FXML Fields
@@ -24,15 +31,20 @@ public class Display extends AnchorPane {
     @FXML
     private ListView<HBox> listView;
 
+    @FXML
+    private Label feedbackLabel;
+    
+    
     // ================================================================
     // Non-FXML Fields
     // ================================================================
     private static Logger logger;
+    private Timeline timeline;
 
+    
     // ================================================================
     // Constants
     // ================================================================
-
     private final static String LOCATION_TASK_OVERVIEW = "/view/TaskOverview.fxml";
 
     private static final String LABEL_FLOATING = "Floating";
@@ -46,7 +58,11 @@ public class Display extends AnchorPane {
     private static final String LABEL_INCOMPLETE = "Incomplete";
     private static final String LABEL_COMPLETED = "Completed";
 
+    private static final int FEEDBACK_FADE_IN_MILLISECONDS = 500;
+    private static final int FEEDBACK_FADE_OUT_MILLISECONDS = 1000;
+    private static final int FEEDBACK_DISPLAY_SECONDS = 8;
 
+    
     // ================================================================
     // Constructor
     // ================================================================
@@ -66,12 +82,45 @@ public class Display extends AnchorPane {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        
+        timeline = new Timeline();
     }
 
     // ================================================================
     // Public methods
     // ================================================================
 
+    public void setFeedback(String feedback) {
+        FadeTransition fadein = new FadeTransition(new Duration(FEEDBACK_FADE_IN_MILLISECONDS));
+        fadein.setNode(feedbackLabel);
+        fadein.setToValue(1);
+
+        FadeTransition fadeout = new FadeTransition(new Duration(FEEDBACK_FADE_OUT_MILLISECONDS));
+        fadeout.setNode(feedbackLabel);
+        fadeout.setToValue(0);
+
+        timeline.stop();
+
+        timeline = new Timeline(new KeyFrame(Duration.seconds(0),
+                                             new EventHandler<ActionEvent>() {
+                                                 @Override
+                                                 public void handle(ActionEvent event) {
+                                                     feedbackLabel.setOpacity(0);
+                                                     feedbackLabel.setText(feedback);
+                                                     fadein.play();
+                                                 }
+                                             }),
+                                new KeyFrame(Duration.seconds(FEEDBACK_DISPLAY_SECONDS),
+                                             new EventHandler<ActionEvent>() {
+                                                 @Override
+                                                 public void handle(ActionEvent event) {
+                                                     fadeout.play();
+                                                 }
+                                             }));
+
+        timeline.play();
+    }
+    
     public void updateOverviewDisplay(ObservableList<Task> tasks) {
         ArrayList<Task> listOfTasks = new ArrayList<Task>(tasks);
         logger.log(Level.INFO, "List of tasks: " + listOfTasks.toString());

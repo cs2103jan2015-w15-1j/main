@@ -109,6 +109,7 @@ public class Controller {
     // To load the tasks into the display on the first load
     public void onloadDisplay() {
         display.updateOverviewDisplay(displayedTasks);
+        display.setFeedback("Welcome to Veto!");
     }
 
     // ================================================================
@@ -181,6 +182,7 @@ public class Controller {
             updateDisplayWithDefault();
         }
         
+        display.setFeedback(feedback);
         // just so I have something to return, will remove once the whole switch case is done
         // added feedback so that it still returns the previous returns values from the methods -CK
         return feedback;
