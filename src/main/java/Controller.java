@@ -18,6 +18,8 @@ public class Controller {
     // ================================================================
     // Fields
     // ================================================================
+    private static Controller controller;
+
     private String saveFileName;
     private Storage storage;
     private boolean timeToExit;
@@ -58,10 +60,18 @@ public class Controller {
     // ================================================================
     // Constructor
     // ================================================================
+    // Singleton pattern for Controller
+    public static Controller getInstance() {
+        if (controller == null) {
+            controller = new Controller();
+        }
+        return controller;
+    }
+
     /**
      * The constructor is called before the initialize() method.
      */
-    public Controller() {
+    private Controller() {
         parser = DateParser.getInstance();
         storage = Storage.getInstance();
         saveFileName = storage.getSaveFileName();
@@ -84,6 +94,7 @@ public class Controller {
         previousStates = new Stack<ArrayList<Task>>();
         previousStatesDisplayed = new Stack<ObservableList<Task>>();
     }
+
 
     // To load the tasks into the display on the first load
     public void onloadDisplay() {

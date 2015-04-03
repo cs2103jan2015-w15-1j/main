@@ -61,7 +61,7 @@ public class MainApp extends Application {
 	}
 
 	public void initController() {
-		controller = new Controller();
+		controller = Controller.getInstance();
 		controller.setDisplay(display);
 		controller.onloadDisplay();
 	}
