@@ -4,3 +4,4 @@ main.java.Veto.iml
 *.txt
 target/
 *.iml
+out/
