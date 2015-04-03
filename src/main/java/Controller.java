@@ -52,7 +52,7 @@ public class Controller {
     private static final String MESSAGE_EDIT_FAILED = "Task could not be edited.\n";
     private static final String MESSAGE_COMPLETE = "\"%s\" completed. \n";
     private static final String MESSAGE_COMPLETE_FAILED = "\"%s\" already completed. \n";
-    private static final String MESSAGE_INCOMPLETE = "\"%s\" incompleted. \n";
+    private static final String MESSAGE_INCOMPLETE = "\"%s\" marked as incomplete. \n";
     private static final String MESSAGE_EXIT = "Goodbye!";
     private static final String MESSAGE_UNDO = "Last command has been undone. \n";
     private static final String MESSAGE_INVALID_COMMAND = "Invalid command. \n";

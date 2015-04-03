@@ -19,11 +19,28 @@ public class TaskBox extends HBox {
 
     @FXML
     private Label description;
-    
+
     @FXML
     private Button delete;
 
     public TaskBox(int idx, String desc) {
+        loadFxml();
+
+        ChangeListener<Boolean> listener = initCheckboxListener(idx);
+
+        initFxmlFields(idx, desc, listener);
+    }
+
+    public TaskBox(int idx, String desc, boolean completed) {
+        loadFxml();
+        checkbox.setSelected(completed);
+
+        ChangeListener<Boolean> listener = initCheckboxListener(idx);
+
+        initFxmlFields(idx, desc, listener);
+    }
+
+    private void loadFxml() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/TaskBox.fxml"));
             loader.setRoot(this);
@@ -33,26 +50,32 @@ public class TaskBox extends HBox {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
 
+
+    private ChangeListener<Boolean> initCheckboxListener(int idx) {
         ChangeListener<Boolean> listener = new ChangeListener<Boolean>() {
             @Override
             public void changed(ObservableValue<? extends Boolean> ov,
                                 Boolean oldVal,
                                 Boolean newVal) {
-//                description.setStyle("-fx-strikethrough: true;");
                 Controller controller = Controller.getInstance();
-                controller.executeCommand("complete " + idx);
+                if (newVal) {
+                    controller.executeCommand("complete " + idx);
+                } else {
+                    controller.executeCommand("incomplete " + idx);
+                }
             }
         };
+        return listener;
+    }
 
+    private void initFxmlFields(int idx,
+                                String desc,
+                                ChangeListener<Boolean> listener) {
         index.setText(idx + "");
         checkbox.selectedProperty().addListener(listener);
         description.setText(desc);
         delete.setText("X");
-    }
-    
-    public TaskBox(int idx, String desc, boolean completed) {
-        this(idx, desc);
-        checkbox.setDisable(true);
     }
 }
