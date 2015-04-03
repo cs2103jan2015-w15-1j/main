@@ -30,7 +30,7 @@ public class Controller {
     private Stack<ArrayList<Task>> previousStates;
     private Stack<ObservableList<Task>> previousStatesDisplayed;
 
-    private String arguments;
+    private String searchArgument;
     private DateParser parser;
 
     private boolean switchDisplay = false;
@@ -133,14 +133,7 @@ public class Controller {
 	            feedback = editTask(arguments);
 	            break;
 	        case DISPLAY:  // DONE
-                if (displayTask(arguments)) {
-                    // Display Completed check
-                    this.arguments = arguments;
-                    switchDisplay = true;
-                } else {
-                    this.arguments = null;
-                    switchDisplay = false;
-                }
+                displayTask(arguments);
 	            break;
 	        case COMPLETE: // DONE
 	            updateState();
@@ -155,7 +148,7 @@ public class Controller {
 	            break;
 	        case SEARCH:  // DONE
 	            search(arguments);
-	            this.arguments = arguments;
+                searchArgument = arguments;
 	            switchDisplay = true;
 	            break;
 	        case CLEAR:    // DONE
@@ -366,14 +359,16 @@ public class Controller {
         }
     }
 
-    private boolean displayTask(String input) {
+    private void displayTask(String input) {
         displayedTasks.clear();
 
         if (input.equals("completed")) {
+            switchDisplay = true;
+            searchArgument = input;
             updateDisplayWithCompleted();
-            return true;
         } else {
-            return false;
+            switchDisplay = false;
+            searchArgument = null;
         }
     }
 
@@ -402,7 +397,7 @@ public class Controller {
 
     private void updateDisplaySearch() {
     	sortSearchedTasks();
-        display.updateSearchDisplay(displayedTasks, arguments);
+        display.updateSearchDisplay(displayedTasks, searchArgument);
     }
 
     private void sortAllTasks() {
