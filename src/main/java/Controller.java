@@ -58,15 +58,15 @@ public class Controller {
     private static final String MESSAGE_INVALID_COMMAND = "Invalid command. \n";
     private static final String MESSAGE_NO_UNDO = "Already at oldest change, unable to undo. \n";
     
-    private static final String HELP_ADD = "add <arguments>";
-    private static final String HELP_EDIT = "edit <index> <desc/dead> <arguments>";
-    private static final String HELP_DELETE = "delete <index>";
-    private static final String HELP_COMPLETE = "complete <index>";
-    private static final String HELP_INCOMPLETE = "incomplete <index>";
-    private static final String HELP_UNDO = "undo";
-    private static final String HELP_SET_SAVE_LOCATION = "set <directory>";
-    private static final String HELP_SEARCH = "search <keyworrd/date>";
-    private static final String HELP_EXIT = "exit";
+    private static final String HELP_ADD = "Add a task  -  add <arguments>";
+    private static final String HELP_EDIT = "Edit a task  -  edit <index> <desc/dead> <arguments>";
+    private static final String HELP_DELETE = "Delete a task  -  delete <index>";
+    private static final String HELP_COMPLETE = "Mark a task as complete  -  complete <index>";
+    private static final String HELP_INCOMPLETE = "Mark a task as incomplete  -  incomplete <index>";
+    private static final String HELP_UNDO = "Undo previous action  -  undo";
+    private static final String HELP_SET_SAVE_LOCATION = "Change save directory  -  set <directory>";
+    private static final String HELP_SEARCH = "Search for a task  -  search <keyworrd/date>";
+    private static final String HELP_EXIT = "Exit Veto  -  exit";
 
     // ================================================================
     // Constructor
@@ -168,6 +168,9 @@ public class Controller {
 	        case INVALID:  // DONE
 	            feedback =  invalid();
 	            break;
+	        case HELP:
+	        	// TODO - Make a window pop out to show how to use the commands
+	        	break;
 	        case EXIT:  // DONE
 	            timeToExit = true;
 	            feedback =  exit();
