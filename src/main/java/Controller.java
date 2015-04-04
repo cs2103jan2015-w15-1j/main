@@ -124,6 +124,8 @@ public class Controller {
         Command.Type commandType = currentCommand.getCommandType();
         String arguments = currentCommand.getArguments();
         String feedback = "";
+        
+        boolean something = false;
 
         switch (commandType) {
         	case SETSAVEFILE:
@@ -169,7 +171,9 @@ public class Controller {
 	            feedback =  invalid();
 	            break;
 	        case HELP:
+	        	something = true;
 	        	// TODO - Make a window pop out to show how to use the commands
+	        	updateHelpDisplay();
 	        	break;
 	        case EXIT:  // DONE
 	            timeToExit = true;
@@ -183,6 +187,8 @@ public class Controller {
         } else {
             updateDisplayWithDefault();
         }
+        
+        if (something) {updateHelpDisplay();}
         
         display.setFeedback(feedback);
         // just so I have something to return, will remove once the whole switch case is done
@@ -418,6 +424,20 @@ public class Controller {
     	sortSearchedTasks();
         display.updateSearchDisplay(displayedTasks, searchArgument);
     }
+    
+    private void updateHelpDisplay() {
+    	ObservableList<String> list = FXCollections.observableArrayList();
+    	list.add(HELP_ADD);
+    	list.add(HELP_EDIT);
+    	list.add(HELP_DELETE);
+    	list.add(HELP_COMPLETE);
+    	list.add(HELP_INCOMPLETE);
+    	list.add(HELP_UNDO);
+    	list.add(HELP_SET_SAVE_LOCATION);
+    	list.add(HELP_SEARCH);
+    	list.add(HELP_EXIT);
+    	display.updateHelpDisplay(list);
+;    }
 
     private void sortAllTasks() {
     	uds = new UserDefinedSort(allTasks);

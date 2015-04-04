@@ -153,7 +153,14 @@ public class Display extends VBox {
 
         listView.setItems(displayBoxes);
     }
-
+    
+    public void updateHelpDisplay(ObservableList<String> list) {
+    	ObservableList<HBox> displayBoxes = FXCollections.observableArrayList();
+    	for (String item: list) {
+    		displayBoxes.add(new HelpBox(item));
+    	}
+    	listView.setItems(displayBoxes);
+    }
 
     // ================================================================
     // Logic methods for updateOverviewDisplay
