@@ -124,7 +124,7 @@ public class Controller {
         String arguments = currentCommand.getArguments();
         String feedback = "";
         
-        boolean something = false;
+        boolean helpUser = false;
 
         switch (commandType) {
         	case SETSAVEFILE:
@@ -170,9 +170,7 @@ public class Controller {
 	            feedback =  invalid();
 	            break;
 	        case HELP:
-	        	something = true;
-	        	// TODO - Make a window pop out to show how to use the commands
-	        	updateHelpDisplay();
+	        	helpUser = true;
 	        	break;
 	        case EXIT:  // DONE
 	            timeToExit = true;
@@ -181,13 +179,14 @@ public class Controller {
 	            break;
         }
         sortAllTasks();
-        if (switchDisplay) {
+        
+        if (helpUser) {
+        	updateHelpDisplay();
+        } else if (switchDisplay) {
             updateDisplaySearch();
         } else {
             updateDisplayWithDefault();
         }
-        
-        if (something) {updateHelpDisplay();}
         
         display.setFeedback(feedback);
         // just so I have something to return, will remove once the whole switch case is done
@@ -507,6 +506,7 @@ public class Controller {
     public void clear() {
         ArrayList<Task> emptyArr = new ArrayList<Task>();
         allTasks = emptyArr;
+        displayedTasks = FXCollections.observableArrayList();;
         storage.updateFiles(emptyArr);
     }
 
