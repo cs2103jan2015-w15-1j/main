@@ -58,15 +58,15 @@ public class Controller {
     private static final String MESSAGE_INVALID_COMMAND = "Invalid command. \n";
     private static final String MESSAGE_NO_UNDO = "Already at oldest change, unable to undo. \n";
     
-    private static final String HELP_ADD = "Add a task  -  add <arguments>";
-    private static final String HELP_EDIT = "Edit a task  -  edit <index> <desc/dead> <arguments>";
-    private static final String HELP_DELETE = "Delete a task  -  delete <index>";
-    private static final String HELP_COMPLETE = "Mark a task as complete  -  complete <index>";
-    private static final String HELP_INCOMPLETE = "Mark a task as incomplete  -  incomplete <index>";
-    private static final String HELP_UNDO = "Undo previous action  -  undo";
-    private static final String HELP_SET_SAVE_LOCATION = "Change save directory  -  set <directory>";
-    private static final String HELP_SEARCH = "Search for a task  -  search <keyworrd/date>";
-    private static final String HELP_EXIT = "Exit Veto  -  exit";
+    private static final String HELP_ADD = "Add a task  ---------------------------------------------  add <arguments>";
+    private static final String HELP_EDIT = "Edit a task  ---------------------  edit <index> <desc/dead> <arguments>";
+    private static final String HELP_DELETE = "Delete a task  ----------------------------------------------  delete <index>";
+    private static final String HELP_COMPLETE = "Mark a task as complete  -----------------------------  complete <index>";
+    private static final String HELP_INCOMPLETE = "Mark a task as incomplete  -------------------------  incomplete <index>";
+    private static final String HELP_UNDO = "Undo previous action  ----------------------------------------------  undo";
+    private static final String HELP_SET_SAVE_LOCATION = "Change save directory  -----------------------------------  set <directory>";
+    private static final String HELP_SEARCH = "Search for a task  -------------------------------  search <keyword/date>";
+    private static final String HELP_EXIT = "Exit Veto  -------------------------------------------------------------  exit";
 
     // ================================================================
     // Constructor

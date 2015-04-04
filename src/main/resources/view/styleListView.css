@@ -139,7 +139,7 @@
 	-fx-background-color: white;
 }
 
-.categoryBox #category {
+.helpBox #category {
 	-fx-font-weight: 700;
 	-fx-text-fill: tomato;
 }
