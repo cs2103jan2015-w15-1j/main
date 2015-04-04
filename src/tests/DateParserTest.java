@@ -206,6 +206,10 @@ public class DateParserTest {
         assertEquals("End date & time",
                      constructDateTime(2015, 3, 23, 14, 00),
                      dates.get(1));
+        
+        input = "2 friday";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
     }
     
     @Test
