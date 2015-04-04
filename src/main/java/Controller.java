@@ -32,7 +32,7 @@ public class Controller {
 
     private String searchArgument;
     private DateParser parser;
-    private TaskCreator taskCreator;
+    private CreateTask taskCreator;
 
     private boolean switchDisplay = false;
     
@@ -88,7 +88,7 @@ public class Controller {
     private Controller() {
         parser = DateParser.getInstance();
         storage = Storage.getInstance();
-        taskCreator = TaskCreator.getInstance();
+        taskCreator = CreateTask.getInstance();
         saveFileName = storage.getSaveFileName();
 
         allTasks = storage.readFile();

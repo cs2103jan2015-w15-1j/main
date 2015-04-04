@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.UUID;
 
-public class TaskCreator {
+public class CreateTask {
     // Not fully Tested!!!!
     // seem to be working add for recuring:
     // "add do homework every 2 monday from 3 apr to 25 jul"
@@ -33,16 +33,16 @@ public class TaskCreator {
             "wed", "thu", "fri", "sat", "sun" };
     private static final String[] DAYWORD = { "day", "daily" };
 
-    private static TaskCreator taskCreator;
+    private static CreateTask taskCreator;
     private DateParser dateParser;
     private ArrayList<Task> tempList;
     private LocalDateTime endDateTime;
     private LocalDateTime limit;
     private int recurRate;
 
-    public static TaskCreator getInstance() {
+    public static CreateTask getInstance() {
         if (taskCreator == null) {
-            taskCreator = new TaskCreator();
+            taskCreator = new CreateTask();
         }
         return taskCreator;
     }
