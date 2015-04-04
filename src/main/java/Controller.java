@@ -45,7 +45,6 @@ public class Controller {
     // ================================================================
     // Constants
     // ================================================================
-    private final static String TASK_OVERVIEW_LOCATION = "/view/TaskOverview.fxml";
     private static final String MESSAGE_SAVE_FILE_READY = "Welcome to main.java.Veto. %s is ready for use.";
     private static final String MESSAGE_EMPTY = "There is currently no task.\n";
     private static final String MESSAGE_ADD = "Task has been successfully added:\n     Description: %s\n     Deadline: %s\n     Time: %s\n";
@@ -61,15 +60,15 @@ public class Controller {
     private static final String MESSAGE_INVALID_COMMAND = "Invalid command. \n";
     private static final String MESSAGE_NO_UNDO = "Already at oldest change, unable to undo. \n";
     
-    private static final String HELP_ADD = "add <arguments>";
-    private static final String HELP_EDIT = "edit <index> <desc/dead> <arguments>";
-    private static final String HELP_DELETE = "delete <index>";
-    private static final String HELP_COMPLETE = "complete <index>";
-    private static final String HELP_INCOMPLETE = "incomplete <index>";
-    private static final String HELP_UNDO = "undo";
-    private static final String HELP_SET_SAVE_LOCATION = "set <directory>";
-    private static final String HELP_SEARCH = "search <keyworrd/date>";
-    private static final String HELP_EXIT = "exit";
+    private static final String HELP_ADD = "Add a task  ---------------------------------------------  add <arguments>";
+    private static final String HELP_EDIT = "Edit a task  ---------------------  edit <index> <desc/dead> <arguments>";
+    private static final String HELP_DELETE = "Delete a task  ----------------------------------------------  delete <index>";
+    private static final String HELP_COMPLETE = "Mark a task as complete  -----------------------------  complete <index>";
+    private static final String HELP_INCOMPLETE = "Mark a task as incomplete  -------------------------  incomplete <index>";
+    private static final String HELP_UNDO = "Undo previous action  ----------------------------------------------  undo";
+    private static final String HELP_SET_SAVE_LOCATION = "Change save directory  -----------------------------------  set <directory>";
+    private static final String HELP_SEARCH = "Search for a task  -------------------------------  search <keyword/date>";
+    private static final String HELP_EXIT = "Exit Veto  -------------------------------------------------------------  exit";
 
     // ================================================================
     // Constructor
@@ -128,6 +127,8 @@ public class Controller {
         Command.Type commandType = currentCommand.getCommandType();
         String arguments = currentCommand.getArguments();
         String feedback = "";
+        
+        boolean helpUser = false;
 
         switch (commandType) {
         	case SETSAVEFILE:
@@ -172,7 +173,10 @@ public class Controller {
 	        case INVALID:
 	            feedback =  invalid();
 	            break;
-	        case EXIT:  // DONE, BUT CONSOLE OUTPUTS WEIRD ERROR MESSAGES
+	        case HELP:
+	        	helpUser = true;
+	        	break;
+	        case EXIT:  // DONE
 	            timeToExit = true;
 	            feedback =  exit();
                 stage.close();
@@ -182,7 +186,10 @@ public class Controller {
 
         }
         sortAllTasks();
-        if (switchDisplay) {
+        
+        if (helpUser) {
+        	updateHelpDisplay();
+        } else if (switchDisplay) {
             updateDisplaySearch();
         } else {
             updateDisplayWithDefault();
@@ -232,11 +239,14 @@ public class Controller {
     // ================================================================
 
     private String addTask(String input) {
-        ArrayList<Task> newTask = new ArrayList<Task>();
+        if (input.isEmpty()) {
+            return MESSAGE_INVALID_COMMAND;
+        }
         parser.parse(input);
         ArrayList<LocalDateTime> parsedDates = parser.getDates();
         String parsedWords = parser.getParsedWords();
         String notParsedWords = parser.getNotParsedWords();
+        ArrayList<Task> newTask = new ArrayList<Task>();
 
         // Instantiate a new Task object
         newTask = taskCreator.create(input, parsedDates, parsedWords, notParsedWords);
@@ -438,6 +448,20 @@ public class Controller {
     	sortSearchedTasks();
         display.updateSearchDisplay(displayedTasks, searchArgument);
     }
+    
+    private void updateHelpDisplay() {
+    	ObservableList<String> list = FXCollections.observableArrayList();
+    	list.add(HELP_ADD);
+    	list.add(HELP_EDIT);
+    	list.add(HELP_DELETE);
+    	list.add(HELP_COMPLETE);
+    	list.add(HELP_INCOMPLETE);
+    	list.add(HELP_UNDO);
+    	list.add(HELP_SET_SAVE_LOCATION);
+    	list.add(HELP_SEARCH);
+    	list.add(HELP_EXIT);
+    	display.updateHelpDisplay(list);
+;    }
 
     private void sortAllTasks() {
     	uds = new UserDefinedSort(allTasks);
@@ -505,6 +529,7 @@ public class Controller {
     public void clear() {
         ArrayList<Task> emptyArr = new ArrayList<Task>();
         allTasks = emptyArr;
+        displayedTasks = FXCollections.observableArrayList();;
         storage.updateFiles(emptyArr);
     }
 

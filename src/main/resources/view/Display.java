@@ -57,6 +57,8 @@ public class Display extends VBox {
     private static final String LABEL_DEFAULT_SEARCH_QUERY = "all tasks";
     private static final String LABEL_INCOMPLETE = "Incomplete";
     private static final String LABEL_COMPLETED = "Completed";
+    
+    private static final String TITLE_HELP = "~ Veto help menu ~";
 
     private static final int FEEDBACK_FADE_IN_MILLISECONDS = 500;
     private static final int FEEDBACK_FADE_OUT_MILLISECONDS = 1000;
@@ -153,7 +155,15 @@ public class Display extends VBox {
 
         listView.setItems(displayBoxes);
     }
-
+    
+    public void updateHelpDisplay(ObservableList<String> list) {
+    	ObservableList<HBox> displayBoxes = FXCollections.observableArrayList();
+    	displayBoxes.add(new TitleBox(TITLE_HELP));
+    	for (String item: list) {
+    		displayBoxes.add(new HelpBox(item));
+    	}
+    	listView.setItems(displayBoxes);
+    }
 
     // ================================================================
     // Logic methods for updateOverviewDisplay

@@ -211,7 +211,7 @@ public class DateParser {
 
         input = catchRelaxedYearBeforeToday(input, pLocations);
 
-        input = catchExplicitTimeWithoutDate(input, pLocations, parsePosition);
+//        input = catchExplicitTimeWithoutDate(input, pLocations, parsePosition);
 
         return input;
     }
