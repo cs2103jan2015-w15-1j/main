@@ -7,7 +7,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.UUID;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -16,15 +15,14 @@ import javafx.beans.property.StringProperty;
 
 import org.apache.commons.lang.StringUtils;
 
-
 /**
  * This class contains the information of a task element.
  *
  * Types of tasks:
  *
- * Floating task: no keywords required. Example: "do assignment"
- * Deadline task: one date must be provided. Example: "do assignment by 23 Mar"
- * Timed-task: two times must be provided for one date. Example:
+ * Floating task: no keywords required. Example: "do assignment" Deadline task:
+ * one date must be provided. Example: "do assignment by 23 Mar" Timed-task: two
+ * times must be provided for one date. Example:
  * "attend meeting at 1200 - 1400 on 20 Apr"
  *
  * NOTE THAT IF THE INFORMATION DOES NOT FOLLOW THE ABOVE FORMAT, IT WILL BE
@@ -44,16 +42,17 @@ public class Task implements Cloneable {
         FLOATING, DEADLINE, TIMED
     };
 
-//    private static final String HEADER_DESC = "Description: ";
-//    private static final String HEADER_TIME = "Time: ";
-//    private static final String HEADER_DATE = "Deadline: ";
-//    private static final String HEADER_NOT_APPL = "Not applicable";
+    // private static final String HEADER_DESC = "Description: ";
+    // private static final String HEADER_TIME = "Time: ";
+    // private static final String HEADER_DATE = "Deadline: ";
+    // private static final String HEADER_NOT_APPL = "Not applicable";
 
     private static final char ESCAPE_CHAR = '"';
 
     private static final int POSITION_FIRST_DATE = 0;
     private static final int POSITION_SECOND_DATE = 1;
-    private static final String[] KEYWORDS = {"by", "on", "at", "from"};
+    private static final String[] KEYWORDS = { "by", "on", "at", "from",
+            "until", "til", "every", "day", "week", "month"};
 
     private Type type;
     private String description; // arguments without the date and time
@@ -67,7 +66,8 @@ public class Task implements Cloneable {
     // Start of MX's edits
     // ================================================================
     // Methods
-    // Note: Property attributes (part of JavaFX) are created on the fly as there were problems with serialization
+    // Note: Property attributes (part of JavaFX) are created on the fly as
+    // there were problems with serialization
 
     public StringProperty getTaskDesc() {
         return new SimpleStringProperty(getDescription());
@@ -90,7 +90,7 @@ public class Task implements Cloneable {
     // ================================================================
 
     public Task(String input, ArrayList<LocalDateTime> parsedDates,
-                String parsedWords, String nonParsedWords) {
+            String parsedWords, String nonParsedWords) {
         markAsIncomplete();
         type = determineType(parsedDates);
         initDateAndTime(type, parsedDates);
@@ -124,25 +124,24 @@ public class Task implements Cloneable {
     public boolean isCompleted() {
         return isCompleted;
     }
-    
+
     public String getID() {
         return recurID;
     }
 
     public boolean isOverdue() {
-    	LocalDate nowDate = LocalDate.now();
+        LocalDate nowDate = LocalDate.now();
         return getDate() != null && nowDate.isAfter(getDate());
     }
-
 
     // ================================================================
     // Public setters
     // ================================================================
 
-    public void setID(String input){
+    public void setID(String input) {
         recurID = input;
     }
-    
+
     public void setDescription(String input) {
         description = input;
     }
@@ -160,7 +159,7 @@ public class Task implements Cloneable {
     }
 
     public void markAsIncomplete() {
-    	isCompleted = false;
+        isCompleted = false;
     }
 
     public boolean updateTypeDateTime(ArrayList<LocalDateTime> parsedDates) {
@@ -199,64 +198,65 @@ public class Task implements Cloneable {
     private Type determineType(ArrayList<LocalDateTime> parsedDates) {
         int numDates = parsedDates.size();
         switch (numDates) {
-            case 2 :
-                return Type.TIMED;
-            case 1 :
-                return Type.DEADLINE;
-            default :
-                return Type.FLOATING;
+        case 2:
+            return Type.TIMED;
+        case 1:
+            return Type.DEADLINE;
+        default:
+            return Type.FLOATING;
         }
     }
 
     private void initDateAndTime(Type type, ArrayList<LocalDateTime> parsedDates) {
         switch (type) {
-            case TIMED :
-                date = parsedDates.get(POSITION_FIRST_DATE).toLocalDate();
-                startTime = parsedDates.get(POSITION_FIRST_DATE).toLocalTime();
-                endTime = parsedDates.get(POSITION_SECOND_DATE).toLocalTime();
-                break;
-            case DEADLINE :
-                date = parsedDates.get(POSITION_FIRST_DATE).toLocalDate();
-                break;
-            default :
-                break;
+        case TIMED:
+            date = parsedDates.get(POSITION_FIRST_DATE).toLocalDate();
+            startTime = parsedDates.get(POSITION_FIRST_DATE).toLocalTime();
+            endTime = parsedDates.get(POSITION_SECOND_DATE).toLocalTime();
+            break;
+        case DEADLINE:
+            date = parsedDates.get(POSITION_FIRST_DATE).toLocalDate();
+            break;
+        default:
+            break;
         }
     }
 
-    private boolean updateDateAndTime(Type newType, ArrayList<LocalDateTime> parsedDates) {
+    private boolean updateDateAndTime(Type newType,
+            ArrayList<LocalDateTime> parsedDates) {
         // parsedDates correspond to the parsedDates of the update
         // type refers to CURRENT type
         switch (newType) {
-            case FLOATING :
-                setDate(null);
-                setStartTime(null);
-                setEndTime(null);
-                break;
-            case DEADLINE :
-                if (type.equals(Type.FLOATING)) {
-                    setDate(parsedDates.get(POSITION_FIRST_DATE).toLocalDate());
-                } else if (type.equals(Type.DEADLINE)) {
-                    setDate(parsedDates.get(POSITION_FIRST_DATE).toLocalDate());
-                } else { // current: TIMED
-                    setDate(parsedDates.get(POSITION_FIRST_DATE).toLocalDate());
-                    return true;
-                }
-                break;
-            case TIMED :
-                if (type.equals(Type.FLOATING)) {
-                    setDate(parsedDates.get(POSITION_FIRST_DATE).toLocalDate());
-                    setStartTime(parsedDates.get(POSITION_FIRST_DATE).toLocalTime());
-                    setEndTime(parsedDates.get(POSITION_SECOND_DATE).toLocalTime());
-                } else if (type.equals(Type.DEADLINE)) {
-                    setStartTime(parsedDates.get(POSITION_FIRST_DATE).toLocalTime());
-                    setEndTime(parsedDates.get(POSITION_SECOND_DATE).toLocalTime());
-                } else { // current: TIMED
-                    setStartTime(parsedDates.get(POSITION_FIRST_DATE).toLocalTime());
-                    setEndTime(parsedDates.get(POSITION_SECOND_DATE).toLocalTime());
-                }
-                break;
-            default :
-                break;
+        case FLOATING:
+            setDate(null);
+            setStartTime(null);
+            setEndTime(null);
+            break;
+        case DEADLINE:
+            if (type.equals(Type.FLOATING)) {
+                setDate(parsedDates.get(POSITION_FIRST_DATE).toLocalDate());
+            } else if (type.equals(Type.DEADLINE)) {
+                setDate(parsedDates.get(POSITION_FIRST_DATE).toLocalDate());
+            } else { // current: TIMED
+                setDate(parsedDates.get(POSITION_FIRST_DATE).toLocalDate());
+                return true;
+            }
+            break;
+        case TIMED:
+            if (type.equals(Type.FLOATING)) {
+                setDate(parsedDates.get(POSITION_FIRST_DATE).toLocalDate());
+                setStartTime(parsedDates.get(POSITION_FIRST_DATE).toLocalTime());
+                setEndTime(parsedDates.get(POSITION_SECOND_DATE).toLocalTime());
+            } else if (type.equals(Type.DEADLINE)) {
+                setStartTime(parsedDates.get(POSITION_FIRST_DATE).toLocalTime());
+                setEndTime(parsedDates.get(POSITION_SECOND_DATE).toLocalTime());
+            } else { // current: TIMED
+                setStartTime(parsedDates.get(POSITION_FIRST_DATE).toLocalTime());
+                setEndTime(parsedDates.get(POSITION_SECOND_DATE).toLocalTime());
+            }
+            break;
+        default:
+            break;
         }
         setType(newType);
         return true;
@@ -265,8 +265,10 @@ public class Task implements Cloneable {
     /**
      * Get the description of the task
      *
-     * @param input - user's raw input
-     * @param nonParsedWords - words that were used to obtain the dates from user input
+     * @param input
+     *            - user's raw input
+     * @param nonParsedWords
+     *            - words that were used to obtain the dates from user input
      * @return description
      */
     private String extractDescription(String input, String nonParsedWords) {
@@ -277,7 +279,8 @@ public class Task implements Cloneable {
             String[] wordArr = nonParsedWords.split(" ");
 
             // convert input string array to arraylist of strings
-            ArrayList<String> wordArrayList = new ArrayList<String>(Arrays.asList(wordArr));
+            ArrayList<String> wordArrayList = new ArrayList<String>(
+                    Arrays.asList(wordArr));
 
             // reverse as we want to delete words from the back
             Collections.reverse(wordArrayList);
@@ -290,11 +293,10 @@ public class Task implements Cloneable {
             Collections.reverse(wordArrayList);
 
             String description = stringFormatter(wordArrayList);
-//            return description;
+            // return description;
             return description.replace("\"", "");
         }
     }
-
 
     // ================================================================
     // Utility Methods
@@ -331,27 +333,31 @@ public class Task implements Cloneable {
     }
 
     public String toString() {
-//        String result = HEADER_DESC + getDescription() +"\n";
-//        if (getDate() == null) {
-//            result += HEADER_DATE + HEADER_NOT_APPL + "\n";
-//        } else {
-//            result += HEADER_DATE + getDate() + "\n";
-//        }
-//        if (getStartTime() == null || getEndTime() == null) {
-//            result += HEADER_TIME + HEADER_NOT_APPL + "\n\n";
-//        } else {
-//            result += HEADER_TIME + getStartTime() + " to " + getEndTime() + "\n\n";
-//        }
+        // String result = HEADER_DESC + getDescription() +"\n";
+        // if (getDate() == null) {
+        // result += HEADER_DATE + HEADER_NOT_APPL + "\n";
+        // } else {
+        // result += HEADER_DATE + getDate() + "\n";
+        // }
+        // if (getStartTime() == null || getEndTime() == null) {
+        // result += HEADER_TIME + HEADER_NOT_APPL + "\n\n";
+        // } else {
+        // result += HEADER_TIME + getStartTime() + " to " + getEndTime() +
+        // "\n\n";
+        // }
         String result = getDescription();
-//        String result = Character.toUpperCase(getDescription().charAt(0)) + getDescription().substring(1);
+        // String result = Character.toUpperCase(getDescription().charAt(0)) +
+        // getDescription().substring(1);
         if (getDate() != null) {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, d MMMM y");
+            DateTimeFormatter formatter = DateTimeFormatter
+                    .ofPattern("EEEE, d MMMM y");
             // javadoc reference: http://goo.gl/GCyd5E
             result += " on " + getDate().format(formatter);
         }
         if (getStartTime() != null) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("h.mma");
-            result += " from " + getStartTime().format(formatter) + " to " + getEndTime().format(formatter);
+            result += " from " + getStartTime().format(formatter) + " to "
+                    + getEndTime().format(formatter);
         }
         return result;
     }

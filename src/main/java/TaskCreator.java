@@ -13,23 +13,25 @@ public class TaskCreator {
     // "add foo every day from 2pm to 4pm"
     // "add foo every week until 20 may"
     // "add foo weekly from 2pm to 5pm until 21 may"
+    // "add foo every month from 4 apr to 6 sep"    
     // needs more testing
+    
     public static enum Type {
         YEARLY, MONTHLY, WEEKLY, DAILY,
     };
 
-    private static String keyword = "every";
-    private static String startWord = "from";
-    private static String[] endWord = { "until", "til", "by" };
-    private static String[] mainWords = { "daily", "everyday", "monthly",
+    private static final String KEYWORD = "every";
+    private static final String STARTWORD = "from";
+    private static final String[] ENDWORD = { "until", "til", "by" };
+    private static final String[] MAINWORD = { "daily", "everyday", "monthly",
             "weekly", "yearly" };
-    private static String[] yearWords = { "yearly", "year" };
-    private static String[] monthWords = { "monthly", "month", "jan", "feb",
+    private static final String[] YEARWORD = { "yearly", "year" };
+    private static final String[] MONTHWORD = { "monthly", "month", "jan", "feb",
             "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov",
             "dec" };
-    private static String[] weekWords = { "weekly", "week", "mon", "tue",
+    private static final String[] WEEKWORD = { "weekly", "week", "mon", "tue",
             "wed", "thu", "fri", "sat", "sun" };
-    private static String[] dayWords = { "day", "daily" };
+    private static final String[] DAYWORD = { "day", "daily" };
 
     private static TaskCreator taskCreator;
     private DateParser dateParser;
@@ -91,7 +93,7 @@ public class TaskCreator {
 
     private ArrayList<LocalDateTime> findRecurDates(String input) {
         ArrayList<LocalDateTime> result = new ArrayList<LocalDateTime>();
-        for (String check : endWord) {
+        for (String check : ENDWORD) {
             if (input.toLowerCase().contains(check)) {
                 String endCondition = input.substring(input.indexOf(check),
                         input.length());
@@ -103,8 +105,8 @@ public class TaskCreator {
             }
         }
 
-        if (input.toLowerCase().contains(startWord)) {
-            String subString = input.substring(input.indexOf(startWord),
+        if (input.toLowerCase().contains(STARTWORD)) {
+            String subString = input.substring(input.indexOf(STARTWORD),
                     input.length());
             dateParser.parse(subString);
             result.addAll(dateParser.getDates());
@@ -220,7 +222,7 @@ public class TaskCreator {
 
     // Checks if the input contains words to indicate recurring tasks
     private Type checkRecurring(String input) {
-        for (String check : mainWords) {
+        for (String check : MAINWORD) {
             if (input.toLowerCase().contains(check)) {
                 switch (check) {
                 case "yearly":
@@ -237,8 +239,8 @@ public class TaskCreator {
             }
         }
 
-        if (input.toLowerCase().contains(keyword)) {
-            String check = input.substring(input.lastIndexOf(keyword) + 6,
+        if (input.toLowerCase().contains(KEYWORD)) {
+            String check = input.substring(input.lastIndexOf(KEYWORD) + 6,
                     input.length());
             String[] split = check.split(" ");
             try {
@@ -246,28 +248,28 @@ public class TaskCreator {
             } catch (NumberFormatException e) {
                 recurRate = 1;
             }
-            for (String find : yearWords) {
+            for (String find : YEARWORD) {
                 if (split[0].toLowerCase().contains(find)
                         || (split.length > 1 && split[1].toLowerCase()
                                 .contains(find))) {
                     return Type.YEARLY;
                 }
             }
-            for (String find : monthWords) {
+            for (String find : MONTHWORD) {
                 if (split[0].toLowerCase().contains(find)
                         || (split.length > 1 && split[1].toLowerCase()
                                 .contains(find))) {
                     return Type.MONTHLY;
                 }
             }
-            for (String find : weekWords) {
+            for (String find : WEEKWORD) {
                 if (split[0].toLowerCase().contains(find)
                         || (split.length > 1 && split[1].toLowerCase()
                                 .contains(find))) {
                     return Type.WEEKLY;
                 }
             }
-            for (String find : dayWords) {
+            for (String find : DAYWORD) {
                 if (split[0].toLowerCase().contains(find)
                         || (split.length > 1 && split[1].toLowerCase()
                                 .contains(find))) {
