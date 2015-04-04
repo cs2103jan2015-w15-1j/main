@@ -26,7 +26,7 @@ public class TaskTest {
         assertEquals("2015-04-04", testingTask.getDate().toString());
         assertEquals(null, testingTask.getStartTime());
         assertFalse(testingTask.isCompleted());
-        testingTask.markAsComplete();
+        testingTask.markAsCompleted();
         assertTrue(testingTask.isCompleted());
     }
 
@@ -40,7 +40,7 @@ public class TaskTest {
         assertEquals("12:00", testingTask.getStartTime().toString());
         assertEquals("14:00", testingTask.getEndTime().toString());
         assertFalse(testingTask.isCompleted());
-        testingTask.markAsComplete();
+        testingTask.markAsCompleted();
         assertTrue(testingTask.isCompleted());
     }
 
@@ -53,7 +53,7 @@ public class TaskTest {
         assertEquals(2, testingTask.getDate().getMonthValue());
         assertEquals(null, testingTask.getStartTime());
         assertFalse(testingTask.isCompleted());
-        testingTask.markAsComplete();
+        testingTask.markAsCompleted();
         assertTrue(testingTask.isCompleted());
     }
 

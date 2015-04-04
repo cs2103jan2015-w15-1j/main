@@ -319,7 +319,7 @@ public class Controller {
                 return String.format(MESSAGE_COMPLETE_FAILED, task.getDescription());
             }
             
-            task.markAsComplete();
+            task.markAsCompleted();
 
             updateStorageWithAllTasks();
 

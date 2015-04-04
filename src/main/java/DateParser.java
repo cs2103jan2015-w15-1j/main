@@ -75,7 +75,7 @@ public class DateParser {
 
     public void parse(String input) {
         initVariables(input);
-        
+
         input = fixTimeFormatting(input);
         rawInput = input;
         logger.log(Level.INFO, "Input: " + input);
@@ -279,8 +279,9 @@ public class DateParser {
         if (parsedLocations.containsKey("relaxed_year")) {
             for (ParseLocation parsedWord : parsedLocations.get("relaxed_year")) {
                 if (Year.parse(parsedWord.getText()).isBefore(Year.now())) {
-                    System.out.println("ERROR3: " + input + ", word: " + parsedWord +
-                                       ", position: " + parsedWord.getStart());
+                    System.out.println("ERROR3: " + input + ", word: " +
+                                       parsedWord + ", position: " +
+                                       parsedWord.getStart());
                     input = addWordsBeforeWordAtPosition(input,
                                                          parsedWord.getStart(),
                                                          Year.now().toString() +
@@ -292,7 +293,8 @@ public class DateParser {
     }
 
     /**
-     * Catches words that are parsed as a timing when it should be parsed as a year.
+     * Catches words that are parsed as a timing when it should be parsed as a
+     * year.
      * A time with no date is taken as a year.
      * E.g. "2016" is incorrectly parsed as 8:16pm, but should be the year 2016.
      * 
@@ -308,14 +310,16 @@ public class DateParser {
             !parsedLocations.containsKey("date")) {
             if (parsedLocations.get("explicit_time").size() == 1) {
                 String parsedWord = parsedLocations.get("explicit_time")
-                                              .get(0)
-                                              .getText();
+                                                   .get(0)
+                                                   .getText();
                 int position = parsePosition +
                                input.substring(parsePosition)
                                     .indexOf(parsedWord);
                 System.out.println("ERROR4: " + input + ", word: " +
                                    parsedWord + ", position: " + position);
-                input = addWordsBeforeWordAtPosition(input, position, DEFAULT_MONTH_AND_DAY);
+                input = addWordsBeforeWordAtPosition(input,
+                                                     position,
+                                                     DEFAULT_MONTH_AND_DAY);
             }
         }
         return input;
@@ -375,7 +379,7 @@ public class DateParser {
             group = groups.get(POSITION_FIRST_DATE_GROUP);
             generateDates(group);
         }
-        
+
         generateParsedAndNotParsedWords(group);
 
     }
@@ -384,13 +388,13 @@ public class DateParser {
     private void generateParsedAndNotParsedWords(DateGroup group) {
         if (group != null) {
             String parsedWordsFromModifiedInput = group.getText();
-        
+
             String[] splitParsedWords = parsedWordsFromModifiedInput.split(" ");
             String[] splitRawInput = rawInput.split(" ");
             ArrayList<String> splitParsedWordsArr = new ArrayList<String>(Arrays.asList(splitParsedWords));
             ArrayList<String> parsedWordsArr = new ArrayList<String>();
             ArrayList<String> notParsedWordsArr = new ArrayList<String>(Arrays.asList(splitRawInput));
-            
+
             Collections.reverse(splitParsedWordsArr);
             Collections.reverse(notParsedWordsArr);
             for (String parsedWord : splitParsedWordsArr) {
@@ -402,7 +406,7 @@ public class DateParser {
                     }
                 }
             }
-            
+
             Collections.reverse(parsedWordsArr);
             Collections.reverse(notParsedWordsArr);
             parsedWords = StringUtils.join(parsedWordsArr, ' ');
@@ -421,10 +425,12 @@ public class DateParser {
             dates.add(LocalDateTime.ofInstant(d.toInstant(),
                                               ZoneId.systemDefault()));
         }
-        if (group.isRecurring()) {
+
+        if (group.isRecurring() && group.getRecursUntil() != null) {
             dates.add(LocalDateTime.ofInstant(group.getRecursUntil()
                                                    .toInstant(),
                                               ZoneId.systemDefault()));
+
         }
         logger.log(Level.INFO, "Generated dates: " + dates);
     }

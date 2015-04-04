@@ -8,11 +8,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-
 import org.apache.commons.lang.StringUtils;
 
 
@@ -60,7 +55,6 @@ public class Task implements Cloneable {
     private LocalTime startTime;
     private LocalTime endTime;
     private boolean isCompleted;
-
 
 
     public Task(String input, ArrayList<LocalDateTime> parsedDates,
@@ -121,7 +115,7 @@ public class Task implements Cloneable {
         }
     }
 
-    public void markAsComplete() {
+    public void markAsCompleted() {
         isCompleted = true;
     }
 
@@ -183,7 +177,10 @@ public class Task implements Cloneable {
                 break;
             case DEADLINE :
                 date = parsedDates.get(POSITION_FIRST_DATE).toLocalDate();
-                startTime = parsedDates.get(POSITION_FIRST_DATE).toLocalTime();
+                LocalTime time = parsedDates.get(POSITION_FIRST_DATE).toLocalTime();
+                if (time.getNano() == 0) {
+                    startTime = time;
+                }
                 break;
             default :
                 break;
@@ -304,7 +301,7 @@ public class Task implements Cloneable {
         result += addFormattedTime();
         return result;
     }
-    
+
     public String toString(boolean withoutDate) {
         String result = getDescription();
         if (withoutDate) {
@@ -314,7 +311,7 @@ public class Task implements Cloneable {
         }
         return result;
     }
-    
+
     private String addFormattedTime() {
         // formats the time for the time label, eg 2:00PM to 4:00PM
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("h.mma");
@@ -322,16 +319,18 @@ public class Task implements Cloneable {
         LocalTime endTime = getEndTime();
         if (startTime != null) {
             if (endTime != null) {
-                return " from " + startTime.format(timeFormatter).toLowerCase() + " to " + endTime.format(timeFormatter).toLowerCase();
+                return " from " +
+                       startTime.format(timeFormatter).toLowerCase() + " to " +
+                       endTime.format(timeFormatter).toLowerCase();
             } else {
                 return " by " + startTime.format(timeFormatter).toLowerCase();
             }
         }
-        return "";        
+        return "";
     }
 
     private String addFormattedDate() {
-     // javadoc reference: http://goo.gl/GCyd5E
+        // javadoc reference: http://goo.gl/GCyd5E
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("EEEE, d MMMM y");
         if (getDate() != null) {
             return " on " + getDate().format(dateFormatter);
