@@ -13,9 +13,9 @@ public class TaskCreator {
     // "add foo every day from 2pm to 4pm"
     // "add foo every week until 20 may"
     // "add foo weekly from 2pm to 5pm until 21 may"
-    // "add foo every month from 4 apr to 6 sep"    
+    // "add foo every month from 4 apr to 6 sep"
     // needs more testing
-    
+
     public static enum Type {
         YEARLY, MONTHLY, WEEKLY, DAILY,
     };
@@ -26,9 +26,9 @@ public class TaskCreator {
     private static final String[] MAINWORD = { "daily", "everyday", "monthly",
             "weekly", "yearly" };
     private static final String[] YEARWORD = { "yearly", "year" };
-    private static final String[] MONTHWORD = { "monthly", "month", "jan", "feb",
-            "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov",
-            "dec" };
+    private static final String[] MONTHWORD = { "monthly", "month", "jan",
+            "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct",
+            "nov", "dec" };
     private static final String[] WEEKWORD = { "weekly", "week", "mon", "tue",
             "wed", "thu", "fri", "sat", "sun" };
     private static final String[] DAYWORD = { "day", "daily" };
@@ -64,32 +64,45 @@ public class TaskCreator {
         if (type != null) {
             recurDate = new ArrayList<LocalDateTime>(findRecurDates(input));
             getEndDateTime(recurDate);
-            switch (type) {
-            case YEARLY:
-                createYearly(input, parsedWords, nonParsedWords, recurDate,
-                        recurID);
-                break;
-            case MONTHLY:
-                createMonthly(input, parsedWords, nonParsedWords, recurDate,
-                        recurID);
-                break;
-            case WEEKLY:
-                createWeekly(input, parsedWords, nonParsedWords, recurDate,
-                        recurID);
-                break;
-            case DAILY:
-                createDaily(input, parsedWords, nonParsedWords, recurDate,
-                        recurID);
-                break;
-            default:
-                break;
-            }
+            createRecurring(type, input, parsedWords, nonParsedWords,
+                    recurDate, recurID);
         } else {
             task = new Task(input, parsedDates, parsedWords, nonParsedWords);
             tempList.add(task);
         }
-        
+
         return tempList;
+    }
+
+    private void createRecurring(Type type, String input, String parsedWords,
+            String nonParsedWords, ArrayList<LocalDateTime> recurDate,
+            String recurID) {
+        Task task;
+        LocalDateTime nextDate = null;
+
+        while (!recurDate.get(0).isAfter(endDateTime)) {
+            task = new Task(input, recurDate, parsedWords, nonParsedWords);
+            task.setID(recurID);
+            tempList.add(task);
+            switch (type) {
+            case DAILY:
+                nextDate = recurDate.get(0).plusDays(recurRate);
+                break;
+            case WEEKLY:
+                nextDate = recurDate.get(0).plusWeeks(recurRate);
+                break;
+            case MONTHLY:
+                nextDate = recurDate.get(0).plusMonths(recurRate);
+                break;
+            case YEARLY:
+                nextDate = recurDate.get(0).plusYears(recurRate);
+                break;
+            default:
+                break;
+            }
+            recurDate.set(0, nextDate);
+        }
+
     }
 
     private ArrayList<LocalDateTime> findRecurDates(String input) {
@@ -132,64 +145,6 @@ public class TaskCreator {
             } else {
                 endDateTime = limit;
             }
-        }
-    }
-
-    private void createDaily(String input, String parsedWords,
-            String nonParsedWords, ArrayList<LocalDateTime> recurDate,
-            String recurID) {
-        Task task;
-
-        while (!recurDate.get(0).isAfter(endDateTime)) {
-            task = new Task(input, recurDate, parsedWords, nonParsedWords);
-            task.setID(recurID);
-            tempList.add(task);
-            LocalDateTime nextDate = recurDate.get(0).plusDays(recurRate);
-            recurDate.set(0, nextDate);
-        }
-    }
-
-    private void createWeekly(String input, String parsedWords,
-            String nonParsedWords, ArrayList<LocalDateTime> recurDate,
-            String recurID) {
-        Task task;
-
-        while (!recurDate.get(0).isAfter(endDateTime)) {
-            task = new Task(input, recurDate, parsedWords, nonParsedWords);
-            task.setID(recurID);
-            tempList.add(task);
-            LocalDateTime nextDate = recurDate.get(0).plusWeeks(recurRate);
-            recurDate.set(0, nextDate);
-        }
-    }
-
-    private void createMonthly(String input, String parsedWords,
-            String nonParsedWords, ArrayList<LocalDateTime> recurDate,
-            String recurID) {
-        Task task;
-
-        while (!recurDate.get(0).isAfter(endDateTime)) {
-            task = new Task(input, recurDate, parsedWords, nonParsedWords);
-            task.setID(recurID);
-            tempList.add(task);
-            LocalDateTime nextDate = recurDate.get(0).plusMonths(recurRate);
-            recurDate.set(0, nextDate);
-            // TESTING NONSENSE
-            System.out.println("recuring date:" + recurDate.get(0));
-        }
-    }
-
-    private void createYearly(String input, String parsedWords,
-            String nonParsedWords, ArrayList<LocalDateTime> recurDate,
-            String recurID) {
-        Task task;
-
-        while (!recurDate.get(0).isAfter(endDateTime)) {
-            task = new Task(input, recurDate, parsedWords, nonParsedWords);
-            task.setID(recurID);
-            tempList.add(task);
-            LocalDateTime nextDate = recurDate.get(0).plusYears(recurRate);
-            recurDate.set(0, nextDate);
         }
     }
 
