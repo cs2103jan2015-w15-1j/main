@@ -57,15 +57,15 @@ public class Controller {
     private static final String MESSAGE_INVALID_COMMAND = "Invalid command. \n";
     private static final String MESSAGE_NO_UNDO = "Already at oldest change, unable to undo. \n";
     
-    private static final String HELP_ADD = "Add a task  -  add <arguments>";
-    private static final String HELP_EDIT = "Edit a task  -  edit <index> <desc/dead> <arguments>";
-    private static final String HELP_DELETE = "Delete a task  -  delete <index>";
-    private static final String HELP_COMPLETE = "Mark a task as complete  -  complete <index>";
-    private static final String HELP_INCOMPLETE = "Mark a task as incomplete  -  incomplete <index>";
-    private static final String HELP_UNDO = "Undo previous action  -  undo";
-    private static final String HELP_SET_SAVE_LOCATION = "Change save directory  -  set <directory>";
-    private static final String HELP_SEARCH = "Search for a task  -  search <keyworrd/date>";
-    private static final String HELP_EXIT = "Exit Veto  -  exit";
+    private static final String HELP_ADD = "Add a task  ---------------------------------------------  add <arguments>";
+    private static final String HELP_EDIT = "Edit a task  ---------------------  edit <index> <desc/dead> <arguments>";
+    private static final String HELP_DELETE = "Delete a task  ----------------------------------------------  delete <index>";
+    private static final String HELP_COMPLETE = "Mark a task as complete  -----------------------------  complete <index>";
+    private static final String HELP_INCOMPLETE = "Mark a task as incomplete  -------------------------  incomplete <index>";
+    private static final String HELP_UNDO = "Undo previous action  ----------------------------------------------  undo";
+    private static final String HELP_SET_SAVE_LOCATION = "Change save directory  -----------------------------------  set <directory>";
+    private static final String HELP_SEARCH = "Search for a task  -------------------------------  search <keyword/date>";
+    private static final String HELP_EXIT = "Exit Veto  -------------------------------------------------------------  exit";
 
     // ================================================================
     // Constructor
@@ -123,6 +123,8 @@ public class Controller {
         Command.Type commandType = currentCommand.getCommandType();
         String arguments = currentCommand.getArguments();
         String feedback = "";
+        
+        boolean something = false;
 
         switch (commandType) {
         	case SETSAVEFILE:
@@ -168,7 +170,9 @@ public class Controller {
 	            feedback =  invalid();
 	            break;
 	        case HELP:
+	        	something = true;
 	        	// TODO - Make a window pop out to show how to use the commands
+	        	updateHelpDisplay();
 	        	break;
 	        case EXIT:  // DONE
 	            timeToExit = true;
@@ -182,6 +186,8 @@ public class Controller {
         } else {
             updateDisplayWithDefault();
         }
+        
+        if (something) {updateHelpDisplay();}
         
         display.setFeedback(feedback);
         // just so I have something to return, will remove once the whole switch case is done
@@ -420,6 +426,20 @@ public class Controller {
     	sortSearchedTasks();
         display.updateSearchDisplay(displayedTasks, searchArgument);
     }
+    
+    private void updateHelpDisplay() {
+    	ObservableList<String> list = FXCollections.observableArrayList();
+    	list.add(HELP_ADD);
+    	list.add(HELP_EDIT);
+    	list.add(HELP_DELETE);
+    	list.add(HELP_COMPLETE);
+    	list.add(HELP_INCOMPLETE);
+    	list.add(HELP_UNDO);
+    	list.add(HELP_SET_SAVE_LOCATION);
+    	list.add(HELP_SEARCH);
+    	list.add(HELP_EXIT);
+    	display.updateHelpDisplay(list);
+;    }
 
     private void sortAllTasks() {
     	uds = new UserDefinedSort(allTasks);

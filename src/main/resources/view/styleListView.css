@@ -126,6 +126,42 @@
 	-fx-text-fill: gray;
 }
 
+/*
+ * ================================================================
+ * HelpBox styles
+ * ================================================================
+ */
+.helpBox {
+	-fx-padding: 5 0 5 0;
+	-fx-font-family: Roboto;
+	-fx-font-size: 20px;
+	-fx-font-style: italic;
+	-fx-background-color: white;
+}
+
+.helpBox #category {
+	-fx-font-weight: 700;
+	-fx-text-fill: tomato;
+}
+
+/*
+ * ================================================================
+ * TitleBox styles
+ * ================================================================
+ */
+.titleBox {
+	-fx-padding: 5 0 5 0;
+	-fx-font-family: Roboto;
+	-fx-font-size: 40px;
+	-fx-font-style: italic;
+	-fx-background-color: white;
+}
+
+.titleBox #title {
+	-fx-font-weight: 700;
+	-fx-text-fill: tomato;
+}
+
 
 /*
  * ================================================================
