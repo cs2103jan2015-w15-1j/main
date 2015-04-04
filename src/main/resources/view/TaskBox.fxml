@@ -1,19 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.*?>
 <?import javafx.geometry.*?>
 <?import java.lang.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.HBox?>
 
-<fx:root alignment="CENTER_LEFT" styleClass="taskBox" type="HBox" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root alignment="CENTER_LEFT" styleClass="taskBox" type="HBox" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <CheckBox fx:id="checkbox" focusTraversable="false" mnemonicParsing="false" text="" />
+      <CheckBox fx:id="checkbox" focusTraversable="false" mnemonicParsing="false" text="">
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor></CheckBox>
       <Label fx:id="index" text="Index" />
       <Label fx:id="description" text="Description" />
-      <HBox alignment="CENTER_RIGHT" nodeOrientation="LEFT_TO_RIGHT" HBox.hgrow="ALWAYS">
+      <HBox nodeOrientation="LEFT_TO_RIGHT" HBox.hgrow="ALWAYS">
          <children>
-            <Button fx:id="delete" alignment="CENTER_RIGHT" contentDisplay="CENTER" graphicTextGap="0.0" mnemonicParsing="false" text="Delete" textAlignment="CENTER" visible="false" />
+            <Button fx:id="delete" alignment="TOP_RIGHT" contentDisplay="CENTER" focusTraversable="false" graphicTextGap="0.0" mnemonicParsing="false" text="X" textAlignment="CENTER">
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor></Button>
          </children>
       </HBox>
    </children>

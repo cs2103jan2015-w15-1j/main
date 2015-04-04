@@ -9,7 +9,6 @@
    <bottom>
       <VBox alignment="CENTER" prefHeight="26.0" BorderPane.alignment="CENTER">
          <children>
-            <Label fx:id="feedbackLabel" text="Feedback" textAlignment="CENTER" />
             <TextField fx:id="userInput" onKeyPressed="#handleKeyPress" prefHeight="26.0" />
          </children>
       </VBox>

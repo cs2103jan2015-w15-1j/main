@@ -5,8 +5,9 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<fx:root prefHeight="600.0" prefWidth="600.0" type="AnchorPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root alignment="TOP_CENTER" styleClass="display" type="VBox" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <ListView fx:id="listView" prefHeight="600.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+      <ListView fx:id="listView" prefHeight="600.0" prefWidth="600.0" VBox.vgrow="ALWAYS" />
+      <Label fx:id="feedbackLabel" text="Feedback" VBox.vgrow="ALWAYS" />
    </children>
 </fx:root>

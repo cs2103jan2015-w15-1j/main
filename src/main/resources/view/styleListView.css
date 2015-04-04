@@ -26,6 +26,13 @@
 	src: url("/fonts/Roboto-BoldItalic.ttf");
 }
 
+@font-face {
+	font-family: FontAwesome;
+	font-weight: 400;
+	font-style: normal;
+	src: url("/fonts/fontawesome-webfont.ttf");
+}
+
 /*
  * ================================================================
  * RootLayout styles
@@ -44,7 +51,14 @@
 	-fx-faint-focus-color: transparent;
 }
 
-.root #feedbackLabel {
+
+/*
+ * ================================================================
+ * Display styles
+ * ================================================================
+ */
+
+.display #feedbackLabel {
 	-fx-padding: 0 0 5 0;
 	-fx-font: 14px Roboto;
 	-fx-text-fill: tomato;
@@ -148,6 +162,12 @@
 
 /* not implemented yet */
 .taskBox #delete {
-	-fx-font: 12px System;
+	-fx-font: 14px FontAwesome;
+	-fx-text-fill: transparent;
+	-fx-background-color: transparent;
+}
+
+.taskBox #delete:hover {
+	-fx-text-fill: tomato;
 }
 

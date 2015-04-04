@@ -54,7 +54,8 @@ public class Controller {
     private static final String MESSAGE_EDIT = "Task has been successfully edited.\n";
     private static final String MESSAGE_EDIT_FAILED = "Task could not be edited.\n";
     private static final String MESSAGE_COMPLETE = "\"%s\" completed. \n";
-    private static final String MESSAGE_INCOMPLETE = "\"%s\" incompleted. \n";
+    private static final String MESSAGE_COMPLETE_FAILED = "\"%s\" already completed. \n";
+    private static final String MESSAGE_INCOMPLETE = "\"%s\" marked as incomplete. \n";
     private static final String MESSAGE_EXIT = "Goodbye!";
     private static final String MESSAGE_UNDO = "Last command has been undone. \n";
     private static final String MESSAGE_INVALID_COMMAND = "Invalid command. \n";
@@ -92,12 +93,7 @@ public class Controller {
 
         allTasks = storage.readFile();
         
-        //Sorting process
-        uds = new UserDefinedSort(allTasks);
-        uds.addComparator(new SortType());
-        uds.addComparator(new SortOverdue());
-        uds.addComparator(new SortDate());
-        uds.executeSort();
+        sortAllTasks();
 
         // Load the incomplete tasks into displayedTasks (MAIN VIEW WHEN APP STARTS)
         for (Task task : getIncompleteTasks(allTasks)) {
@@ -107,12 +103,16 @@ public class Controller {
         timeToExit = false;
         previousStates = new Stack<ArrayList<Task>>();
         previousStatesDisplayed = new Stack<ObservableList<Task>>();
+        
+        // THIS FIXES THE SLOW ADDITION OF FIRST TASK
+        parser.parse("hello");
     }
 
 
     // To load the tasks into the display on the first load
     public void onloadDisplay() {
         display.updateOverviewDisplay(displayedTasks);
+        display.setFeedback("Welcome to Veto!");
     }
 
     // ================================================================
@@ -188,6 +188,7 @@ public class Controller {
             updateDisplayWithDefault();
         }
         
+        display.setFeedback(feedback);
         // just so I have something to return, will remove once the whole switch case is done
         return feedback;
     }
@@ -336,6 +337,11 @@ public class Controller {
         try {
             int index = Integer.parseInt(input.trim()) - 1;
             Task task = displayedTasks.get(index);
+            
+            if (task.isCompleted()) {
+                return String.format(MESSAGE_COMPLETE_FAILED, task.getDescription());
+            }
+            
             task.markAsComplete();
 
             updateStorageWithAllTasks();

@@ -3,11 +3,11 @@ package main.java;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -16,8 +16,6 @@ import org.apache.commons.lang.StringUtils;
 import com.joestelmach.natty.DateGroup;
 import com.joestelmach.natty.ParseLocation;
 import com.joestelmach.natty.Parser;
-
-import edu.emory.mathcs.backport.java.util.Arrays;
 
 
 /**
