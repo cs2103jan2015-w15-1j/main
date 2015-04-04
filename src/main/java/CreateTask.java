@@ -38,6 +38,8 @@ public class CreateTask {
     private ArrayList<Task> tempList;
     private LocalDateTime endDateTime;
     private LocalDateTime limit;
+    private ArrayList<String> removedWords;
+    private String endDateWords;
     private int recurRate;
 
     public static CreateTask getInstance() {
@@ -50,10 +52,7 @@ public class CreateTask {
     public ArrayList<Task> create(String input,
             ArrayList<LocalDateTime> parsedDates, String parsedWords,
             String nonParsedWords) {
-        endDateTime = null;
-        dateParser = DateParser.getInstance();
-        recurRate = 1;
-        tempList = new ArrayList<Task>();
+        resetField();
         Type type = checkRecurring(input);
 
         ArrayList<LocalDateTime> recurDate = new ArrayList<LocalDateTime>();
@@ -64,6 +63,12 @@ public class CreateTask {
         if (type != null) {
             recurDate = new ArrayList<LocalDateTime>(findRecurDates(input));
             getEndDateTime(recurDate);
+            if (!removedWords.isEmpty()) {
+                for (String remove : removedWords) {
+                    input = input.replace(remove, "");
+                    nonParsedWords = nonParsedWords.replace(remove, "");
+                }
+            }
             createRecurring(type, input, parsedWords, nonParsedWords,
                     recurDate, recurID);
         } else {
@@ -71,7 +76,23 @@ public class CreateTask {
             tempList.add(task);
         }
 
+//        System.out.println("input: " + input);
+//        System.out.println("parsedDates: " + parsedDates);
+//        System.out.println("recurDate: " + recurDate);
+//        System.out.println("removedWords: " + removedWords);
+//        System.out.println("endDateTime: " + endDateTime);
+//        System.out.println("endDateWords: " + endDateWords);
+//        System.out.println("limit:" + limit);
         return tempList;
+    }
+
+    private void resetField() {
+        endDateTime = null;
+        dateParser = DateParser.getInstance();
+        recurRate = 1;
+        tempList = new ArrayList<Task>();
+        removedWords = new ArrayList<String>();
+        endDateWords = "";
     }
 
     private void createRecurring(Type type, String input, String parsedWords,
@@ -111,10 +132,11 @@ public class CreateTask {
             if (input.toLowerCase().contains(check)) {
                 String endCondition = input.substring(input.indexOf(check),
                         input.length());
-                System.out.println(endCondition);
                 dateParser.parse(endCondition);
+                endDateWords = dateParser.getParsedWords();
                 endDateTime = dateParser.getDates().get(0);
-                input = input.replaceAll(endCondition, "");
+                input = input.replaceAll(endDateWords, "");
+                removedWords.add(endDateWords);
                 break;
             }
         }
@@ -154,20 +176,26 @@ public class CreateTask {
             if (input.toLowerCase().contains(check)) {
                 switch (check) {
                 case "yearly":
+                    removedWords.add(check);
                     return Type.YEARLY;
                 case "monthly":
+                    removedWords.add(check);
                     return Type.MONTHLY;
                 case "weekly":
+                    removedWords.add(check);
                     return Type.WEEKLY;
                 case "daily":
+                    removedWords.add(check);
                     return Type.DAILY;
                 case "everyday":
+                    removedWords.add(check);
                     return Type.DAILY;
                 }
             }
         }
 
         if (input.toLowerCase().contains(KEYWORD)) {
+            removedWords.add(KEYWORD);
             String check = input.substring(input.lastIndexOf(KEYWORD) + 6,
                     input.length());
             String[] split = check.split(" ");
@@ -180,6 +208,11 @@ public class CreateTask {
                 if (split[0].toLowerCase().contains(find)
                         || (split.length > 1 && split[1].toLowerCase()
                                 .contains(find))) {
+                    if (split[1].toLowerCase().contains(find)) {
+                        removedWords.add(split[0] + " " + split[1]);
+                    } else {
+                        removedWords.add(split[0]);
+                    }
                     return Type.YEARLY;
                 }
             }
@@ -187,6 +220,11 @@ public class CreateTask {
                 if (split[0].toLowerCase().contains(find)
                         || (split.length > 1 && split[1].toLowerCase()
                                 .contains(find))) {
+                    if (split[1].toLowerCase().contains(find)) {
+                        removedWords.add(split[0] + " " + split[1]);
+                    } else {
+                        removedWords.add(split[0]);
+                    }
                     return Type.MONTHLY;
                 }
             }
@@ -194,6 +232,11 @@ public class CreateTask {
                 if (split[0].toLowerCase().contains(find)
                         || (split.length > 1 && split[1].toLowerCase()
                                 .contains(find))) {
+                    if (split[1].toLowerCase().contains(find)) {
+                        removedWords.add(split[0] + " " + split[1]);
+                    } else {
+                        removedWords.add(split[0]);
+                    }
                     return Type.WEEKLY;
                 }
             }
@@ -201,10 +244,14 @@ public class CreateTask {
                 if (split[0].toLowerCase().contains(find)
                         || (split.length > 1 && split[1].toLowerCase()
                                 .contains(find))) {
+                    if (split[1].toLowerCase().contains(find)) {
+                        removedWords.add(split[0] + " " + split[1]);
+                    } else {
+                        removedWords.add(split[0]);
+                    }
                     return Type.DAILY;
                 }
             }
-            System.out.println(recurRate);
         }
         return null;
     }
