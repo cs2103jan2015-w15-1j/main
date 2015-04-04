@@ -222,17 +222,17 @@ public class DateParserTest {
         assertEquals("Number of dates", 1, dates.size());
     }
     
-    @Test
-    public void inputWithYearOnly() {
-        String input;
-        ArrayList<LocalDateTime> dates;
-        input = "2016";
-        dates = getParsedDates(input);
-        assertEquals("Number of dates", 1, dates.size());
-        assertEquals("Date",
-                     constructDate(2016, 1, 1),
-                     dates.get(0).toLocalDate());
-    }
+//    @Test
+//    public void inputWithYearOnly() {
+//        String input;
+//        ArrayList<LocalDateTime> dates;
+//        input = "2016";
+//        dates = getParsedDates(input);
+//        assertEquals("Number of dates", 1, dates.size());
+//        assertEquals("Date",
+//                     constructDate(2016, 1, 1),
+//                     dates.get(0).toLocalDate());
+//    }
 
     @Test
     public void inputWithFalseMatchingWords() {

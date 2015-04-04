@@ -44,7 +44,6 @@ public class Controller {
     // ================================================================
     // Constants
     // ================================================================
-    private final static String TASK_OVERVIEW_LOCATION = "/view/TaskOverview.fxml";
     private static final String MESSAGE_SAVE_FILE_READY = "Welcome to main.java.Veto. %s is ready for use.";
     private static final String MESSAGE_ADD = "Task has been added: ";
     private static final String MESSAGE_DELETE = "Task has been deleted: ";
@@ -226,6 +225,9 @@ public class Controller {
     // ================================================================
 
     private String addTask(String input) {
+        if (input.isEmpty()) {
+            return MESSAGE_INVALID_COMMAND;
+        }
         parser.parse(input);
         ArrayList<LocalDateTime> parsedDates = parser.getDates();
         String parsedWords = parser.getParsedWords();
