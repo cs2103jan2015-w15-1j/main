@@ -88,11 +88,11 @@ public class Task implements Cloneable {
     // ================================================================
 
     public Task(String input, ArrayList<LocalDateTime> parsedDates,
-                String parsedWords, String nonParsedWords) {
+                String parsedWords, String notParsedWords) {
         markAsIncomplete();
         type = determineType(parsedDates);
         initDateAndTime(type, parsedDates);
-        description = extractDescription(input, nonParsedWords);
+        description = extractDescription(input, notParsedWords);
     }
 
     // ================================================================
@@ -256,15 +256,15 @@ public class Task implements Cloneable {
      * Get the description of the task
      *
      * @param input - user's raw input
-     * @param nonParsedWords - words that were used to obtain the dates from user input
+     * @param notParsedWords - words that were used to obtain the dates from user input
      * @return description
      */
-    private String extractDescription(String input, String nonParsedWords) {
+    private String extractDescription(String input, String notParsedWords) {
         if (hasTwoEscapeChars(input)) {
             return getWordsWithinEscapeChars(input);
         } else {
             // convert input arguments to string arrays
-            String[] wordArr = nonParsedWords.split(" ");
+            String[] wordArr = notParsedWords.split(" ");
 
             // convert input string array to arraylist of strings
             ArrayList<String> wordArrayList = new ArrayList<String>(Arrays.asList(wordArr));
@@ -279,7 +279,7 @@ public class Task implements Cloneable {
 
             Collections.reverse(wordArrayList);
 
-            String description = stringFormatter(wordArrayList);
+            String description = StringUtils.join(wordArrayList, ' ');
 //            return description;
             return description.replace("\"", "");
         }

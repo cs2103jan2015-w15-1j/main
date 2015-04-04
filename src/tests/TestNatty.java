@@ -71,7 +71,8 @@ public class TestNatty {
                            "add do nothing everyday",
                            "add do homework every monday 2pm to 3pm from 2 apr to 10 may",
                            "something something next week",
-                           "monday tuesday wednesday thursday friday saturday sunday"
+                           "monday tuesday wednesday thursday friday saturday sunday",
+                           "attend meeting later at 1200 - 1400 on 20 Feb"
         };
         
         for (String input : inputs) {
@@ -126,6 +127,7 @@ public class TestNatty {
                         break;
                     } else if (c >= parsePosition) {
                         int position = parsePosition + input.substring(parsePosition).indexOf(parsedWord);
+                        System.out.println(group.getParseLocations());
                         System.out.println("ERROR5: " + input + ", word: " + parsedWord + ", position: " +
                                 position);
                         input = escapeWordAtPosition(input, position);

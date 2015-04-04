@@ -151,6 +151,16 @@ public class DateParserTest {
         assertEquals("End date & time",
                      constructDateTime(2015, 3, 15, 18, 30),
                      dates.get(1));
+        
+        input = "attend meeting from 1200 - 1400 on 20 Feb";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 2, dates.size());
+        assertEquals("Start date & time",
+                     constructDateTime(2015, 2, 20, 12, 0),
+                     dates.get(0));
+        assertEquals("End date & time",
+                     constructDateTime(2015, 2, 20, 14, 0),
+                     dates.get(1));
     }
 
     @Test
@@ -169,7 +179,7 @@ public class DateParserTest {
         String input;
         ArrayList<LocalDateTime> dates;
 
-        input = "do assignment 2 tomorrow";
+        input = "\"do assignment 2\" tomorrow";
         dates = getParsedDates(input);
         assertEquals("Number of dates", 1, dates.size());
         assertEquals("Deadline",
@@ -232,6 +242,10 @@ public class DateParserTest {
         input = "fries";
         dates = getParsedDates(input);
         assertEquals("Number of dates", 0, dates.size());
+        
+        input = "find girlfriend in 2016";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
     }
 
     @Test

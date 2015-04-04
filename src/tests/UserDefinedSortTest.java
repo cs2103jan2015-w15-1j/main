@@ -25,7 +25,7 @@ public class UserDefinedSortTest {
 		dp.parse(input);
 	    parsedDates = dp.getDates();
 	    parsedWords = dp.getParsedWords();
-	    nonParsedWords = dp.getNonParsedWords();
+	    nonParsedWords = dp.getNotParsedWords();
 	    return new Task(input, parsedDates, parsedWords, nonParsedWords);
 	}
 
