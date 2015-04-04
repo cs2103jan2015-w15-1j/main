@@ -33,15 +33,15 @@ public class Display extends VBox {
 
     @FXML
     private Label feedbackLabel;
-    
-    
+
+
     // ================================================================
     // Non-FXML Fields
     // ================================================================
     private static Logger logger;
     private Timeline timeline;
 
-    
+
     // ================================================================
     // Constants
     // ================================================================
@@ -62,7 +62,7 @@ public class Display extends VBox {
     private static final int FEEDBACK_FADE_OUT_MILLISECONDS = 1000;
     private static final int FEEDBACK_DISPLAY_SECONDS = 8;
 
-    
+
     // ================================================================
     // Constructor
     // ================================================================
@@ -82,7 +82,7 @@ public class Display extends VBox {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        
+
         timeline = new Timeline();
     }
 
@@ -120,7 +120,7 @@ public class Display extends VBox {
 
         timeline.play();
     }
-    
+
     public void updateOverviewDisplay(ObservableList<Task> tasks) {
         ArrayList<Task> listOfTasks = new ArrayList<Task>(tasks);
         logger.log(Level.INFO, "List of tasks: " + listOfTasks.toString());
@@ -170,7 +170,7 @@ public class Display extends VBox {
         for (Task task : listOfTasks) {
             if (task.getType() == Task.Type.FLOATING) {
                 hasFloating = true;
-                displayBoxes.add(new TaskBox(index, task.getDescription()));
+                displayBoxes.add(new TaskBox(index, task.toString()));
                 index++;
             }
         }
@@ -190,15 +190,11 @@ public class Display extends VBox {
         displayBoxes.add(overdue);
 
         boolean hasOverdue = false;
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, d MMMM y");
 
         for (Task task : listOfTasks) {
             if (task.isOverdue()) {
                 hasOverdue = true;
-                displayBoxes.add(new TaskBox(index, task.getDescription() +
-                                                    " on " +
-                                                    task.getDate()
-                                                        .format(formatter)));
+                displayBoxes.add(new TaskBox(index, task.toString()));
                 index++;
             }
         }
@@ -223,12 +219,11 @@ public class Display extends VBox {
         // formats the date for the date label, eg. 1 April
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d MMMM");
 
-        // formats the time for the time label, eg 2:00PM to 4:00PM
-        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("h:mma");
-
         for (LocalDate day : days) {
-            CategoryBox label = generateDayLabel(now, dayFormatter, dateFormatter,
-                                            day);
+            CategoryBox label = generateDayLabel(now,
+                                                 dayFormatter,
+                                                 dateFormatter,
+                                                 day);
             displayBoxes.add(label);
 
             boolean hasTaskOnThisDay = false;
@@ -236,19 +231,8 @@ public class Display extends VBox {
             for (Task task : listOfTasks) {
                 if (day.equals(task.getDate())) {
                     hasTaskOnThisDay = true;
-                    if (task.getType() == Task.Type.TIMED) {
-                        displayBoxes.add(new TaskBox(index,
-                                                     task.getDescription() +
-                                                             ", " +
-                                                             task.getStartTime()
-                                                                 .format(timeFormatter) +
-                                                             " to " +
-                                                             task.getEndTime()
-                                                                 .format(timeFormatter)));
-                    } else {
-                        displayBoxes.add(new TaskBox(index,
-                                                     task.getDescription()));
-                    }
+                    displayBoxes.add(new TaskBox(index, task.toString(true)));
+
                     index++;
                 }
             }
@@ -261,9 +245,9 @@ public class Display extends VBox {
     }
 
     private CategoryBox generateDayLabel(LocalDate now,
-                                    DateTimeFormatter dayFormatter,
-                                    DateTimeFormatter dateFormatter,
-                                    LocalDate day) {
+                                         DateTimeFormatter dayFormatter,
+                                         DateTimeFormatter dateFormatter,
+                                         LocalDate day) {
         CategoryBox label;
         // special cases to show "Today" and "Tomorrow" instead of day
         if (day.equals(now)) {
@@ -272,7 +256,7 @@ public class Display extends VBox {
             label = new CategoryBox(LABEL_TOMORROW, day.format(dateFormatter));
         } else {
             label = new CategoryBox(day.format(dayFormatter),
-                               day.format(dateFormatter));
+                                    day.format(dateFormatter));
         }
         return label;
     }
@@ -294,14 +278,13 @@ public class Display extends VBox {
         displayBoxes.add(otherTasks);
 
         boolean hasOtherTasks = false;
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, d MMMM y");
         LocalDate dayOneWeekFromNow = now.plusWeeks(1);
 
-        for (Task t : listOfTasks) {
-            if (t.getDate() != null && dayOneWeekFromNow.isBefore(t.getDate())) {
+        for (Task task : listOfTasks) {
+            if (task.getDate() != null &&
+                dayOneWeekFromNow.isBefore(task.getDate())) {
                 hasOtherTasks = true;
-                displayBoxes.add(new TaskBox(i, t.getDescription() + " on " +
-                                                t.getDate().format(formatter)));
+                displayBoxes.add(new TaskBox(i, task.toString()));
                 i++;
             }
         }
@@ -321,12 +304,13 @@ public class Display extends VBox {
     private void addSearchLabel(ObservableList<HBox> displayBoxes,
                                 ObservableList<Task> searchResults,
                                 String searchQuery) {
-        CategoryBox searchLabel = generateSearchLabel(searchResults, searchQuery);
+        CategoryBox searchLabel = generateSearchLabel(searchResults,
+                                                      searchQuery);
         displayBoxes.add(searchLabel);
     }
 
     private CategoryBox generateSearchLabel(ObservableList<Task> searchResults,
-                                       String searchQuery) {
+                                            String searchQuery) {
         CategoryBox searchLabel;
         if (searchQuery.isEmpty()) {
             searchQuery = LABEL_DEFAULT_SEARCH_QUERY;
@@ -334,10 +318,12 @@ public class Display extends VBox {
 
         if (searchResults.isEmpty()) {
             searchLabel = new CategoryBox(String.format(LABEL_UNSUCCESSFUL_SEARCH,
-                                                   searchQuery), "");
+                                                        searchQuery),
+                                          "");
         } else {
             searchLabel = new CategoryBox(String.format(LABEL_SUCCESSFUL_SEARCH,
-                                                   searchQuery), "");
+                                                        searchQuery),
+                                          "");
         }
         return searchLabel;
     }

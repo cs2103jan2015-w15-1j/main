@@ -8,11 +8,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -52,7 +47,7 @@ public class Task implements Cloneable {
     private static final int POSITION_FIRST_DATE = 0;
     private static final int POSITION_SECOND_DATE = 1;
     private static final String[] KEYWORDS = { "by", "on", "at", "from",
-            "until", "til", "every", "day", "week", "month"};
+            "until", "til", "every", "day", "week", "month" };
 
     private Type type;
     private String description; // arguments without the date and time
@@ -62,39 +57,12 @@ public class Task implements Cloneable {
     private boolean isCompleted;
     private String recurID;
 
-    // ================================================================
-    // Start of MX's edits
-    // ================================================================
-    // Methods
-    // Note: Property attributes (part of JavaFX) are created on the fly as
-    // there were problems with serialization
-
-    public StringProperty getTaskDesc() {
-        return new SimpleStringProperty(getDescription());
-    }
-
-    public ObjectProperty<LocalDate> getTaskDate() {
-        return new SimpleObjectProperty<LocalDate>(getDate());
-    }
-
-    public StringProperty getStringPropertyTaskDate() {
-        if (getDate() != null) {
-            return new SimpleStringProperty(getDate().toString());
-        } else {
-            return new SimpleStringProperty("Not Applicable");
-        }
-    }
-
-    // ================================================================
-    // End of MX's edits
-    // ================================================================
-
     public Task(String input, ArrayList<LocalDateTime> parsedDates,
-            String parsedWords, String nonParsedWords) {
+            String parsedWords, String notParsedWords) {
         markAsIncomplete();
         type = determineType(parsedDates);
         initDateAndTime(type, parsedDates);
-        description = extractDescription(input, nonParsedWords);
+        description = extractDescription(input, notParsedWords);
     }
 
     // ================================================================
@@ -154,7 +122,7 @@ public class Task implements Cloneable {
         }
     }
 
-    public void markAsComplete() {
+    public void markAsCompleted() {
         isCompleted = true;
     }
 
@@ -216,6 +184,10 @@ public class Task implements Cloneable {
             break;
         case DEADLINE:
             date = parsedDates.get(POSITION_FIRST_DATE).toLocalDate();
+            LocalTime time = parsedDates.get(POSITION_FIRST_DATE).toLocalTime();
+            if (time.getNano() == 0) {
+                startTime = time;
+            }
             break;
         default:
             break;
@@ -266,17 +238,20 @@ public class Task implements Cloneable {
      * Get the description of the task
      *
      * @param input
-     *            - user's raw input
+     *            - user's raw input <<<<<<< HEAD
      * @param nonParsedWords
-     *            - words that were used to obtain the dates from user input
+     *            =======
+     * @param notParsedWords
+     *            >>>>>>> origin/DateParser - words that were used to obtain the
+     *            dates from user input
      * @return description
      */
-    private String extractDescription(String input, String nonParsedWords) {
+    private String extractDescription(String input, String notParsedWords) {
         if (hasTwoEscapeChars(input)) {
             return getWordsWithinEscapeChars(input);
         } else {
             // convert input arguments to string arrays
-            String[] wordArr = nonParsedWords.split(" ");
+            String[] wordArr = notParsedWords.split(" ");
 
             // convert input string array to arraylist of strings
             ArrayList<String> wordArrayList = new ArrayList<String>(
@@ -291,8 +266,7 @@ public class Task implements Cloneable {
             }
 
             Collections.reverse(wordArrayList);
-
-            String description = stringFormatter(wordArrayList);
+            String description = StringUtils.join(wordArrayList, ' ');
             // return description;
             return description.replace("\"", "");
         }
@@ -323,43 +297,48 @@ public class Task implements Cloneable {
         return output;
     }
 
-    // Format the elements in the ArrayList to one single string
-    private String stringFormatter(ArrayList<String> strList) {
-        String result = "";
-        for (String word : strList) {
-            result += word + " ";
-        }
-        return result.trim();
+    @Override
+    public String toString() {
+        String result = getDescription();
+        result += addFormattedDate();
+        result += addFormattedTime();
+        return result;
     }
 
-    public String toString() {
-        // String result = HEADER_DESC + getDescription() +"\n";
-        // if (getDate() == null) {
-        // result += HEADER_DATE + HEADER_NOT_APPL + "\n";
-        // } else {
-        // result += HEADER_DATE + getDate() + "\n";
-        // }
-        // if (getStartTime() == null || getEndTime() == null) {
-        // result += HEADER_TIME + HEADER_NOT_APPL + "\n\n";
-        // } else {
-        // result += HEADER_TIME + getStartTime() + " to " + getEndTime() +
-        // "\n\n";
-        // }
+    public String toString(boolean withoutDate) {
         String result = getDescription();
-        // String result = Character.toUpperCase(getDescription().charAt(0)) +
-        // getDescription().substring(1);
-        if (getDate() != null) {
-            DateTimeFormatter formatter = DateTimeFormatter
-                    .ofPattern("EEEE, d MMMM y");
-            // javadoc reference: http://goo.gl/GCyd5E
-            result += " on " + getDate().format(formatter);
-        }
-        if (getStartTime() != null) {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("h.mma");
-            result += " from " + getStartTime().format(formatter) + " to "
-                    + getEndTime().format(formatter);
+        if (withoutDate) {
+            result += addFormattedTime();
+        } else {
+            this.toString();
         }
         return result;
+    }
+
+    private String addFormattedTime() {
+        // formats the time for the time label, eg 2:00PM to 4:00PM
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("h.mma");
+        LocalTime startTime = getStartTime();
+        LocalTime endTime = getEndTime();
+        if (startTime != null) {
+            if (endTime != null) {
+                return " from " + startTime.format(timeFormatter).toLowerCase()
+                        + " to " + endTime.format(timeFormatter).toLowerCase();
+            } else {
+                return " by " + startTime.format(timeFormatter).toLowerCase();
+            }
+        }
+        return "";
+    }
+
+    private String addFormattedDate() {
+        // javadoc reference: http://goo.gl/GCyd5E
+        DateTimeFormatter dateFormatter = DateTimeFormatter
+                .ofPattern("EEEE, d MMMM y");
+        if (getDate() != null) {
+            return " on " + getDate().format(dateFormatter);
+        }
+        return "";
     }
 
     @Override

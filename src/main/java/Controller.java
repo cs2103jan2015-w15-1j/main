@@ -105,7 +105,7 @@ public class Controller {
         previousStatesDisplayed = new Stack<ObservableList<Task>>();
         
         // THIS FIXES THE SLOW ADDITION OF FIRST TASK
-        parser.parse("hello");
+        parser.parse("foo today");
     }
 
 
@@ -236,10 +236,10 @@ public class Controller {
         parser.parse(input);
         ArrayList<LocalDateTime> parsedDates = parser.getDates();
         String parsedWords = parser.getParsedWords();
-        String nonParsedWords = parser.getNonParsedWords();
+        String notParsedWords = parser.getNotParsedWords();
 
         // Instantiate a new Task object
-        newTask = taskCreator.create(input, parsedDates, parsedWords, nonParsedWords);
+        newTask = taskCreator.create(input, parsedDates, parsedWords, notParsedWords);
 //        Task task = new Task(input, parsedDates, parsedWords, nonParsedWords);
 
 //        allTasks.add(task);
@@ -342,7 +342,7 @@ public class Controller {
                 return String.format(MESSAGE_COMPLETE_FAILED, task.getDescription());
             }
             
-            task.markAsComplete();
+            task.markAsCompleted();
 
             updateStorageWithAllTasks();
 
