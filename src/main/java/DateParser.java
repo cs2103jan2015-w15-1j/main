@@ -49,7 +49,7 @@ public class DateParser {
 
     private DateParser() {
         logger = Logger.getLogger("Veto");
-        logger.setLevel(Level.OFF);
+        logger.setLevel(Level.INFO);
     }
 
 
@@ -70,14 +70,14 @@ public class DateParser {
         input = getWordsOutsideEscapeChars(input);
 
         List<DateGroup> groups = parser.parse(input);
-
-        for (DateGroup group : groups) {
-            String substring = input.substring(group.getPosition(),
-                                               input.length());
-            substring = substring.replace('.', ':');
-            input = input.substring(0, group.getPosition()) + substring;
-        }
-        groups = parser.parse(input);
+//
+//        for (DateGroup group : groups) {
+//            String substring = input.substring(group.getPosition(),
+//                                               input.length());
+//            substring = substring.replace('.', ':');
+//            input = input.substring(0, group.getPosition()) + substring;
+//        }
+//        groups = parser.parse(input);
 
         findErrorCausingWords(groups);
 
@@ -153,7 +153,7 @@ public class DateParser {
 
         // convert input arguments to string arrays
         String[] parsedWordsArr = parsedWords.split(" ");
-        String[] inputArr = input.split(" ");
+        String[] inputArr = rawInput.split(" ");
 
         // convert input string array to arraylist of strings
         ArrayList<String> inputArrayList = new ArrayList<String>(Arrays.asList(inputArr));
