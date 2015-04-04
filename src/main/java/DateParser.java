@@ -1,6 +1,7 @@
 package main.java;
 
 import java.time.LocalDateTime;
+import java.time.Year;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -67,9 +68,22 @@ public class DateParser {
     public void parse(String input) {
         initVariables(input);
         logger.log(Level.INFO, "Input: " + input);
-        input = getWordsOutsideEscapeChars(input);
+//        input = getWordsOutsideEscapeChars(input);
 
         List<DateGroup> groups = parser.parse(input);
+        
+        if (!groups.isEmpty()) {
+            input = fixInput1(input, groups);
+            groups = parser.parse(input);
+        }
+        
+        if (!groups.isEmpty()) {
+            input = fixInput(input, groups);
+            groups = parser.parse(input);
+        }
+        
+        generateInstanceVariables(input, groups);
+      removeNonChronologicalDates();
 //
 //        for (DateGroup group : groups) {
 //            String substring = input.substring(group.getPosition(),
@@ -79,15 +93,15 @@ public class DateParser {
 //        }
 //        groups = parser.parse(input);
 
-        findErrorCausingWords(groups);
+//        findErrorCausingWords(groups);
 
-        if (isIncorrectlyParsingWords) {
-            input = modifyInput(input);
-            parse(input);
-        } else {
-            generateInstanceVariables(input, groups);
-            removeNonChronologicalDates();
-        }
+//        if (isIncorrectlyParsingWords) {
+//            input = modifyInput(input);
+//            parse(input);
+//        } else {
+//            generateInstanceVariables(input, groups);
+//            removeNonChronologicalDates();
+//        }
     }
 
     public String getParsedWords() {
@@ -113,10 +127,131 @@ public class DateParser {
         parsedWords = "";
         nonParsedWords = "";
         parser = new Parser();
-        isIncorrectlyParsingWords = false;
-        incorrectlyParsedWord = "";
+//        isIncorrectlyParsingWords = false;
+//        incorrectlyParsedWord = "";
     }
 
+    
+    private String fixInput1(String input, List<DateGroup> groups) {
+        DateGroup group = groups.get(0);
+        int parsePosition = group.getPosition();
+        ArrayList<String> splitParsed = new ArrayList<String>(Arrays.asList(group.getText().split(" ")));
+        ArrayList<String> splitInput = new ArrayList<String>(Arrays.asList(input.split(" ")));
+        for (String parsedWord : splitParsed) {
+            int c = 0;
+            for (String inputWord : splitInput) {
+                c += inputWord.length() + 1;
+                if (inputWord.contains(parsedWord)) {
+                    if (inputWord.equals(parsedWord)) {
+                        break;
+                    } else if (c >= parsePosition) {
+                        int position = parsePosition + input.substring(parsePosition).indexOf(parsedWord);
+                        System.out.println("ERROR5: " + input + ", word: " + parsedWord + ", position: " +
+                                position);
+                        input = escapeWordAtPosition(input, position);
+                    }                    
+                }
+            }
+        }
+        return input;
+    }
+    
+    private String fixInput(String input, List<DateGroup> groups) {
+        DateGroup group = groups.get(0);
+        Map<String, List<ParseLocation>> pLocations = group.getParseLocations();
+        int parsePosition = group.getPosition();
+        System.out.println("INPUT: " + input);
+        System.out.println(pLocations);
+        
+        
+        if (pLocations.containsKey("explicit_time")) {
+            for (ParseLocation s : pLocations.get("explicit_time")) {
+                if (s.getText().length() < 3) {
+                    System.out.println("ERROR1: " + input + ", word: " + s + ", position: " + s.getStart());
+                    input = escapeWordAtPosition(input, s.getStart());
+                }
+            }
+        }
+        
+        if (pLocations.containsKey("spelled_or_int_optional_prefix")) {
+            for (ParseLocation s : pLocations.get("spelled_or_int_optional_prefix")) {
+                System.out.println("ERROR2: " + input + ", word: " + s + ", position: " +
+                                   s.getStart());
+                input = escapeWordAtPosition(input, s.getStart());
+            }
+        }
+        
+        if (pLocations.containsKey("relaxed_year")) {
+            for (ParseLocation s : pLocations.get("relaxed_year")) {
+                if (Year.parse(s.getText()).isBefore(Year.now())) {
+                    System.out.println("ERROR3: " + input + ", word: " + s + ", position: " +
+                            s.getStart());
+                    input = addWordsBeforeWordAtPosition(input, s.getStart(), Year.now().toString() + " ");
+                }
+            }
+        }
+        
+        if (pLocations.containsKey("explicit_time") && !pLocations.containsKey("date")) {
+            if (pLocations.get("explicit_time").size() == 1) {
+                String parsedWord = pLocations.get("explicit_time").get(0).getText();
+                int position = parsePosition + input.substring(parsePosition).indexOf(parsedWord);
+                System.out.println("ERROR4: " + input + ", word: " + parsedWord + ", position: " +
+                                position);
+                input = addWordsBeforeWordAtPosition(input, position, "1/1/");
+//                input = addWordsBeforePosition(input, position, LocalDate.now().getMonthValue() + "/" + LocalDate.now().getDayOfMonth() + "/");
+//                input += " " +  LocalDate.now().getMonthValue() + "/" + LocalDate.now().getDayOfMonth();
+            }
+        }
+
+        return input;
+    }
+    
+    private String addWordsBeforeWordAtPosition(String input, int position, String words) {
+        ArrayList<String> splitInput = new ArrayList<String>(Arrays.asList(input.split(" ")));
+        
+        int i = getIndexOfWordInSplitInput(splitInput, input, position);
+        String word = splitInput.get(i);
+        
+        splitInput.set(i, words + word);
+        
+        return StringUtils.join(splitInput, ' ');
+    }
+
+    private String escapeWordAtPosition(String input, int position) {
+        ArrayList<String> splitInput = new ArrayList<String>(Arrays.asList(input.split(" ")));
+        
+        int i = getIndexOfWordInSplitInput(splitInput, input, position);
+        String word = splitInput.get(i);
+        
+        if (!isSurroundedByEscapeChars(word)) {
+            splitInput.set(i, "\"" + word + "\"");
+        }
+        
+        return StringUtils.join(splitInput, ' ');
+    }
+
+    private boolean isSurroundedByEscapeChars(String word) {
+        return word.startsWith("\"") && word.endsWith("\"");
+    }
+    
+    private int getIndexOfWordInSplitInput(ArrayList<String> splitInput,
+                                                    String input,
+                                                    int index) {
+        String word = getWordAtIndex(splitInput, index);
+        return splitInput.indexOf(word);
+    }
+
+    private String getWordAtIndex(ArrayList<String> splitInput, int index) {
+        int c = 0;
+        for (String word : splitInput) {
+            if (index >= c && index < c + word.length() + 1) {
+                return word;
+            }
+            c += word.length() + 1;
+        }
+        return null;
+    }
+    
     private String getWordsOutsideEscapeChars(String input) {
         if (StringUtils.countMatches(input, ESCAPE_CHAR + "") == 2) {
             String output = "";
@@ -147,6 +282,9 @@ public class DateParser {
                 // create new LocalDateTime objects
                 dates.add(LocalDateTime.ofInstant(d.toInstant(),
                                                   ZoneId.systemDefault()));
+            }
+            if (group.isRecurring()) {
+                dates.add(LocalDateTime.ofInstant(group.getRecursUntil().toInstant(), ZoneId.systemDefault()));
             }
             logger.log(Level.INFO, "Generated dates: " + dates);
         }

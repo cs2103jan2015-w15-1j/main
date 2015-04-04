@@ -6,6 +6,7 @@ import java.time.ZoneId;
 import java.util.*;
 
 import org.antlr.runtime.tree.Tree;
+import org.apache.commons.lang.StringUtils;
 
 import com.joestelmach.natty.*;
 
@@ -57,7 +58,7 @@ public class TestNatty {
                            "add read harry potter on 12 apr at 1200",
                            "today 2359",
                            "2359 today",
-                           "cs1231 tomorrow",
+                           "do CS 1231 tutorial by tomorrow",
                            "fries",
                            "find girlfriend in 2016",
                            "2016",
@@ -127,7 +128,7 @@ public class TestNatty {
                         int position = parsePosition + input.substring(parsePosition).indexOf(parsedWord);
                         System.out.println("ERROR5: " + input + ", word: " + parsedWord + ", position: " +
                                 position);
-                        input = escapeWordInInput(input, position);
+                        input = escapeWordAtPosition(input, position);
                     }                    
                 }
             }
@@ -147,7 +148,7 @@ public class TestNatty {
             for (ParseLocation s : pLocations.get("explicit_time")) {
                 if (s.getText().length() < 3) {
                     System.out.println("ERROR1: " + input + ", word: " + s + ", position: " + s.getStart());
-                    input = escapeWordInInput(input, s.getStart());
+                    input = escapeWordAtPosition(input, s.getStart());
                 }
             }
         }
@@ -156,7 +157,7 @@ public class TestNatty {
             for (ParseLocation s : pLocations.get("spelled_or_int_optional_prefix")) {
                 System.out.println("ERROR2: " + input + ", word: " + s + ", position: " +
                                    s.getStart());
-                input = escapeWordInInput(input, s.getStart());
+                input = escapeWordAtPosition(input, s.getStart());
             }
         }
         
@@ -165,7 +166,7 @@ public class TestNatty {
                 if (Year.parse(s.getText()).isBefore(Year.now())) {
                     System.out.println("ERROR3: " + input + ", word: " + s + ", position: " +
                             s.getStart());
-                    input = addWordsBeforePosition(input, s.getStart(), Year.now().toString() + " ");
+                    input = addWordsBeforeWordAtPosition(input, s.getStart(), Year.now().toString() + " ");
                 }
             }
         }
@@ -176,7 +177,7 @@ public class TestNatty {
                 int position = parsePosition + input.substring(parsePosition).indexOf(parsedWord);
                 System.out.println("ERROR4: " + input + ", word: " + parsedWord + ", position: " +
                                 position);
-                input = addWordsBeforePosition(input, position, "1/1/");
+                input = addWordsBeforeWordAtPosition(input, position, "1/1/");
 //                input = addWordsBeforePosition(input, position, LocalDate.now().getMonthValue() + "/" + LocalDate.now().getDayOfMonth() + "/");
 //                input += " " +  LocalDate.now().getMonthValue() + "/" + LocalDate.now().getDayOfMonth();
             }
@@ -185,43 +186,50 @@ public class TestNatty {
         return input;
     }
 
-    private static String addWordsBeforePosition(String input, int start, String words) {
+    private static String addWordsBeforeWordAtPosition(String input, int position, String words) {
         ArrayList<String> splitInput = new ArrayList<String>(Arrays.asList(input.split(" ")));
-        int c = 0;
-        String output = "";
-        for (String word : splitInput) {
-            if (start >= c && start < c + word.length() + 1) {
-                output += words + word;
-            } else {
-                output += word;
-            }
-            output += " ";
-            c += word.length() + 1;
-        }
-        System.out.println("new input: " + output.trim());
-        return output.trim();     
+        
+        int i = getIndexOfWordInSplitInput(splitInput, input, position);
+        String word = splitInput.get(i);
+        
+        splitInput.set(i, words + word);
+        
+        return StringUtils.join(splitInput, ' ');
     }
 
-    private static String escapeWordInInput(String input, int start) {
+    private static String escapeWordAtPosition(String input, int position) {
         ArrayList<String> splitInput = new ArrayList<String>(Arrays.asList(input.split(" ")));
-        int c = 0;
-        String output = "";
-        for (String word : splitInput) {
-            if (start >= c && start < c + word.length() + 1) {
-                if (word.startsWith("\"") && word.endsWith("\"")) {
-                    output += word;
-                } else {
-                    output += "\"" + word + "\"";
-                }
-            } else {
-                output += word;
-            }
-            output += " ";
-            c += word.length() + 1;
+        
+        int i = getIndexOfWordInSplitInput(splitInput, input, position);
+        String word = splitInput.get(i);
+        
+        if (!isSurroundedByEscapeChars(word)) {
+            splitInput.set(i, "\"" + word + "\"");
         }
-        System.out.println("new input: " + output.trim());
-        return output.trim();        
+        
+        return StringUtils.join(splitInput, ' ');
+    }
+
+    private static boolean isSurroundedByEscapeChars(String word) {
+        return word.startsWith("\"") && word.endsWith("\"");
     }
     
+    private static int getIndexOfWordInSplitInput(ArrayList<String> splitInput,
+                                                    String input,
+                                                    int index) {
+        String word = getWordAtIndex(splitInput, index);
+        return splitInput.indexOf(word);
+    }
+
+    private static String getWordAtIndex(ArrayList<String> splitInput, int index) {
+        int c = 0;
+        for (String word : splitInput) {
+            if (index >= c && index < c + word.length() + 1) {
+                return word;
+            }
+            c += word.length() + 1;
+        }
+        return null;
+    }
 
 }
