@@ -2,6 +2,9 @@ package main.resources.view;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+
+import org.apache.commons.lang.StringUtils;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -27,6 +30,8 @@ public class RootLayoutController extends BorderPane {
     
     private ArrayList<String> history;
     private int pointer;
+    
+    private ArrayList<String> commands; 
 
     private final String ROOT_LAYOUT_LOCATION = "/view/RootLayout.fxml";
 
@@ -42,8 +47,21 @@ public class RootLayoutController extends BorderPane {
         }
         
         initVariablesForHistory();
+        initCommands();
     }
     
+    private void initCommands() {
+        commands = new ArrayList<String>(); 
+        commands.add("add");
+        commands.add("complete");
+        commands.add("delete");
+        commands.add("display");
+        commands.add("edit");
+        commands.add("incomplete");
+        commands.add("search");
+        commands.add("undo");
+    }
+
     public void setController(Controller controller) {
         this.controller = controller;
     }
@@ -66,14 +84,31 @@ public class RootLayoutController extends BorderPane {
         } else if (event.getCode() == KeyCode.DOWN || event.getCode() == KeyCode.UP) {
             String pastCommand = getPastCommandFromHistory(event.getCode());
             userInput.setText(pastCommand);
+        } else if (event.getCode() == KeyCode.TAB) {
+            String autoCompletedCommand = getAutoCompletedCommand(userInput.getText());
+            userInput.setText(autoCompletedCommand + " ");
+            userInput.positionCaret(autoCompletedCommand.length() + 1);
         }
+    }
+
+    private String getAutoCompletedCommand(String text) {
+        ArrayList<String> splitText = new ArrayList<String>(Arrays.asList(text.split(" ")));
+        String lastWord = splitText.get(splitText.size() - 1);
+
+        for (String command : commands) {
+            if (lastWord.length() <= command.length() && command.substring(0, lastWord.length()).equals(lastWord)) {
+                splitText.set(splitText.size() - 1, command);
+                return StringUtils.join(splitText, " ");
+            }
+        }
+        return text;
     }
 
     
     // ================================================================
     // Methods to handle history of user entered commands
-    // ================================================================
-    
+    // ================================================================    
+
     private void initVariablesForHistory() {
         history = new ArrayList<String>();
         history.add("");

@@ -13,8 +13,8 @@
          <cursor>
             <Cursor fx:constant="HAND" />
          </cursor></CheckBox>
-      <Label fx:id="index" text="Index" />
-      <Label fx:id="description" text="Description" />
+      <Label fx:id="index" focusTraversable="false" text="Index" />
+      <Label fx:id="description" focusTraversable="false" text="Description" />
       <HBox nodeOrientation="LEFT_TO_RIGHT" HBox.hgrow="ALWAYS">
          <children>
             <Button fx:id="delete" alignment="TOP_RIGHT" contentDisplay="CENTER" focusTraversable="false" graphicTextGap="0.0" mnemonicParsing="false" text="X" textAlignment="CENTER">
