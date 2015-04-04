@@ -44,7 +44,6 @@ public class Controller {
     // ================================================================
     // Constants
     // ================================================================
-    private final static String TASK_OVERVIEW_LOCATION = "/view/TaskOverview.fxml";
     private static final String MESSAGE_SAVE_FILE_READY = "Welcome to main.java.Veto. %s is ready for use.";
     private static final String MESSAGE_ADD = "Task has been added: ";
     private static final String MESSAGE_DELETE = "Task has been deleted: ";
@@ -101,7 +100,7 @@ public class Controller {
         previousStatesDisplayed = new Stack<ObservableList<Task>>();
         
         // THIS FIXES THE SLOW ADDITION OF FIRST TASK
-        parser.parse("hello");
+        parser.parse("foo today");
     }
 
 
@@ -229,13 +228,16 @@ public class Controller {
     // ================================================================
 
     private String addTask(String input) {
+        if (input.isEmpty()) {
+            return MESSAGE_INVALID_COMMAND;
+        }
         parser.parse(input);
         ArrayList<LocalDateTime> parsedDates = parser.getDates();
         String parsedWords = parser.getParsedWords();
-        String nonParsedWords = parser.getNonParsedWords();
+        String notParsedWords = parser.getNotParsedWords();
 
         // Instantiate a new Task object
-        Task task = new Task(input, parsedDates, parsedWords, nonParsedWords);
+        Task task = new Task(input, parsedDates, parsedWords, notParsedWords);
 
         allTasks.add(task);
         updateStorageWithAllTasks();
@@ -322,7 +324,7 @@ public class Controller {
                 return String.format(MESSAGE_COMPLETE_FAILED, task.getDescription());
             }
             
-            task.markAsComplete();
+            task.markAsCompleted();
 
             updateStorageWithAllTasks();
 

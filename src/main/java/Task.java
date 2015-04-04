@@ -8,11 +8,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-
 import org.apache.commons.lang.StringUtils;
 
 
@@ -43,10 +38,10 @@ public class Task implements Cloneable {
         FLOATING, DEADLINE, TIMED
     };
 
-//    private static final String HEADER_DESC = "Description: ";
-//    private static final String HEADER_TIME = "Time: ";
-//    private static final String HEADER_DATE = "Deadline: ";
-//    private static final String HEADER_NOT_APPL = "Not applicable";
+    //    private static final String HEADER_DESC = "Description: ";
+    //    private static final String HEADER_TIME = "Time: ";
+    //    private static final String HEADER_DATE = "Deadline: ";
+    //    private static final String HEADER_NOT_APPL = "Not applicable";
 
     private static final char ESCAPE_CHAR = '"';
 
@@ -61,38 +56,13 @@ public class Task implements Cloneable {
     private LocalTime endTime;
     private boolean isCompleted;
 
-    // ================================================================
-    // Start of MX's edits
-    // ================================================================
-    // Methods
-    // Note: Property attributes (part of JavaFX) are created on the fly as there were problems with serialization
-
-    public StringProperty getTaskDesc() {
-        return new SimpleStringProperty(getDescription());
-    }
-
-    public ObjectProperty<LocalDate> getTaskDate() {
-        return new SimpleObjectProperty<LocalDate>(getDate());
-    }
-
-    public StringProperty getStringPropertyTaskDate() {
-        if (getDate() != null) {
-            return new SimpleStringProperty(getDate().toString());
-        } else {
-            return new SimpleStringProperty("Not Applicable");
-        }
-    }
-
-    // ================================================================
-    // End of MX's edits
-    // ================================================================
 
     public Task(String input, ArrayList<LocalDateTime> parsedDates,
-                String parsedWords, String nonParsedWords) {
+                String parsedWords, String notParsedWords) {
         markAsIncomplete();
         type = determineType(parsedDates);
         initDateAndTime(type, parsedDates);
-        description = extractDescription(input, nonParsedWords);
+        description = extractDescription(input, notParsedWords);
     }
 
     // ================================================================
@@ -124,7 +94,7 @@ public class Task implements Cloneable {
     }
 
     public boolean isOverdue() {
-    	LocalDate nowDate = LocalDate.now();
+        LocalDate nowDate = LocalDate.now();
         return getDate() != null && nowDate.isAfter(getDate());
     }
 
@@ -145,12 +115,12 @@ public class Task implements Cloneable {
         }
     }
 
-    public void markAsComplete() {
+    public void markAsCompleted() {
         isCompleted = true;
     }
 
     public void markAsIncomplete() {
-    	isCompleted = false;
+        isCompleted = false;
     }
 
     public boolean updateTypeDateTime(ArrayList<LocalDateTime> parsedDates) {
@@ -207,13 +177,18 @@ public class Task implements Cloneable {
                 break;
             case DEADLINE :
                 date = parsedDates.get(POSITION_FIRST_DATE).toLocalDate();
+                LocalTime time = parsedDates.get(POSITION_FIRST_DATE).toLocalTime();
+                if (time.getNano() == 0) {
+                    startTime = time;
+                }
                 break;
             default :
                 break;
         }
     }
 
-    private boolean updateDateAndTime(Type newType, ArrayList<LocalDateTime> parsedDates) {
+    private boolean updateDateAndTime(Type newType,
+                                      ArrayList<LocalDateTime> parsedDates) {
         // parsedDates correspond to the parsedDates of the update
         // type refers to CURRENT type
         switch (newType) {
@@ -235,14 +210,20 @@ public class Task implements Cloneable {
             case TIMED :
                 if (type.equals(Type.FLOATING)) {
                     setDate(parsedDates.get(POSITION_FIRST_DATE).toLocalDate());
-                    setStartTime(parsedDates.get(POSITION_FIRST_DATE).toLocalTime());
-                    setEndTime(parsedDates.get(POSITION_SECOND_DATE).toLocalTime());
+                    setStartTime(parsedDates.get(POSITION_FIRST_DATE)
+                                            .toLocalTime());
+                    setEndTime(parsedDates.get(POSITION_SECOND_DATE)
+                                          .toLocalTime());
                 } else if (type.equals(Type.DEADLINE)) {
-                    setStartTime(parsedDates.get(POSITION_FIRST_DATE).toLocalTime());
-                    setEndTime(parsedDates.get(POSITION_SECOND_DATE).toLocalTime());
+                    setStartTime(parsedDates.get(POSITION_FIRST_DATE)
+                                            .toLocalTime());
+                    setEndTime(parsedDates.get(POSITION_SECOND_DATE)
+                                          .toLocalTime());
                 } else { // current: TIMED
-                    setStartTime(parsedDates.get(POSITION_FIRST_DATE).toLocalTime());
-                    setEndTime(parsedDates.get(POSITION_SECOND_DATE).toLocalTime());
+                    setStartTime(parsedDates.get(POSITION_FIRST_DATE)
+                                            .toLocalTime());
+                    setEndTime(parsedDates.get(POSITION_SECOND_DATE)
+                                          .toLocalTime());
                 }
                 break;
             default :
@@ -255,16 +236,18 @@ public class Task implements Cloneable {
     /**
      * Get the description of the task
      *
-     * @param input - user's raw input
-     * @param nonParsedWords - words that were used to obtain the dates from user input
+     * @param input
+     *            - user's raw input
+     * @param notParsedWords
+     *            - words that were used to obtain the dates from user input
      * @return description
      */
-    private String extractDescription(String input, String nonParsedWords) {
+    private String extractDescription(String input, String notParsedWords) {
         if (hasTwoEscapeChars(input)) {
             return getWordsWithinEscapeChars(input);
         } else {
             // convert input arguments to string arrays
-            String[] wordArr = nonParsedWords.split(" ");
+            String[] wordArr = notParsedWords.split(" ");
 
             // convert input string array to arraylist of strings
             ArrayList<String> wordArrayList = new ArrayList<String>(Arrays.asList(wordArr));
@@ -279,8 +262,8 @@ public class Task implements Cloneable {
 
             Collections.reverse(wordArrayList);
 
-            String description = stringFormatter(wordArrayList);
-//            return description;
+            String description = StringUtils.join(wordArrayList, ' ');
+            //            return description;
             return description.replace("\"", "");
         }
     }
@@ -311,39 +294,48 @@ public class Task implements Cloneable {
         return output;
     }
 
-    // Format the elements in the ArrayList to one single string
-    private String stringFormatter(ArrayList<String> strList) {
-        String result = "";
-        for (String word : strList) {
-            result += word + " ";
-        }
-        return result.trim();
+    @Override
+    public String toString() {
+        String result = getDescription();
+        result += addFormattedDate();
+        result += addFormattedTime();
+        return result;
     }
 
-    public String toString() {
-//        String result = HEADER_DESC + getDescription() +"\n";
-//        if (getDate() == null) {
-//            result += HEADER_DATE + HEADER_NOT_APPL + "\n";
-//        } else {
-//            result += HEADER_DATE + getDate() + "\n";
-//        }
-//        if (getStartTime() == null || getEndTime() == null) {
-//            result += HEADER_TIME + HEADER_NOT_APPL + "\n\n";
-//        } else {
-//            result += HEADER_TIME + getStartTime() + " to " + getEndTime() + "\n\n";
-//        }
+    public String toString(boolean withoutDate) {
         String result = getDescription();
-//        String result = Character.toUpperCase(getDescription().charAt(0)) + getDescription().substring(1);
-        if (getDate() != null) {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, d MMMM y");
-            // javadoc reference: http://goo.gl/GCyd5E
-            result += " on " + getDate().format(formatter);
-        }
-        if (getStartTime() != null) {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("h.mma");
-            result += " from " + getStartTime().format(formatter) + " to " + getEndTime().format(formatter);
+        if (withoutDate) {
+            result += addFormattedTime();
+        } else {
+            this.toString();
         }
         return result;
+    }
+
+    private String addFormattedTime() {
+        // formats the time for the time label, eg 2:00PM to 4:00PM
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("h.mma");
+        LocalTime startTime = getStartTime();
+        LocalTime endTime = getEndTime();
+        if (startTime != null) {
+            if (endTime != null) {
+                return " from " +
+                       startTime.format(timeFormatter).toLowerCase() + " to " +
+                       endTime.format(timeFormatter).toLowerCase();
+            } else {
+                return " by " + startTime.format(timeFormatter).toLowerCase();
+            }
+        }
+        return "";
+    }
+
+    private String addFormattedDate() {
+        // javadoc reference: http://goo.gl/GCyd5E
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("EEEE, d MMMM y");
+        if (getDate() != null) {
+            return " on " + getDate().format(dateFormatter);
+        }
+        return "";
     }
 
     @Override
