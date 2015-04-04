@@ -219,9 +219,6 @@ public class Display extends VBox {
         // formats the date for the date label, eg. 1 April
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d MMMM");
 
-        // formats the time for the time label, eg 2:00PM to 4:00PM
-        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("h:mma");
-
         for (LocalDate day : days) {
             CategoryBox label = generateDayLabel(now,
                                                  dayFormatter,

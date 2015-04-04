@@ -61,31 +61,7 @@ public class Task implements Cloneable {
     private LocalTime endTime;
     private boolean isCompleted;
 
-    // ================================================================
-    // Start of MX's edits
-    // ================================================================
-    // Methods
-    // Note: Property attributes (part of JavaFX) are created on the fly as there were problems with serialization
 
-    public StringProperty getTaskDesc() {
-        return new SimpleStringProperty(getDescription());
-    }
-
-    public ObjectProperty<LocalDate> getTaskDate() {
-        return new SimpleObjectProperty<LocalDate>(getDate());
-    }
-
-    public StringProperty getStringPropertyTaskDate() {
-        if (getDate() != null) {
-            return new SimpleStringProperty(getDate().toString());
-        } else {
-            return new SimpleStringProperty("Not Applicable");
-        }
-    }
-
-    // ================================================================
-    // End of MX's edits
-    // ================================================================
 
     public Task(String input, ArrayList<LocalDateTime> parsedDates,
                 String parsedWords, String notParsedWords) {
@@ -329,7 +305,18 @@ public class Task implements Cloneable {
         return result;
     }
     
+    public String toString(boolean withoutDate) {
+        String result = getDescription();
+        if (withoutDate) {
+            result += addFormattedTime();
+        } else {
+            this.toString();
+        }
+        return result;
+    }
+    
     private String addFormattedTime() {
+        // formats the time for the time label, eg 2:00PM to 4:00PM
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("h.mma");
         LocalTime startTime = getStartTime();
         LocalTime endTime = getEndTime();
@@ -350,16 +337,6 @@ public class Task implements Cloneable {
             return " on " + getDate().format(dateFormatter);
         }
         return "";
-    }
-
-    public String toString(boolean withoutDate) {
-        String result = getDescription();
-        if (withoutDate) {
-            result += addFormattedTime();
-        } else {
-            this.toString();
-        }
-        return result;
     }
 
     @Override

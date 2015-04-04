@@ -101,7 +101,7 @@ public class Controller {
         previousStatesDisplayed = new Stack<ObservableList<Task>>();
         
         // THIS FIXES THE SLOW ADDITION OF FIRST TASK
-        parser.parse("hello");
+        parser.parse("foo today");
     }
 
 
