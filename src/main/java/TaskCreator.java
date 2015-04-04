@@ -63,6 +63,7 @@ public class TaskCreator {
 
         if (type != null) {
             recurDate = new ArrayList<LocalDateTime>(findRecurDates(input));
+            getEndDateTime(recurDate);
             switch (type) {
             case YEARLY:
                 createYearly(input, parsedWords, nonParsedWords, recurDate,
@@ -122,11 +123,7 @@ public class TaskCreator {
         return result;
     }
 
-    private void createDaily(String input, String parsedWords,
-            String nonParsedWords, ArrayList<LocalDateTime> recurDate,
-            String recurID) {
-        Task task;
-
+    private void getEndDateTime(ArrayList<LocalDateTime> recurDate) {
         if (endDateTime == null) {
             if (recurDate.size() > 1
                     && !recurDate.get(recurDate.size() - 1).toLocalDate()
@@ -136,6 +133,12 @@ public class TaskCreator {
                 endDateTime = limit;
             }
         }
+    }
+
+    private void createDaily(String input, String parsedWords,
+            String nonParsedWords, ArrayList<LocalDateTime> recurDate,
+            String recurID) {
+        Task task;
 
         while (!recurDate.get(0).isAfter(endDateTime)) {
             task = new Task(input, recurDate, parsedWords, nonParsedWords);
@@ -151,16 +154,6 @@ public class TaskCreator {
             String recurID) {
         Task task;
 
-        if (endDateTime == null) {
-            if (recurDate.size() > 1
-                    && !recurDate.get(recurDate.size() - 1).toLocalDate()
-                            .isEqual(recurDate.get(0).toLocalDate())) {
-                endDateTime = recurDate.get(recurDate.size() - 1);
-            } else {
-                endDateTime = limit;
-            }
-        }
-
         while (!recurDate.get(0).isAfter(endDateTime)) {
             task = new Task(input, recurDate, parsedWords, nonParsedWords);
             task.setID(recurID);
@@ -174,16 +167,6 @@ public class TaskCreator {
             String nonParsedWords, ArrayList<LocalDateTime> recurDate,
             String recurID) {
         Task task;
-
-        if (endDateTime == null) {
-            if (recurDate.size() > 1
-                    && !recurDate.get(recurDate.size() - 1).toLocalDate()
-                            .isEqual(recurDate.get(0).toLocalDate())) {
-                endDateTime = recurDate.get(recurDate.size() - 1);
-            } else {
-                endDateTime = limit;
-            }
-        }
 
         while (!recurDate.get(0).isAfter(endDateTime)) {
             task = new Task(input, recurDate, parsedWords, nonParsedWords);
@@ -200,16 +183,6 @@ public class TaskCreator {
             String nonParsedWords, ArrayList<LocalDateTime> recurDate,
             String recurID) {
         Task task;
-
-        if (endDateTime == null) {
-            if (recurDate.size() > 1
-                    && !recurDate.get(recurDate.size() - 1).toLocalDate()
-                            .isEqual(recurDate.get(0).toLocalDate())) {
-                endDateTime = recurDate.get(recurDate.size() - 1);
-            } else {
-                endDateTime = limit;
-            }
-        }
 
         while (!recurDate.get(0).isAfter(endDateTime)) {
             task = new Task(input, recurDate, parsedWords, nonParsedWords);
