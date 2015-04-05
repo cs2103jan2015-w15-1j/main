@@ -133,32 +133,14 @@ public class Task implements Cloneable {
         isCompleted = false;
     }
 
-    public boolean updateTypeDateTime(ArrayList<LocalDateTime> parsedDates) {
-        return updateDateAndTime(determineType(parsedDates), parsedDates);
-    }
+    public void update(String input, ArrayList<LocalDateTime> parsedDates,
+                          String parsedWords, String notParsedWords) {
+        type = determineType(parsedDates);
+        initDateAndTime(type, parsedDates);
+        // substring to get rid of the index being part of description
+        description = extractDescription(input, notParsedWords).substring(2);
 
-    // ================================================================
-    // Private setters
-    // ================================================================
-
-    private void setDate(LocalDate date) {
-        this.date = date;
-    }
-
-    private void setType(Type type) {
-        this.type = type;
-    }
-
-    private void setIsCompleted(Boolean isCompleted) {
-        this.isCompleted = isCompleted;
-    }
-
-    private void setStartTime(LocalTime startTime) {
-        this.startTime = startTime;
-    }
-
-    private void setEndTime(LocalTime endTime) {
-        this.endTime = endTime;
+        updateAll(description, determineType(parsedDates), parsedDates);
     }
 
     // ================================================================
@@ -197,44 +179,69 @@ public class Task implements Cloneable {
         }
     }
 
-    private boolean updateDateAndTime(Type newType,
-            ArrayList<LocalDateTime> parsedDates) {
-        // parsedDates correspond to the parsedDates of the update
-        // type refers to CURRENT type
-        switch (newType) {
-        case FLOATING:
-            setDate(null);
-            setStartTime(null);
-            setEndTime(null);
-            break;
-        case DEADLINE:
-            if (type.equals(Type.FLOATING)) {
-                setDate(parsedDates.get(POSITION_FIRST_DATE).toLocalDate());
-            } else if (type.equals(Type.DEADLINE)) {
-                setDate(parsedDates.get(POSITION_FIRST_DATE).toLocalDate());
-            } else { // current: TIMED
-                setDate(parsedDates.get(POSITION_FIRST_DATE).toLocalDate());
-                return true;
-            }
-            break;
-        case TIMED:
-            if (type.equals(Type.FLOATING)) {
-                setDate(parsedDates.get(POSITION_FIRST_DATE).toLocalDate());
-                setStartTime(parsedDates.get(POSITION_FIRST_DATE).toLocalTime());
-                setEndTime(parsedDates.get(POSITION_SECOND_DATE).toLocalTime());
-            } else if (type.equals(Type.DEADLINE)) {
-                setStartTime(parsedDates.get(POSITION_FIRST_DATE).toLocalTime());
-                setEndTime(parsedDates.get(POSITION_SECOND_DATE).toLocalTime());
-            } else { // current: TIMED
-                setStartTime(parsedDates.get(POSITION_FIRST_DATE).toLocalTime());
-                setEndTime(parsedDates.get(POSITION_SECOND_DATE).toLocalTime());
-            }
-            break;
-        default:
-            break;
-        }
+    private void unsetAllProperties() {
+        setType(null);
+        setDescription(null);
+        setDate(null);
+        setTime(null, null);
+    }
+
+    private void updateAll(String newDesc, Type newType,
+                              ArrayList<LocalDateTime> parsedDates) {
+
+        unsetAllProperties();
+        setDescription(newDesc);
         setType(newType);
-        return true;
+
+        switch (newType) {
+            case FLOATING :
+                break;
+            case DEADLINE :
+                setDate(parsedDates.get(POSITION_FIRST_DATE).toLocalDate());
+                break;
+            case TIMED :
+                setDate(parsedDates.get(POSITION_FIRST_DATE).toLocalDate());
+                setStartTime(parsedDates.get(POSITION_FIRST_DATE).toLocalTime());
+                setEndTime(parsedDates.get(POSITION_SECOND_DATE).toLocalTime());
+        }
+
+        // KEPT FOR THE MOMENT IN CASE THERE ARE CHANGES TO EDIT AGAIN
+//        // parsedDates correspond to the parsedDates of the update
+//        // type refers to CURRENT type
+//        switch (newType) {
+//        case FLOATING:
+//            setDate(null);
+//            setStartTime(null);
+//            setEndTime(null);
+//            break;
+//        case DEADLINE:
+//            if (type.equals(Type.FLOATING)) {
+//                setDate(parsedDates.get(POSITION_FIRST_DATE).toLocalDate());
+//            } else if (type.equals(Type.DEADLINE)) {
+//                setDate(parsedDates.get(POSITION_FIRST_DATE).toLocalDate());
+//            } else { // current: TIMED
+//                setDate(parsedDates.get(POSITION_FIRST_DATE).toLocalDate());
+//                return true;
+//            }
+//            break;
+//        case TIMED:
+//            if (type.equals(Type.FLOATING)) {
+//                setDate(parsedDates.get(POSITION_FIRST_DATE).toLocalDate());
+//                setStartTime(parsedDates.get(POSITION_FIRST_DATE).toLocalTime());
+//                setEndTime(parsedDates.get(POSITION_SECOND_DATE).toLocalTime());
+//            } else if (type.equals(Type.DEADLINE)) {
+//                setStartTime(parsedDates.get(POSITION_FIRST_DATE).toLocalTime());
+//                setEndTime(parsedDates.get(POSITION_SECOND_DATE).toLocalTime());
+//            } else { // current: TIMED
+//                setStartTime(parsedDates.get(POSITION_FIRST_DATE).toLocalTime());
+//                setEndTime(parsedDates.get(POSITION_SECOND_DATE).toLocalTime());
+//            }
+//            break;
+//        default:
+//            break;
+//        }
+//        setType(newType);
+//        return true;
     }
 
     /**
@@ -268,6 +275,30 @@ public class Task implements Cloneable {
             // return description;
             return description.replace("\"", "");
         }
+    }
+
+    // ================================================================
+    // Private setters
+    // ================================================================
+
+    private void setDate(LocalDate date) {
+        this.date = date;
+    }
+
+    private void setType(Type type) {
+        this.type = type;
+    }
+
+    private void setIsCompleted(Boolean isCompleted) {
+        this.isCompleted = isCompleted;
+    }
+
+    private void setStartTime(LocalTime startTime) {
+        this.startTime = startTime;
+    }
+
+    private void setEndTime(LocalTime endTime) {
+        this.endTime = endTime;
     }
 
     // ================================================================

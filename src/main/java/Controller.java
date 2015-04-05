@@ -282,22 +282,6 @@ public class Controller {
 //        }
     }
 
-    private String deleteTask(String input) {
-        // ArrayList is 0-indexed, but Tasks are displayed to users as 1-indexed
-        try {
-            int removalIndex = Integer.parseInt(input) - 1;
-            Task task = displayedTasks.get(removalIndex);
-            displayedTasks.remove(task);
-            allTasks.remove(task);
-            
-            updateStorageWithAllTasks();
-
-            return null;
-        } catch (Exception e) {
-            return MESSAGE_INVALID_COMMAND;
-        }
-    }
-
     /**
      *
      * Current implementation of Edit:
@@ -319,37 +303,62 @@ public class Controller {
         } catch (Exception e) {
             return MESSAGE_INVALID_COMMAND;
         }
-        String editType = inputArray[1];
 
-        StringBuilder editArgument = new StringBuilder();
-        // format: edit 1 deadline /desc ..., so 2 is the arg's starting word
-        for (int i = 2; i < inputArray.length; i++) {
-            editArgument.append(inputArray[i] + " ");
-        }
+        Task task = displayedTasks.get(editIndex);
+
+        parser.parse(input);
+        ArrayList<LocalDateTime> parsedDates = parser.getDates();
+        String parsedWords = parser.getParsedWords();
+        String notParsedWords = parser.getNotParsedWords();
+
+        task.update(input, parsedDates, parsedWords, notParsedWords);
+
+//        String editType = inputArray[1];
+//        StringBuilder editArgument = new StringBuilder();
+//        // format: edit 1 deadline /desc ..., so 2 is the arg's starting word
+//        for (int i = 2; i < inputArray.length; i++) {
+//            editArgument.append(inputArray[i] + " ");
+//        }
 
         // Filter for edit Description or Deadline
+//        try {
+//            Task task = displayedTasks.get(editIndex);
+//            if (editType.equals("d") || editType.equals("de")) {
+//                return MESSAGE_INVALID_COMMAND;
+//            } else if ("description".contains(editType)) {
+//                task.setDescription(editArgument.toString());
+//            } else if ("deadline".contains(editType)) {
+//                parser.parse(input);
+//                ArrayList<LocalDateTime> parsedDates = parser.getDates();
+//                if (!task.updateTypeDateTime(parsedDates)) {
+//                    return MESSAGE_EDIT_FAILED;
+//                }
+//            } else {
+//                return MESSAGE_INVALID_COMMAND;
+//            }
+//            updateStorageWithAllTasks();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return MESSAGE_INVALID_COMMAND;
+//        }
+        return MESSAGE_EDIT;
+    }
+
+
+    private String deleteTask(String input) {
+        // ArrayList is 0-indexed, but Tasks are displayed to users as 1-indexed
         try {
-            Task task = displayedTasks.get(editIndex);
-            if (editType.equals("d") || editType.equals("de")) {
-                return MESSAGE_INVALID_COMMAND;
-            } else if ("description".contains(editType)) {
-                task.setDescription(editArgument.toString());
-            } else if ("deadline".contains(editType)) {
-                parser.parse(input);
-                ArrayList<LocalDateTime> parsedDates = parser.getDates();
-                if (!task.updateTypeDateTime(parsedDates)) {
-                    return MESSAGE_EDIT_FAILED;
-                }
-            } else {
-                return MESSAGE_INVALID_COMMAND;
-            }
+            int removalIndex = Integer.parseInt(input) - 1;
+            Task task = displayedTasks.get(removalIndex);
+            displayedTasks.remove(task);
+            allTasks.remove(task);
+
             updateStorageWithAllTasks();
+
+            return null;
         } catch (Exception e) {
-            e.printStackTrace();
             return MESSAGE_INVALID_COMMAND;
         }
-
-        return MESSAGE_EDIT;
     }
 
     private String completeTask(String input) {
