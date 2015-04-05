@@ -25,7 +25,7 @@ public class UserDefinedSortTest {
 		dp.parse(input);
 	    parsedDates = dp.getDates();
 	    parsedWords = dp.getParsedWords();
-	    nonParsedWords = dp.getNonParsedWords();
+	    nonParsedWords = dp.getNotParsedWords();
 	    return new Task(input, parsedDates, parsedWords, nonParsedWords);
 	}
 
@@ -127,7 +127,7 @@ public class UserDefinedSortTest {
 		Task taskFloating = createTask("do homework");
 
 	    // Make 1 task completed
-	    taskTimed.markAsComplete();
+	    taskTimed.markAsCompleted();
 	    
 	    list.add(taskTimed);
 	    list.add(taskDeadline);
@@ -170,12 +170,12 @@ public class UserDefinedSortTest {
 		Task taskDeadline5 = createTask("do something tomorrow");
 		Task taskFloating5 = createTask("do shit");
 		
-		taskTimed2.markAsComplete();
-		taskDeadline1.markAsComplete();
-		taskFloating5.markAsComplete();
-		taskFloating4.markAsComplete();
-		taskDeadline3.markAsComplete();
-		taskTimed5.markAsComplete();
+		taskTimed2.markAsCompleted();
+		taskDeadline1.markAsCompleted();
+		taskFloating5.markAsCompleted();
+		taskFloating4.markAsCompleted();
+		taskDeadline3.markAsCompleted();
+		taskTimed5.markAsCompleted();
 		
 		list.add(taskTimed1);        // do homework 2pm to 3pm 3 days later
 	    list.add(taskDeadline1);     // buy milk tomorrow (COMPLETED)

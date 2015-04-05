@@ -23,10 +23,10 @@ public class TaskTest {
         String text = "attend meeting later today";
         Task testingTask = createNewTask(text);
         assertEquals("attend meeting later", testingTask.getDescription());
-        assertEquals("2015-03-25", testingTask.getDate().toString());
+        assertEquals("2015-04-04", testingTask.getDate().toString());
         assertEquals(null, testingTask.getStartTime());
         assertFalse(testingTask.isCompleted());
-        testingTask.markAsComplete();
+        testingTask.markAsCompleted();
         assertTrue(testingTask.isCompleted());
     }
 
@@ -40,7 +40,7 @@ public class TaskTest {
         assertEquals("12:00", testingTask.getStartTime().toString());
         assertEquals("14:00", testingTask.getEndTime().toString());
         assertFalse(testingTask.isCompleted());
-        testingTask.markAsComplete();
+        testingTask.markAsCompleted();
         assertTrue(testingTask.isCompleted());
     }
 
@@ -53,7 +53,7 @@ public class TaskTest {
         assertEquals(2, testingTask.getDate().getMonthValue());
         assertEquals(null, testingTask.getStartTime());
         assertFalse(testingTask.isCompleted());
-        testingTask.markAsComplete();
+        testingTask.markAsCompleted();
         assertTrue(testingTask.isCompleted());
     }
 
@@ -93,7 +93,7 @@ public class TaskTest {
         parser.parse(input);
         ArrayList<LocalDateTime> parsedDates = parser.getDates();
         String parsedWords = parser.getParsedWords();
-        String nonParsedWords = parser.getNonParsedWords();
+        String nonParsedWords = parser.getNotParsedWords();
         return new Task(input, parsedDates, parsedWords, nonParsedWords);
     }
 }

@@ -1,25 +1,22 @@
 package main.resources.view;
 
-import javafx.animation.FadeTransition;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+
+import org.apache.commons.lang.StringUtils;
+
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
-import javafx.util.Duration;
 import main.java.Controller;
 import main.java.Task;
 
-import java.io.IOException;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 
 public class RootLayoutController extends BorderPane {
 
@@ -32,11 +29,13 @@ public class RootLayoutController extends BorderPane {
     // ================================================================
     // Non-FXML Fields
     // ================================================================
-    private Display display;
+
     private Controller controller;
     
     private ArrayList<String> history;
     private int pointer;
+    
+    private ArrayList<String> commands; 
 
     private final String ROOT_LAYOUT_LOCATION = "/view/RootLayout.fxml";
     private final String WELCOME_INPUT = "Enter your task here";
@@ -63,13 +62,26 @@ public class RootLayoutController extends BorderPane {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        
-        history = new ArrayList<String>();
-        history.add(EMPTY_STRING);
-        history.add(EMPTY_STRING);
-        pointer = history.size() - 1;
 
+        initVariablesForHistory();
+        initCommands();
         userInput.setText(WELCOME_INPUT);
+    }
+    
+    private void initCommands() {
+        commands = new ArrayList<String>(); 
+        commands.add("add");
+        commands.add("complete");
+        commands.add("delete");
+        commands.add("display");
+        commands.add("edit");
+        commands.add("incomplete");
+        commands.add("search");
+        commands.add("undo");
+    }
+
+    public void setController(Controller controller) {
+        this.controller = controller;
     }
 
     // ================================================================
@@ -80,30 +92,58 @@ public class RootLayoutController extends BorderPane {
         if (event.getCode() == KeyCode.SPACE) {
             listenForEdit(event);
         } else if (event.getCode() == KeyCode.ENTER) {
-            String feedback = controller.executeCommand(userInput.getText());
-//            System.out.println(userInput.getText());
-            pointer = history.size();
-            history.add(pointer - 1, userInput.getText());
-            userInput.setText(EMPTY_STRING);
-        } else if (event.getCode() == KeyCode.DOWN) {
-            if (pointer < history.size() - 1) {
-                pointer++;
-                userInput.setText(history.get(pointer));
-            } else {
-                userInput.setText(EMPTY_STRING);
-            }
-//            System.out.println("down " + pointer);
-        } else if (event.getCode() == KeyCode.UP) {
-            if (pointer > 0) {
-                pointer--;
-            }
-//            System.out.println("up " + pointer);
-            userInput.setText(history.get(pointer));
+            controller.executeCommand(userInput.getText());
+            updateHistory();
+            userInput.setText("");          
+        } else if (event.getCode() == KeyCode.DOWN || event.getCode() == KeyCode.UP) {
+            String pastCommand = getPastCommandFromHistory(event.getCode());
+            userInput.setText(pastCommand);
+        } else if (event.getCode() == KeyCode.TAB) {
+            String autoCompletedCommand = getAutoCompletedCommand(userInput.getText());
+            userInput.setText(autoCompletedCommand + " ");
+            userInput.positionCaret(autoCompletedCommand.length() + 1);
         }
     }
 
-    public void setController(Controller controller) {
-        this.controller = controller;
+    private String getAutoCompletedCommand(String text) {
+        ArrayList<String> splitText = new ArrayList<String>(Arrays.asList(text.split(" ")));
+        String lastWord = splitText.get(splitText.size() - 1);
+
+        for (String command : commands) {
+            if (lastWord.length() <= command.length() && command.substring(0, lastWord.length()).equals(lastWord)) {
+                splitText.set(splitText.size() - 1, command);
+                return StringUtils.join(splitText, " ");
+            }
+        }
+        return text;
+    }
+
+    
+    // ================================================================
+    // Methods to handle history of user entered commands
+    // ================================================================    
+
+    private void initVariablesForHistory() {
+        history = new ArrayList<String>();
+        history.add("");
+        history.add("");
+        pointer = history.size() - 1;
+    }
+
+    private String getPastCommandFromHistory(KeyCode code) {
+        String command = "";
+        if (code == KeyCode.DOWN) {
+            if (pointer < history.size() - 1) {
+                pointer++;
+                command = history.get(pointer);
+            }
+        } else if (code == KeyCode.UP) {
+            if (pointer > 0) {
+                pointer--;
+            }
+            command = history.get(pointer);
+        }
+        return command;
     }
 
     // ================================================================
@@ -164,6 +204,13 @@ public class RootLayoutController extends BorderPane {
             }
             userInput.end();
         }
+    }
+
+
+
+    private void updateHistory() {
+        pointer = history.size();
+        history.add(pointer - 1, userInput.getText());
     }
 
 

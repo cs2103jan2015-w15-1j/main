@@ -154,7 +154,7 @@ public class StorageTest {
             parser.parse(string);
             ArrayList<LocalDateTime> parsedDates = parser.getDates();
             String parsedWords = parser.getParsedWords();
-            String nonParsedWords = parser.getNonParsedWords();
+            String nonParsedWords = parser.getNotParsedWords();
             tempData.add(new Task(string, parsedDates, parsedWords, nonParsedWords));
         }
     }

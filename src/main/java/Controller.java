@@ -32,6 +32,7 @@ public class Controller {
 
     private String searchArgument;
     private DateParser parser;
+    private CreateTask taskCreator;
 
     private boolean switchDisplay = false;
     
@@ -44,10 +45,11 @@ public class Controller {
     // ================================================================
     // Constants
     // ================================================================
-    private final static String TASK_OVERVIEW_LOCATION = "/view/TaskOverview.fxml";
     private static final String MESSAGE_SAVE_FILE_READY = "Welcome to main.java.Veto. %s is ready for use.";
-    private static final String MESSAGE_ADD = "Task has been added: ";
-    private static final String MESSAGE_DELETE = "Task has been deleted: ";
+    private static final String MESSAGE_EMPTY = "There is currently no task.\n";
+    private static final String MESSAGE_ADD = "Task has been successfully added:\n     Description: %s\n     Deadline: %s\n     Time: %s\n";
+    private static final String MESSAGE_NOT_APPL = "Not applicable";
+    private static final String MESSAGE_DELETE = "Task has been successfully deleted:\n Description: %s \n";
     private static final String MESSAGE_EDIT = "Task has been successfully edited.\n";
     private static final String MESSAGE_EDIT_FAILED = "Task could not be edited.\n";
     private static final String MESSAGE_COMPLETE = "\"%s\" completed. \n";
@@ -58,15 +60,15 @@ public class Controller {
     private static final String MESSAGE_INVALID_COMMAND = "Invalid command. \n";
     private static final String MESSAGE_NO_UNDO = "Already at oldest change, unable to undo. \n";
     
-    private static final String HELP_ADD = "Add a task  -  add <arguments>";
-    private static final String HELP_EDIT = "Edit a task  -  edit <index> <desc/dead> <arguments>";
-    private static final String HELP_DELETE = "Delete a task  -  delete <index>";
-    private static final String HELP_COMPLETE = "Mark a task as complete  -  complete <index>";
-    private static final String HELP_INCOMPLETE = "Mark a task as incomplete  -  incomplete <index>";
-    private static final String HELP_UNDO = "Undo previous action  -  undo";
-    private static final String HELP_SET_SAVE_LOCATION = "Change save directory  -  set <directory>";
-    private static final String HELP_SEARCH = "Search for a task  -  search <keyworrd/date>";
-    private static final String HELP_EXIT = "Exit Veto  -  exit";
+    private static final String HELP_ADD = "Add a task  ---------------------------------------------  add <arguments>";
+    private static final String HELP_EDIT = "Edit a task  ---------------------  edit <index> <desc/dead> <arguments>";
+    private static final String HELP_DELETE = "Delete a task  ----------------------------------------------  delete <index>";
+    private static final String HELP_COMPLETE = "Mark a task as complete  -----------------------------  complete <index>";
+    private static final String HELP_INCOMPLETE = "Mark a task as incomplete  -------------------------  incomplete <index>";
+    private static final String HELP_UNDO = "Undo previous action  ----------------------------------------------  undo";
+    private static final String HELP_SET_SAVE_LOCATION = "Change save directory  -----------------------------------  set <directory>";
+    private static final String HELP_SEARCH = "Search for a task  -------------------------------  search <keyword/date>";
+    private static final String HELP_EXIT = "Exit Veto  -------------------------------------------------------------  exit";
 
     // ================================================================
     // Constructor
@@ -85,6 +87,7 @@ public class Controller {
     private Controller() {
         parser = DateParser.getInstance();
         storage = Storage.getInstance();
+        taskCreator = CreateTask.getInstance();
         saveFileName = storage.getSaveFileName();
 
         allTasks = storage.readFile();
@@ -101,8 +104,7 @@ public class Controller {
         previousStatesDisplayed = new Stack<ObservableList<Task>>();
         
         // THIS FIXES THE SLOW ADDITION OF FIRST TASK
-        // SO HACKISH!
-        parser.parse("hello");
+        parser.parse("foo today");
     }
 
 
@@ -125,6 +127,8 @@ public class Controller {
         Command.Type commandType = currentCommand.getCommandType();
         String arguments = currentCommand.getArguments();
         String feedback = "";
+        
+        boolean helpUser = false;
 
         switch (commandType) {
         	case SETSAVEFILE:
@@ -150,11 +154,11 @@ public class Controller {
 	            updateState();
 	            feedback = completeTask(arguments);
 	            break;
-	        case INCOMPLETE:  // NOT TESTED YET
+	        case INCOMPLETE:
 	            updateState();
                 feedback = incompleteTask(arguments);
 	            break;
-	        case UNDO:  // BUGGED
+	        case UNDO:  // DONE
 	            feedback = undo();
 	            break;
 	        case SEARCH:  // DONE
@@ -166,20 +170,26 @@ public class Controller {
 	        	updateState();
 	        	clear();
 	        	break;
-	        case INVALID:  // DONE
+	        case INVALID:
 	            feedback =  invalid();
 	            break;
 	        case HELP:
-	        	// TODO - Make a window pop out to show how to use the commands
+	        	helpUser = true;
 	        	break;
 	        case EXIT:  // DONE
 	            timeToExit = true;
 	            feedback =  exit();
                 stage.close();
 	            break;
+	        default:
+	            break;
+
         }
         sortAllTasks();
-        if (switchDisplay) {
+        
+        if (helpUser) {
+        	updateHelpDisplay();
+        } else if (switchDisplay) {
             updateDisplaySearch();
         } else {
             updateDisplayWithDefault();
@@ -187,7 +197,6 @@ public class Controller {
         
         display.setFeedback(feedback);
         // just so I have something to return, will remove once the whole switch case is done
-        // added feedback so that it still returns the previous returns values from the methods -CK
         return feedback;
     }
 
@@ -239,18 +248,38 @@ public class Controller {
     // ================================================================
 
     private String addTask(String input) {
+        if (input.isEmpty()) {
+            return MESSAGE_INVALID_COMMAND;
+        }
         parser.parse(input);
         ArrayList<LocalDateTime> parsedDates = parser.getDates();
         String parsedWords = parser.getParsedWords();
-        String nonParsedWords = parser.getNonParsedWords();
+        String notParsedWords = parser.getNotParsedWords();
+        ArrayList<Task> newTask = new ArrayList<Task>();
 
         // Instantiate a new Task object
-        Task task = new Task(input, parsedDates, parsedWords, nonParsedWords);
+        newTask = taskCreator.create(input, parsedDates, parsedWords, notParsedWords);
+//        Task task = new Task(input, parsedDates, parsedWords, nonParsedWords);
 
-        allTasks.add(task);
+//        allTasks.add(task);
+        Task task = newTask.get(0);
+        allTasks.addAll(newTask);
         updateStorageWithAllTasks();
-
-        return MESSAGE_ADD + task.toString();
+        
+        return "Task has been added: " + task.toString();
+        
+//        if (task.getType() == Task.Type.FLOATING) {
+//            return String.format(MESSAGE_ADD, task.getDescription(),
+//                    MESSAGE_NOT_APPL, MESSAGE_NOT_APPL);
+//        } else if (task.getType() == Task.Type.DEADLINE) {
+//            return String.format(MESSAGE_ADD, task.getDescription(),
+//                    task.getDate(), MESSAGE_NOT_APPL);
+//        } else {
+//            String formattedTime = task.getStartTime() + " to "
+//                    + task.getEndTime();
+//            return String.format(MESSAGE_ADD, task.getDescription(),
+//                    task.getDate(), formattedTime);
+//        }
     }
 
     private String deleteTask(String input) {
@@ -263,7 +292,7 @@ public class Controller {
             
             updateStorageWithAllTasks();
 
-            return MESSAGE_DELETE + task.toString();
+            return null;
         } catch (Exception e) {
             return MESSAGE_INVALID_COMMAND;
         }
@@ -332,7 +361,7 @@ public class Controller {
                 return String.format(MESSAGE_COMPLETE_FAILED, task.getDescription());
             }
             
-            task.markAsComplete();
+            task.markAsCompleted();
 
             updateStorageWithAllTasks();
 
@@ -428,6 +457,20 @@ public class Controller {
     	sortSearchedTasks();
         display.updateSearchDisplay(displayedTasks, searchArgument);
     }
+    
+    private void updateHelpDisplay() {
+    	ObservableList<String> list = FXCollections.observableArrayList();
+    	list.add(HELP_ADD);
+    	list.add(HELP_EDIT);
+    	list.add(HELP_DELETE);
+    	list.add(HELP_COMPLETE);
+    	list.add(HELP_INCOMPLETE);
+    	list.add(HELP_UNDO);
+    	list.add(HELP_SET_SAVE_LOCATION);
+    	list.add(HELP_SEARCH);
+    	list.add(HELP_EXIT);
+    	display.updateHelpDisplay(list);
+;    }
 
     private void sortAllTasks() {
     	uds = new UserDefinedSort(allTasks);
@@ -495,6 +538,7 @@ public class Controller {
     public void clear() {
         ArrayList<Task> emptyArr = new ArrayList<Task>();
         allTasks = emptyArr;
+        displayedTasks = FXCollections.observableArrayList();;
         storage.updateFiles(emptyArr);
     }
 
