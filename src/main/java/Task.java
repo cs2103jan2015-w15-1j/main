@@ -115,7 +115,10 @@ public class Task implements Cloneable {
     }
 
     public void setTime(LocalTime inputStartTime, LocalTime inputEndTime) {
-        if (inputStartTime.isBefore(inputEndTime)) {
+        if (inputStartTime == null && inputEndTime == null) {
+            startTime = null;
+            endTime = null;
+        } else if (inputStartTime.isBefore(inputEndTime)) {
             setType(Type.TIMED);
             startTime = inputStartTime;
             endTime = inputEndTime;
