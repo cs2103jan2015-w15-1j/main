@@ -101,6 +101,7 @@ public class Controller {
         previousStatesDisplayed = new Stack<ObservableList<Task>>();
         
         // THIS FIXES THE SLOW ADDITION OF FIRST TASK
+        // SO HACKISH!
         parser.parse("hello");
     }
 
@@ -222,6 +223,15 @@ public class Controller {
 
     public void setStage(Stage stage) {
         this.stage = stage;
+    }
+
+    // ================================================================
+    // Getters
+    // ================================================================
+
+    public ObservableList<Task> getDisplayedTasks() {
+        sortAllTasks();
+        return displayedTasks;
     }
 
     // ================================================================
