@@ -20,7 +20,6 @@ public class Controller {
     // ================================================================
     private static Controller controller;
 
-    private String saveFileName;
     private Storage storage;
 
     private ArrayList<Task> allTasks;
@@ -44,20 +43,17 @@ public class Controller {
     // ================================================================
     // Constants
     // ================================================================
-    private static final String MESSAGE_SAVE_FILE_READY = "Welcome to Veto. \"%s\" is ready for use.";
-    private static final String MESSAGE_EMPTY = "There is currently no task.\n";
-    private static final String MESSAGE_ADD = "Task has been successfully added:\n     Description: %s\n     Deadline: %s\n     Time: %s\n";
-    private static final String MESSAGE_NOT_APPL = "Not applicable";
-    private static final String MESSAGE_DELETE = "Task has been successfully deleted:\n Description: %s \n";
-    private static final String MESSAGE_EDIT = "Task has been successfully edited.\n";
-    private static final String MESSAGE_EDIT_FAILED = "Task could not be edited.\n";
+    private static final String MESSAGE_WELCOME = "Welcome to Veto!  Here is an overview of the week ahead.";
+    private static final String MESSAGE_ADD = "Task has been successfully added: ";
+    private static final String MESSAGE_DELETE = "Task has been successfully deleted: ";
+    private static final String MESSAGE_EDIT = "Task has been successfully edited: ";
     private static final String MESSAGE_COMPLETE = "\"%s\" completed. \n";
-    private static final String MESSAGE_COMPLETE_FAILED = "\"%s\" already completed. \n";
-    private static final String MESSAGE_INCOMPLETE = "\"%s\" marked as incomplete. \n";
+    private static final String MESSAGE_COMPLETE_FAILED = "\"%s\" already completed.";
+    private static final String MESSAGE_INCOMPLETE = "\"%s\" marked as incomplete.";
     private static final String MESSAGE_EXIT = "Goodbye!";
-    private static final String MESSAGE_UNDO = "Last command has been undone. \n";
-    private static final String MESSAGE_INVALID_COMMAND = "Invalid command. \n";
-    private static final String MESSAGE_NO_UNDO = "Already at oldest change, unable to undo. \n";
+    private static final String MESSAGE_UNDO = "Last command has been undone.";
+    private static final String MESSAGE_INVALID_COMMAND = "Invalid command.";
+    private static final String MESSAGE_NO_UNDO = "Already at oldest change, unable to undo.";
     
     private static final String HELP_ADD = "Add a task  ---------------------------------------------  add <arguments>";
     private static final String HELP_EDIT = "Edit a task  ---------------------  edit <index> <desc/dead> <arguments>";
@@ -87,8 +83,6 @@ public class Controller {
         parser = DateParser.getInstance();
         storage = Storage.getInstance();
         taskCreator = CreateTask.getInstance();
-        saveFileName = storage.getSaveFileName();
-
         allTasks = storage.readFile();
         
         sortAllTasks();
@@ -116,7 +110,7 @@ public class Controller {
     // Public methods
     // ================================================================
     public String getWelcomeMessage() {
-        return String.format(MESSAGE_SAVE_FILE_READY, saveFileName);
+        return MESSAGE_WELCOME;
     }
 
     public String executeCommand(String input) {
@@ -129,7 +123,7 @@ public class Controller {
         boolean helpUser = false;
 
         switch (commandType) {
-        	case SET:
+        	case SET:  // DONE
 	            feedback =  setSaveFileDirectory(arguments);
 	            break;
 	        case ADD: // DONE
@@ -152,7 +146,7 @@ public class Controller {
 	            updateState();
 	            feedback = completeTask(arguments);
 	            break;
-	        case INCOMPLETE:
+	        case INCOMPLETE:  // DONE
 	            updateState();
                 feedback = incompleteTask(arguments);
 	            break;
@@ -168,10 +162,10 @@ public class Controller {
 	        	updateState();
 	        	clear();
 	        	break;
-	        case INVALID:
+	        case INVALID:  // DONE
 	            feedback =  invalid();
 	            break;
-	        case HELP:
+	        case HELP:  // DONE
 	        	helpUser = true;
 	        	break;
 	        case EXIT:  // DONE
@@ -251,31 +245,15 @@ public class Controller {
 
         // Instantiate a new Task object
         newTask = taskCreator.create(input, parsedDates, parsedWords, notParsedWords);
-//        Task task = new Task(input, parsedDates, parsedWords, nonParsedWords);
 
-//        allTasks.add(task);
         Task task = newTask.get(0);
         allTasks.addAll(newTask);
         updateStorageWithAllTasks();
         
-        return "Task has been added: " + task.toString();
-        
-//        if (task.getType() == Task.Type.FLOATING) {
-//            return String.format(MESSAGE_ADD, task.getDescription(),
-//                    MESSAGE_NOT_APPL, MESSAGE_NOT_APPL);
-//        } else if (task.getType() == Task.Type.DEADLINE) {
-//            return String.format(MESSAGE_ADD, task.getDescription(),
-//                    task.getDate(), MESSAGE_NOT_APPL);
-//        } else {
-//            String formattedTime = task.getStartTime() + " to "
-//                    + task.getEndTime();
-//            return String.format(MESSAGE_ADD, task.getDescription(),
-//                    task.getDate(), formattedTime);
-//        }
+        return MESSAGE_ADD + task.toString();      
     }
 
     /**
-     *
      * Current implementation of Edit:
      * 1. Allows users to change FLOATING to any type of tasks.
      * 2. Allows users to change DEADLINE to any type of tasks, except TIMED with DAY
@@ -305,34 +283,6 @@ public class Controller {
 
         task.update(input, parsedDates, parsedWords, notParsedWords);
 
-//        String editType = inputArray[1];
-//        StringBuilder editArgument = new StringBuilder();
-//        // format: edit 1 deadline /desc ..., so 2 is the arg's starting word
-//        for (int i = 2; i < inputArray.length; i++) {
-//            editArgument.append(inputArray[i] + " ");
-//        }
-
-        // Filter for edit Description or Deadline
-//        try {
-//            Task task = displayedTasks.get(editIndex);
-//            if (editType.equals("d") || editType.equals("de")) {
-//                return MESSAGE_INVALID_COMMAND;
-//            } else if ("description".contains(editType)) {
-//                task.setDescription(editArgument.toString());
-//            } else if ("deadline".contains(editType)) {
-//                parser.parse(input);
-//                ArrayList<LocalDateTime> parsedDates = parser.getDates();
-//                if (!task.updateTypeDateTime(parsedDates)) {
-//                    return MESSAGE_EDIT_FAILED;
-//                }
-//            } else {
-//                return MESSAGE_INVALID_COMMAND;
-//            }
-//            updateStorageWithAllTasks();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return MESSAGE_INVALID_COMMAND;
-//        }
         return MESSAGE_EDIT;
     }
 
@@ -347,7 +297,7 @@ public class Controller {
 
             updateStorageWithAllTasks();
 
-            return null;
+            return MESSAGE_DELETE + task.toString();
         } catch (Exception e) {
             return MESSAGE_INVALID_COMMAND;
         }
