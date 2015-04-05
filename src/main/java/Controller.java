@@ -131,7 +131,7 @@ public class Controller {
         boolean helpUser = false;
 
         switch (commandType) {
-        	case SETSAVEFILE:
+        	case SET:
 	            feedback =  setSaveFileDirectory(arguments);
 	            break;
 	        case ADD: // DONE

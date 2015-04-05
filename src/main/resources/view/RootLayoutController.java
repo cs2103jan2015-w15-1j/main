@@ -1,11 +1,10 @@
 package main.resources.view;
 
 import javafx.collections.ObservableList;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-
-import org.apache.commons.lang.StringUtils;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -13,6 +12,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
+import main.java.Command;
 import main.java.Controller;
 import main.java.Task;
 
@@ -31,32 +31,22 @@ public class RootLayoutController extends BorderPane {
     // ================================================================
 
     private Controller controller;
-    
+
     private ArrayList<String> history;
     private int pointer;
-    
-    private ArrayList<String> commands; 
+
+    private ArrayList<String> commands;
 
     private final String ROOT_LAYOUT_LOCATION = "/view/RootLayout.fxml";
     private final String WELCOME_INPUT = "Enter your task here";
     private final String ONE_SPACING = " ";
     private final String EMPTY_STRING = "";
 
-    private final String ADD_COMMAND = "add";
-    private final String COMPLETE_COMMAND = "complete";
-    private final String DELETE_COMMAND = "delete";
-    private final String DISPLAY_COMMAND = "display";
-    private final String EDIT_COMMAND = "edit";
-    private final String INCOMPLETE_COMMAND = "incomplete";
-    private final String SEARCH_COMMAND = "search";
-    private final String UNDO_COMMAND = "undo";
-
-
     // formats the date for the date label, eg. 1 April
-    DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d MMMM");
+    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d MMMM");
 
     // formats the time for the time label, eg 2:00PM to 4:00PM
-    DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("h:mma");
+    private final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("h:mma");
 
     // ================================================================
     // Constructor
@@ -73,25 +63,10 @@ public class RootLayoutController extends BorderPane {
         }
 
         initVariablesForHistory();
-        initCommands();
+        initAutoCompleteCommands();
         userInput.setText(WELCOME_INPUT);
     }
     
-    private void initCommands() {
-        commands = new ArrayList<String>(); 
-        commands.add(ADD_COMMAND);
-        commands.add(COMPLETE_COMMAND);
-        commands.add(DELETE_COMMAND);
-        commands.add(DISPLAY_COMMAND);
-        commands.add(EDIT_COMMAND);
-        commands.add(INCOMPLETE_COMMAND);
-        commands.add(SEARCH_COMMAND);
-        commands.add(UNDO_COMMAND);
-    }
-
-    public void setController(Controller controller) {
-        this.controller = controller;
-    }
 
     // ================================================================
     // Public methods
@@ -101,64 +76,141 @@ public class RootLayoutController extends BorderPane {
         if (event.getCode() == KeyCode.SPACE) {
             listenForEdit(event);
         } else if (event.getCode() == KeyCode.ENTER) {
-            controller.executeCommand(userInput.getText());
-            updateHistory();
-            userInput.setText(EMPTY_STRING);          
-        } else if (event.getCode() == KeyCode.UP || event.getCode() == KeyCode.DOWN) {
+            handleUserInput();
+        } else if (event.getCode() == KeyCode.UP ||
+                   event.getCode() == KeyCode.DOWN) {
             event.consume(); // nullifies the default behavior of UP and DOWN on a TextArea
-            String pastCommand = getPastCommandFromHistory(event.getCode());
-            userInput.setText(pastCommand);
-            userInput.end();
+            handleGetPastCommands(event);
         } else if (event.getCode() == KeyCode.TAB) {
-            String autoCompletedCommand = getAutoCompletedCommand(userInput.getText());
-            userInput.setText(autoCompletedCommand + ONE_SPACING);
-            userInput.end();
+            handleCommandAutoComplete();
         }
     }
+    
+    public void setController(Controller controller) {
+        this.controller = controller;
+    }
+    
+    
+    // ================================================================
+    // Private Methods
+    // ================================================================
+    private void handleUserInput() {
+        controller.executeCommand(userInput.getText());
+        updateHistory();
+        updateUserInput(EMPTY_STRING);
+    }
 
+    private void handleCommandAutoComplete() {
+        String autoCompletedCommand = getAutoCompletedCommand(userInput.getText());
+        updateUserInput(autoCompletedCommand);
+    }
+
+    private void handleGetPastCommands(KeyEvent event) {
+        String pastCommand = getPastCommandFromHistory(event.getCode());
+        updateUserInput(pastCommand);
+    }
+
+    private void updateUserInput(String newInput) {
+        userInput.setText(newInput);
+        userInput.end();
+    }
+    
+    
+    // ================================================================
+    // Methods to handle command autocomplete
+    // ================================================================    
     private String getAutoCompletedCommand(String text) {
+        ArrayList<String> splitText = generateSplitText(text);
+        if (hasOnlyOneWord(splitText)) {
+            String firstWord = getFirstWord(splitText);
+            return findSuitableCommand(text, firstWord);
+        } else {
+            return text;
+        }
+    }
+    
+    private ArrayList<String> generateSplitText(String text) {
         ArrayList<String> splitText = new ArrayList<String>(Arrays.asList(text.split(ONE_SPACING)));
-        String lastWord = splitText.get(splitText.size() - 1);
+        return splitText;
+    }
 
+    private boolean hasOnlyOneWord(ArrayList<String> splitText) {
+        return splitText.size() == 1;
+    }
+    
+    private String getFirstWord(ArrayList<String> splitText) {
+        return splitText.get(0);
+    }
+
+    private String findSuitableCommand(String text, String firstWord) {
         for (String command : commands) {
-            if (lastWord.length() <= command.length() && command.substring(0, lastWord.length()).equals(lastWord)) {
-                splitText.set(splitText.size() - 1, command);
-                return StringUtils.join(splitText, ONE_SPACING);
+            if (isValidLengths(firstWord, command) &&
+                isWordAtStartOfCommand(firstWord, command)) {
+                return command.toLowerCase() + ONE_SPACING;
             }
         }
         return text;
     }
 
+    private boolean isValidLengths(String firstWord, String command) {
+        return firstWord.length() <= command.length();
+    }
+
+    private boolean isWordAtStartOfCommand(String firstWord, String command) {
+        return command.substring(0, firstWord.length())
+                      .equalsIgnoreCase(firstWord);
+    }
+
+
     // ================================================================
     // Methods to handle history of user entered commands
-    // ================================================================    
-
+    // ================================================================
     private void initVariablesForHistory() {
         history = new ArrayList<String>();
         history.add(EMPTY_STRING);
         history.add(EMPTY_STRING);
         pointer = history.size() - 1;
     }
-
-    private String getPastCommandFromHistory(KeyCode code) {
-        String command = EMPTY_STRING;
-        if (code == KeyCode.DOWN) {
-            if (pointer < history.size() - 1) {
-                pointer++;
-                command = history.get(pointer);
-            }
-        } else if (code == KeyCode.UP) {
-            if (pointer > 0) {
-                pointer--;
-            }
-            command = history.get(pointer);
-        }
-        return command;
+    
+    private void updateHistory() {
+        pointer = history.size();
+        history.add(pointer - 1, userInput.getText());
     }
 
+    private String getPastCommandFromHistory(KeyCode code) {
+        if (code == KeyCode.DOWN) {
+            return getNextCommand();
+        } else if (code == KeyCode.UP) {
+            return getPreviousCommand();
+        } else {
+            return EMPTY_STRING;
+        }
+    }
+
+    private String getPreviousCommand() {
+        if (pointer > 0) {
+            pointer--;
+        }
+        return history.get(pointer);
+    }
+
+    private String getNextCommand() {
+        if (pointer < history.size() - 1) {
+            pointer++;
+        }
+        return history.get(pointer);
+    }
+
+
+
     // ================================================================
-    // Private methods
+    // Methods to handle edit autocomplete
     // ================================================================
+    private void initAutoCompleteCommands() {
+        commands = Command.getAllCommandTypes();
+        commands.remove(Command.Type.INVALID.toString());
+    }
+    
     private void listenForEdit(KeyEvent event) {
         if (isValidEditFormat(userInput.getText())) {
             int index = getEditIndex(userInput.getText());
@@ -170,7 +222,7 @@ public class RootLayoutController extends BorderPane {
         String[] output = input.split(ONE_SPACING);
 
         // Check for edit keyword and length
-        if (output.length == 2 && output[0].equals(EDIT_COMMAND)) {
+        if (output.length == 2 && output[0].equals(Command.Type.EDIT)) {
             // Check for whether it's in the format "edit <int>"
             try {
                 Integer.parseInt(output[1]);
@@ -189,8 +241,8 @@ public class RootLayoutController extends BorderPane {
 
     private void autoCompleteEdit(int index) {
         ObservableList<Task> displayedTasks = controller.getDisplayedTasks();
-        if (index < displayedTasks.size()+1) {
-            Task task = displayedTasks.get(index-1);
+        if (index < displayedTasks.size() + 1) {
+            Task task = displayedTasks.get(index - 1);
             Task.Type taskType = task.getType();
 
             userInput.appendText(ONE_SPACING + task.getDescription());
@@ -203,20 +255,18 @@ public class RootLayoutController extends BorderPane {
                     break;
                 case TIMED :
                     userInput.appendText(ONE_SPACING);
-                    userInput.appendText(task.getDate().format(dateFormatter) + ONE_SPACING +
-                            task.getStartTime().format(timeFormatter) + ONE_SPACING +
-                            "to " +
-                            task.getEndTime().format(timeFormatter));
+                    userInput.appendText(task.getDate().format(dateFormatter) +
+                                         ONE_SPACING +
+                                         task.getStartTime()
+                                             .format(timeFormatter) +
+                                         ONE_SPACING +
+                                         "to " +
+                                         task.getEndTime()
+                                             .format(timeFormatter));
                     break;
             }
             userInput.end();
         }
     }
-
-    private void updateHistory() {
-        pointer = history.size();
-        history.add(pointer - 1, userInput.getText());
-    }
-
 
 }
