@@ -179,7 +179,7 @@ public class Controller {
 	        case EXIT:  // DONE
 	            timeToExit = true;
 	            feedback =  exit();
-                stage.close();
+                stage.hide();
 	            break;
 	        default:
 	            break;
