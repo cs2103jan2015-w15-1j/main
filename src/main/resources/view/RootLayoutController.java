@@ -39,9 +39,18 @@ public class RootLayoutController extends BorderPane {
 
     private final String ROOT_LAYOUT_LOCATION = "/view/RootLayout.fxml";
     private final String WELCOME_INPUT = "Enter your task here";
-    private final String EDIT_COMMAND = "edit";
     private final String ONE_SPACING = " ";
     private final String EMPTY_STRING = "";
+
+    private final String ADD_COMMAND = "add";
+    private final String COMPLETE_COMMAND = "complete";
+    private final String DELETE_COMMAND = "delete";
+    private final String DISPLAY_COMMAND = "display";
+    private final String EDIT_COMMAND = "edit";
+    private final String INCOMPLETE_COMMAND = "incomplete";
+    private final String SEARCH_COMMAND = "search";
+    private final String UNDO_COMMAND = "undo";
+
 
     // formats the date for the date label, eg. 1 April
     DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d MMMM");
@@ -70,14 +79,14 @@ public class RootLayoutController extends BorderPane {
     
     private void initCommands() {
         commands = new ArrayList<String>(); 
-        commands.add("add");
-        commands.add("complete");
-        commands.add("delete");
-        commands.add("display");
-        commands.add("edit");
-        commands.add("incomplete");
-        commands.add("search");
-        commands.add("undo");
+        commands.add(ADD_COMMAND);
+        commands.add(COMPLETE_COMMAND);
+        commands.add(DELETE_COMMAND);
+        commands.add(DISPLAY_COMMAND);
+        commands.add(EDIT_COMMAND);
+        commands.add(INCOMPLETE_COMMAND);
+        commands.add(SEARCH_COMMAND);
+        commands.add(UNDO_COMMAND);
     }
 
     public void setController(Controller controller) {
@@ -94,14 +103,14 @@ public class RootLayoutController extends BorderPane {
         } else if (event.getCode() == KeyCode.ENTER) {
             controller.executeCommand(userInput.getText());
             updateHistory();
-            userInput.setText("");          
+            userInput.setText(EMPTY_STRING);          
         } else if (event.getCode() == KeyCode.DOWN || event.getCode() == KeyCode.UP) {
             String pastCommand = getPastCommandFromHistory(event.getCode());
             userInput.setText(pastCommand);
         } else if (event.getCode() == KeyCode.TAB) {
             String autoCompletedCommand = getAutoCompletedCommand(userInput.getText());
             userInput.setText(autoCompletedCommand + " ");
-            userInput.positionCaret(autoCompletedCommand.length() + 1);
+            userInput.end();
         }
     }
 
@@ -118,20 +127,19 @@ public class RootLayoutController extends BorderPane {
         return text;
     }
 
-    
     // ================================================================
     // Methods to handle history of user entered commands
     // ================================================================    
 
     private void initVariablesForHistory() {
         history = new ArrayList<String>();
-        history.add("");
-        history.add("");
+        history.add(EMPTY_STRING);
+        history.add(EMPTY_STRING);
         pointer = history.size() - 1;
     }
 
     private String getPastCommandFromHistory(KeyCode code) {
-        String command = "";
+        String command = EMPTY_STRING;
         if (code == KeyCode.DOWN) {
             if (pointer < history.size() - 1) {
                 pointer++;
@@ -150,8 +158,6 @@ public class RootLayoutController extends BorderPane {
     // Private methods
     // ================================================================
     private void listenForEdit(KeyEvent event) {
-//        System.out.println(userInput.getText());
-//        System.out.println(isValidEditFormat(userInput.getText()));
         if (isValidEditFormat(userInput.getText())) {
             int index = getEditIndex(userInput.getText());
             autoCompleteEdit(index);
@@ -165,9 +171,9 @@ public class RootLayoutController extends BorderPane {
         if (output.length == 2 && output[0].equals(EDIT_COMMAND)) {
             // Check for whether it's in the format "edit <int>"
             try {
-                int index = Integer.parseInt(output[1]);
+                Integer.parseInt(output[1]);
                 return true;
-            } catch (Exception e) {
+            } catch (NumberFormatException e) {
                 return false;
             }
         }
@@ -192,11 +198,11 @@ public class RootLayoutController extends BorderPane {
                     break;
                 case DEADLINE :
                     userInput.appendText(ONE_SPACING);
-                    userInput.appendText(task.getDate().toString());
+                    userInput.appendText(task.getDate().format(dateFormatter));
                     break;
                 case TIMED :
                     userInput.appendText(ONE_SPACING);
-                    userInput.appendText(task.getDate().toString() + ONE_SPACING +
+                    userInput.appendText(task.getDate().format(dateFormatter) + ONE_SPACING +
                             task.getStartTime().format(timeFormatter) + ONE_SPACING +
                             "to " +
                             task.getEndTime().format(timeFormatter));
@@ -205,8 +211,6 @@ public class RootLayoutController extends BorderPane {
             userInput.end();
         }
     }
-
-
 
     private void updateHistory() {
         pointer = history.size();
