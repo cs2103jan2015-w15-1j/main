@@ -104,24 +104,26 @@ public class RootLayoutController extends BorderPane {
             controller.executeCommand(userInput.getText());
             updateHistory();
             userInput.setText(EMPTY_STRING);          
-        } else if (event.getCode() == KeyCode.DOWN || event.getCode() == KeyCode.UP) {
+        } else if (event.getCode() == KeyCode.UP || event.getCode() == KeyCode.DOWN) {
+            event.consume(); // nullifies the default behavior of UP and DOWN on a TextArea
             String pastCommand = getPastCommandFromHistory(event.getCode());
             userInput.setText(pastCommand);
+            userInput.end();
         } else if (event.getCode() == KeyCode.TAB) {
             String autoCompletedCommand = getAutoCompletedCommand(userInput.getText());
-            userInput.setText(autoCompletedCommand + " ");
+            userInput.setText(autoCompletedCommand + ONE_SPACING);
             userInput.end();
         }
     }
 
     private String getAutoCompletedCommand(String text) {
-        ArrayList<String> splitText = new ArrayList<String>(Arrays.asList(text.split(" ")));
+        ArrayList<String> splitText = new ArrayList<String>(Arrays.asList(text.split(ONE_SPACING)));
         String lastWord = splitText.get(splitText.size() - 1);
 
         for (String command : commands) {
             if (lastWord.length() <= command.length() && command.substring(0, lastWord.length()).equals(lastWord)) {
                 splitText.set(splitText.size() - 1, command);
-                return StringUtils.join(splitText, " ");
+                return StringUtils.join(splitText, ONE_SPACING);
             }
         }
         return text;
@@ -189,7 +191,6 @@ public class RootLayoutController extends BorderPane {
         ObservableList<Task> displayedTasks = controller.getDisplayedTasks();
         if (index < displayedTasks.size()+1) {
             Task task = displayedTasks.get(index-1);
-
             Task.Type taskType = task.getType();
 
             userInput.appendText(ONE_SPACING + task.getDescription());

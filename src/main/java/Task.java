@@ -238,12 +238,7 @@ public class Task implements Cloneable {
      * Get the description of the task
      *
      * @param input
-     *            - user's raw input <<<<<<< HEAD
-     * @param nonParsedWords
-     *            =======
-     * @param notParsedWords
-     *            >>>>>>> origin/DateParser - words that were used to obtain the
-     *            dates from user input
+     * @param notParsedWords dates from user input
      * @return description
      */
     private String extractDescription(String input, String notParsedWords) {
