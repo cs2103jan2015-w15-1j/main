@@ -66,7 +66,7 @@ public class RootLayoutController extends BorderPane {
         initAutoCompleteCommands();
         userInput.setText(WELCOME_INPUT);
     }
-    
+
 
     // ================================================================
     // Public methods
@@ -85,12 +85,12 @@ public class RootLayoutController extends BorderPane {
             handleCommandAutoComplete();
         }
     }
-    
+
     public void setController(Controller controller) {
         this.controller = controller;
     }
-    
-    
+
+
     // ================================================================
     // Private Methods
     // ================================================================
@@ -114,8 +114,8 @@ public class RootLayoutController extends BorderPane {
         userInput.setText(newInput);
         userInput.end();
     }
-    
-    
+
+
     // ================================================================
     // Methods to handle command autocomplete
     // ================================================================
@@ -123,7 +123,7 @@ public class RootLayoutController extends BorderPane {
         commands = Command.getAllCommandTypes();
         commands.remove(Command.Type.INVALID.toString());
     }
-    
+
     private String getAutoCompletedCommand(String text) {
         ArrayList<String> splitText = generateSplitText(text);
         if (hasOnlyOneWord(splitText)) {
@@ -133,7 +133,7 @@ public class RootLayoutController extends BorderPane {
             return text;
         }
     }
-    
+
     private ArrayList<String> generateSplitText(String text) {
         ArrayList<String> splitText = new ArrayList<String>(Arrays.asList(text.split(ONE_SPACING)));
         return splitText;
@@ -142,7 +142,7 @@ public class RootLayoutController extends BorderPane {
     private boolean hasOnlyOneWord(ArrayList<String> splitText) {
         return splitText.size() == 1;
     }
-    
+
     private String getFirstWord(ArrayList<String> splitText) {
         return splitText.get(0);
     }
@@ -176,7 +176,7 @@ public class RootLayoutController extends BorderPane {
         history.add(EMPTY_STRING);
         pointer = history.size() - 1;
     }
-    
+
     private void updateHistory() {
         pointer = history.size();
         history.add(pointer - 1, userInput.getText());
@@ -221,7 +221,8 @@ public class RootLayoutController extends BorderPane {
         String[] output = input.split(ONE_SPACING);
 
         // Check for edit keyword and length
-        if (output.length == 2 && output[0].equals(Command.Type.EDIT)) {
+        if (output.length == 2 &&
+            output[0].equalsIgnoreCase(Command.Type.EDIT.toString())) {
             // Check for whether it's in the format "edit <int>"
             try {
                 Integer.parseInt(output[1]);
