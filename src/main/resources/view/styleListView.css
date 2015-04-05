@@ -40,7 +40,7 @@
  */
  
 .root {
-	-fx-background-color: transparent;
+	-fx-background-color: white;
 	-fx-padding: 10;
 }
 
@@ -95,8 +95,6 @@
 
 .list-cell {
 	-fx-padding: 0;
-	-fx-height:100%;
-	/* -fx-background-color:yellow; */
 	-fx-background-color: white;
 }
 
@@ -173,7 +171,6 @@
 	-fx-padding: 5 0 5 20;
 	-fx-font-family: Roboto;
 	-fx-font-size: 16px;
-	/* -fx-background-color: tomato; */
 }
 
 .taskBox #checkbox {
@@ -190,13 +187,7 @@
 	-fx-text-fill: black;
 }
 
-/*
-.taskBox #description .text {
-	-fx-strikethrough: true;
-}
-*/
 
-/* not implemented yet */
 .taskBox #delete {
 	-fx-font: 14px FontAwesome;
 	-fx-text-fill: transparent;

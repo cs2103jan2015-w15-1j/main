@@ -22,7 +22,6 @@ public class Controller {
 
     private String saveFileName;
     private Storage storage;
-    private boolean timeToExit;
 
     private ArrayList<Task> allTasks;
     private ObservableList<Task> displayedTasks = FXCollections.observableArrayList();
@@ -45,7 +44,7 @@ public class Controller {
     // ================================================================
     // Constants
     // ================================================================
-    private static final String MESSAGE_SAVE_FILE_READY = "Welcome to main.java.Veto. %s is ready for use.";
+    private static final String MESSAGE_SAVE_FILE_READY = "Welcome to Veto. \"%s\" is ready for use.";
     private static final String MESSAGE_EMPTY = "There is currently no task.\n";
     private static final String MESSAGE_ADD = "Task has been successfully added:\n     Description: %s\n     Deadline: %s\n     Time: %s\n";
     private static final String MESSAGE_NOT_APPL = "Not applicable";
@@ -99,7 +98,6 @@ public class Controller {
             displayedTasks.add(task);
         }
 
-        timeToExit = false;
         previousStates = new Stack<ArrayList<Task>>();
         previousStatesDisplayed = new Stack<ObservableList<Task>>();
         
@@ -111,7 +109,7 @@ public class Controller {
     // To load the tasks into the display on the first load
     public void onloadDisplay() {
         display.updateOverviewDisplay(displayedTasks);
-        display.setFeedback("Welcome to Veto!");
+        display.setFeedback(getWelcomeMessage());
     }
 
     // ================================================================
@@ -177,7 +175,6 @@ public class Controller {
 	        	helpUser = true;
 	        	break;
 	        case EXIT:  // DONE
-	            timeToExit = true;
 	            feedback =  exit();
                 stage.close();
 	            break;
@@ -196,12 +193,7 @@ public class Controller {
         }
         
         display.setFeedback(feedback);
-        // just so I have something to return, will remove once the whole switch case is done
         return feedback;
-    }
-
-    public boolean isTimeToExit() {
-        return timeToExit;
     }
 
     // ================================================================

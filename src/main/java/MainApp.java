@@ -43,7 +43,7 @@ public class MainApp extends Application {
 
 		// Provide a display handle in controller so that controller can pass message to display
 		controller.setDisplay(display);
-		controller.setStage(primaryStage);
+		controller.setStage(this.primaryStage);
 	}
 
 	public void initRootLayout() {

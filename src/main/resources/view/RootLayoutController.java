@@ -118,7 +118,12 @@ public class RootLayoutController extends BorderPane {
     
     // ================================================================
     // Methods to handle command autocomplete
-    // ================================================================    
+    // ================================================================
+    private void initAutoCompleteCommands() {
+        commands = Command.getAllCommandTypes();
+        commands.remove(Command.Type.INVALID.toString());
+    }
+    
     private String getAutoCompletedCommand(String text) {
         ArrayList<String> splitText = generateSplitText(text);
         if (hasOnlyOneWord(splitText)) {
@@ -202,15 +207,9 @@ public class RootLayoutController extends BorderPane {
     }
 
 
-
     // ================================================================
     // Methods to handle edit autocomplete
-    // ================================================================
-    private void initAutoCompleteCommands() {
-        commands = Command.getAllCommandTypes();
-        commands.remove(Command.Type.INVALID.toString());
-    }
-    
+    // ================================================================    
     private void listenForEdit(KeyEvent event) {
         if (isValidEditFormat(userInput.getText())) {
             int index = getEditIndex(userInput.getText());
