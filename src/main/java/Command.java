@@ -1,13 +1,17 @@
 package main.java;
 
+import java.util.ArrayList;
+
 public class Command {
     public static enum Type {
-        ADD, DELETE, EDIT, DISPLAY, COMPLETE, INCOMPLETE, UNDO, SEARCH, EXIT, SETSAVEFILE,
-        INVALID, CLEAR, HELP
+        ADD, DISPLAY, DELETE, EDIT, COMPLETE, INCOMPLETE, UNDO, SEARCH, EXIT,
+        SET, CLEAR, HELP, INVALID
     };
 
     private static final int PARAM_POSITION_COMMAND = 0;
     private static final int PARAM_START_POSITION_ARGUMENT = 1;
+
+    private final String ONE_SPACING = " ";
 
     private Type commandType;
     private String userCommand;
@@ -22,7 +26,17 @@ public class Command {
         commandType = determineCommandType(userCommand);
     }
 
+    // ================================================================
     // Public getters
+    // ================================================================
+    public static ArrayList<String> getAllCommandTypes() {
+        ArrayList<String> allCommands = new ArrayList<String>();
+        for (Type command : Type.values()) {
+            allCommands.add(command.toString());
+        }
+        return allCommands;
+    }
+
     public Type getCommandType() {
         return commandType;
     }
@@ -32,7 +46,9 @@ public class Command {
     }
 
 
+    // ================================================================
     // Private methods
+    // ================================================================
     private Type determineCommandType(String userCommand2) {
         switch (userCommand.toLowerCase()) {
             case "add" :
@@ -52,13 +68,13 @@ public class Command {
             case "search" :
                 return Type.SEARCH;
             case "help" :
-            	return Type.HELP;
+                return Type.HELP;
             case "exit" :
                 return Type.EXIT;
             case "set" :
-                return Type.SETSAVEFILE;
+                return Type.SET;
             case "clear" :
-            	return  Type.CLEAR;
+                return Type.CLEAR;
             default :
                 return Type.INVALID;
         }
@@ -72,13 +88,12 @@ public class Command {
         StringBuilder builder = new StringBuilder();
         for (int i = PARAM_START_POSITION_ARGUMENT; i < parameters.length; i++) {
             builder.append(parameters[i]);
-            builder.append(" ");
+            builder.append(ONE_SPACING);
         }
         return builder.toString().trim();
     }
 
-
     private String[] splitUserInput(String input) {
-        return input.trim().split("\\s+");
+        return input.trim().split(ONE_SPACING);
     }
 }
