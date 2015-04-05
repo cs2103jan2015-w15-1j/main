@@ -344,10 +344,12 @@ public class Controller {
             ObservableList<Task> previousDisplayed = previousStatesDisplayed.pop(); // update state pushes the complete first
             
             allTasks = previousTasks;
-            displayedTasks = previousDisplayed;
-
             updateStorageWithAllTasks();
-
+            displayedTasks = previousDisplayed;
+            
+            if (switchDisplay) {
+            	search(searchArgument);
+            }
             return MESSAGE_UNDO;
         }
     }
