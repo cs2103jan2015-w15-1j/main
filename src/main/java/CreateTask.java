@@ -1,5 +1,6 @@
 package main.java;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.UUID;
@@ -22,7 +23,7 @@ public class CreateTask {
 
     private static final String KEYWORD = "every";
     private static final String STARTWORD = "from";
-    private static final String[] ENDWORD = { "until", "til" };
+    private static final String[] ENDWORD = { "until", "till" };
     private static final String[] ENDWORD2 = { " to ", " by " };
     private static final String[] MAINWORD = { "daily", "everyday", "monthly",
             "weekly", "yearly" };
@@ -109,7 +110,8 @@ public class CreateTask {
         Task task;
         LocalDateTime nextDate = null;
 
-        while (!recurDate.get(0).toLocalDate().isAfter(endDateTime.toLocalDate())) {
+        while (!recurDate.get(0).toLocalDate()
+                .isAfter(endDateTime.toLocalDate())) {
             task = new Task(input, recurDate, parsedWords, nonParsedWords);
             task.setID(recurID);
             tempList.add(task);
@@ -136,15 +138,20 @@ public class CreateTask {
 
     private ArrayList<LocalDateTime> findRecurDates(String input) {
         ArrayList<LocalDateTime> result = new ArrayList<LocalDateTime>();
+        ArrayList<LocalDateTime> tempResult = new ArrayList<LocalDateTime>();
+        LocalDate tempDate;
         Boolean hasEndWord = false;
         for (String check : ENDWORD2) {
-            if (input.toLowerCase().contains(check)
-                    && input.toLowerCase().contains(STARTWORD)) {
-                String endCondition = input.substring(input.indexOf(check),
+            if (input.toLowerCase().contains(STARTWORD)) {
+                String endCondition = input.substring(input.indexOf(STARTWORD),
                         input.length());
-                input = processInfo(input, endCondition);
-                hasEndWord = true;
-                break;
+                if (endCondition.toLowerCase().contains(check)) {
+                    endCondition = endCondition.substring(
+                            endCondition.indexOf(check), endCondition.length());
+                    input = processInfo(input, endCondition);
+                    hasEndWord = true;
+                    break;
+                }
             }
         }
 
@@ -159,8 +166,29 @@ public class CreateTask {
             }
         }
 
-        System.out.println(input);
-        if (input.toLowerCase().contains(STARTWORD)) {
+        System.out.println("What is the input to parse the start date: "
+                + input);
+        
+        
+        dateParser.parse(input);
+        if (dateParser.getDates().size() > 1
+                && input.toLowerCase().contains(STARTWORD)) {
+            String subString = input.substring(input.indexOf(STARTWORD),
+                    input.length());
+            removedWords.add(dateParser.getParsedWords());
+            tempResult.addAll(dateParser.getDates());
+            
+            dateParser.parse(subString);
+            if (dateParser.getDates().isEmpty()) {
+                tempDate = LocalDate.now();
+            } else {
+                tempDate = dateParser.getDates().get(0).toLocalDate();
+            }
+            for (LocalDateTime time : tempResult) {
+                result.add(LocalDateTime.of(tempDate,time.toLocalTime()));
+            }
+            removedWords.add(dateParser.getParsedWords());
+        } else if (input.toLowerCase().contains(STARTWORD)) {
             String subString = input.substring(input.indexOf(STARTWORD),
                     input.length());
             dateParser.parse(subString);
@@ -169,20 +197,23 @@ public class CreateTask {
             } else {
                 result.addAll(dateParser.getDates());
             }
+            removedWords.add(dateParser.getParsedWords());
         } else {
             dateParser.parse(input);
+            System.out.println("dateParser: " + dateParser.getDates());
             if (dateParser.getDates().isEmpty()) {
                 result.add(LocalDateTime.now());
             } else {
                 result.addAll(dateParser.getDates());
             }
+            removedWords.add(dateParser.getParsedWords());
         }
-        
+
         if (result.get(0).toLocalDate().isEqual(endDateTime.toLocalDate())) {
             result.add(endDateTime);
             endDateTime = null;
         }
-        
+
         System.out.println("result: " + result);
         limit = result.get(0).plusYears(1);
         return result;
