@@ -77,7 +77,7 @@ public class CreateTask {
                     nonParsedWords = nonParsedWords.replace(remove, "");
                 }
             }
-            System.out.println("Start recurDate: " + recurDate);
+//            System.out.println("Start recurDate: " + recurDate);
             createRecurring(type, input, parsedWords, nonParsedWords,
                     recurDate, recurID);
         } else {
@@ -85,13 +85,13 @@ public class CreateTask {
             tempList.add(task);
         }
 
-        System.out.println("input: " + input);
-        System.out.println("parsedDates: " + parsedDates);
-        System.out.println("recurDate: " + recurDate);
-        System.out.println("removedWords: " + removedWords);
-        System.out.println("endDateTime: " + endDateTime);
-        System.out.println("endDateWords: " + endDateWords);
-        System.out.println("limit:" + limit);
+//        System.out.println("input: " + input);
+//        System.out.println("parsedDates: " + parsedDates);
+//        System.out.println("recurDate: " + recurDate);
+//        System.out.println("removedWords: " + removedWords);
+//        System.out.println("endDateTime: " + endDateTime);
+//        System.out.println("endDateWords: " + endDateWords);
+//        System.out.println("limit:" + limit);
         return tempList;
     }
 
@@ -145,12 +145,18 @@ public class CreateTask {
             if (input.toLowerCase().contains(STARTWORD)) {
                 String endCondition = input.substring(input.indexOf(STARTWORD),
                         input.length());
-                if (endCondition.toLowerCase().contains(check)) {
-                    endCondition = endCondition.substring(
-                            endCondition.indexOf(check), endCondition.length());
-                    input = processInfo(input, endCondition);
-                    hasEndWord = true;
-                    break;
+                dateParser.parse(endCondition);
+                if (dateParser.getDates().size() > 1
+                        && !dateParser.getDates().get(0).toLocalDate()
+                                .isEqual(dateParser.getDates().get(1).toLocalDate())) {
+                    if (endCondition.toLowerCase().contains(check)) {
+                        endCondition = endCondition.substring(
+                                endCondition.indexOf(check),
+                                endCondition.length());
+                        input = processInfo(input, endCondition);
+                        hasEndWord = true;
+                        break;
+                    }
                 }
             }
         }
@@ -165,9 +171,6 @@ public class CreateTask {
                 }
             }
         }
-
-        System.out.println("What is the input to parse the start date: "
-                + input);
 
         dateParser.parse(input);
         if (dateParser.getDates().size() > 1
@@ -199,7 +202,6 @@ public class CreateTask {
             removedWords.add(dateParser.getParsedWords());
         } else {
             dateParser.parse(input);
-            System.out.println("dateParser: " + dateParser.getDates());
             if (dateParser.getDates().isEmpty()) {
                 result.add(LocalDateTime.now());
             } else {
@@ -215,7 +217,6 @@ public class CreateTask {
             endDateTime = null;
         }
 
-        System.out.println("result: " + result);
         limit = result.get(0).plusYears(1);
         return result;
     }
