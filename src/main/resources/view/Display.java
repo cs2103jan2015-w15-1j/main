@@ -57,7 +57,7 @@ public class Display extends VBox {
     private static final String LABEL_DEFAULT_SEARCH_QUERY = "all tasks";
     private static final String LABEL_INCOMPLETE = "Incomplete";
     private static final String LABEL_COMPLETED = "Completed";
-    
+
     private static final String TITLE_HELP = "~ Veto help menu ~";
 
     private static final int FEEDBACK_FADE_IN_MILLISECONDS = 500;
@@ -155,14 +155,14 @@ public class Display extends VBox {
 
         listView.setItems(displayBoxes);
     }
-    
+
     public void updateHelpDisplay(ObservableList<String> list) {
-    	ObservableList<HBox> displayBoxes = FXCollections.observableArrayList();
-    	displayBoxes.add(new TitleBox(TITLE_HELP));
-    	for (String item: list) {
-    		displayBoxes.add(new HelpBox(item));
-    	}
-    	listView.setItems(displayBoxes);
+        ObservableList<HBox> displayBoxes = FXCollections.observableArrayList();
+        displayBoxes.add(new TitleBox(TITLE_HELP));
+        for (String item : list) {
+            displayBoxes.add(new HelpBox(item));
+        }
+        listView.setItems(displayBoxes);
     }
 
     // ================================================================
@@ -223,17 +223,9 @@ public class Display extends VBox {
         // generate the dates of the 7 days from today
         ArrayList<LocalDate> days = generateDaysOfWeek(now);
 
-        // formats the date for the day label, eg. Monday, Tuesday, etc
-        DateTimeFormatter dayFormatter = DateTimeFormatter.ofPattern("EEEE");
-
-        // formats the date for the date label, eg. 1 April
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d MMMM");
 
         for (LocalDate day : days) {
-            CategoryBox label = generateDayLabel(now,
-                                                 dayFormatter,
-                                                 dateFormatter,
-                                                 day);
+            CategoryBox label = generateDayLabel(now, day);
             displayBoxes.add(label);
 
             boolean hasTaskOnThisDay = false;
@@ -254,16 +246,24 @@ public class Display extends VBox {
         return index;
     }
 
-    private CategoryBox generateDayLabel(LocalDate now,
-                                         DateTimeFormatter dayFormatter,
-                                         DateTimeFormatter dateFormatter,
-                                         LocalDate day) {
+    private CategoryBox generateDayLabel(LocalDate now, LocalDate day) {
+
+        // formats the date for the day label, eg. Monday, Tuesday, etc
+        DateTimeFormatter dayFormatter = DateTimeFormatter.ofPattern("EEEE");
+
+        // formats the date for the date label, eg. 1 April
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d MMMM");
+        
+     // formats the date for the date label of special cases, eg. Wednesday, 1 April
+        DateTimeFormatter dateFormatterForSpecialCase = DateTimeFormatter.ofPattern("EEEE, d MMMM");
+        
         CategoryBox label;
+        
         // special cases to show "Today" and "Tomorrow" instead of day
         if (day.equals(now)) {
-            label = new CategoryBox(LABEL_TODAY, day.format(dateFormatter));
+            label = new CategoryBox(LABEL_TODAY, day.format(dateFormatterForSpecialCase));
         } else if (day.equals(now.plusDays(1))) {
-            label = new CategoryBox(LABEL_TOMORROW, day.format(dateFormatter));
+            label = new CategoryBox(LABEL_TOMORROW, day.format(dateFormatterForSpecialCase));
         } else {
             label = new CategoryBox(day.format(dayFormatter),
                                     day.format(dateFormatter));
