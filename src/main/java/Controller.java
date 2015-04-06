@@ -25,6 +25,7 @@ public class Controller {
 
     private ArrayList<Task> allTasks;
     private ObservableList<Task> displayedTasks = FXCollections.observableArrayList();
+    private ObservableList<String> helpList = FXCollections.observableArrayList();
 
     private Stack<ArrayList<Task>> previousStates;
     private Stack<ObservableList<Task>> previousStatesDisplayed;
@@ -33,9 +34,9 @@ public class Controller {
     private DateParser parser;
     private CreateTask taskCreator;
 
-    private boolean switchDisplay = false;
+    private boolean switchDisplayToSearch = false;
     
-    private UserDefinedSort uds;
+    private UserDefinedSort userDefinedSort;
     
     private Display display;
 
@@ -45,17 +46,18 @@ public class Controller {
     // Constants
     // ================================================================
     private static final String MESSAGE_WELCOME = "Welcome to Veto!  Here is an overview of the week ahead.";
-    private static final String MESSAGE_ADD = "Task has been successfully added: ";
-    private static final String MESSAGE_DELETE = "Task has been successfully deleted: ";
-    private static final String MESSAGE_EDIT = "Task has been successfully edited: ";
+    private static final String MESSAGE_ADD = "Task has been successfully added: %s";
+    private static final String MESSAGE_DELETE = "Task has been successfully deleted: %s";
+    private static final String MESSAGE_EDIT = "Task has been successfully edited: %s";
     private static final String MESSAGE_COMPLETE = "\"%s\" completed.";
     private static final String MESSAGE_COMPLETE_FAILED = "\"%s\" already completed.";
     private static final String MESSAGE_INCOMPLETE = "\"%s\" marked as incomplete.";
-    private static final String MESSAGE_EXIT = "Goodbye!";
     private static final String MESSAGE_UNDO = "Last command has been undone.";
     private static final String MESSAGE_INVALID_COMMAND = "Invalid command.";
     private static final String MESSAGE_NO_UNDO = "Already at oldest change, unable to undo.";
     private static final String MESSAGE_ALL_CLEAR = "All contents are cleared!";
+    
+    private static final String EMPTY_STRING = "";
     
     private static final String HELP_ADD = "Add a task  ---------------------------------------------  add <arguments>";
     private static final String HELP_EDIT = "Edit a task  ---------------------  edit <index> <desc/dead> <arguments>";
@@ -81,6 +83,8 @@ public class Controller {
         allTasks = storage.readFile();
         
         sortAllTasks();
+        
+        instantiateHelpList();
 
         // Load the incomplete tasks into displayedTasks (MAIN VIEW WHEN APP STARTS)
         for (Task task : getIncompleteTasks(allTasks)) {
@@ -120,73 +124,74 @@ public class Controller {
 
         Command.Type commandType = currentCommand.getCommandType();
         String arguments = currentCommand.getArguments();
-        String feedback = "";
-        
+        String feedback = EMPTY_STRING;
         boolean helpUser = false;
 
         switch (commandType) {
-        	case SET:  // DONE
+        	
+        	case SET:
 	            feedback = setSaveFileDirectory(arguments);
 	            break;
-	        case ADD: // DONE
-	            updateState();
+	        
+        	case ADD:
+	            saveCurrentState();
 	            feedback = addTask(arguments);
-	            switchDisplay = false;
+	            switchDisplayToSearch = false;
 	            break; 
-	        case DELETE: // DONE
-	            updateState();
+	        
+        	case DELETE:
+	            saveCurrentState();
 	            feedback = deleteTask(arguments);
 	            break;
-	        case EDIT:
-	            updateState();
+	        
+        	case EDIT:
+	            saveCurrentState();
 	            feedback = editTask(arguments);
 	            break;
-	        case DISPLAY:  // DONE
+	        
+        	case DISPLAY:
                 displayTask(arguments);
 	            break;
-	        case COMPLETE: // DONE
-	            updateState();
+	        
+        	case COMPLETE:
+	            saveCurrentState();
 	            feedback = completeTask(arguments);
 	            break;
-	        case INCOMPLETE:  // DONE
-	            updateState();
+	        
+        	case INCOMPLETE:
+	            saveCurrentState();
                 feedback = incompleteTask(arguments);
 	            break;
-	        case UNDO:  // DONE
+	        
+        	case UNDO:
 	            feedback = undo();
 	            break;
-	        case SEARCH:  // DONE
+	        
+        	case SEARCH:
 	            search(arguments);
                 searchArgument = arguments;
-	            switchDisplay = true;
+	            switchDisplayToSearch = true;
 	            break;
-	        case CLEAR:    // DONE
-	        	updateState();
+	        
+        	case CLEAR:
+	        	saveCurrentState();
 	        	feedback = clear();
 	        	break;
-	        case INVALID:  // DONE
-	            feedback =  invalid();
+	        
+        	case INVALID:
+	            feedback = invalid();
 	            break;
-	        case HELP:  // DONE
+	        
+        	case HELP:
 	        	helpUser = true;
 	        	break;
-	        case EXIT:  // DONE
-	            feedback =  exit();
+	        
+        	case EXIT:
+	        	exit();
                 stage.hide();
 	            break;
-	        default:
-	            break;
         }
-   
-        if (helpUser) {
-        	updateHelpDisplay();
-        } else if (switchDisplay) {
-            updateDisplaySearch();
-        } else {
-        	sortAllTasks();
-            updateDisplayWithDefault();
-        }
-        
+        showAppropriateDisplay(helpUser);
         display.setFeedback(feedback);
         return feedback;
     }
@@ -208,7 +213,6 @@ public class Controller {
 	// ================================================================
 	
 	public ObservableList<Task> getDisplayedTasks() {
-	    sortAllTasks();
 	    return displayedTasks;
 	}
 
@@ -247,7 +251,7 @@ public class Controller {
         allTasks.addAll(newTask);
         updateStorageWithAllTasks();
         
-        return MESSAGE_ADD + task.toString();      
+        return String.format(MESSAGE_ADD, task);      
     }
 
     private String editTask(String input) {
@@ -263,17 +267,14 @@ public class Controller {
         }
 
         Task task = displayedTasks.get(editIndex);
-
         parser.parse(input);
         ArrayList<LocalDateTime> parsedDates = parser.getDates();
         String parsedWords = parser.getParsedWords();
         String notParsedWords = parser.getNotParsedWords();
-
         task.update(input, parsedDates, parsedWords, notParsedWords);
 
-        return MESSAGE_EDIT;
+        return String.format(MESSAGE_EDIT, task);
     }
-
 
     private String deleteTask(String input) {
         // ArrayList is 0-indexed, but Tasks are displayed to users as 1-indexed
@@ -285,7 +286,7 @@ public class Controller {
 
             updateStorageWithAllTasks();
 
-            return MESSAGE_DELETE + task.toString();
+            return String.format(MESSAGE_DELETE, task);
         } catch (Exception e) {
             return MESSAGE_INVALID_COMMAND;
         }
@@ -328,15 +329,12 @@ public class Controller {
         if (previousStates.empty()) {
             return MESSAGE_NO_UNDO;
         } else {
-            ArrayList<Task> previousTasks = previousStates.pop();
-            ObservableList<Task> previousDisplayed = previousStatesDisplayed.pop();
-            
-            allTasks = previousTasks;
-            displayedTasks = previousDisplayed;
+            allTasks = previousStates.pop();
+            displayedTasks = previousStatesDisplayed.pop();
             
             updateStorageWithAllTasks();
             
-            if (switchDisplay) {
+            if (switchDisplayToSearch) {
             	search(searchArgument);
             }
             return MESSAGE_UNDO;
@@ -363,11 +361,11 @@ public class Controller {
         displayedTasks.clear();
 
         if (input.equals("completed")) {
-            switchDisplay = true;
+            switchDisplayToSearch = true;
             searchArgument = input;
             updateDisplayWithCompleted();
         } else {
-            switchDisplay = false;
+            switchDisplayToSearch = false;
             searchArgument = null;
         }
     }
@@ -381,21 +379,30 @@ public class Controller {
     }
     
     private String clear() {
-        ArrayList<Task> emptyArr = new ArrayList<Task>();
-        allTasks = emptyArr;
+        allTasks = new ArrayList<Task>();
         displayedTasks = FXCollections.observableArrayList();;
-        storage.updateFiles(emptyArr);
+        storage.updateFiles(allTasks);
         return MESSAGE_ALL_CLEAR;
     }
 
-    private String exit() {
+    private void exit() {
         updateStorageWithAllTasks();
-        return MESSAGE_EXIT;
     }
 
     // ================================================================
     // Utility methods
     // ================================================================
+    
+    private void showAppropriateDisplay(boolean helpUser) {
+    	if (helpUser) {
+        	updateHelpDisplay();
+        } else if (switchDisplayToSearch) {
+            updateDisplaySearch();
+        } else {
+        	sortAllTasks();
+            updateDisplayWithDefault();
+        }
+    }
     
     private void updateDisplayWithDefault() {
         displayedTasks.setAll(getIncompleteTasks(allTasks));
@@ -413,42 +420,44 @@ public class Controller {
     }
     
     private void updateHelpDisplay() {
-    	ObservableList<String> list = FXCollections.observableArrayList();
-    	list.add(HELP_ADD);
-    	list.add(HELP_EDIT);
-    	list.add(HELP_DELETE);
-    	list.add(HELP_COMPLETE);
-    	list.add(HELP_INCOMPLETE);
-    	list.add(HELP_UNDO);
-    	list.add(HELP_SET_SAVE_LOCATION);
-    	list.add(HELP_SEARCH);
-    	list.add(HELP_EXIT);
-    	display.updateHelpDisplay(list);
+    	display.updateHelpDisplay(helpList);
 ;    }
 
     private void sortAllTasks() {
-    	uds = new UserDefinedSort(allTasks);
-    	uds.addComparator(new SortType());
-    	uds.addComparator(new SortDate());
-        uds.addComparator(new SortOverdue());   
-        allTasks = uds.executeSort();
+    	userDefinedSort = new UserDefinedSort(allTasks);
+    	userDefinedSort.addComparator(new SortType());
+    	userDefinedSort.addComparator(new SortDate());
+        userDefinedSort.addComparator(new SortOverdue());   
+        allTasks = userDefinedSort.executeSort();
     }
     
     private void sortSearchedTasks() {
-    	uds = new UserDefinedSort(new ArrayList<Task>(displayedTasks));
-        uds.addComparator(new SortType());
-        uds.addComparator(new SortDate());
-        uds.addComparator(new SortOverdue());
-        uds.addComparator(new SortIncomplete());
-        uds.executeSort();
-        displayedTasks = FXCollections.observableArrayList(uds.getList());
+    	userDefinedSort = new UserDefinedSort(new ArrayList<Task>(displayedTasks));
+        userDefinedSort.addComparator(new SortType());
+        userDefinedSort.addComparator(new SortDate());
+        userDefinedSort.addComparator(new SortOverdue());
+        userDefinedSort.addComparator(new SortIncomplete());
+        userDefinedSort.executeSort();
+        displayedTasks = FXCollections.observableArrayList(userDefinedSort.getList());
+    }
+    
+    private void instantiateHelpList() {
+    	helpList.add(HELP_ADD);
+    	helpList.add(HELP_EDIT);
+    	helpList.add(HELP_DELETE);
+    	helpList.add(HELP_COMPLETE);
+    	helpList.add(HELP_INCOMPLETE);
+    	helpList.add(HELP_UNDO);
+    	helpList.add(HELP_SET_SAVE_LOCATION);
+    	helpList.add(HELP_SEARCH);
+    	helpList.add(HELP_EXIT);
     }
 
     private void updateStorageWithAllTasks() {
         storage.updateFiles(allTasks);
     }
 
-    private void updateState() {
+    private void saveCurrentState() {
         previousStates.push(cloneState(allTasks));
         previousStatesDisplayed.push(cloneState(displayedTasks));
     }
