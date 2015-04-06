@@ -76,11 +76,10 @@ public class Display extends VBox {
 
     private static final String NO_TASK_OVERLAY_GREETING = "Hello!";
     private static final String NO_TASK_OVERLAY_ICON = "\uf14a";
-    private static final String NO_TASK_OVERLAY_MESSAGE = "Looks like you you've got no tasks,\n"
-                                                          + "try entering the following:\n" +
+    private static final String NO_TASK_OVERLAY_MESSAGE = "Looks like you've got no tasks, try entering the following:\n" +
                                                           "add do tutorial 10 tomorrow\n" +
                                                           "add finish assignment by 2359 tomorrow\n" +
-                                                          "add meet Isabel today from 5pm to 6pm";
+                                                          "add meet Isabel from 5pm to 6pm today";
 
     private static final int FEEDBACK_FADE_IN_MILLISECONDS = 500;
     private static final int FEEDBACK_FADE_OUT_MILLISECONDS = 1000;
@@ -147,7 +146,31 @@ public class Display extends VBox {
     }
 
     public void updateOverviewDisplay(ObservableList<Task> tasks) {
-        messageOverlay.setOpacity(0);
+        messageOverlay.toBack();
+        
+        if (tasks.isEmpty()) {
+            setFeedback("");
+            
+            FadeTransition fadein = new FadeTransition(new Duration(2000));
+            fadein.setNode(messageOverlay);
+            fadein.setToValue(1);
+
+            noTaskMessageTimeline = new Timeline(new KeyFrame(new Duration(1),
+                                                              new EventHandler<ActionEvent>() {
+                                                                  @Override
+                                                                  public void handle(ActionEvent event) {
+                                                                      messageOverlay.setOpacity(0);
+                                                                      messageOverlay.toFront();
+                                                                      icon.setText(NO_TASK_OVERLAY_ICON);
+                                                                      greeting.setText(NO_TASK_OVERLAY_GREETING);
+                                                                      message.setText(NO_TASK_OVERLAY_MESSAGE);
+                                                                      fadein.play();
+                                                                  }
+                                                              }));
+
+            noTaskMessageTimeline.play();
+        }
+        
         ArrayList<Task> listOfTasks = new ArrayList<Task>(tasks);
         logger.log(Level.INFO, "List of tasks: " + listOfTasks.toString());
 
@@ -161,27 +184,6 @@ public class Display extends VBox {
         index = addAllOtherTasks(displayBoxes, listOfTasks, now, index);
 
         listView.setItems(displayBoxes);
-        if (tasks.isEmpty()) {
-            setFeedback("");
-            
-            FadeTransition fadein = new FadeTransition(new Duration(2000));
-            fadein.setNode(messageOverlay);
-            fadein.setToValue(1);
-
-            noTaskMessageTimeline = new Timeline(new KeyFrame(new Duration(1),
-                                                              new EventHandler<ActionEvent>() {
-                                                                  @Override
-                                                                  public void handle(ActionEvent event) {
-                                                                      messageOverlay.setOpacity(0);
-                                                                      icon.setText(NO_TASK_OVERLAY_ICON);
-                                                                      greeting.setText(NO_TASK_OVERLAY_GREETING);
-                                                                      message.setText(NO_TASK_OVERLAY_MESSAGE);
-                                                                      fadein.play();
-                                                                  }
-                                                              }));
-
-            noTaskMessageTimeline.play();
-        }
     }
 
     public void updateSearchDisplay(ObservableList<Task> searchResults,
