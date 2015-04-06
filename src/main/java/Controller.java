@@ -124,64 +124,64 @@ public class Controller {
 
         switch (commandType) {
         	
-        	case SET:
+        	case SET :
 	            feedback = setSaveFileDirectory(arguments);
 	            break;
 	        
-        	case ADD:
+        	case ADD :
 	            saveCurrentState(input);
 	            feedback = addTask(arguments);
 	            switchDisplayToSearch = false;
 	            break; 
 	        
-        	case DELETE:
+        	case DELETE :
 	            saveCurrentState(input);
 	            feedback = deleteTask(arguments);
 	            break;
 	        
-        	case EDIT:
+        	case EDIT :
 	            saveCurrentState(input);
 	            feedback = editTask(arguments);
 	            break;
 	        
-        	case DISPLAY:
+        	case DISPLAY :
                 displayTask(arguments);
 	            break;
 	        
-        	case COMPLETE:
+        	case COMPLETE :
 	            saveCurrentState(input);
 	            feedback = completeTask(arguments);
 	            break;
 	        
-        	case INCOMPLETE:
+        	case INCOMPLETE :
 	            saveCurrentState(input);
                 feedback = incompleteTask(arguments);
 	            break;
 	        
-        	case UNDO:
+        	case UNDO :
 	            feedback = undo();
 	            break;
 	        
-        	case SEARCH:
+        	case SEARCH :
 	            search(arguments);
                 searchArgument = arguments;
 	            switchDisplayToSearch = true;
 	            break;
 	        
-        	case CLEAR:
+        	case CLEAR :
 	        	saveCurrentState(input);
 	        	feedback = clear();
 	        	break;
 	        
-        	case INVALID:
+        	case INVALID :
 	            feedback = invalid();
 	            break;
 	        
-        	case HELP:
+        	case HELP :
 	        	helpUser = true;
 	        	break;
 	        
-        	case EXIT:
+        	case EXIT :
 	        	exit();
                 stage.hide();
 	            break;
