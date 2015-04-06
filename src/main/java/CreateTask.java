@@ -23,6 +23,8 @@ public class CreateTask {
 
     private static final String KEYWORD = "every";
     private static final String STARTWORD = "from";
+    private static final String[] IGNOREWORD = { "day from", "week from",
+            "month from", "year from" };
     private static final String[] ENDWORD = { "until", "till" };
     private static final String[] ENDWORD2 = { " to ", " by " };
     private static final String[] MAINWORD = { "daily", "everyday", "monthly",
@@ -56,16 +58,24 @@ public class CreateTask {
             String nonParsedWords) {
         resetField();
         Type type = checkRecurring(input);
+        Boolean hasIgnoreWords = false;
 
         ArrayList<LocalDateTime> recurDate = new ArrayList<LocalDateTime>();
         String recurID;
         Task task;
         recurID = UUID.randomUUID().toString();
-
+        for (String string : IGNOREWORD) {
+            if (input.contains(string)) {
+                hasIgnoreWords = true;
+            }
+        }
         if (type != null) {
             recurDate = new ArrayList<LocalDateTime>(findRecurDates(input));
+
             if (!parsedDates.isEmpty()
+                    && !hasIgnoreWords
                     && parsedDates.size() > 1
+                    && !recurDate.get(0).toLocalDate().isEqual(LocalDate.now())
                     && recurDate.get(0).toLocalDate()
                             .isBefore(parsedDates.get(0).toLocalDate())) {
                 recurDate.set(0, parsedDates.get(0));
@@ -77,7 +87,7 @@ public class CreateTask {
                     nonParsedWords = nonParsedWords.replace(remove, "");
                 }
             }
-//            System.out.println("Start recurDate: " + recurDate);
+            System.out.println("Start recurDate: " + recurDate);
             createRecurring(type, input, parsedWords, nonParsedWords,
                     recurDate, recurID);
         } else {
@@ -85,13 +95,13 @@ public class CreateTask {
             tempList.add(task);
         }
 
-//        System.out.println("input: " + input);
-//        System.out.println("parsedDates: " + parsedDates);
-//        System.out.println("recurDate: " + recurDate);
-//        System.out.println("removedWords: " + removedWords);
-//        System.out.println("endDateTime: " + endDateTime);
-//        System.out.println("endDateWords: " + endDateWords);
-//        System.out.println("limit:" + limit);
+        System.out.println("input: " + input);
+        System.out.println("parsedDates: " + parsedDates);
+        System.out.println("recurDate: " + recurDate);
+        System.out.println("removedWords: " + removedWords);
+        System.out.println("endDateTime: " + endDateTime);
+        System.out.println("endDateWords: " + endDateWords);
+        System.out.println("limit:" + limit);
         return tempList;
     }
 
@@ -147,8 +157,13 @@ public class CreateTask {
                         input.length());
                 dateParser.parse(endCondition);
                 if (dateParser.getDates().size() > 1
-                        && !dateParser.getDates().get(0).toLocalDate()
-                                .isEqual(dateParser.getDates().get(1).toLocalDate())) {
+                        && !dateParser
+                                .getDates()
+                                .get(0)
+                                .toLocalDate()
+                                .isEqual(
+                                        dateParser.getDates().get(1)
+                                                .toLocalDate())) {
                     if (endCondition.toLowerCase().contains(check)) {
                         endCondition = endCondition.substring(
                                 endCondition.indexOf(check),
@@ -210,6 +225,7 @@ public class CreateTask {
             removedWords.add(dateParser.getParsedWords());
         }
 
+        System.out.println("results 1: " + result);
         if (endDateTime != null
                 && result.get(0).toLocalDate()
                         .isEqual(endDateTime.toLocalDate())) {
@@ -217,6 +233,7 @@ public class CreateTask {
             endDateTime = null;
         }
 
+        System.out.println("results 1: " + result);
         limit = result.get(0).plusYears(1);
         return result;
     }

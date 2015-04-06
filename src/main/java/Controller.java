@@ -11,7 +11,6 @@ import main.resources.view.Display;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
 import java.util.stream.Collectors;
 
 public class Controller {
@@ -26,9 +25,8 @@ public class Controller {
     private ArrayList<Task> allTasks;
     private ObservableList<Task> displayedTasks = FXCollections.observableArrayList();
     private ObservableList<String> helpList = FXCollections.observableArrayList();
-
-    private Stack<ArrayList<Task>> previousStates;
-    private Stack<ObservableList<Task>> previousStatesDisplayed;
+    
+    private History previousStates;
 
     private String searchArgument;
     private DateParser parser;
@@ -90,9 +88,8 @@ public class Controller {
         for (Task task : getIncompleteTasks(allTasks)) {
             displayedTasks.add(task);
         }
-
-        previousStates = new Stack<ArrayList<Task>>();
-        previousStatesDisplayed = new Stack<ObservableList<Task>>();
+        
+        previousStates = new History();
         
         // THIS FIXES THE SLOW ADDITION OF FIRST TASK
         parser.parse("foo today");
@@ -326,11 +323,12 @@ public class Controller {
     }
 
     private String undo() {
-        if (previousStates.empty()) {
+        if (previousStates.isEmpty()) {
             return MESSAGE_NO_UNDO;
         } else {
-            allTasks = previousStates.pop();
-            displayedTasks = previousStatesDisplayed.pop();
+        	previousStates.extractLatestStatus();
+            allTasks = previousStates.getAllTasks();
+            displayedTasks = previousStates.getDisplayedTasks();
             
             updateStorageWithAllTasks();
             
@@ -458,32 +456,9 @@ public class Controller {
     }
 
     private void saveCurrentState() {
-        previousStates.push(cloneState(allTasks));
-        previousStatesDisplayed.push(cloneState(displayedTasks));
-    }
-
-    private ArrayList<Task> cloneState(ArrayList<Task> input) {
-        ArrayList<Task> output = new ArrayList<Task>();
-        try {
-            for (Task task : input) {
-                output.add(task.clone());
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return output;
-    }
-    
-    private ObservableList<Task> cloneState(ObservableList<Task> input) {
-        ArrayList<Task> output = new ArrayList<Task>();
-        try {
-            for (Task task : input) {
-                output.add(task.clone());
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return FXCollections.observableArrayList(output);
+    	previousStates.storeCurrentStatus(allTasks, displayedTasks);
+        //previousStates.push(cloneState(allTasks));
+        //previousStatesDisplayed.push(cloneState(displayedTasks));
     }
 
     // ================================================================
