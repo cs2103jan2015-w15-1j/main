@@ -4,8 +4,11 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.apache.commons.lang.StringUtils;
 
 import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
@@ -52,9 +55,8 @@ public class Display extends VBox {
     // ================================================================
     private static Logger logger;
     private Timeline feedbackTimeline;
-
     private Timeline noTaskMessageTimeline;
-
+    private ArrayList<String> allExampleCommands;
 
     // ================================================================
     // Constants
@@ -74,13 +76,11 @@ public class Display extends VBox {
 
     private static final String TITLE_HELP = "~ Veto help menu ~";
 
+    private static final int NO_TASK_OVERLAY_FADE_IN_MILLISECONDS = 2000;
     private static final String NO_TASK_OVERLAY_GREETING = "Hello!";
     private static final String NO_TASK_OVERLAY_ICON = "\uf14a";
-    private static final String NO_TASK_OVERLAY_MESSAGE = "Looks like you've got no tasks, try entering the following:\n" +
-                                                          "add do tutorial 10 tomorrow\n" +
-                                                          "add finish assignment by 2359 tomorrow\n" +
-                                                          "add meet Isabel from 5pm to 6pm today";
-
+    private static final String NO_TASK_OVERLAY_MESSAGE = "Looks like you've got no tasks, try entering the following:\n";
+    
     private static final int FEEDBACK_FADE_IN_MILLISECONDS = 500;
     private static final int FEEDBACK_FADE_OUT_MILLISECONDS = 1000;
     private static final int FEEDBACK_DISPLAY_SECONDS = 8;
@@ -108,6 +108,17 @@ public class Display extends VBox {
 
         feedbackTimeline = new Timeline();
         noTaskMessageTimeline = new Timeline();
+        initExampleCommands();
+    }
+
+    private void initExampleCommands() {
+        allExampleCommands = new ArrayList<String>();
+        allExampleCommands.add("add meet Isabel from 5pm to 6pm today");
+        allExampleCommands.add("add do tutorial 10 tomorrow");
+        allExampleCommands.add("add finish assignment by 2359 tomorrow");
+        allExampleCommands.add("add find easter eggs by 10 apr");
+        allExampleCommands.add("add complete proposal by friday");
+        allExampleCommands.add("add exercise every tuesday");
     }
 
     // ================================================================
@@ -150,8 +161,10 @@ public class Display extends VBox {
         
         if (tasks.isEmpty()) {
             setFeedback("");
+            Collections.shuffle(allExampleCommands);
+            String exampleCommands = StringUtils.join(allExampleCommands.toArray(), "\n", 0, 3);
             
-            FadeTransition fadein = new FadeTransition(new Duration(2000));
+            FadeTransition fadein = new FadeTransition(new Duration(NO_TASK_OVERLAY_FADE_IN_MILLISECONDS));
             fadein.setNode(messageOverlay);
             fadein.setToValue(1);
 
@@ -163,7 +176,7 @@ public class Display extends VBox {
                                                                       messageOverlay.toFront();
                                                                       icon.setText(NO_TASK_OVERLAY_ICON);
                                                                       greeting.setText(NO_TASK_OVERLAY_GREETING);
-                                                                      message.setText(NO_TASK_OVERLAY_MESSAGE);
+                                                                      message.setText(NO_TASK_OVERLAY_MESSAGE+exampleCommands);
                                                                       fadein.play();
                                                                   }
                                                               }));
