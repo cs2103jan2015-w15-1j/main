@@ -23,8 +23,8 @@ public class CreateTask {
 
     private static final String KEYWORD = "every";
     private static final String STARTWORD = "from";
-    private static final String[] IGNOREWORD = { "day from", "week from",
-            "month from", "year from" };
+    private static final String[] IGNOREWORD = { " day from", " week from",
+            " month from", " year from" };
     private static final String[] ENDWORD = { "until", "till" };
     private static final String[] ENDWORD2 = { " to ", " by " };
     private static final String[] MAINWORD = { "daily", "everyday", "monthly",
