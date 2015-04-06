@@ -28,9 +28,6 @@ public class Controller {
     
     private History previousStates;
 
-    //private Stack<ArrayList<Task>> previousStates;
-    //private Stack<ObservableList<Task>> previousStatesDisplayed;
-
     private String searchArgument;
     private DateParser parser;
     private CreateTask taskCreator;
@@ -93,8 +90,6 @@ public class Controller {
         }
         
         previousStates = new History();
-        //previousStates = new Stack<ArrayList<Task>>();
-        //previousStatesDisplayed = new Stack<ObservableList<Task>>();
         
         // THIS FIXES THE SLOW ADDITION OF FIRST TASK
         parser.parse("foo today");
