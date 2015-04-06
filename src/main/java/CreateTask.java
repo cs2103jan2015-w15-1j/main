@@ -23,7 +23,7 @@ public class CreateTask {
     private static final String KEYWORD = "every";
     private static final String STARTWORD = "from";
     private static final String[] ENDWORD = { "until", "til" };
-    private static final String[] ENDWORD2 = { "to", "by" };
+    private static final String[] ENDWORD2 = { " to ", " by " };
     private static final String[] MAINWORD = { "daily", "everyday", "monthly",
             "weekly", "yearly" };
     private static final String[] YEARWORD = { "yearly", "year" };
@@ -64,21 +64,19 @@ public class CreateTask {
         if (type != null) {
             recurDate = new ArrayList<LocalDateTime>(findRecurDates(input));
             if (!parsedDates.isEmpty()
+                    && parsedDates.size() > 1
                     && recurDate.get(0).toLocalDate()
                             .isBefore(parsedDates.get(0).toLocalDate())) {
                 recurDate.set(0, parsedDates.get(0));
             }
             getEndDateTime(recurDate);
-            System.out.println("input: " + input);
-            System.out.println("nonParsedWords: " + nonParsedWords);
             if (!removedWords.isEmpty()) {
                 for (String remove : removedWords) {
                     input = input.replace(remove, "");
                     nonParsedWords = nonParsedWords.replace(remove, "");
                 }
             }
-            System.out.println("input: " + input);
-            System.out.println("nonParsedWords: " + nonParsedWords);
+            System.out.println("Start recurDate: " + recurDate);
             createRecurring(type, input, parsedWords, nonParsedWords,
                     recurDate, recurID);
         } else {
@@ -111,7 +109,7 @@ public class CreateTask {
         Task task;
         LocalDateTime nextDate = null;
 
-        while (!recurDate.get(0).isAfter(endDateTime)) {
+        while (!recurDate.get(0).toLocalDate().isAfter(endDateTime.toLocalDate())) {
             task = new Task(input, recurDate, parsedWords, nonParsedWords);
             task.setID(recurID);
             tempList.add(task);
@@ -138,38 +136,48 @@ public class CreateTask {
 
     private ArrayList<LocalDateTime> findRecurDates(String input) {
         ArrayList<LocalDateTime> result = new ArrayList<LocalDateTime>();
-        for (String check : ENDWORD) {
-            if (input.toLowerCase().contains(check)) {
-                String endCondition = input.substring(input.indexOf(check),
-                        input.length());
-                input = processInfo(input, endCondition);
-                break;
-            }
-        }
-
+        Boolean hasEndWord = false;
         for (String check : ENDWORD2) {
             if (input.toLowerCase().contains(check)
                     && input.toLowerCase().contains(STARTWORD)) {
                 String endCondition = input.substring(input.indexOf(check),
                         input.length());
                 input = processInfo(input, endCondition);
+                hasEndWord = true;
                 break;
             }
         }
 
+        if (!hasEndWord) {
+            for (String check : ENDWORD) {
+                if (input.toLowerCase().contains(check)) {
+                    String endCondition = input.substring(input.indexOf(check),
+                            input.length());
+                    input = processInfo(input, endCondition);
+                    break;
+                }
+            }
+        }
+
+        System.out.println(input);
         if (input.toLowerCase().contains(STARTWORD)) {
             String subString = input.substring(input.indexOf(STARTWORD),
                     input.length());
             dateParser.parse(subString);
-            result.addAll(dateParser.getDates());
+            if (dateParser.getDates().isEmpty()) {
+                result.add(LocalDateTime.now());
+            } else {
+                result.addAll(dateParser.getDates());
+            }
         } else {
             dateParser.parse(input);
-            if (dateParser.getDates().size() < 1) {
+            if (dateParser.getDates().isEmpty()) {
                 result.add(LocalDateTime.now());
             } else {
                 result.addAll(dateParser.getDates());
             }
         }
+        System.out.println("result: " + result);
         limit = result.get(0).plusYears(1);
         return result;
     }
