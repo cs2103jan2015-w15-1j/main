@@ -216,9 +216,7 @@ public class Controller {
         this.display = display;
     }
 
-    public void setStage(Stage stage) {
-        this.stage = stage;
-    }
+    
 
     // ================================================================
     // Getters
@@ -232,6 +230,10 @@ public class Controller {
     // ================================================================
     // Logic methods
     // ================================================================
+
+    public void setStage(Stage stage) {
+        this.stage = stage;
+    }
 
     private String addTask(String input) {
         if (input.isEmpty()) {

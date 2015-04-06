@@ -22,7 +22,8 @@ public class CreateTask {
 
     private static final String KEYWORD = "every";
     private static final String STARTWORD = "from";
-    private static final String[] ENDWORD = { "until", "til", "by" };
+    private static final String[] ENDWORD = { "until", "til" };
+    private static final String[] ENDWORD2 = { "to", "by" };
     private static final String[] MAINWORD = { "daily", "everyday", "monthly",
             "weekly", "yearly" };
     private static final String[] YEARWORD = { "yearly", "year" };
@@ -62,13 +63,22 @@ public class CreateTask {
 
         if (type != null) {
             recurDate = new ArrayList<LocalDateTime>(findRecurDates(input));
+            if (!parsedDates.isEmpty()
+                    && recurDate.get(0).toLocalDate()
+                            .isBefore(parsedDates.get(0).toLocalDate())) {
+                recurDate.set(0, parsedDates.get(0));
+            }
             getEndDateTime(recurDate);
+            System.out.println("input: " + input);
+            System.out.println("nonParsedWords: " + nonParsedWords);
             if (!removedWords.isEmpty()) {
                 for (String remove : removedWords) {
                     input = input.replace(remove, "");
                     nonParsedWords = nonParsedWords.replace(remove, "");
                 }
             }
+            System.out.println("input: " + input);
+            System.out.println("nonParsedWords: " + nonParsedWords);
             createRecurring(type, input, parsedWords, nonParsedWords,
                     recurDate, recurID);
         } else {
@@ -76,13 +86,13 @@ public class CreateTask {
             tempList.add(task);
         }
 
-//        System.out.println("input: " + input);
-//        System.out.println("parsedDates: " + parsedDates);
-//        System.out.println("recurDate: " + recurDate);
-//        System.out.println("removedWords: " + removedWords);
-//        System.out.println("endDateTime: " + endDateTime);
-//        System.out.println("endDateWords: " + endDateWords);
-//        System.out.println("limit:" + limit);
+        System.out.println("input: " + input);
+        System.out.println("parsedDates: " + parsedDates);
+        System.out.println("recurDate: " + recurDate);
+        System.out.println("removedWords: " + removedWords);
+        System.out.println("endDateTime: " + endDateTime);
+        System.out.println("endDateWords: " + endDateWords);
+        System.out.println("limit:" + limit);
         return tempList;
     }
 
@@ -132,11 +142,17 @@ public class CreateTask {
             if (input.toLowerCase().contains(check)) {
                 String endCondition = input.substring(input.indexOf(check),
                         input.length());
-                dateParser.parse(endCondition);
-                endDateWords = dateParser.getParsedWords();
-                endDateTime = dateParser.getDates().get(0);
-                input = input.replaceAll(endDateWords, "");
-                removedWords.add(endDateWords);
+                input = processInfo(input, endCondition);
+                break;
+            }
+        }
+
+        for (String check : ENDWORD2) {
+            if (input.toLowerCase().contains(check)
+                    && input.toLowerCase().contains(STARTWORD)) {
+                String endCondition = input.substring(input.indexOf(check),
+                        input.length());
+                input = processInfo(input, endCondition);
                 break;
             }
         }
@@ -156,6 +172,17 @@ public class CreateTask {
         }
         limit = result.get(0).plusYears(1);
         return result;
+    }
+
+    private String processInfo(String input, String endCondition) {
+        dateParser.parse(endCondition);
+        endDateWords = dateParser.getParsedWords();
+        if (!dateParser.getDates().isEmpty()) {
+            endDateTime = dateParser.getDates().get(0);
+        }
+        input = input.replaceAll(endDateWords, "");
+        removedWords.add(endDateWords);
+        return input;
     }
 
     private void getEndDateTime(ArrayList<LocalDateTime> recurDate) {
@@ -195,7 +222,6 @@ public class CreateTask {
         }
 
         if (input.toLowerCase().contains(KEYWORD)) {
-            removedWords.add(KEYWORD);
             String check = input.substring(input.lastIndexOf(KEYWORD) + 6,
                     input.length());
             String[] split = check.split(" ");
@@ -208,8 +234,10 @@ public class CreateTask {
                 if (split[0].toLowerCase().contains(find)
                         || (split.length > 1 && split[1].toLowerCase()
                                 .contains(find))) {
-                    if (split[1].toLowerCase().contains(find)) {
+                    if (split.length > 1
+                            && split[1].toLowerCase().contains(find)) {
                         removedWords.add(split[0] + " " + split[1]);
+                        removedWords.add(KEYWORD + " " + split[0]);
                     } else {
                         removedWords.add(split[0]);
                     }
@@ -220,8 +248,10 @@ public class CreateTask {
                 if (split[0].toLowerCase().contains(find)
                         || (split.length > 1 && split[1].toLowerCase()
                                 .contains(find))) {
-                    if (split[1].toLowerCase().contains(find)) {
+                    if (split.length > 1
+                            && split[1].toLowerCase().contains(find)) {
                         removedWords.add(split[0] + " " + split[1]);
+                        removedWords.add(KEYWORD + " " + split[0]);
                     } else {
                         removedWords.add(split[0]);
                     }
@@ -232,8 +262,10 @@ public class CreateTask {
                 if (split[0].toLowerCase().contains(find)
                         || (split.length > 1 && split[1].toLowerCase()
                                 .contains(find))) {
-                    if (split[1].toLowerCase().contains(find)) {
+                    if (split.length > 1
+                            && split[1].toLowerCase().contains(find)) {
                         removedWords.add(split[0] + " " + split[1]);
+                        removedWords.add(KEYWORD + " " + split[0]);
                     } else {
                         removedWords.add(split[0]);
                     }
@@ -244,8 +276,10 @@ public class CreateTask {
                 if (split[0].toLowerCase().contains(find)
                         || (split.length > 1 && split[1].toLowerCase()
                                 .contains(find))) {
-                    if (split[1].toLowerCase().contains(find)) {
+                    if (split.length > 1
+                            && split[1].toLowerCase().contains(find)) {
                         removedWords.add(split[0] + " " + split[1]);
+                        removedWords.add(KEYWORD + " " + split[0]);
                     } else {
                         removedWords.add(split[0]);
                     }

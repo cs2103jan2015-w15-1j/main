@@ -47,7 +47,7 @@ public class Task implements Cloneable {
     private static final int POSITION_FIRST_DATE = 0;
     private static final int POSITION_SECOND_DATE = 1;
     private static final String[] KEYWORDS = { "by", "on", "at", "from",
-            "until", "til" };
+            "until", "til", "every" };
 
     private Type type;
     private String description; // arguments without the date and time
@@ -63,6 +63,9 @@ public class Task implements Cloneable {
         type = determineType(parsedDates);
         initDateAndTime(type, parsedDates);
         description = extractDescription(input, notParsedWords);
+        while (description.substring(description.length()-1) == " ") {
+            description = description.trim();
+        }
     }
 
     // ================================================================
