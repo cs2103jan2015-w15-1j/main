@@ -177,6 +177,12 @@ public class CreateTask {
                 result.addAll(dateParser.getDates());
             }
         }
+        
+        if (result.get(0).toLocalDate().isEqual(endDateTime.toLocalDate())) {
+            result.add(endDateTime);
+            endDateTime = null;
+        }
+        
         System.out.println("result: " + result);
         limit = result.get(0).plusYears(1);
         return result;
