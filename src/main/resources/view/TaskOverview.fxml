@@ -13,8 +13,8 @@
             <VBox fx:id="messageOverlay" alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="450.0" prefWidth="450.0">
                <children>
                   <Label fx:id="icon" text="Icon" />
-                  <Label fx:id="greeting" text="Hi" wrapText="true" />
-                  <Label fx:id="message" text="Message" wrapText="true" />
+                  <Label fx:id="greeting" text="Greeting" wrapText="true" />
+                  <Label fx:id="message" maxWidth="350.0" text="Message" wrapText="true" />
                </children>
             </VBox>
          </children>

@@ -76,11 +76,10 @@ public class Display extends VBox {
 
     private static final String NO_TASK_OVERLAY_GREETING = "Hello!";
     private static final String NO_TASK_OVERLAY_ICON = "\uf14a";
-    private static final String NO_TASK_OVERLAY_MESSAGE = "Looks like you've got no tasks,\n"
-                                                          + "try entering the following:\n" +
+    private static final String NO_TASK_OVERLAY_MESSAGE = "Looks like you've got no tasks, try entering the following:\n" +
                                                           "add do tutorial 10 tomorrow\n" +
                                                           "add finish assignment by 2359 tomorrow\n" +
-                                                          "add meet Isabel today from 5pm to 6pm";
+                                                          "add meet Isabel from 5pm to 6pm today";
 
     private static final int FEEDBACK_FADE_IN_MILLISECONDS = 500;
     private static final int FEEDBACK_FADE_OUT_MILLISECONDS = 1000;
@@ -147,7 +146,7 @@ public class Display extends VBox {
     }
 
     public void updateOverviewDisplay(ObservableList<Task> tasks) {
-        messageOverlay.setOpacity(0);
+        messageOverlay.toBack();
         
         if (tasks.isEmpty()) {
             setFeedback("");
@@ -161,6 +160,7 @@ public class Display extends VBox {
                                                                   @Override
                                                                   public void handle(ActionEvent event) {
                                                                       messageOverlay.setOpacity(0);
+                                                                      messageOverlay.toFront();
                                                                       icon.setText(NO_TASK_OVERLAY_ICON);
                                                                       greeting.setText(NO_TASK_OVERLAY_GREETING);
                                                                       message.setText(NO_TASK_OVERLAY_MESSAGE);
