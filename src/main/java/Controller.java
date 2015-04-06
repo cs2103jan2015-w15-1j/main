@@ -15,6 +15,7 @@ import java.util.Stack;
 import java.util.stream.Collectors;
 
 public class Controller {
+	
     // ================================================================
     // Fields
     // ================================================================
@@ -47,13 +48,14 @@ public class Controller {
     private static final String MESSAGE_ADD = "Task has been successfully added: ";
     private static final String MESSAGE_DELETE = "Task has been successfully deleted: ";
     private static final String MESSAGE_EDIT = "Task has been successfully edited: ";
-    private static final String MESSAGE_COMPLETE = "\"%s\" completed. \n";
+    private static final String MESSAGE_COMPLETE = "\"%s\" completed.";
     private static final String MESSAGE_COMPLETE_FAILED = "\"%s\" already completed.";
     private static final String MESSAGE_INCOMPLETE = "\"%s\" marked as incomplete.";
     private static final String MESSAGE_EXIT = "Goodbye!";
     private static final String MESSAGE_UNDO = "Last command has been undone.";
     private static final String MESSAGE_INVALID_COMMAND = "Invalid command.";
     private static final String MESSAGE_NO_UNDO = "Already at oldest change, unable to undo.";
+    private static final String MESSAGE_ALL_CLEAR = "All contents are cleared!";
     
     private static final String HELP_ADD = "Add a task  ---------------------------------------------  add <arguments>";
     private static final String HELP_EDIT = "Edit a task  ---------------------  edit <index> <desc/dead> <arguments>";
@@ -65,17 +67,10 @@ public class Controller {
     private static final String HELP_SEARCH = "Search for a task  -------------------------------  search <keyword/date>";
     private static final String HELP_EXIT = "Exit Veto  -------------------------------------------------------------  exit";
 
+    
     // ================================================================
-    // Constructor
-    // ================================================================
-    // Singleton pattern for Controller
-    public static Controller getInstance() {
-        if (controller == null) {
-            controller = new Controller();
-        }
-        return controller;
-    }
-
+ 	// Constructor
+ 	// ================================================================
     /**
      * The constructor is called before the initialize() method.
      */
@@ -99,8 +94,15 @@ public class Controller {
         parser.parse("foo today");
     }
 
+	// Singleton pattern for Controller
+	public static Controller getInstance() {
+	    if (controller == null) {
+	        controller = new Controller();
+	    }
+	    return controller;
+	}
 
-    // To load the tasks into the display on the first load
+	// To load the tasks into the display on the first load
     public void onloadDisplay() {
         display.updateOverviewDisplay(displayedTasks);
         display.setFeedback(getWelcomeMessage());
@@ -124,7 +126,7 @@ public class Controller {
 
         switch (commandType) {
         	case SET:  // DONE
-	            feedback =  setSaveFileDirectory(arguments);
+	            feedback = setSaveFileDirectory(arguments);
 	            break;
 	        case ADD: // DONE
 	            updateState();
@@ -160,7 +162,7 @@ public class Controller {
 	            break;
 	        case CLEAR:    // DONE
 	        	updateState();
-	        	clear();
+	        	feedback = clear();
 	        	break;
 	        case INVALID:  // DONE
 	            feedback =  invalid();
@@ -174,15 +176,14 @@ public class Controller {
 	            break;
 	        default:
 	            break;
-
         }
-        sortAllTasks();
-        
+   
         if (helpUser) {
         	updateHelpDisplay();
         } else if (switchDisplay) {
             updateDisplaySearch();
         } else {
+        	sortAllTasks();
             updateDisplayWithDefault();
         }
         
@@ -194,9 +195,22 @@ public class Controller {
     // Initialization methods
     // ================================================================
 
-    private String setSaveFileDirectory(String input) {
-        return storage.setSaveFileDirectory(input);
-    }
+    public void setDisplay(Display display) {
+	    this.display = display;
+	}
+    
+    public void setStage(Stage stage) {
+	    this.stage = stage;
+	}
+
+	// ================================================================
+	// Getters
+	// ================================================================
+	
+	public ObservableList<Task> getDisplayedTasks() {
+	    sortAllTasks();
+	    return displayedTasks;
+	}
 
     private ArrayList<Task> getIncompleteTasks(ArrayList<Task> allTasks) {
         List<Task> incompleteTasks = allTasks.stream()
@@ -210,30 +224,11 @@ public class Controller {
                 .filter(task -> task.isCompleted())
                 .collect(Collectors.toList());
         return completedTasks;
-    }
-
-    public void setDisplay(Display display) {
-        this.display = display;
-    }
-
-    
-
-    // ================================================================
-    // Getters
-    // ================================================================
-
-    public ObservableList<Task> getDisplayedTasks() {
-        sortAllTasks();
-        return displayedTasks;
-    }
+    } 
 
     // ================================================================
     // Logic methods
     // ================================================================
-
-    public void setStage(Stage stage) {
-        this.stage = stage;
-    }
 
     private String addTask(String input) {
         if (input.isEmpty()) {
@@ -255,15 +250,6 @@ public class Controller {
         return MESSAGE_ADD + task.toString();      
     }
 
-    /**
-     * Current implementation of Edit:
-     * 1. Allows users to change FLOATING to any type of tasks.
-     * 2. Allows users to change DEADLINE to any type of tasks, except TIMED with DAY
-     * 3. Allows users to change TIMED to any type of tasks, except TIMED with DAY
-     *
-     * @param input
-     * @return
-     */
     private String editTask(String input) {
         String[] inputArray;
         int editIndex;
@@ -342,12 +328,13 @@ public class Controller {
         if (previousStates.empty()) {
             return MESSAGE_NO_UNDO;
         } else {
-            ArrayList<Task> previousTasks = previousStates.pop(); // update state pushes the complete first
-            ObservableList<Task> previousDisplayed = previousStatesDisplayed.pop(); // update state pushes the complete first
+            ArrayList<Task> previousTasks = previousStates.pop();
+            ObservableList<Task> previousDisplayed = previousStatesDisplayed.pop();
             
             allTasks = previousTasks;
-            updateStorageWithAllTasks();
             displayedTasks = previousDisplayed;
+            
+            updateStorageWithAllTasks();
             
             if (switchDisplay) {
             	search(searchArgument);
@@ -387,6 +374,18 @@ public class Controller {
 
     private String invalid() {
         return MESSAGE_INVALID_COMMAND;
+    }
+    
+    private String setSaveFileDirectory(String input) {
+        return storage.setSaveFileDirectory(input);
+    }
+    
+    private String clear() {
+        ArrayList<Task> emptyArr = new ArrayList<Task>();
+        allTasks = emptyArr;
+        displayedTasks = FXCollections.observableArrayList();;
+        storage.updateFiles(emptyArr);
+        return MESSAGE_ALL_CLEAR;
     }
 
     private String exit() {
@@ -489,14 +488,4 @@ public class Controller {
     public List<Task> getCompleteTasksPublic() {
         return getCompletedTasks(allTasks);
     }
-
-    public void clear() {
-        ArrayList<Task> emptyArr = new ArrayList<Task>();
-        allTasks = emptyArr;
-        displayedTasks = FXCollections.observableArrayList();;
-        storage.updateFiles(emptyArr);
-    }
-
-
-
 }
