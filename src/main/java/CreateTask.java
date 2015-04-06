@@ -168,8 +168,7 @@ public class CreateTask {
 
         System.out.println("What is the input to parse the start date: "
                 + input);
-        
-        
+
         dateParser.parse(input);
         if (dateParser.getDates().size() > 1
                 && input.toLowerCase().contains(STARTWORD)) {
@@ -177,7 +176,7 @@ public class CreateTask {
                     input.length());
             removedWords.add(dateParser.getParsedWords());
             tempResult.addAll(dateParser.getDates());
-            
+
             dateParser.parse(subString);
             if (dateParser.getDates().isEmpty()) {
                 tempDate = LocalDate.now();
@@ -185,7 +184,7 @@ public class CreateTask {
                 tempDate = dateParser.getDates().get(0).toLocalDate();
             }
             for (LocalDateTime time : tempResult) {
-                result.add(LocalDateTime.of(tempDate,time.toLocalTime()));
+                result.add(LocalDateTime.of(tempDate, time.toLocalTime()));
             }
             removedWords.add(dateParser.getParsedWords());
         } else if (input.toLowerCase().contains(STARTWORD)) {
@@ -209,7 +208,9 @@ public class CreateTask {
             removedWords.add(dateParser.getParsedWords());
         }
 
-        if (result.get(0).toLocalDate().isEqual(endDateTime.toLocalDate())) {
+        if (endDateTime != null
+                && result.get(0).toLocalDate()
+                        .isEqual(endDateTime.toLocalDate())) {
             result.add(endDateTime);
             endDateTime = null;
         }
