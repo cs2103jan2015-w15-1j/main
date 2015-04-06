@@ -87,7 +87,6 @@ public class CreateTask {
                     nonParsedWords = nonParsedWords.replace(remove, "");
                 }
             }
-            System.out.println("Start recurDate: " + recurDate);
             createRecurring(type, input, parsedWords, nonParsedWords,
                     recurDate, recurID);
         } else {
@@ -95,13 +94,6 @@ public class CreateTask {
             tempList.add(task);
         }
 
-        System.out.println("input: " + input);
-        System.out.println("parsedDates: " + parsedDates);
-        System.out.println("recurDate: " + recurDate);
-        System.out.println("removedWords: " + removedWords);
-        System.out.println("endDateTime: " + endDateTime);
-        System.out.println("endDateWords: " + endDateWords);
-        System.out.println("limit:" + limit);
         return tempList;
     }
 
@@ -225,7 +217,6 @@ public class CreateTask {
             removedWords.add(dateParser.getParsedWords());
         }
 
-        System.out.println("results 1: " + result);
         if (endDateTime != null
                 && result.get(0).toLocalDate()
                         .isEqual(endDateTime.toLocalDate())) {
@@ -233,7 +224,6 @@ public class CreateTask {
             endDateTime = null;
         }
 
-        System.out.println("results 1: " + result);
         limit = result.get(0).plusYears(1);
         return result;
     }
@@ -303,7 +293,7 @@ public class CreateTask {
                         removedWords.add(split[0] + " " + split[1]);
                         removedWords.add(KEYWORD + " " + split[0]);
                     } else {
-                        removedWords.add(split[0]);
+                        removedWords.add(KEYWORD + " " + split[0]);
                     }
                     return Type.YEARLY;
                 }
@@ -317,7 +307,7 @@ public class CreateTask {
                         removedWords.add(split[0] + " " + split[1]);
                         removedWords.add(KEYWORD + " " + split[0]);
                     } else {
-                        removedWords.add(split[0]);
+                        removedWords.add(KEYWORD + " " + split[0]);
                     }
                     return Type.MONTHLY;
                 }
@@ -331,7 +321,7 @@ public class CreateTask {
                         removedWords.add(split[0] + " " + split[1]);
                         removedWords.add(KEYWORD + " " + split[0]);
                     } else {
-                        removedWords.add(split[0]);
+                        removedWords.add(KEYWORD + " " + split[0]);
                     }
                     return Type.WEEKLY;
                 }
@@ -345,7 +335,7 @@ public class CreateTask {
                         removedWords.add(split[0] + " " + split[1]);
                         removedWords.add(KEYWORD + " " + split[0]);
                     } else {
-                        removedWords.add(split[0]);
+                        removedWords.add(KEYWORD + " " + split[0]);
                     }
                     return Type.DAILY;
                 }
