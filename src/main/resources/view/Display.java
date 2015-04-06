@@ -34,12 +34,26 @@ public class Display extends VBox {
     @FXML
     private Label feedbackLabel;
 
+    @FXML
+    private VBox messageOverlay;
+
+    @FXML
+    private Label icon;
+
+    @FXML
+    private Label greeting;
+
+    @FXML
+    private Label message;
+
 
     // ================================================================
     // Non-FXML Fields
     // ================================================================
     private static Logger logger;
-    private Timeline timeline;
+    private Timeline feedbackTimeline;
+
+    private Timeline noTaskMessageTimeline;
 
 
     // ================================================================
@@ -59,6 +73,14 @@ public class Display extends VBox {
     private static final String LABEL_COMPLETED = "Completed";
 
     private static final String TITLE_HELP = "~ Veto help menu ~";
+
+    private static final String NO_TASK_OVERLAY_GREETING = "Hello!";
+    private static final String NO_TASK_OVERLAY_ICON = "\uf14a";
+    private static final String NO_TASK_OVERLAY_MESSAGE = "Looks like you you've got no tasks,\n"
+                                                          + "try entering the following:\n" +
+                                                          "add do tutorial 10 tomorrow\n" +
+                                                          "add finish assignment by 2359 tomorrow\n" +
+                                                          "add meet Isabel today from 5pm to 6pm";
 
     private static final int FEEDBACK_FADE_IN_MILLISECONDS = 500;
     private static final int FEEDBACK_FADE_OUT_MILLISECONDS = 1000;
@@ -85,7 +107,8 @@ public class Display extends VBox {
             throw new RuntimeException(e);
         }
 
-        timeline = new Timeline();
+        feedbackTimeline = new Timeline();
+        noTaskMessageTimeline = new Timeline();
     }
 
     // ================================================================
@@ -101,29 +124,30 @@ public class Display extends VBox {
         fadeout.setNode(feedbackLabel);
         fadeout.setToValue(0);
 
-        timeline.stop();
+        feedbackTimeline.stop();
 
-        timeline = new Timeline(new KeyFrame(Duration.seconds(0),
-                                             new EventHandler<ActionEvent>() {
-                                                 @Override
-                                                 public void handle(ActionEvent event) {
-                                                     feedbackLabel.setOpacity(0);
-                                                     feedbackLabel.setText(feedback);
-                                                     fadein.play();
-                                                 }
-                                             }),
-                                new KeyFrame(Duration.seconds(FEEDBACK_DISPLAY_SECONDS),
-                                             new EventHandler<ActionEvent>() {
-                                                 @Override
-                                                 public void handle(ActionEvent event) {
-                                                     fadeout.play();
-                                                 }
-                                             }));
+        feedbackTimeline = new Timeline(new KeyFrame(Duration.seconds(0),
+                                                     new EventHandler<ActionEvent>() {
+                                                         @Override
+                                                         public void handle(ActionEvent event) {
+                                                             feedbackLabel.setOpacity(0);
+                                                             feedbackLabel.setText(feedback);
+                                                             fadein.play();
+                                                         }
+                                                     }),
+                                        new KeyFrame(Duration.seconds(FEEDBACK_DISPLAY_SECONDS),
+                                                     new EventHandler<ActionEvent>() {
+                                                         @Override
+                                                         public void handle(ActionEvent event) {
+                                                             fadeout.play();
+                                                         }
+                                                     }));
 
-        timeline.play();
+        feedbackTimeline.play();
     }
 
     public void updateOverviewDisplay(ObservableList<Task> tasks) {
+        messageOverlay.setOpacity(0);
         ArrayList<Task> listOfTasks = new ArrayList<Task>(tasks);
         logger.log(Level.INFO, "List of tasks: " + listOfTasks.toString());
 
@@ -137,6 +161,27 @@ public class Display extends VBox {
         index = addAllOtherTasks(displayBoxes, listOfTasks, now, index);
 
         listView.setItems(displayBoxes);
+        if (tasks.isEmpty()) {
+            setFeedback("");
+            
+            FadeTransition fadein = new FadeTransition(new Duration(2000));
+            fadein.setNode(messageOverlay);
+            fadein.setToValue(1);
+
+            noTaskMessageTimeline = new Timeline(new KeyFrame(new Duration(1),
+                                                              new EventHandler<ActionEvent>() {
+                                                                  @Override
+                                                                  public void handle(ActionEvent event) {
+                                                                      messageOverlay.setOpacity(0);
+                                                                      icon.setText(NO_TASK_OVERLAY_ICON);
+                                                                      greeting.setText(NO_TASK_OVERLAY_GREETING);
+                                                                      message.setText(NO_TASK_OVERLAY_MESSAGE);
+                                                                      fadein.play();
+                                                                  }
+                                                              }));
+
+            noTaskMessageTimeline.play();
+        }
     }
 
     public void updateSearchDisplay(ObservableList<Task> searchResults,
@@ -253,17 +298,19 @@ public class Display extends VBox {
 
         // formats the date for the date label, eg. 1 April
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d MMMM");
-        
-     // formats the date for the date label of special cases, eg. Wednesday, 1 April
+
+        // formats the date for the date label of special cases, eg. Wednesday, 1 April
         DateTimeFormatter dateFormatterForSpecialCase = DateTimeFormatter.ofPattern("EEEE, d MMMM");
-        
+
         CategoryBox label;
-        
+
         // special cases to show "Today" and "Tomorrow" instead of day
         if (day.equals(now)) {
-            label = new CategoryBox(LABEL_TODAY, day.format(dateFormatterForSpecialCase));
+            label = new CategoryBox(LABEL_TODAY,
+                                    day.format(dateFormatterForSpecialCase));
         } else if (day.equals(now.plusDays(1))) {
-            label = new CategoryBox(LABEL_TOMORROW, day.format(dateFormatterForSpecialCase));
+            label = new CategoryBox(LABEL_TOMORROW,
+                                    day.format(dateFormatterForSpecialCase));
         } else {
             label = new CategoryBox(day.format(dayFormatter),
                                     day.format(dateFormatter));

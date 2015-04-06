@@ -65,6 +65,28 @@
 	-fx-font-style: italic;
 }
 
+.display #messageOverlay {
+	-fx-background-color: RGB(255, 99, 71, 0.8);
+	-fx-background-radius: 20;
+	-fx-padding: 10;
+}
+
+.display #icon {
+	-fx-text-fill: white;
+	-fx-font: 80px FontAwesome;
+}
+
+.display #greeting {
+	-fx-text-fill: white;
+	-fx-font: 60px Roboto;
+	-fx-font-weight: bold;
+	-fx-padding: 0 0 10 0;
+}
+
+.display #message {
+	-fx-text-fill: white;
+	-fx-font: 18px Roboto;
+}
 
 /*
  * ================================================================

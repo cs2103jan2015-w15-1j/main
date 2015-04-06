@@ -108,8 +108,8 @@ public class Controller {
 
 	// To load the tasks into the display on the first load
     public void onloadDisplay() {
-        display.updateOverviewDisplay(displayedTasks);
         display.setFeedback(getWelcomeMessage());
+        display.updateOverviewDisplay(displayedTasks);
     }
 
     // ================================================================
