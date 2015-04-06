@@ -91,6 +91,16 @@ public class DateParserTest {
         assertEquals("End date & time",
                      constructDateTime(2015, 3, 15, 18, 0),
                      dates.get(1));
+        
+        input = "do homework 4pm to 6pm today";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 2, dates.size());
+        assertEquals("Start date & time",
+                     constructDateTime(2015, 4, 6, 16, 0),
+                     dates.get(0));
+        assertEquals("End date & time",
+                     constructDateTime(2015, 4, 6, 18, 0),
+                     dates.get(1));
 
         input = "15 mar 4pm to 6pm";
         dates = getParsedDates(input);
@@ -152,7 +162,7 @@ public class DateParserTest {
                      constructDateTime(2015, 3, 15, 18, 30),
                      dates.get(1));
         
-        input = "attend meeting from 1200 - 1400 on 20 Feb";
+        input = "attend meeting from \"20\" 1200 - 1400 on 20 Feb";
         dates = getParsedDates(input);
         assertEquals("Number of dates", 2, dates.size());
         assertEquals("Start date & time",

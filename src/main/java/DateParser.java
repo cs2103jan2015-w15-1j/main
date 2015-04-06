@@ -167,6 +167,7 @@ public class DateParser {
                                                                                  .split(" ")));
         ArrayList<String> splitInput = new ArrayList<String>(Arrays.asList(input.split(" ")));
         Collections.reverse(splitInput);
+        Collections.reverse(splitParsed);
 
         for (String parsedWord : splitParsed) {
             int c = 0;
@@ -176,6 +177,7 @@ public class DateParser {
 
                 if (inputWord.contains(parsedWord)) {
                     if (inputWord.equals(parsedWord)) {
+                        splitInput.remove(inputWord);
                         break;
                     } else if (c >= parsePosition) {
                         int position = parsePosition +
@@ -203,7 +205,7 @@ public class DateParser {
     private String fixInputSecondPass(String input, List<DateGroup> groups) {
         DateGroup group = groups.get(POSITION_FIRST_DATE_GROUP);
         Map<String, List<ParseLocation>> pLocations = group.getParseLocations();
-        int parsePosition = group.getPosition();
+//        int parsePosition = group.getPosition();
 
         input = catchExplicitTimeFalseMatch(input, pLocations);
 
