@@ -47,6 +47,7 @@ public class Controller {
     private static final String MESSAGE_WELCOME = "Welcome to Veto!  Here is an overview of the week ahead.";
     private static final String MESSAGE_ADD = "Task has been successfully added: %s";
     private static final String MESSAGE_DELETE = "Task has been successfully deleted: %s";
+    private static final String MESSAGE_DELETE_ALL = "All recurring task has been successfully deleted: %s";
     private static final String MESSAGE_EDIT = "Task has been successfully edited: %s";
     private static final String MESSAGE_COMPLETE = "\"%s\" completed.";
     private static final String MESSAGE_COMPLETE_FAILED = "\"%s\" already completed.";
@@ -274,15 +275,39 @@ public class Controller {
 
     private String deleteTask(String input) {
         // ArrayList is 0-indexed, but Tasks are displayed to users as 1-indexed
+        ArrayList<Task> tasksToRemove = new ArrayList<Task>();
+        Boolean isToDeleteAll = false;
+        String recurringID;
+        
+        if (input.toLowerCase().contains("all")) {
+            isToDeleteAll = true;
+            input = input.toLowerCase().replace("all", "").trim();
+        }
         try {
             int removalIndex = Integer.parseInt(input) - 1;
-            Task task = displayedTasks.get(removalIndex);
-            displayedTasks.remove(task);
-            allTasks.remove(task);
-
+            Task removeTask = displayedTasks.get(removalIndex);
+            if (isToDeleteAll) {
+                recurringID = removeTask.getID();
+                if (recurringID.equals("NA")) {
+                    return MESSAGE_INVALID_COMMAND;
+                }
+                for (Task task : allTasks) {
+                    if (task.getID().equals(recurringID)) {
+                        tasksToRemove.add(task);
+                    }
+                }
+            } else {
+                tasksToRemove.add(removeTask);
+            }
+            
+            displayedTasks.removeAll(tasksToRemove);
+            allTasks.removeAll(tasksToRemove);
             updateStorageWithAllTasks();
-
-            return String.format(MESSAGE_DELETE, task);
+            
+            if (isToDeleteAll) {
+                return String.format(MESSAGE_DELETE_ALL, removeTask.getDescription());
+            }
+            return String.format(MESSAGE_DELETE, removeTask);
         } catch (Exception e) {
             return MESSAGE_INVALID_COMMAND;
         }

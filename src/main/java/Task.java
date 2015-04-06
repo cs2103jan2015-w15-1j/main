@@ -63,6 +63,7 @@ public class Task implements Cloneable {
         type = determineType(parsedDates);
         initDateAndTime(type, parsedDates);
         description = extractDescription(input, notParsedWords);
+        recurID = "NA";
         while (description.substring(description.length()-1).equals(" ")) {
             description = description.trim();
         }
