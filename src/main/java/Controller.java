@@ -18,6 +18,7 @@ public class Controller {
     // ================================================================
     // Fields
     // ================================================================
+    // Singleton
     private static Controller controller;
 
     private Storage storage;
@@ -71,9 +72,6 @@ public class Controller {
     // ================================================================
  	// Constructor
  	// ================================================================
-    /**
-     * The constructor is called before the initialize() method.
-     */
     private Controller() {
         parser = DateParser.getInstance();
         storage = Storage.getInstance();
@@ -189,7 +187,9 @@ public class Controller {
 	            break;
         }
         showAppropriateDisplay(helpUser);
+        previousStates.addFeedback(feedback);
         display.setFeedback(feedback);
+
         return feedback;
     }
 
@@ -335,7 +335,7 @@ public class Controller {
             if (switchDisplayToSearch) {
             	search(searchArgument);
             }
-            return MESSAGE_UNDO;
+            return previousStates.getPreviousFeedback();
         }
     }
 
