@@ -76,7 +76,7 @@ public class Display extends VBox {
 
     private static final String NO_TASK_OVERLAY_GREETING = "Hello!";
     private static final String NO_TASK_OVERLAY_ICON = "\uf14a";
-    private static final String NO_TASK_OVERLAY_MESSAGE = "Looks like you you've got no tasks,\n"
+    private static final String NO_TASK_OVERLAY_MESSAGE = "Looks like you've got no tasks,\n"
                                                           + "try entering the following:\n" +
                                                           "add do tutorial 10 tomorrow\n" +
                                                           "add finish assignment by 2359 tomorrow\n" +
@@ -148,19 +148,7 @@ public class Display extends VBox {
 
     public void updateOverviewDisplay(ObservableList<Task> tasks) {
         messageOverlay.setOpacity(0);
-        ArrayList<Task> listOfTasks = new ArrayList<Task>(tasks);
-        logger.log(Level.INFO, "List of tasks: " + listOfTasks.toString());
-
-        ObservableList<HBox> displayBoxes = FXCollections.observableArrayList();
-        LocalDate now = LocalDate.now();
-        int index = 1;
-
-        index = addOverdueTasks(displayBoxes, listOfTasks, index);
-        index = addFloatingTasks(displayBoxes, listOfTasks, index);
-        index = addThisWeeksTasks(displayBoxes, listOfTasks, now, index);
-        index = addAllOtherTasks(displayBoxes, listOfTasks, now, index);
-
-        listView.setItems(displayBoxes);
+        
         if (tasks.isEmpty()) {
             setFeedback("");
             
@@ -182,6 +170,20 @@ public class Display extends VBox {
 
             noTaskMessageTimeline.play();
         }
+        
+        ArrayList<Task> listOfTasks = new ArrayList<Task>(tasks);
+        logger.log(Level.INFO, "List of tasks: " + listOfTasks.toString());
+
+        ObservableList<HBox> displayBoxes = FXCollections.observableArrayList();
+        LocalDate now = LocalDate.now();
+        int index = 1;
+
+        index = addOverdueTasks(displayBoxes, listOfTasks, index);
+        index = addFloatingTasks(displayBoxes, listOfTasks, index);
+        index = addThisWeeksTasks(displayBoxes, listOfTasks, now, index);
+        index = addAllOtherTasks(displayBoxes, listOfTasks, now, index);
+
+        listView.setItems(displayBoxes);
     }
 
     public void updateSearchDisplay(ObservableList<Task> searchResults,
