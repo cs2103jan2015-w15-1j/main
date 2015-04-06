@@ -51,7 +51,7 @@ public class Controller {
     private static final String MESSAGE_COMPLETE = "\"%s\" completed.";
     private static final String MESSAGE_COMPLETE_FAILED = "\"%s\" already completed.";
     private static final String MESSAGE_INCOMPLETE = "\"%s\" marked as incomplete.";
-    private static final String MESSAGE_UNDO = "Last command has been undone.";
+    private static final String MESSAGE_UNDO = "Previous command has been undone: \"%s\"";
     private static final String MESSAGE_INVALID_COMMAND = "Invalid command.";
     private static final String MESSAGE_NO_UNDO = "Already at oldest change, unable to undo.";
     private static final String MESSAGE_ALL_CLEAR = "All contents are cleared!";
@@ -129,18 +129,18 @@ public class Controller {
 	            break;
 	        
         	case ADD:
-	            saveCurrentState();
+	            saveCurrentState(input);
 	            feedback = addTask(arguments);
 	            switchDisplayToSearch = false;
 	            break; 
 	        
         	case DELETE:
-	            saveCurrentState();
+	            saveCurrentState(input);
 	            feedback = deleteTask(arguments);
 	            break;
 	        
         	case EDIT:
-	            saveCurrentState();
+	            saveCurrentState(input);
 	            feedback = editTask(arguments);
 	            break;
 	        
@@ -149,12 +149,12 @@ public class Controller {
 	            break;
 	        
         	case COMPLETE:
-	            saveCurrentState();
+	            saveCurrentState(input);
 	            feedback = completeTask(arguments);
 	            break;
 	        
         	case INCOMPLETE:
-	            saveCurrentState();
+	            saveCurrentState(input);
                 feedback = incompleteTask(arguments);
 	            break;
 	        
@@ -169,7 +169,7 @@ public class Controller {
 	            break;
 	        
         	case CLEAR:
-	        	saveCurrentState();
+	        	saveCurrentState(input);
 	        	feedback = clear();
 	        	break;
 	        
@@ -187,7 +187,6 @@ public class Controller {
 	            break;
         }
         showAppropriateDisplay(helpUser);
-        previousStates.addFeedback(feedback);
         display.setFeedback(feedback);
 
         return feedback;
@@ -335,7 +334,7 @@ public class Controller {
             if (switchDisplayToSearch) {
             	search(searchArgument);
             }
-            return previousStates.getPreviousFeedback();
+            return String.format(MESSAGE_UNDO, previousStates.getPreviousFeedback());
         }
     }
 
@@ -455,10 +454,9 @@ public class Controller {
         storage.updateFiles(allTasks);
     }
 
-    private void saveCurrentState() {
+    private void saveCurrentState(String input) {
     	previousStates.storeCurrentStatus(allTasks, displayedTasks);
-        //previousStates.push(cloneState(allTasks));
-        //previousStatesDisplayed.push(cloneState(displayedTasks));
+        previousStates.addFeedback(input);
     }
 
     // ================================================================
