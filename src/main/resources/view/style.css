@@ -1,3 +1,8 @@
+/*
+ * ================================================================
+ * Fonts
+ * ================================================================
+ */
 @font-face {
 	font-family: Roboto;
 	font-weight: 400;
@@ -33,16 +38,15 @@
 	src: url("/fonts/fontawesome-webfont.ttf");
 }
 
+
 /*
  * ================================================================
  * RootLayout styles
  * ================================================================
  */
- 
 .root {
     -fx-background-color: white;
 	-fx-padding: 10;
-
 }
 
 .root #userInput {
@@ -58,7 +62,6 @@
  * Display styles
  * ================================================================
  */
-
 .display #feedbackLabel {
 	-fx-padding: 0 0 5 0;
 	-fx-font: 14px Roboto;
@@ -112,59 +115,43 @@
 	-fx-background-color: transparent;
 }
 
-
-
 .display #helpOverlayContents .list-cell {
 	-fx-padding: 3 0 3 0;
 	-fx-background-color: transparent;
 }
 
-
-/*
- * ================================================================
- * ListView styles
- * ================================================================
- */
-
-.list-view .scroll-bar:horizontal {
+.display .list-view .scroll-bar:horizontal {
     -fx-opacity: 0;
-    -fx-padding:-7;
+    -fx-padding: -7;
 }
 
-.list-view .scroll-bar:vertical {
+.display .list-view .scroll-bar:vertical {
     -fx-opacity: 0;
-    -fx-padding:-7;
+    -fx-padding: -7;
 }
 
-.list-view {
+.display .list-view {
 	-fx-padding: 8 15 8 15;
 	-fx-background-color: white;
 }
 
-/*
- * ================================================================
- * list-cell styles
- * ================================================================
- */
-
-.list-cell {
+.display .list-cell {
 	-fx-padding: 0;
 	-fx-background-color: white;
 }
+
 
 /*
  * ================================================================
  * CategoryBox styles
  * ================================================================
  */
-
 .categoryBox {
 	-fx-padding: 5 0 5 0;
 	-fx-font-family: Roboto;
 	-fx-font-size: 20px;
 	-fx-font-style: italic;
 	-fx-background-color: transparent;
-	
 }
 
 .categoryBox #category {
@@ -177,6 +164,7 @@
 	-fx-font-size: 14px;
 	-fx-text-fill: gray;
 }
+
 
 /*
  * ================================================================
@@ -199,12 +187,12 @@
 	-fx-text-fill: white;
 }
 
+
 /*
  * ================================================================
  * TaskBox styles
  * ================================================================
  */
-
 .taskBox {
 	-fx-padding: 5 0 5 20;
 	-fx-font-family: Roboto;
@@ -225,7 +213,6 @@
 	-fx-text-fill: black;
 }
 
-
 .taskBox #delete {
 	-fx-font: 14px FontAwesome;
 	-fx-text-fill: transparent;
@@ -235,4 +222,3 @@
 .taskBox #delete:hover {
 	-fx-text-fill: tomato;
 }
-

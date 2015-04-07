@@ -29,6 +29,7 @@ import com.joestelmach.natty.Parser;
  * dp.parse("do homework from 4pm to 6pm on 15 mar");
  * ArrayList<LocalDateTime> dates = dp.getDates();
  * String parsedWords = dp.getParsedWords;
+ * String notParsedWords = dp.getNotParsedWords;
  */
 
 //@author A0121520A

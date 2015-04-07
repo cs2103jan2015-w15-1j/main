@@ -89,9 +89,9 @@ public class Display extends VBox {
     private static final String LABEL_INCOMPLETE = "Incomplete";
     private static final String LABEL_COMPLETED = "Completed";
 
-    private static final String HELP_OVERLAY_ICON = "\uf05a";
-    private static final String HELP_OVERLAY_TITLE = "Need help?";
 
+    private static final String HELP_OVERLAY_TITLE = "Need help?";
+    private static final String HELP_OVERLAY_ICON = "\uf05a";
     private static final String HELP_ADD_DESC = "Add a task";
     private static final String HELP_ADD_COMMAND = "add <description> <time> <day>";
     private static final String HELP_EDIT_DESC = "Edit a task";
@@ -110,14 +110,14 @@ public class Display extends VBox {
     private static final String HELP_SEARCH_COMMAND = "search <keyword/day>";
     private static final String HELP_EXIT_DESC = "Exit Veto";
     private static final String HELP_EXIT_COMMAND = "exit";
-
-    private static final int OVERLAY_FADE_IN_MILLISECONDS = 1500;
-
+    
+    private static final int OVERLAY_FADE_IN_MILLISECONDS = 200;
+    
     private static final String NO_TASK_OVERLAY_GREETING = "Hello!";
     private static final String NO_TASK_OVERLAY_ICON = "\uf14a";
-    private static final String NO_TASK_OVERLAY_MESSAGE = "Looks like you've got no tasks, try entering the following:\n";
+    private static final String NO_TASK_OVERLAY_MESSAGE = "Looks like you've got no tasks, try entering the following:\n\n";
     private static final int NUM_EXAMPLE_COMMANDS = 3;
-
+    
     private static final int FEEDBACK_FADE_IN_MILLISECONDS = 500;
     private static final int FEEDBACK_FADE_OUT_MILLISECONDS = 1000;
     private static final int FEEDBACK_DISPLAY_SECONDS = 8;
@@ -171,7 +171,6 @@ public class Display extends VBox {
         listView.setItems(displayBoxes);
     }
 
-
     public void updateSearchDisplay(ObservableList<Task> searchResults,
                                     String searchQuery) {
         hideOverlays();
@@ -190,7 +189,6 @@ public class Display extends VBox {
         listView.setItems(displayBoxes);
     }
 
-
     public void setFeedback(String feedback) {
         FadeTransition fadeIn = initFadeIn(feedbackLabel,
                                            FEEDBACK_FADE_IN_MILLISECONDS);
@@ -204,7 +202,6 @@ public class Display extends VBox {
 
     public void showHelpDisplay() {
         hideOverlays();
-
         FadeTransition fadeIn = initFadeIn(helpOverlay,
                                            OVERLAY_FADE_IN_MILLISECONDS);
 
@@ -226,13 +223,12 @@ public class Display extends VBox {
                                            OVERLAY_FADE_IN_MILLISECONDS);
 
         overlayTimeline = generateNoTaskOverlayTimeline(exampleCommands, fadeIn);
-
         overlayTimeline.play();
     }
 
 
     // ================================================================
-    // Initialisation methods
+    // Initialization methods
     // ================================================================
     private void initTimelines() {
         feedbackTimeline = new Timeline();
@@ -347,7 +343,6 @@ public class Display extends VBox {
                                          }));
     }
 
-
     private Timeline generateHelpOverlayTimeline(FadeTransition fadeIn) {
         return new Timeline(new KeyFrame(new Duration(1),
                                          new EventHandler<ActionEvent>() {
@@ -386,7 +381,6 @@ public class Display extends VBox {
         return index;
     }
 
-
     private int addOverdueTasks(ObservableList<HBox> displayBoxes,
                                 ArrayList<Task> listOfTasks,
                                 int index) {
@@ -410,7 +404,6 @@ public class Display extends VBox {
 
         return index;
     }
-
 
     private int addThisWeeksTasks(ObservableList<HBox> displayBoxes,
                                   ArrayList<Task> listOfTasks,
@@ -440,7 +433,6 @@ public class Display extends VBox {
         return index;
     }
 
-
     private int addAllOtherTasks(ObservableList<HBox> displayBoxes,
                                  ArrayList<Task> listOfTasks,
                                  LocalDate now,
@@ -466,7 +458,6 @@ public class Display extends VBox {
 
         return index;
     }
-
 
     private CategoryBox generateDayLabel(LocalDate now, LocalDate day) {
 
@@ -530,7 +521,6 @@ public class Display extends VBox {
         return index;
     }
 
-
     private int addCompletedTasks(ObservableList<HBox> displayBoxes,
                                   ArrayList<Task> listOfResults,
                                   int index) {
@@ -553,7 +543,6 @@ public class Display extends VBox {
 
         return index;
     }
-
 
     private void addSearchLabel(ObservableList<HBox> displayBoxes,
                                 ObservableList<Task> searchResults,
