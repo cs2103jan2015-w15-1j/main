@@ -96,10 +96,10 @@ public class DateParserTest {
         dates = getParsedDates(input);
         assertEquals("Number of dates", 2, dates.size());
         assertEquals("Start date & time",
-                     constructDateTime(2015, 4, 6, 16, 0),
+                     constructDateTime(2015, 4, 7, 16, 0),
                      dates.get(0));
         assertEquals("End date & time",
-                     constructDateTime(2015, 4, 6, 18, 0),
+                     constructDateTime(2015, 4, 7, 18, 0),
                      dates.get(1));
 
         input = "15 mar 4pm to 6pm";
@@ -276,6 +276,17 @@ public class DateParserTest {
         assertEquals("Recur until date",
                      constructDate(2015, 6, 6),
                      dates.get(2).toLocalDate());
+    }
+    
+    @Test
+    public void inputWithHolidays() {
+        String input;
+        ArrayList<LocalDateTime> dates;
+
+        input = "\"good bye thursday and friday\" today";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date", constructDate(2015, 4, 7), dates.get(0).toLocalDate());
     }
 
 }

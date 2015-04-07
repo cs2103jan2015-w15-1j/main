@@ -40,8 +40,13 @@
  */
  
 .root {
-	-fx-background-color: white;
+	/* -fx-background-image: url("/images/hUCAMdc.jpg");
+	-fx-background-repeat: stretch;
+	-fx-background-size: cover;
+    -fx-background-position: center center; */
+    -fx-background-color: white;
 	-fx-padding: 10;
+
 }
 
 .root #userInput {
@@ -105,7 +110,7 @@
 }
 
 .list-view {
-	-fx-padding: 8;
+	-fx-padding: 8 15 8 15;
 	-fx-background-color: transparent;
 }
 
@@ -117,7 +122,7 @@
 
 .list-cell {
 	-fx-padding: 0;
-	-fx-background-color: white;
+	-fx-background-color: transparent;
 }
 
 /*
@@ -131,7 +136,7 @@
 	-fx-font-family: Roboto;
 	-fx-font-size: 20px;
 	-fx-font-style: italic;
-	-fx-background-color: white;
+	-fx-background-color: transparent;
 	
 }
 
