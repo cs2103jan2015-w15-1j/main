@@ -81,6 +81,7 @@ public class CreateTask {
                             .isBefore(parsedDates.get(0).toLocalDate())) {
                 recurDate.set(0, parsedDates.get(0));
             }
+            
             getEndDateTime(recurDate);
             if (!removedWords.isEmpty()) {
                 for (String remove : removedWords) {
@@ -88,6 +89,11 @@ public class CreateTask {
                     nonParsedWords = nonParsedWords.replace(remove, "");
                 }
             }
+            System.out.println(input);
+            System.out.println(nonParsedWords);
+            nonParsedWords = findCommonWord(input,nonParsedWords);
+            System.out.println(nonParsedWords);
+            
             createRecurring(type, input, parsedWords, nonParsedWords,
                     recurDate, recurId, rawInfo);
         } else {
@@ -96,6 +102,20 @@ public class CreateTask {
         }
 
         return tempList;
+    }
+
+    private String findCommonWord(String input, String nonParsedWords) {
+        String result = null;
+        int stringLength = Math.min(input.length(), nonParsedWords.length());
+        
+        for(int i=0; i<=stringLength; i++){
+                if(input.substring(0, i).equals(nonParsedWords.substring(0, i))){
+                        result = input.substring(0, i);
+                } else {
+                        break;
+                }
+        }
+        return result;
     }
 
     private void resetField() {
