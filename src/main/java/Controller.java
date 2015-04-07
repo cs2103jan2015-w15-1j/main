@@ -49,6 +49,7 @@ public class Controller {
     private static final String MESSAGE_DELETE = "Task has been successfully deleted: %s";
     private static final String MESSAGE_DELETE_ALL = "All recurring task has been successfully deleted: %s";
     private static final String MESSAGE_EDIT = "Task has been successfully edited: %s";
+    private static final String MESSAGE_EDIT_ALL = "All recurring task has been successfully edited: %s";
     private static final String MESSAGE_COMPLETE = "\"%s\" completed.";
     private static final String MESSAGE_COMPLETE_FAILED = "\"%s\" already completed.";
     private static final String MESSAGE_INCOMPLETE = "\"%s\" marked as incomplete.";
@@ -254,8 +255,6 @@ public class Controller {
     private String editTask(String input) {
         String[] inputArray;
         int editIndex;
-        boolean isToEditAll = false;
-        String recurringId;
 
         // Check if it's an edit all
         if (input.toLowerCase().contains("all")) {
@@ -285,6 +284,13 @@ public class Controller {
         task.update(input, parsedDates, parsedWords, notParsedWords);
     }
 
+    // Use this overloaded version or editAllTasks to prevent parsing n times,
+    // where n is the number of recurring tasks to edit
+    private void updateIndividualTask(Task task, String input, ArrayList<LocalDateTime> parsedDates,
+                                      String parsedWords, String notParsedWords) {
+        task.update(input, parsedDates, parsedWords, notParsedWords);
+    }
+
     private String editAllTasks(String input) {
         String[] inputArray;
         int editIndex;
@@ -296,23 +302,21 @@ public class Controller {
             Task task = displayedTasks.get(editIndex);
 
             recurringId = task.getID();
+
             if (recurringId.equals("NA")) {
                 return MESSAGE_INVALID_COMMAND;
             } else {
-                List<Task> allEditedTasks = allTasks.stream()
-                        .filter(e -> e.getID().equals(recurringId))
-                        .collect(Collectors.toList());
+                parser.parse(input);
+                ArrayList<LocalDateTime> parsedDates = parser.getDates();
+                String parsedWords = parser.getParsedWords();
+                String notParsedWords = parser.getNotParsedWords();
+
+                for (Task editedTask : allTasks) {
+                    updateIndividualTask(editedTask, input, parsedDates, parsedWords, notParsedWords);
+                }
+                updateStorageWithAllTasks();
             }
-
-
-
-            parser.parse(input);
-            ArrayList<LocalDateTime> parsedDates = parser.getDates();
-            String parsedWords = parser.getParsedWords();
-            String notParsedWords = parser.getNotParsedWords();
-
-            task.update(input, parsedDates, parsedWords, notParsedWords);
-            return String.format(MESSAGE_EDIT, task);
+            return String.format(MESSAGE_EDIT_ALL, task);
         } catch (Exception e) {
             return MESSAGE_INVALID_COMMAND;
         }
