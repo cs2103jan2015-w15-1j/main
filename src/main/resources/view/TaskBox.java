@@ -1,5 +1,6 @@
 package main.resources.view;
 
+import main.java.Command;
 import main.java.Controller;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -12,15 +13,17 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 
+//@author A0121520A
 public class TaskBox extends HBox {
+    
+    private static final String EMPTY_STRING = "";
+    private static final String ONE_SPACING = " ";
     private static final String LOCATION_TASK_BOX_FXML = "/view/TaskBox.fxml";
-    
-    private static final String KEYWORD_COMPLETE = "complete";
-    private static final String KEYWORD_INCOMPLETE = "incomplete";
-    private static final String KEYWORD_DELETE = "delete";
-
+    private static final String KEYWORD_COMPLETE = Command.Type.COMPLETE.toString();
+    private static final String KEYWORD_INCOMPLETE = Command.Type.INCOMPLETE.toString();
+    private static final String KEYWORD_DELETE = Command.Type.DELETE.toString();
     private static final String ICON_DELETE = "\uf014";
-    
+
     @FXML
     private Label index;
 
@@ -43,7 +46,7 @@ public class TaskBox extends HBox {
         checkbox.setSelected(completed);
         initListenerAndFields(idx, desc);
     }
-    
+
     private void loadFxml() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(LOCATION_TASK_BOX_FXML));
@@ -55,14 +58,13 @@ public class TaskBox extends HBox {
             e.printStackTrace();
         }
     }
-    
+
     private void initListenerAndFields(int idx, String desc) {
         ChangeListener<Boolean> checkboxListener = initCheckboxListener(idx);
         EventHandler<ActionEvent> deleteListener = initDeleteListener(idx);
-
         initFxmlFields(idx, desc, checkboxListener, deleteListener);
     }
-    
+
     private ChangeListener<Boolean> initCheckboxListener(int idx) {
         ChangeListener<Boolean> listener = new ChangeListener<Boolean>() {
             @Override
@@ -71,9 +73,11 @@ public class TaskBox extends HBox {
                                 Boolean newVal) {
                 Controller controller = Controller.getInstance();
                 if (newVal) {
-                    controller.executeCommand(KEYWORD_COMPLETE + " " + idx);
+                    controller.executeCommand(KEYWORD_COMPLETE + ONE_SPACING +
+                                              idx);
                 } else {
-                    controller.executeCommand(KEYWORD_INCOMPLETE + " " + idx);
+                    controller.executeCommand(KEYWORD_INCOMPLETE + ONE_SPACING +
+                                              idx);
                 }
             }
         };
@@ -85,7 +89,7 @@ public class TaskBox extends HBox {
             @Override
             public void handle(ActionEvent event) {
                 Controller controller = Controller.getInstance();
-                controller.executeCommand(KEYWORD_DELETE + " " + idx);
+                controller.executeCommand(KEYWORD_DELETE + ONE_SPACING + idx);
             }
         };
         return deleteListener;
@@ -95,8 +99,8 @@ public class TaskBox extends HBox {
                                 String desc,
                                 ChangeListener<Boolean> checkboxListener,
                                 EventHandler<ActionEvent> deleteListener) {
-        index.setText(idx + "");
         checkbox.selectedProperty().addListener(checkboxListener);
+        index.setText(idx + EMPTY_STRING);
         description.setText(desc);
         delete.setText(ICON_DELETE);
         delete.setOnAction(deleteListener);
