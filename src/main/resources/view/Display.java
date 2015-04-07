@@ -64,8 +64,10 @@ public class Display extends VBox {
     // ================================================================
     private static Logger logger;
     private Timeline feedbackTimeline;
-    private Timeline noTaskMessageTimeline;
+    private Timeline noTaskOverlayTimeline;
+    private Timeline helpOverlayTimeline;
     private ArrayList<String> allExampleCommands;
+    
 
     // ================================================================
     // Constants
@@ -116,7 +118,8 @@ public class Display extends VBox {
         }
 
         feedbackTimeline = new Timeline();
-        noTaskMessageTimeline = new Timeline();
+        noTaskOverlayTimeline = new Timeline();
+        helpOverlayTimeline = new Timeline();
         initExampleCommands();
     }
 
@@ -130,6 +133,7 @@ public class Display extends VBox {
         allExampleCommands.add("add exercise every tuesday");
     }
 
+    
     // ================================================================
     // Public methods
     // ================================================================
@@ -167,8 +171,8 @@ public class Display extends VBox {
 
     public void updateOverviewDisplay(ObservableList<Task> tasks) {
         messageOverlay.toBack();
-        helpOverlay.toBack();
         messageOverlay.setOpacity(0);
+        helpOverlay.toBack();
 
         
         if (tasks.isEmpty()) {
@@ -180,7 +184,7 @@ public class Display extends VBox {
             fadein.setNode(messageOverlay);
             fadein.setToValue(1);
 
-            noTaskMessageTimeline = new Timeline(new KeyFrame(new Duration(1),
+            noTaskOverlayTimeline = new Timeline(new KeyFrame(new Duration(1),
                                                               new EventHandler<ActionEvent>() {
                                                                   @Override
                                                                   public void handle(ActionEvent event) {
@@ -193,7 +197,7 @@ public class Display extends VBox {
                                                                   }
                                                               }));
 
-            noTaskMessageTimeline.play();
+            noTaskOverlayTimeline.play();
         }
         
         ArrayList<Task> listOfTasks = new ArrayList<Task>(tasks);
@@ -236,7 +240,7 @@ public class Display extends VBox {
         fadein.setNode(helpOverlay);
         fadein.setToValue(1);
         
-        noTaskMessageTimeline = new Timeline(new KeyFrame(new Duration(1),
+        helpOverlayTimeline = new Timeline(new KeyFrame(new Duration(1),
                 					new EventHandler<ActionEvent>() {
                     					@Override
                     					public void handle(ActionEvent event) {
@@ -247,7 +251,7 @@ public class Display extends VBox {
                     						fadein.play();
                     					}
                 					}));
-        noTaskMessageTimeline.play();
+        helpOverlayTimeline.play();
         
         
 //        ObservableList<HBox> displayBoxes = FXCollections.observableArrayList();
