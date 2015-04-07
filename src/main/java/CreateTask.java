@@ -57,13 +57,14 @@ public class CreateTask {
             ArrayList<LocalDateTime> parsedDates, String parsedWords,
             String nonParsedWords) {
         resetField();
+        String rawInfo = input;
         Type type = checkRecurring(input);
         Boolean hasIgnoreWords = false;
 
         ArrayList<LocalDateTime> recurDate = new ArrayList<LocalDateTime>();
-        String recurID;
+        String recurId;
         Task task;
-        recurID = UUID.randomUUID().toString();
+        recurId = UUID.randomUUID().toString();
         for (String string : IGNOREWORD) {
             if (input.contains(string)) {
                 hasIgnoreWords = true;
@@ -88,7 +89,7 @@ public class CreateTask {
                 }
             }
             createRecurring(type, input, parsedWords, nonParsedWords,
-                    recurDate, recurID);
+                    recurDate, recurId, rawInfo);
         } else {
             task = new Task(input, parsedDates, parsedWords, nonParsedWords);
             tempList.add(task);
@@ -108,14 +109,15 @@ public class CreateTask {
 
     private void createRecurring(Type type, String input, String parsedWords,
             String nonParsedWords, ArrayList<LocalDateTime> recurDate,
-            String recurID) {
+            String recurId, String rawInfo) {
         Task task;
         LocalDateTime nextDate = null;
 
         while (!recurDate.get(0).toLocalDate()
                 .isAfter(endDateTime.toLocalDate())) {
             task = new Task(input, recurDate, parsedWords, nonParsedWords);
-            task.setID(recurID);
+            task.setId(recurId);
+            task.setRawInfo(rawInfo);
             tempList.add(task);
             switch (type) {
             case DAILY:

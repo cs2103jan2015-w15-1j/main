@@ -223,15 +223,20 @@ public class Controller {
             return MESSAGE_INVALID_COMMAND;
         }
         parser.parse(input);
+        Task task;
         ArrayList<LocalDateTime> parsedDates = parser.getDates();
         String parsedWords = parser.getParsedWords();
         String notParsedWords = parser.getNotParsedWords();
         ArrayList<Task> newTask = new ArrayList<Task>();
 
         // Instantiate a new Task object
-        newTask = taskCreator.create(input, parsedDates, parsedWords, notParsedWords);
-
-        Task task = newTask.get(0);
+        try {
+            newTask = taskCreator.create(input, parsedDates, parsedWords, notParsedWords);
+            task = newTask.get(0);
+        } catch (IndexOutOfBoundsException e) {
+            return MESSAGE_INVALID_COMMAND;
+        }
+        
         allTasks.addAll(newTask);
         updateStorageWithAllTasks();
         
@@ -302,9 +307,9 @@ public class Controller {
             editIndex = Integer.parseInt(inputArray[0]) - 1;
             Task task = displayedTasks.get(editIndex);
 
-            recurringId = task.getID();
+            recurringId = task.getId();
 
-            if (recurringId.equals("NA")) {
+            if (recurringId.equals(null)) {
                 return MESSAGE_INVALID_COMMAND;
             } else {
                 parser.parse(input);
@@ -337,12 +342,12 @@ public class Controller {
             int removalIndex = Integer.parseInt(input) - 1;
             Task removeTask = displayedTasks.get(removalIndex);
             if (isToDeleteAll) {
-                recurringID = removeTask.getID();
-                if (recurringID.equals("NA")) {
+                recurringID = removeTask.getId();
+                if (recurringID.equals(null)) {
                     return MESSAGE_INVALID_COMMAND;
                 }
                 for (Task task : allTasks) {
-                    if (task.getID().equals(recurringID)) {
+                    if (task.getId()!=null && task.getId().equals(recurringID)) {
                         tasksToRemove.add(task);
                     }
                 }

@@ -49,21 +49,22 @@ public class Task implements Cloneable {
     private static final String[] KEYWORDS = { "by", "on", "at", "from",
             "until", "till" };
 
+    private String rawInfo;
     private Type type;
     private String description; // arguments without the date and time
     private LocalDate date;
     private LocalTime startTime;
     private LocalTime endTime;
     private boolean isCompleted;
-    private String recurID;
+    private String recurId;
 
     public Task(String input, ArrayList<LocalDateTime> parsedDates,
             String parsedWords, String notParsedWords) {
         markAsIncomplete();
+        rawInfo = input;
         type = determineType(parsedDates);
         initDateAndTime(type, parsedDates);
         description = extractDescription(input, notParsedWords);
-        recurID = "NA";
         while (description.substring(description.length()-1).equals(" ")) {
             description = description.trim();
         }
@@ -75,6 +76,10 @@ public class Task implements Cloneable {
 
     public Type getType() {
         return type;
+    }
+    
+    public String getRawInfo() {
+        return rawInfo;
     }
 
     public String getDescription() {
@@ -97,8 +102,8 @@ public class Task implements Cloneable {
         return isCompleted;
     }
 
-    public String getID() {
-        return recurID;
+    public String getId() {
+        return recurId;
     }
 
     public boolean isOverdue() {
@@ -110,8 +115,12 @@ public class Task implements Cloneable {
     // Public setters
     // ================================================================
 
-    public void setID(String input) {
-        recurID = input;
+    public void setId(String input) {
+        recurId = input;
+    }
+    
+    public void setRawInfo(String input) {
+        rawInfo = input;
     }
 
     public void setDescription(String input) {
