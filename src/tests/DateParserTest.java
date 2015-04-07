@@ -2,8 +2,10 @@ package tests;
 
 import static org.junit.Assert.*;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 
 import main.java.DateParser;
@@ -31,6 +33,10 @@ public class DateParserTest {
                                             int minute) {
         return LocalDateTime.of(year, month, day, hour, minute);
     }
+    
+    private LocalDate getDateOfComingDay(DayOfWeek day) {
+        return LocalDate.now().with(TemporalAdjusters.next(day));
+    }
 
     @Test
     public void inputWithNoDateNoDuration() {
@@ -40,48 +46,174 @@ public class DateParserTest {
     }
 
     @Test
-    public void inputWithDateNoDuration() {
+    public void inputWithNumericDateNoDuration() {
         String input = "15 mar";
         ArrayList<LocalDateTime> dates = getParsedDates(input);
         assertEquals("Number of dates", 1, dates.size());
-        assertEquals("Start date & time",
+        assertEquals("Date",
                      constructDate(2015, 3, 15),
                      dates.get(0).toLocalDate());
 
         input = "mar 15";
         dates = getParsedDates(input);
         assertEquals("Number of dates", 1, dates.size());
-        assertEquals("Start date & time",
+        assertEquals("Date",
                      constructDate(2015, 3, 15),
                      dates.get(0).toLocalDate());
 
         input = "15 march";
         dates = getParsedDates(input);
         assertEquals("Number of dates", 1, dates.size());
-        assertEquals("Start date & time",
+        assertEquals("Date",
                      constructDate(2015, 3, 15),
                      dates.get(0).toLocalDate());
 
         input = "15 march 2018";
         dates = getParsedDates(input);
         assertEquals("Number of dates", 1, dates.size());
-        assertEquals("Start date & time",
+        assertEquals("Date",
                      constructDate(2018, 3, 15),
+                     dates.get(0).toLocalDate());
+        
+        input = "03/15";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date",
+                     constructDate(2015, 3, 15),
+                     dates.get(0).toLocalDate());
+    }
+    
+    @Test
+    public void inputWithRelaxedDateNoDuration() {
+        String input = "today";
+        ArrayList<LocalDateTime> dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date",
+                     LocalDate.now(),
+                     dates.get(0).toLocalDate());
+
+        input = "tomorrow";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date",
+                     LocalDate.now().plusDays(1),
+                     dates.get(0).toLocalDate());
+
+        input = "wednesday";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date",
+                     getDateOfComingDay(DayOfWeek.WEDNESDAY),
+                     dates.get(0).toLocalDate());
+
+        input = "next week";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date",
+                     LocalDate.now().plusWeeks(1),
+                     dates.get(0).toLocalDate());
+        
+        input = "next month";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date",
+                     LocalDate.now().plusMonths(1),
+                     dates.get(0).toLocalDate());
+        
+        input = "next year";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date",
+                     LocalDate.now().plusYears(1),
                      dates.get(0).toLocalDate());
     }
 
     @Test
-    public void inputWithDateAndTime() {
+    public void inputWithNumericDateAndTime() {
         String input = "15 mar 6pm";
         ArrayList<LocalDateTime> dates = getParsedDates(input);
         assertEquals("Number of dates", 1, dates.size());
         assertEquals("Date & time",
                      constructDateTime(2015, 3, 15, 18, 0),
                      dates.get(0));
+        
+        input = "6pm 15 mar";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date & time",
+                     constructDateTime(2015, 3, 15, 18, 0),
+                     dates.get(0));
+        
+        input = "1800 15 mar";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date & time",
+                     constructDateTime(2015, 3, 15, 18, 0),
+                     dates.get(0));
+        
+        input = "15 mar 2015 1800";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date & time",
+                     constructDateTime(2015, 3, 15, 18, 0),
+                     dates.get(0));
+        
+        input = "1800 15 mar 2015";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date & time",
+                     constructDateTime(2015, 3, 15, 18, 0),
+                     dates.get(0));
+        
+        input = "1800 03/15";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date & time",
+                     constructDateTime(2015, 3, 15, 18, 0),
+                     dates.get(0));
+        
+        input = "6pm 03/15";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date & time",
+                     constructDateTime(2015, 3, 15, 18, 0),
+                     dates.get(0));
+    }
+    
+    @Test
+    public void inputWithRelaxedDateAndTime() {
+        String input = "today 6pm";
+        ArrayList<LocalDateTime> dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date & time",
+                     LocalDate.now(),
+                     dates.get(0).toLocalDate());
+        
+        input = "6pm tomorrow";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date & time",
+                     LocalDate.now().plusDays(1),
+                     dates.get(0).toLocalDate());
+        
+        input = "6pm next week";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date & time",
+                     LocalDate.now().plusWeeks(1),
+                     dates.get(0).toLocalDate());
+        
+        input = "next week 6pm";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date & time",
+                     LocalDate.now().plusWeeks(1),
+                     dates.get(0).toLocalDate());
     }
 
+    
     @Test
-    public void inputWithDateAndDuration() {
+    public void inputWithNumericDateAndDuration() {
         String input = "4pm to 6pm on 15 mar";
         ArrayList<LocalDateTime> dates = getParsedDates(input);
         assertEquals("Number of dates", 2, dates.size());
@@ -96,7 +228,7 @@ public class DateParserTest {
         dates = getParsedDates(input);
         assertEquals("Number of dates", 2, dates.size());
         assertEquals("Start date & time",
-                     constructDateTime(2015, 4, 7, 16, 0),
+                     LocalDateTime.now(),
                      dates.get(0));
         assertEquals("End date & time",
                      constructDateTime(2015, 4, 7, 18, 0),
@@ -231,18 +363,6 @@ public class DateParserTest {
         dates = getParsedDates(input);
         assertEquals("Number of dates", 1, dates.size());
     }
-    
-//    @Test
-//    public void inputWithYearOnly() {
-//        String input;
-//        ArrayList<LocalDateTime> dates;
-//        input = "2016";
-//        dates = getParsedDates(input);
-//        assertEquals("Number of dates", 1, dates.size());
-//        assertEquals("Date",
-//                     constructDate(2016, 1, 1),
-//                     dates.get(0).toLocalDate());
-//    }
 
     @Test
     public void inputWithFalseMatchingWords() {

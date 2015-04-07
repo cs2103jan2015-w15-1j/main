@@ -358,12 +358,14 @@ public class DateParser {
         if (group != null) {
             String parsedWordsFromModifiedInput = group.getText();
 
-            String[] splitParsedWords = parsedWordsFromModifiedInput.split(" ");
-            String[] splitRawInput = rawInput.split(" ");
+            String[] splitParsedWords = parsedWordsFromModifiedInput.split(ONE_SPACING);
             ArrayList<String> splitParsedWordsArr = new ArrayList<String>(Arrays.asList(splitParsedWords));
-            ArrayList<String> parsedWordsArr = new ArrayList<String>();
+            
+            String[] splitRawInput = rawInput.split(ONE_SPACING);
             ArrayList<String> notParsedWordsArr = new ArrayList<String>(Arrays.asList(splitRawInput));
-
+            
+            ArrayList<String> parsedWordsArr = new ArrayList<String>();
+            
             Collections.reverse(splitParsedWordsArr);
             Collections.reverse(notParsedWordsArr);
 
@@ -379,8 +381,9 @@ public class DateParser {
 
             Collections.reverse(parsedWordsArr);
             Collections.reverse(notParsedWordsArr);
-            parsedWords = StringUtils.join(parsedWordsArr, ' ');
-            notParsedWords = StringUtils.join(notParsedWordsArr, ' ');
+            
+            parsedWords = StringUtils.join(parsedWordsArr, ONE_SPACING);
+            notParsedWords = StringUtils.join(notParsedWordsArr, ONE_SPACING);
         } else {
             notParsedWords = rawInput;
         }
@@ -458,18 +461,17 @@ public class DateParser {
                                                 int position,
                                                 String words) {
         ArrayList<String> splitInput = new ArrayList<String>(Arrays.asList(input.split(ONE_SPACING)));
-        modifyWordAtPosition(input, position, words, splitInput);
+        appendWordAtPosInSplitInput(input, position, words, splitInput);
         return StringUtils.join(splitInput, ONE_SPACING);
     }
 
 
-    private void modifyWordAtPosition(String input,
+    private void appendWordAtPosInSplitInput(String input,
                                       int position,
                                       String words,
                                       ArrayList<String> splitInput) {
         int i = getIndexOfWordInSplitInput(splitInput, input, position);
         String word = splitInput.get(i);
-
         splitInput.set(i, words + word);
     }
 
