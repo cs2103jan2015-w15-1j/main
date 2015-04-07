@@ -53,7 +53,7 @@ public class MainApp extends Application {
 	}
 
 	public void initDisplay() {
-		display = new Display();
+		display = Display.getInstance();
 		rootLayoutController.setCenter(display);
 	}
 

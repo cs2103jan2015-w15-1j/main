@@ -72,6 +72,8 @@ public class Display extends VBox {
     private ArrayList<String> allExampleCommands;
     private ObservableList<HelpBox> helpList;
 
+    private static Display display;
+
     // ================================================================
     // Constants
     // ================================================================
@@ -126,7 +128,7 @@ public class Display extends VBox {
     // ================================================================
     // Constructor
     // ================================================================
-    public Display() {
+    private Display() {
         logger = Logger.getLogger("Display");
         logger.setLevel(Level.INFO);
 
@@ -143,6 +145,13 @@ public class Display extends VBox {
         initTimelines();
         initExampleCommands();
         initHelpList();
+    }
+
+    public static Display getInstance() {
+        if (display == null) {
+            display = new Display();
+        }
+        return display;
     }
 
 
@@ -207,6 +216,10 @@ public class Display extends VBox {
 
         overlayTimeline = generateHelpOverlayTimeline(fadeIn);
         overlayTimeline.play();
+    }
+
+    public void scroll() {
+        listView.scrollTo(5);
     }
 
 
