@@ -254,23 +254,68 @@ public class Controller {
     private String editTask(String input) {
         String[] inputArray;
         int editIndex;
+        boolean isToEditAll = false;
+        String recurringId;
+
+        // Check if it's an edit all
+        if (input.toLowerCase().contains("all")) {
+            input = input.toLowerCase().replace("all", "").trim();
+            return editAllTasks(input);
+        }
 
         // Split the input into the index and the arguments
         try {
             inputArray = input.split(" ");
             editIndex = Integer.parseInt(inputArray[0]) - 1;
+            Task task = displayedTasks.get(editIndex);
+
+            updateIndividualTask(task, input);
+            return String.format(MESSAGE_EDIT, task);
         } catch (Exception e) {
             return MESSAGE_INVALID_COMMAND;
         }
+    }
 
-        Task task = displayedTasks.get(editIndex);
+    private void updateIndividualTask(Task task, String input) {
         parser.parse(input);
         ArrayList<LocalDateTime> parsedDates = parser.getDates();
         String parsedWords = parser.getParsedWords();
         String notParsedWords = parser.getNotParsedWords();
-        task.update(input, parsedDates, parsedWords, notParsedWords);
 
-        return String.format(MESSAGE_EDIT, task);
+        task.update(input, parsedDates, parsedWords, notParsedWords);
+    }
+
+    private String editAllTasks(String input) {
+        String[] inputArray;
+        int editIndex;
+        String recurringId;
+
+        try {
+            inputArray = input.split(" ");
+            editIndex = Integer.parseInt(inputArray[0]) - 1;
+            Task task = displayedTasks.get(editIndex);
+
+            recurringId = task.getID();
+            if (recurringId.equals("NA")) {
+                return MESSAGE_INVALID_COMMAND;
+            } else {
+                List<Task> allEditedTasks = allTasks.stream()
+                        .filter(e -> e.getID().equals(recurringId))
+                        .collect(Collectors.toList());
+            }
+
+
+
+            parser.parse(input);
+            ArrayList<LocalDateTime> parsedDates = parser.getDates();
+            String parsedWords = parser.getParsedWords();
+            String notParsedWords = parser.getNotParsedWords();
+
+            task.update(input, parsedDates, parsedWords, notParsedWords);
+            return String.format(MESSAGE_EDIT, task);
+        } catch (Exception e) {
+            return MESSAGE_INVALID_COMMAND;
+        }
     }
 
     private String deleteTask(String input) {
