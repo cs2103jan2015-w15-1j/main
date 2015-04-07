@@ -1,5 +1,10 @@
 package main.resources.view;
 
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
 import java.io.IOException;
@@ -10,6 +15,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import main.java.Command;
@@ -30,6 +36,7 @@ public class RootLayoutController extends BorderPane {
     // Non-FXML Fields
     // ================================================================
     private Controller controller;
+    private Display display;
 
     private ArrayList<String> history;
     private int pointer;
@@ -61,10 +68,20 @@ public class RootLayoutController extends BorderPane {
             throw new RuntimeException(e);
         }
 
+        display = Display.getInstance();
         initVariablesForHistory();
         initAutoCompleteCommands();
         userInput.setText(WELCOME_INPUT);
     }
+
+    // ================================================================
+    // Experimental
+    // ================================================================
+    final BooleanProperty ctrlPressed = new SimpleBooleanProperty(false);
+    final BooleanProperty upPresed = new SimpleBooleanProperty(false);
+    final BooleanProperty downPressed = new SimpleBooleanProperty(false);
+    final BooleanBinding ctrlAndUpPressed = ctrlPressed.and(upPresed);
+    final BooleanBinding ctrlAndDownPressed = ctrlPressed.and(downPressed);
 
 
     // ================================================================
@@ -72,7 +89,11 @@ public class RootLayoutController extends BorderPane {
     // ================================================================
     @FXML
     public void handleKeyPress(KeyEvent event) {
-        if (event.getCode() == KeyCode.SPACE) {
+        if (event.isControlDown() && event.getCode() == KeyCode.D) {
+            display.scrollDown();
+        } else if (event.isControlDown() && event.getCode() == KeyCode.U) {
+            display.scrollUp();
+        } else if (event.getCode() == KeyCode.SPACE) {
             listenForEdit(event);
         } else if (event.getCode() == KeyCode.ENTER) {
             handleUserInput();

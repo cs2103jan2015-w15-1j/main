@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import main.java.Controller;
 import org.apache.commons.lang.StringUtils;
 
 import javafx.animation.FadeTransition;
@@ -73,6 +74,7 @@ public class Display extends VBox {
     private ObservableList<HelpBox> helpList;
 
     private static Display display;
+    private int currentScrollIndex;
 
     // ================================================================
     // Constants
@@ -123,6 +125,9 @@ public class Display extends VBox {
     private static final int FEEDBACK_FADE_IN_MILLISECONDS = 500;
     private static final int FEEDBACK_FADE_OUT_MILLISECONDS = 1000;
     private static final int FEEDBACK_DISPLAY_SECONDS = 8;
+
+    private static final int DISPLAY_MAX_SIZE = 14;
+    private static final int SCROLL_INCREMENT = 5;
 
 
     // ================================================================
@@ -218,8 +223,28 @@ public class Display extends VBox {
         overlayTimeline.play();
     }
 
-    public void scroll() {
-        listView.scrollTo(5);
+    public void resetScrollIndex() {
+        currentScrollIndex = 0;
+    }
+
+    public void scrollDown() {
+//        System.out.println(currentScrollIndex);
+        if (currentScrollIndex == 0 && listView.getItems().size() < DISPLAY_MAX_SIZE) {
+            currentScrollIndex = 0;
+        } else if (currentScrollIndex < listView.getItems().size() - DISPLAY_MAX_SIZE) {
+            currentScrollIndex += SCROLL_INCREMENT;
+            listView.scrollTo(currentScrollIndex);
+        }
+    }
+
+    public void scrollUp() {
+//        System.out.println(currentScrollIndex);
+        if (currentScrollIndex > 0) {
+            currentScrollIndex -= SCROLL_INCREMENT;
+            listView.scrollTo(currentScrollIndex);
+        } else if (currentScrollIndex < 0 ) {
+            currentScrollIndex = 0;
+        }
     }
 
 

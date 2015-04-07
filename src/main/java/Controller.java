@@ -454,6 +454,7 @@ public class Controller {
         allTasks = new ArrayList<Task>();
         displayedTasks = FXCollections.observableArrayList();;
         storage.updateFiles(allTasks);
+        display.resetScrollIndex();
         return MESSAGE_ALL_CLEAR;
     }
 
