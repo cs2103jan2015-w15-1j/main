@@ -89,8 +89,8 @@ public class Display extends VBox {
     private static final String LABEL_INCOMPLETE = "Incomplete";
     private static final String LABEL_COMPLETED = "Completed";
 
-    private static final String TITLE_HELP = "Need help?";
-    
+    private static final String HELP_OVERLAY_TITLE = "Need help?";
+    private static final String HELP_OVERLAY_ICON = "\uf05a";
     private static final String HELP_ADD_DESC = "Add a task";
     private static final String HELP_ADD_COMMAND = "add <description> <time> <day>";
     private static final String HELP_EDIT_DESC = "Edit a task";
@@ -110,11 +110,11 @@ public class Display extends VBox {
     private static final String HELP_EXIT_DESC = "Exit Veto";
     private static final String HELP_EXIT_COMMAND = "exit";
     
-    private static final int OVERLAY_FADE_IN_MILLISECONDS = 1500;
+    private static final int OVERLAY_FADE_IN_MILLISECONDS = 200;
     
     private static final String NO_TASK_OVERLAY_GREETING = "Hello!";
     private static final String NO_TASK_OVERLAY_ICON = "\uf14a";
-    private static final String NO_TASK_OVERLAY_MESSAGE = "Looks like you've got no tasks, try entering the following:\n";
+    private static final String NO_TASK_OVERLAY_MESSAGE = "Looks like you've got no tasks, try entering the following:\n\n";
     
     private static final int FEEDBACK_FADE_IN_MILLISECONDS = 500;
     private static final int FEEDBACK_FADE_OUT_MILLISECONDS = 1000;
@@ -304,8 +304,8 @@ public class Display extends VBox {
                     					@Override
                     					public void handle(ActionEvent event) {
                     						helpOverlay.toFront();
-                    						helpOverlayIcon.setText("\uf05a");
-                    						helpOverlayTitle.setText(TITLE_HELP);
+                    						helpOverlayIcon.setText(HELP_OVERLAY_ICON);
+                    						helpOverlayTitle.setText(HELP_OVERLAY_TITLE);
                     						helpOverlayContents.setItems(helpList);
                     						fadein.play();
                     					}
