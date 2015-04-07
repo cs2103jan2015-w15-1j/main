@@ -40,10 +40,6 @@
  */
  
 .root {
-	/* -fx-background-image: url("/images/hUCAMdc.jpg");
-	-fx-background-repeat: stretch;
-	-fx-background-size: cover;
-    -fx-background-position: center center; */
     -fx-background-color: white;
 	-fx-padding: 10;
 
@@ -111,10 +107,18 @@
 	-fx-padding: 0 0 10 0;
 }
 
-.display #helpOverlayContent {
-	-fx-text-fill: white;
-	-fx-font: 16px Roboto;
+.display #helpOverlayContents {
+	-fx-padding: 0;
+	-fx-background-color: transparent;
 }
+
+
+
+.display #helpOverlayContents .list-cell {
+	-fx-padding: 3 0 3 0;
+	-fx-background-color: transparent;
+}
+
 
 /*
  * ================================================================
@@ -145,7 +149,7 @@
 
 .list-cell {
 	-fx-padding: 0;
-	-fx-background-color: transparent;
+	-fx-background-color: white;
 }
 
 /*
@@ -180,36 +184,20 @@
  * ================================================================
  */
 .helpBox {
-	-fx-padding: 5 0 5 0;
+	-fx-padding: 0;
 	-fx-font-family: Roboto;
-	-fx-font-size: 20px;
-	-fx-font-style: italic;
-	-fx-background-color: white;
+	-fx-font-size: 16px;
+	-fx-background-color: transparent;
 }
 
-.helpBox #category {
+.helpBox #command {
 	-fx-font-weight: 700;
-	-fx-text-fill: tomato;
+	-fx-text-fill: white;
 }
 
-/*
- * ================================================================
- * TitleBox styles
- * ================================================================
- */
-.titleBox {
-	-fx-padding: 5 0 5 0;
-	-fx-font-family: Roboto;
-	-fx-font-size: 40px;
-	-fx-font-style: italic;
-	-fx-background-color: white;
+.helpBox #description {
+	-fx-text-fill: white;
 }
-
-.titleBox #title {
-	-fx-font-weight: 700;
-	-fx-text-fill: tomato;
-}
-
 
 /*
  * ================================================================

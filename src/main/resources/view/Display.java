@@ -69,8 +69,7 @@ public class Display extends VBox {
     // ================================================================
     private static Logger logger;
     private Timeline feedbackTimeline;
-    private Timeline noTaskOverlayTimeline;
-    private Timeline helpOverlayTimeline;
+    private Timeline overlayTimeline;
     private ArrayList<String> allExampleCommands;
     private ObservableList<HelpBox> helpList;
 
@@ -93,25 +92,25 @@ public class Display extends VBox {
     private static final String TITLE_HELP = "Need help?";
     
     private static final String HELP_ADD_DESC = "Add a task";
-    private static final String HELP_ADD_COMMAND = "add  <arguments>";
+    private static final String HELP_ADD_COMMAND = "add <description> <time> <day>";
     private static final String HELP_EDIT_DESC = "Edit a task";
-    private static final String HELP_EDIT_COMMAND = "edit  <index>  <desc/time>  <arguments>";
+    private static final String HELP_EDIT_COMMAND = "edit <index> <description> <time> <day>";
     private static final String HELP_DELETE_DESC = "Delete a task";
-    private static final String HELP_DELETE_COMMAND = "delete  <index>";
-    private static final String HELP_COMPLETE_DESC = "Mark a task as complete";
-    private static final String HELP_COMPLETE_COMMAND = "complete  <index>";
+    private static final String HELP_DELETE_COMMAND = "delete <index>";
+    private static final String HELP_COMPLETE_DESC = "Mark a task as completed";
+    private static final String HELP_COMPLETE_COMMAND = "complete <index>";
     private static final String HELP_INCOMPLETE_DESC = "Mark a task as incomplete";
-    private static final String HELP_INCOMPLETE_COMMAND = "incomplete  <index>";
+    private static final String HELP_INCOMPLETE_COMMAND = "incomplete <index>";
     private static final String HELP_UNDO_DESC = "Undo previous action";
     private static final String HELP_UNDO_COMMAND = "undo";
     private static final String HELP_SET_SAVE_LOCATION_DESC = "Change save directory";
-    private static final String HELP_SET_SAVE_LOCATION_COMMAND = "set  <directory>";
+    private static final String HELP_SET_SAVE_LOCATION_COMMAND = "set <directory>";
     private static final String HELP_SEARCH_DESC = "Search for a task";
-    private static final String HELP_SEARCH_COMMAND = "search  <keyword/time>";
+    private static final String HELP_SEARCH_COMMAND = "search <keyword/day>";
     private static final String HELP_EXIT_DESC = "Exit Veto";
     private static final String HELP_EXIT_COMMAND = "exit";
     
-    private static final int OVERLAY_FADE_IN_MILLISECONDS = 1000;
+    private static final int OVERLAY_FADE_IN_MILLISECONDS = 1500;
     
     private static final String NO_TASK_OVERLAY_GREETING = "Hello!";
     private static final String NO_TASK_OVERLAY_ICON = "\uf14a";
@@ -143,8 +142,7 @@ public class Display extends VBox {
         }
 
         feedbackTimeline = new Timeline();
-        noTaskOverlayTimeline = new Timeline();
-        helpOverlayTimeline = new Timeline();
+        overlayTimeline = new Timeline();
         initExampleCommands();
         initHelpList();
     }
@@ -157,7 +155,7 @@ public class Display extends VBox {
         allExampleCommands.add("add find easter eggs by 10 apr");
         allExampleCommands.add("add complete proposal by friday");
         allExampleCommands.add("add exercise every tuesday");
-        allExampleCommands.add("add go lunch with boss tomorrow");
+        allExampleCommands.add("add lunch with boss tomorrow");
         allExampleCommands.add("add remember to buy milk");
         allExampleCommands.add("add watch movie with friends today");
         allExampleCommands.add("add remember wedding anniversary on 12 October");
@@ -227,12 +225,8 @@ public class Display extends VBox {
     }
 
     public void updateOverviewDisplay(ObservableList<Task> tasks) {
-        noTaskOverlay.toBack();
-        helpOverlay.toBack();
-        noTaskOverlay.setOpacity(0);
-        helpOverlay.setOpacity(0);
+        hideOverlays();
 
-        
         if (tasks.isEmpty()) {
             setFeedback("");
             Collections.shuffle(allExampleCommands);
@@ -242,7 +236,7 @@ public class Display extends VBox {
             fadein.setNode(noTaskOverlay);
             fadein.setToValue(1);
 
-            noTaskOverlayTimeline = new Timeline(new KeyFrame(new Duration(1),
+            overlayTimeline = new Timeline(new KeyFrame(new Duration(1),
                                                               new EventHandler<ActionEvent>() {
                                                                   @Override
                                                                   public void handle(ActionEvent event) {
@@ -255,7 +249,7 @@ public class Display extends VBox {
                                                                   }
                                                               }));
 
-            noTaskOverlayTimeline.play();
+            overlayTimeline.play();
         }
         
         ArrayList<Task> listOfTasks = new ArrayList<Task>(tasks);
@@ -273,8 +267,16 @@ public class Display extends VBox {
         listView.setItems(displayBoxes);
     }
 
+    private void hideOverlays() {
+        noTaskOverlay.toBack();
+        helpOverlay.toBack();
+        noTaskOverlay.setOpacity(0);
+        helpOverlay.setOpacity(0);
+    }
+
     public void updateSearchDisplay(ObservableList<Task> searchResults,
                                     String searchQuery) {
+        hideOverlays();
         ArrayList<Task> listOfResults = new ArrayList<Task>(searchResults);
         logger.log(Level.INFO, "List of results: " + listOfResults.toString());
 
@@ -291,19 +293,16 @@ public class Display extends VBox {
     }
 
     public void showHelpDisplay() {
-    	noTaskOverlay.toBack();
-    	noTaskOverlay.setOpacity(0);
-    	
-//    	String helpString = stringFormatter(helpList, helpList.size());
+        hideOverlays();
+
     	FadeTransition fadein = new FadeTransition(new Duration(OVERLAY_FADE_IN_MILLISECONDS));
         fadein.setNode(helpOverlay);
         fadein.setToValue(1);
         
-        helpOverlayTimeline = new Timeline(new KeyFrame(new Duration(1),
+        overlayTimeline = new Timeline(new KeyFrame(new Duration(1),
                 					new EventHandler<ActionEvent>() {
                     					@Override
                     					public void handle(ActionEvent event) {
-                    						helpOverlay.setOpacity(0);
                     						helpOverlay.toFront();
                     						helpOverlayIcon.setText("\uf05a");
                     						helpOverlayTitle.setText(TITLE_HELP);
@@ -311,7 +310,7 @@ public class Display extends VBox {
                     						fadein.play();
                     					}
                 					}));
-        helpOverlayTimeline.play();
+        overlayTimeline.play();
     }
 
     // ================================================================
