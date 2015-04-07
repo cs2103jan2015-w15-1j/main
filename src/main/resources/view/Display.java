@@ -148,6 +148,21 @@ public class Display extends VBox {
         allExampleCommands.add("add find easter eggs by 10 apr");
         allExampleCommands.add("add complete proposal by friday");
         allExampleCommands.add("add exercise every tuesday");
+        allExampleCommands.add("add go lunch with boss tomorrow");
+        allExampleCommands.add("add remember to buy milk");
+        allExampleCommands.add("add watch movie with friends today");
+        allExampleCommands.add("add remember wedding anniversary on 12 October");
+        allExampleCommands.add("add buy the latest Harry Potter book");
+        allExampleCommands.add("add sneak in to Apple WWDC 2016");
+        allExampleCommands.add("add remember to complete SOC project");
+        allExampleCommands.add("add find partner for Orbital");
+        allExampleCommands.add("add make funny YouTube video next week");
+        allExampleCommands.add("add study for final exams");
+        allExampleCommands.add("add plan for overseas trip next week");
+        allExampleCommands.add("add meeting with boss 23 July");
+        allExampleCommands.add("add return money owed to John");
+        allExampleCommands.add("add run for presidential campaign");
+        allExampleCommands.add("add do some community work next week");
     }
     
     private void initHelpList() {
