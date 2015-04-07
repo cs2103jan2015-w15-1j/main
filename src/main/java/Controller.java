@@ -49,6 +49,7 @@ public class Controller {
     private static final String MESSAGE_DELETE_ALL = "All recurring task has been successfully deleted: %s";
     private static final String MESSAGE_EDIT = "Task has been successfully edited: %s";
     private static final String MESSAGE_EDIT_ALL = "All recurring task has been successfully edited: %s";
+    private static final String MESSAGE_EDIT_INDEX_ERROR = "The task you specified could not be found.";
     private static final String MESSAGE_COMPLETE = "\"%s\" completed.";
     private static final String MESSAGE_COMPLETE_FAILED = "\"%s\" already completed.";
     private static final String MESSAGE_INCOMPLETE = "\"%s\" marked as incomplete.";
@@ -237,6 +238,12 @@ public class Controller {
         return String.format(MESSAGE_ADD, task);      
     }
 
+    /**
+     *
+     * Deletes the task with the selected index. Replaces it with a new task by calling addTask
+     * with the extracted arguments.
+     *
+     */
     private String editTask(String input) {
         String[] inputArray;
         int editIndex;
@@ -247,16 +254,25 @@ public class Controller {
             return editAllTasks(input);
         }
 
-        // Split the input into the index and the arguments
         try {
+            // Get the index from input
             inputArray = input.split(" ");
             editIndex = Integer.parseInt(inputArray[0]) - 1;
-            Task task = displayedTasks.get(editIndex);
 
-            updateIndividualTask(task, input);
+            // Delete the task
+            Task task = displayedTasks.remove(editIndex);
+            allTasks.remove(task);
+
+            // Creates an input to addTask
+            String[] addArgumentArray =  new String[inputArray.length - 1];
+            System.arraycopy(inputArray, 1, addArgumentArray, 0, inputArray.length - 1);
+            String addArgument = String.join(" ", addArgumentArray);
+            System.out.println(addArgument);
+
+            addTask(addArgument);
             return String.format(MESSAGE_EDIT, task);
-        } catch (Exception e) {
-            return MESSAGE_INVALID_COMMAND;
+        } catch (IndexOutOfBoundsException | NumberFormatException e) {
+            return MESSAGE_EDIT_INDEX_ERROR;
         }
     }
 
