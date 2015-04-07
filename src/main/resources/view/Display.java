@@ -92,16 +92,25 @@ public class Display extends VBox {
 
     private static final String TITLE_HELP = "Need help?";
     
-    private static final String HELP_ADD = "Add a task  ------------------------------------  add <arguments>";
-    private static final String HELP_EDIT = "Edit a task  ------------  edit <index> <desc/dead> <arguments>";
-    private static final String HELP_DELETE = "Delete a task  -------------------------------------  delete <index>";
-    private static final String HELP_COMPLETE = "Mark a task as complete  --------------------  complete <index>";
-    private static final String HELP_INCOMPLETE = "Mark a task as incomplete  ----------------  incomplete <index>";
-    private static final String HELP_UNDO = "Undo previous action  -------------------------------------  undo";
-    private static final String HELP_SET_SAVE_LOCATION = "Change save directory  --------------------------  set <directory>";
-    private static final String HELP_SEARCH = "Search for a task  ----------------------  search <keyword/date>";
-    private static final String HELP_EXIT = "Exit Veto  ----------------------------------------------------  exit";
-
+    private static final String HELP_ADD_DESC = "Add a task";
+    private static final String HELP_ADD_COMMAND = "add  <arguments>";
+    private static final String HELP_EDIT_DESC = "Edit a task";
+    private static final String HELP_EDIT_COMMAND = "edit  <index>  <desc/time>  <arguments>";
+    private static final String HELP_DELETE_DESC = "Delete a task";
+    private static final String HELP_DELETE_COMMAND = "delete  <index>";
+    private static final String HELP_COMPLETE_DESC = "Mark a task as complete";
+    private static final String HELP_COMPLETE_COMMAND = "complete  <index>";
+    private static final String HELP_INCOMPLETE_DESC = "Mark a task as incomplete";
+    private static final String HELP_INCOMPLETE_COMMAND = "incomplete  <index>";
+    private static final String HELP_UNDO_DESC = "Undo previous action";
+    private static final String HELP_UNDO_COMMAND = "undo";
+    private static final String HELP_SET_SAVE_LOCATION_DESC = "Change save directory";
+    private static final String HELP_SET_SAVE_LOCATION_COMMAND = "set  <directory>";
+    private static final String HELP_SEARCH_DESC = "Search for a task";
+    private static final String HELP_SEARCH_COMMAND = "search  <keyword/time>";
+    private static final String HELP_EXIT_DESC = "Exit Veto";
+    private static final String HELP_EXIT_COMMAND = "exit";
+    
     private static final int OVERLAY_FADE_IN_MILLISECONDS = 1000;
     
     private static final String NO_TASK_OVERLAY_GREETING = "Hello!";
@@ -167,15 +176,15 @@ public class Display extends VBox {
     
     private void initHelpList() {
     	helpList = FXCollections.observableArrayList();
-    	helpList.add(new HelpBox(HELP_ADD, ""));
-//    	helpList.add(HELP_EDIT);
-//    	helpList.add(HELP_DELETE);
-//    	helpList.add(HELP_COMPLETE);
-//    	helpList.add(HELP_INCOMPLETE);
-//    	helpList.add(HELP_UNDO);
-//    	helpList.add(HELP_SET_SAVE_LOCATION);
-//    	helpList.add(HELP_SEARCH);
-//    	helpList.add(HELP_EXIT);
+    	helpList.add(new HelpBox(HELP_ADD_DESC, HELP_ADD_COMMAND));
+    	helpList.add(new HelpBox(HELP_EDIT_DESC, HELP_EDIT_COMMAND));
+    	helpList.add(new HelpBox(HELP_DELETE_DESC, HELP_DELETE_COMMAND));
+    	helpList.add(new HelpBox(HELP_COMPLETE_DESC, HELP_COMPLETE_COMMAND));
+    	helpList.add(new HelpBox(HELP_INCOMPLETE_DESC, HELP_INCOMPLETE_COMMAND));
+    	helpList.add(new HelpBox(HELP_UNDO_DESC, HELP_UNDO_COMMAND));
+    	helpList.add(new HelpBox(HELP_SET_SAVE_LOCATION_DESC, HELP_SET_SAVE_LOCATION_COMMAND));
+    	helpList.add(new HelpBox(HELP_SEARCH_DESC, HELP_SEARCH_COMMAND));
+    	helpList.add(new HelpBox(HELP_EXIT_DESC, HELP_EXIT_COMMAND));
     }
     
     private String stringFormatter(ArrayList<String> list, int size) {
@@ -298,7 +307,7 @@ public class Display extends VBox {
                     						helpOverlay.toFront();
                     						helpOverlayIcon.setText("\uf05a");
                     						helpOverlayTitle.setText(TITLE_HELP);
-                    						helpOverlayContents.setItems(helpList);;
+                    						helpOverlayContents.setItems(helpList);
                     						fadein.play();
                     					}
                 					}));
