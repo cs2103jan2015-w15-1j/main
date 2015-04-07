@@ -72,6 +72,8 @@ public class Display extends VBox {
     private ArrayList<String> allExampleCommands;
     private ObservableList<HelpBox> helpList;
 
+    private int numExcessTasks;
+
     // ================================================================
     // Constants
     // ================================================================
@@ -88,7 +90,7 @@ public class Display extends VBox {
     private static final String LABEL_DEFAULT_SEARCH_QUERY = "all tasks";
     private static final String LABEL_INCOMPLETE = "Incomplete";
     private static final String LABEL_COMPLETED = "Completed";
-
+    private static final String LABEL_EXCESS_TASKS = "... and %d more tasks";
 
     private static final String HELP_OVERLAY_TITLE = "Need help?";
     private static final String HELP_OVERLAY_ICON = "\uf05a";
@@ -121,6 +123,8 @@ public class Display extends VBox {
     private static final int FEEDBACK_FADE_IN_MILLISECONDS = 500;
     private static final int FEEDBACK_FADE_OUT_MILLISECONDS = 1000;
     private static final int FEEDBACK_DISPLAY_SECONDS = 8;
+
+    private static final int MAX_NUM_OF_TASKS = 100;
 
 
     // ================================================================
@@ -157,8 +161,9 @@ public class Display extends VBox {
         }
 
         ArrayList<Task> listOfTasks = new ArrayList<Task>(tasks);
+        listOfTasks = trimListOfTasks(listOfTasks);
         logger.log(Level.INFO, "List of tasks: " + listOfTasks.toString());
-
+        
         ObservableList<HBox> displayBoxes = FXCollections.observableArrayList();
         LocalDate now = LocalDate.now();
         int index = 1;
@@ -168,6 +173,7 @@ public class Display extends VBox {
         index = addThisWeeksTasks(displayBoxes, listOfTasks, now, index);
         index = addAllOtherTasks(displayBoxes, listOfTasks, now, index);
 
+        addNumExcessTasksLabel(displayBoxes);
         listView.setItems(displayBoxes);
     }
 
@@ -175,6 +181,7 @@ public class Display extends VBox {
                                     String searchQuery) {
         hideOverlays();
         ArrayList<Task> listOfResults = new ArrayList<Task>(searchResults);
+        listOfResults = trimListOfTasks(listOfResults);
         logger.log(Level.INFO, "List of results: " + listOfResults.toString());
 
         ObservableList<HBox> displayBoxes = FXCollections.observableArrayList();
@@ -186,6 +193,7 @@ public class Display extends VBox {
         index = addIncompleteTasks(displayBoxes, listOfResults, index);
         index = addCompletedTasks(displayBoxes, listOfResults, index);
 
+        addNumExcessTasksLabel(displayBoxes);
         listView.setItems(displayBoxes);
     }
 
@@ -573,6 +581,20 @@ public class Display extends VBox {
     // ================================================================
     // Utility methods
     // ================================================================
+    private void addNumExcessTasksLabel(ObservableList<HBox> displayBoxes) {
+        if (numExcessTasks > 0) {
+            displayBoxes.add(new CategoryBox(String.format(LABEL_EXCESS_TASKS, numExcessTasks)));
+        }
+    }
+
+    private ArrayList<Task> trimListOfTasks(ArrayList<Task> listOfTasks) {
+        numExcessTasks = listOfTasks.size() - MAX_NUM_OF_TASKS;
+        if (numExcessTasks > 0) {
+            return new ArrayList<Task> (listOfTasks.subList(0, MAX_NUM_OF_TASKS));
+        }
+        return listOfTasks;
+    }
+    
     private void hideOverlays() {
         noTaskOverlay.toBack();
         helpOverlay.toBack();
