@@ -44,7 +44,7 @@ public class Controller {
     // ================================================================
     // Constants
     // ================================================================
-    private static final String MESSAGE_WELCOME = "Welcome to Veto!  Here is an overview of the week ahead.";
+    private static final String MESSAGE_WELCOME = "Welcome to Veto! Here is an overview of the week ahead.";
     private static final String MESSAGE_ADD = "Task has been successfully added: %s";
     private static final String MESSAGE_DELETE = "Task has been successfully deleted: %s";
     private static final String MESSAGE_DELETE_ALL = "All recurring task has been successfully deleted: %s";
@@ -55,7 +55,7 @@ public class Controller {
     private static final String MESSAGE_UNDO = "Previous command has been undone: \"%s\"";
     private static final String MESSAGE_INVALID_COMMAND = "Invalid command.";
     private static final String MESSAGE_NO_UNDO = "Already at oldest change, unable to undo.";
-    private static final String MESSAGE_ALL_CLEAR = "All contents are cleared!";
+    private static final String MESSAGE_ALL_CLEAR = "All tasks have been deleted!";
     
     private static final String EMPTY_STRING = "";
     

@@ -35,7 +35,7 @@ import com.joestelmach.natty.Parser;
 public class DateParser {
     private static final String REGEX_PATTERN_DATE_WITH_PERIOD = "\\d+[.]\\d+";
 
-    private static final String DEFAULT_MONTH_AND_DAY = "1/1/";
+//    private static final String DEFAULT_MONTH_AND_DAY = "1/1/";
 
     private static final int POSITION_FIRST_DATE_GROUP = 0;
 
@@ -215,6 +215,8 @@ public class DateParser {
 
 //        input = catchExplicitTimeWithoutDate(input, pLocations, parsePosition);
 
+        input = catchHolidays(input, group, pLocations);
+        
         return input;
     }
 
@@ -301,27 +303,47 @@ public class DateParser {
      * E.g. "2016" is incorrectly parsed as 8:16pm, but should be the year 2016.
      * 
      * @param input
+     * @param group 
      * @param parsedLocations
      * @param parsePosition
      * @return
      */
-    private String catchExplicitTimeWithoutDate(String input,
-                                                Map<String, List<ParseLocation>> parsedLocations,
-                                                int parsePosition) {
-        if (parsedLocations.containsKey("explicit_time") &&
-            !parsedLocations.containsKey("date")) {
-            if (parsedLocations.get("explicit_time").size() == 1) {
-                String parsedWord = parsedLocations.get("explicit_time")
-                                                   .get(0)
-                                                   .getText();
-                int position = parsePosition +
-                               input.substring(parsePosition)
-                                    .indexOf(parsedWord);
-                System.out.println("ERROR4: " + input + ", word: " +
-                                   parsedWord + ", position: " + position);
-                input = addWordsBeforeWordAtPosition(input,
-                                                     position,
-                                                     DEFAULT_MONTH_AND_DAY);
+//    private String catchExplicitTimeWithoutDate(String input,
+//                                                Map<String, List<ParseLocation>> parsedLocations,
+//                                                int parsePosition) {
+//        if (parsedLocations.containsKey("explicit_time") &&
+//            !parsedLocations.containsKey("date")) {
+//            if (parsedLocations.get("explicit_time").size() == 1) {
+//                String parsedWord = parsedLocations.get("explicit_time")
+//                                                   .get(0)
+//                                                   .getText();
+//                int position = parsePosition +
+//                               input.substring(parsePosition)
+//                                    .indexOf(parsedWord);
+//                System.out.println("ERROR4: " + input + ", word: " +
+//                                   parsedWord + ", position: " + position);
+//                input = addWordsBeforeWordAtPosition(input,
+//                                                     position,
+//                                                     DEFAULT_MONTH_AND_DAY);
+//            }
+//        }
+//        return input;
+//    }
+    
+    private String catchHolidays(String input,
+                                 DateGroup group, Map<String, List<ParseLocation>> parsedLocations) {
+        if (parsedLocations.containsKey("holiday")) {
+            ParseLocation parsedWords = parsedLocations.get("holiday").get(0);
+            String[] parsedHolidayWords = parsedWords.getText().split(" ");
+            int startPosition = parsedWords.getStart();
+            System.out.println(startPosition);
+            
+            for (String parsedWord : parsedHolidayWords) {
+                System.out.println(parsedWord);
+                int position = input.substring(startPosition).indexOf(parsedWord) + startPosition;
+                System.out.println(position);
+                input = escapeWordAtPosition(input, position);
+                System.out.println(input);
             }
         }
         return input;
@@ -353,28 +375,25 @@ public class DateParser {
         return StringUtils.join(splitInput, ' ');
     }
 
-    private boolean isSurroundedByEscapeChars(String word) {
-        return word.startsWith(ESCAPE_CHAR) && word.endsWith(ESCAPE_CHAR);
-    }
-
     private int getIndexOfWordInSplitInput(ArrayList<String> splitInput,
                                            String input,
                                            int index) {
-        String word = getWordAtIndex(splitInput, index);
-        return splitInput.indexOf(word);
-    }
-
-    private String getWordAtIndex(ArrayList<String> splitInput, int index) {
         int c = 0;
+        int i = 0;
         for (String word : splitInput) {
             if (index >= c && index < c + word.length() + 1) {
-                return word;
+                return i;
             }
             c += word.length() + 1;
+            i++;
         }
-        return null;
+        return -1;
     }
 
+    private boolean isSurroundedByEscapeChars(String word) {
+        return word.startsWith(ESCAPE_CHAR) && word.endsWith(ESCAPE_CHAR);
+    }
+    
     private void generateInstanceVariables(String input, List<DateGroup> groups) {
         DateGroup group = null;
         if (!groups.isEmpty()) {
@@ -399,9 +418,12 @@ public class DateParser {
 
             Collections.reverse(splitParsedWordsArr);
             Collections.reverse(notParsedWordsArr);
+            
+            System.out.println(splitParsedWordsArr);
+            System.out.println(notParsedWordsArr);
             for (String parsedWord : splitParsedWordsArr) {
                 for (String inputWord : notParsedWordsArr) {
-                    if (parsedWord.contains(inputWord)) {
+                    if (parsedWord.equalsIgnoreCase(inputWord)) {
                         notParsedWordsArr.remove(inputWord);
                         parsedWordsArr.add(inputWord);
                         break;
@@ -422,6 +444,7 @@ public class DateParser {
 
 
     private void generateDates(DateGroup group) {
+        System.out.println(group.getParseLocations());
         List<Date> listOfDates = group.getDates();
         for (Date d : listOfDates) {
             dates.add(LocalDateTime.ofInstant(d.toInstant(),

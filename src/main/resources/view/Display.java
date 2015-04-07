@@ -158,6 +158,7 @@ public class Display extends VBox {
 
     public void updateOverviewDisplay(ObservableList<Task> tasks) {
         messageOverlay.toBack();
+        messageOverlay.setOpacity(0);
         
         if (tasks.isEmpty()) {
             setFeedback("");

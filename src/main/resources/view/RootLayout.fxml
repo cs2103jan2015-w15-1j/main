@@ -5,12 +5,8 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<fx:root maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="500.0" stylesheets="@styleListView.css" type="BorderPane" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="600.0" stylesheets="@styleListView.css" type="BorderPane" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1">
    <bottom>
-      <VBox alignment="CENTER" prefHeight="26.0" BorderPane.alignment="CENTER">
-         <children>
-            <TextField fx:id="userInput" onKeyPressed="#handleKeyPress" prefHeight="26.0" />
-         </children>
-      </VBox>
+      <TextField fx:id="userInput" onKeyPressed="#handleKeyPress" prefHeight="26.0" BorderPane.alignment="CENTER" />
    </bottom>
 </fx:root>
