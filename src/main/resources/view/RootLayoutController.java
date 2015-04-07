@@ -29,7 +29,6 @@ public class RootLayoutController extends BorderPane {
     // ================================================================
     // Non-FXML Fields
     // ================================================================
-
     private Controller controller;
 
     private ArrayList<String> history;
