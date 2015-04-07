@@ -2,7 +2,6 @@ package main.java;
 
 import java.util.ArrayList;
 import java.util.Stack;
-
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -70,7 +69,7 @@ public class History {
             for (Task task : input) {
                 output.add(task.clone());
             }
-        } catch (Exception e) {
+        } catch (CloneNotSupportedException e) {
             e.printStackTrace();
         }
         return output;
@@ -82,7 +81,7 @@ public class History {
             for (Task task : input) {
                 output.add(task.clone());
             }
-        } catch (Exception e) {
+        } catch (CloneNotSupportedException e) {
             e.printStackTrace();
         }
         return FXCollections.observableArrayList(output);

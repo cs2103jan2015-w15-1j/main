@@ -40,8 +40,9 @@
  */
  
 .root {
-	-fx-background-color: white;
+    -fx-background-color: white;
 	-fx-padding: 10;
+
 }
 
 .root #userInput {
@@ -65,28 +66,59 @@
 	-fx-font-style: italic;
 }
 
-.display #messageOverlay {
-	-fx-background-color: RGB(255, 99, 71, 0.8);
+.display #noTaskOverlay {
+	-fx-background-color: RGB(255, 99, 71, 0.9);
 	-fx-background-radius: 20;
 	-fx-padding: 10;
 }
 
-.display #icon {
+.display #noTaskOverlayIcon {
 	-fx-text-fill: white;
 	-fx-font: 80px FontAwesome;
 }
 
-.display #greeting {
+.display #noTaskOverlayGreeting {
 	-fx-text-fill: white;
 	-fx-font: 60px Roboto;
 	-fx-font-weight: bold;
 	-fx-padding: 0 0 10 0;
 }
 
-.display #message {
+.display #noTaskOverlayMessage {
 	-fx-text-fill: white;
 	-fx-font: 18px Roboto;
 }
+
+.display #helpOverlay {
+	-fx-background-color: RGB(255, 99, 71, 0.9);
+	-fx-background-radius: 20;
+	-fx-padding: 10;
+}
+
+.display #helpOverlayIcon {
+	-fx-text-fill: white;
+	-fx-font: 80px FontAwesome;
+}
+
+.display #helpOverlayTitle {
+	-fx-text-fill: white;
+	-fx-font: 60px Roboto;
+	-fx-font-weight: bold;
+	-fx-padding: 0 0 10 0;
+}
+
+.display #helpOverlayContents {
+	-fx-padding: 0;
+	-fx-background-color: transparent;
+}
+
+
+
+.display #helpOverlayContents .list-cell {
+	-fx-padding: 3 0 3 0;
+	-fx-background-color: transparent;
+}
+
 
 /*
  * ================================================================
@@ -105,8 +137,8 @@
 }
 
 .list-view {
-	-fx-padding: 8;
-	-fx-background-color: transparent;
+	-fx-padding: 8 15 8 15;
+	-fx-background-color: white;
 }
 
 /*
@@ -131,7 +163,7 @@
 	-fx-font-family: Roboto;
 	-fx-font-size: 20px;
 	-fx-font-style: italic;
-	-fx-background-color: white;
+	-fx-background-color: transparent;
 	
 }
 
@@ -152,36 +184,20 @@
  * ================================================================
  */
 .helpBox {
-	-fx-padding: 5 0 5 0;
+	-fx-padding: 0;
 	-fx-font-family: Roboto;
-	-fx-font-size: 20px;
-	-fx-font-style: italic;
-	-fx-background-color: white;
+	-fx-font-size: 16px;
+	-fx-background-color: transparent;
 }
 
-.helpBox #category {
+.helpBox #command {
 	-fx-font-weight: 700;
-	-fx-text-fill: tomato;
+	-fx-text-fill: white;
 }
 
-/*
- * ================================================================
- * TitleBox styles
- * ================================================================
- */
-.titleBox {
-	-fx-padding: 5 0 5 0;
-	-fx-font-family: Roboto;
-	-fx-font-size: 40px;
-	-fx-font-style: italic;
-	-fx-background-color: white;
+.helpBox #description {
+	-fx-text-fill: white;
 }
-
-.titleBox #title {
-	-fx-font-weight: 700;
-	-fx-text-fill: tomato;
-}
-
 
 /*
  * ================================================================

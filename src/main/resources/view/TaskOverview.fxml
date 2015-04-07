@@ -10,11 +10,18 @@
       <StackPane VBox.vgrow="ALWAYS">
          <children>
             <ListView fx:id="listView" focusTraversable="false" prefHeight="600.0" prefWidth="600.0" />
-            <VBox fx:id="messageOverlay" alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="450.0" prefWidth="450.0">
+            <VBox fx:id="noTaskOverlay" alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="450.0" prefWidth="450.0">
                <children>
-                  <Label fx:id="icon" text="Icon" />
-                  <Label fx:id="greeting" text="Greeting" wrapText="true" />
-                  <Label fx:id="message" maxWidth="350.0" text="Message" wrapText="true" />
+                  <Label fx:id="noTaskOverlayIcon" focusTraversable="false" text="Icon" />
+                  <Label fx:id="noTaskOverlayGreeting" focusTraversable="false" text="Greeting" wrapText="true" />
+                  <Label fx:id="noTaskOverlayMessage" focusTraversable="false" maxWidth="350.0" text="Message" wrapText="true" />
+               </children>
+            </VBox>
+            <VBox fx:id="helpOverlay" alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="500.0" prefWidth="500.0">
+               <children>
+                  <Label fx:id="helpOverlayIcon" focusTraversable="false" text="Help Icon" />
+                  <Label fx:id="helpOverlayTitle" focusTraversable="false" text="Help title" />
+                  <ListView fx:id="helpOverlayContents" focusTraversable="false" maxWidth="-Infinity" prefHeight="260.0" prefWidth="400.0" />
                </children>
             </VBox>
          </children>

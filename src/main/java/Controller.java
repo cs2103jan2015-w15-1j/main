@@ -25,7 +25,6 @@ public class Controller {
 
     private ArrayList<Task> allTasks;
     private ObservableList<Task> displayedTasks = FXCollections.observableArrayList();
-    private ObservableList<String> helpList = FXCollections.observableArrayList();
     
     private History previousStates;
 
@@ -44,7 +43,7 @@ public class Controller {
     // ================================================================
     // Constants
     // ================================================================
-    private static final String MESSAGE_WELCOME = "Welcome to Veto!  Here is an overview of the week ahead.";
+    private static final String MESSAGE_WELCOME = "Welcome to Veto! Here is an overview of the week ahead.";
     private static final String MESSAGE_ADD = "Task has been successfully added: %s";
     private static final String MESSAGE_DELETE = "Task has been successfully deleted: %s";
     private static final String MESSAGE_DELETE_ALL = "All recurring task has been successfully deleted: %s";
@@ -56,20 +55,9 @@ public class Controller {
     private static final String MESSAGE_UNDO = "Previous command has been undone: \"%s\"";
     private static final String MESSAGE_INVALID_COMMAND = "Invalid command.";
     private static final String MESSAGE_NO_UNDO = "Already at oldest change, unable to undo.";
-    private static final String MESSAGE_ALL_CLEAR = "All contents are cleared!";
+    private static final String MESSAGE_ALL_CLEAR = "All tasks have been deleted!";
     
     private static final String EMPTY_STRING = "";
-    
-    private static final String HELP_ADD = "Add a task  ---------------------------------------------  add <arguments>";
-    private static final String HELP_EDIT = "Edit a task  ---------------------  edit <index> <desc/dead> <arguments>";
-    private static final String HELP_DELETE = "Delete a task  ----------------------------------------------  delete <index>";
-    private static final String HELP_COMPLETE = "Mark a task as complete  -----------------------------  complete <index>";
-    private static final String HELP_INCOMPLETE = "Mark a task as incomplete  -------------------------  incomplete <index>";
-    private static final String HELP_UNDO = "Undo previous action  ----------------------------------------------  undo";
-    private static final String HELP_SET_SAVE_LOCATION = "Change save directory  -----------------------------------  set <directory>";
-    private static final String HELP_SEARCH = "Search for a task  -------------------------------  search <keyword/date>";
-    private static final String HELP_EXIT = "Exit Veto  -------------------------------------------------------------  exit";
-
     
     // ================================================================
  	// Constructor
@@ -79,17 +67,14 @@ public class Controller {
         storage = Storage.getInstance();
         taskCreator = CreateTask.getInstance();
         allTasks = storage.readFile();
+        previousStates = new History();
         
         sortAllTasks();
-        
-        instantiateHelpList();
 
         // Load the incomplete tasks into displayedTasks (MAIN VIEW WHEN APP STARTS)
         for (Task task : getIncompleteTasks(allTasks)) {
             displayedTasks.add(task);
         }
-        
-        previousStates = new History();
         
         // THIS FIXES THE SLOW ADDITION OF FIRST TASK
         parser.parse("foo today");
@@ -491,7 +476,7 @@ public class Controller {
     }
     
     private void updateHelpDisplay() {
-    	display.updateHelpDisplay(helpList);
+    	display.showHelpDisplay();
 ;    }
 
     private void sortAllTasks() {
@@ -510,18 +495,6 @@ public class Controller {
         userDefinedSort.addComparator(new SortIncomplete());
         userDefinedSort.executeSort();
         displayedTasks = FXCollections.observableArrayList(userDefinedSort.getList());
-    }
-    
-    private void instantiateHelpList() {
-    	helpList.add(HELP_ADD);
-    	helpList.add(HELP_EDIT);
-    	helpList.add(HELP_DELETE);
-    	helpList.add(HELP_COMPLETE);
-    	helpList.add(HELP_INCOMPLETE);
-    	helpList.add(HELP_UNDO);
-    	helpList.add(HELP_SET_SAVE_LOCATION);
-    	helpList.add(HELP_SEARCH);
-    	helpList.add(HELP_EXIT);
     }
 
     private void updateStorageWithAllTasks() {
