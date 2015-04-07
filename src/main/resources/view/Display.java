@@ -64,10 +64,9 @@ public class Display extends VBox {
     // ================================================================
     private static Logger logger;
     private Timeline feedbackTimeline;
-    private Timeline noTaskOverlayTimeline;
-    private Timeline helpOverlayTimeline;
+    private Timeline noTaskMessageTimeline;
     private ArrayList<String> allExampleCommands;
-    
+    private ArrayList<String> helpList;
 
     // ================================================================
     // Constants
@@ -85,9 +84,20 @@ public class Display extends VBox {
     private static final String LABEL_INCOMPLETE = "Incomplete";
     private static final String LABEL_COMPLETED = "Completed";
 
-    private static final String TITLE_HELP = "~ Veto help menu ~";
+    private static final String TITLE_HELP = "Need help?";
+    
+    private static final String HELP_ADD = "Add a task  ------------------------------------  add <arguments>";
+    private static final String HELP_EDIT = "Edit a task  ------------  edit <index> <desc/dead> <arguments>";
+    private static final String HELP_DELETE = "Delete a task  -------------------------------------  delete <index>";
+    private static final String HELP_COMPLETE = "Mark a task as complete  --------------------  complete <index>";
+    private static final String HELP_INCOMPLETE = "Mark a task as incomplete  ----------------  incomplete <index>";
+    private static final String HELP_UNDO = "Undo previous action  -------------------------------------  undo";
+    private static final String HELP_SET_SAVE_LOCATION = "Change save directory  --------------------------  set <directory>";
+    private static final String HELP_SEARCH = "Search for a task  ----------------------  search <keyword/date>";
+    private static final String HELP_EXIT = "Exit Veto  ----------------------------------------------------  exit";
 
     private static final int OVERLAY_FADE_IN_MILLISECONDS = 1000;
+    
     private static final String NO_TASK_OVERLAY_GREETING = "Hello!";
     private static final String NO_TASK_OVERLAY_ICON = "\uf14a";
     private static final String NO_TASK_OVERLAY_MESSAGE = "Looks like you've got no tasks, try entering the following:\n";
@@ -118,9 +128,9 @@ public class Display extends VBox {
         }
 
         feedbackTimeline = new Timeline();
-        noTaskOverlayTimeline = new Timeline();
-        helpOverlayTimeline = new Timeline();
+        noTaskMessageTimeline = new Timeline();
         initExampleCommands();
+        initHelpList();
     }
 
     private void initExampleCommands() {
@@ -132,8 +142,24 @@ public class Display extends VBox {
         allExampleCommands.add("add complete proposal by friday");
         allExampleCommands.add("add exercise every tuesday");
     }
-
     
+    private void initHelpList() {
+    	helpList = new ArrayList<String>();
+    	helpList.add(HELP_ADD);
+    	helpList.add(HELP_EDIT);
+    	helpList.add(HELP_DELETE);
+    	helpList.add(HELP_COMPLETE);
+    	helpList.add(HELP_INCOMPLETE);
+    	helpList.add(HELP_UNDO);
+    	helpList.add(HELP_SET_SAVE_LOCATION);
+    	helpList.add(HELP_SEARCH);
+    	helpList.add(HELP_EXIT);
+    }
+    
+    private String stringFormatter(ArrayList<String> list, int size) {
+    	return StringUtils.join(list.toArray(), "\n", 0, size);
+    }
+
     // ================================================================
     // Public methods
     // ================================================================
@@ -171,20 +197,21 @@ public class Display extends VBox {
 
     public void updateOverviewDisplay(ObservableList<Task> tasks) {
         messageOverlay.toBack();
-        messageOverlay.setOpacity(0);
         helpOverlay.toBack();
+        messageOverlay.setOpacity(0);
+        helpOverlay.setOpacity(0);
 
         
         if (tasks.isEmpty()) {
             setFeedback("");
             Collections.shuffle(allExampleCommands);
-            String exampleCommands = StringUtils.join(allExampleCommands.toArray(), "\n", 0, 3);
+            String exampleCommands = stringFormatter(allExampleCommands, 3);
             
             FadeTransition fadein = new FadeTransition(new Duration(OVERLAY_FADE_IN_MILLISECONDS));
             fadein.setNode(messageOverlay);
             fadein.setToValue(1);
 
-            noTaskOverlayTimeline = new Timeline(new KeyFrame(new Duration(1),
+            noTaskMessageTimeline = new Timeline(new KeyFrame(new Duration(1),
                                                               new EventHandler<ActionEvent>() {
                                                                   @Override
                                                                   public void handle(ActionEvent event) {
@@ -197,7 +224,7 @@ public class Display extends VBox {
                                                                   }
                                                               }));
 
-            noTaskOverlayTimeline.play();
+            noTaskMessageTimeline.play();
         }
         
         ArrayList<Task> listOfTasks = new ArrayList<Task>(tasks);
@@ -232,15 +259,16 @@ public class Display extends VBox {
         listView.setItems(displayBoxes);
     }
 
-    public void updateHelpDisplay(ArrayList<String> list) {
+    public void updateHelpDisplay() {
     	messageOverlay.toBack();
+    	messageOverlay.setOpacity(0);
     	
-    	String helpString = StringUtils.join(list.toArray(), "\n", 0, list.size());
+    	String helpString = stringFormatter(helpList, helpList.size());
     	FadeTransition fadein = new FadeTransition(new Duration(OVERLAY_FADE_IN_MILLISECONDS));
         fadein.setNode(helpOverlay);
         fadein.setToValue(1);
         
-        helpOverlayTimeline = new Timeline(new KeyFrame(new Duration(1),
+        noTaskMessageTimeline = new Timeline(new KeyFrame(new Duration(1),
                 					new EventHandler<ActionEvent>() {
                     					@Override
                     					public void handle(ActionEvent event) {
@@ -251,15 +279,7 @@ public class Display extends VBox {
                     						fadein.play();
                     					}
                 					}));
-        helpOverlayTimeline.play();
-        
-        
-//        ObservableList<HBox> displayBoxes = FXCollections.observableArrayList();
-//        displayBoxes.add(new TitleBox(TITLE_HELP));
-//        for (String item : list) {
-//            displayBoxes.add(new HelpBox(item));
-//        }
-//        listView.setItems(displayBoxes);
+        noTaskMessageTimeline.play();
     }
 
     // ================================================================
