@@ -25,7 +25,8 @@ public class Controller {
 
     private ArrayList<Task> allTasks;
     private ObservableList<Task> displayedTasks = FXCollections.observableArrayList();
-    private ObservableList<String> helpList = FXCollections.observableArrayList();
+    //private ObservableList<String> helpList = FXCollections.observableArrayList();
+    private ArrayList<String> helpList = new ArrayList<String>();
     
     private History previousStates;
 
@@ -78,6 +79,7 @@ public class Controller {
         storage = Storage.getInstance();
         taskCreator = CreateTask.getInstance();
         allTasks = storage.readFile();
+        previousStates = new History();
         
         sortAllTasks();
         
@@ -87,8 +89,6 @@ public class Controller {
         for (Task task : getIncompleteTasks(allTasks)) {
             displayedTasks.add(task);
         }
-        
-        previousStates = new History();
         
         // THIS FIXES THE SLOW ADDITION OF FIRST TASK
         parser.parse("foo today");

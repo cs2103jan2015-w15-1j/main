@@ -17,6 +17,12 @@
                   <Label fx:id="message" maxWidth="350.0" text="Message" wrapText="true" />
                </children>
             </VBox>
+            <VBox fx:id="helpOverlay" alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="450.0" prefWidth="450.0">
+               <children>
+                  <Label fx:id="helpTitle" text="Help title" />
+                  <Label fx:id="helpContent" text="Help content" />
+               </children>
+            </VBox>
          </children>
       </StackPane>
       <Label fx:id="feedbackLabel" focusTraversable="false" text="Feedback" VBox.vgrow="ALWAYS" />

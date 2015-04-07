@@ -48,6 +48,15 @@ public class Display extends VBox {
 
     @FXML
     private Label message;
+    
+    @FXML
+    private Label helpTitle;
+    
+    @FXML
+    private Label helpContent;
+    
+    @FXML
+    private VBox helpOverlay;
 
 
     // ================================================================
@@ -76,7 +85,7 @@ public class Display extends VBox {
 
     private static final String TITLE_HELP = "~ Veto help menu ~";
 
-    private static final int NO_TASK_OVERLAY_FADE_IN_MILLISECONDS = 2000;
+    private static final int OVERLAY_FADE_IN_MILLISECONDS = 1000;
     private static final String NO_TASK_OVERLAY_GREETING = "Hello!";
     private static final String NO_TASK_OVERLAY_ICON = "\uf14a";
     private static final String NO_TASK_OVERLAY_MESSAGE = "Looks like you've got no tasks, try entering the following:\n";
@@ -158,13 +167,14 @@ public class Display extends VBox {
 
     public void updateOverviewDisplay(ObservableList<Task> tasks) {
         messageOverlay.toBack();
+        helpOverlay.toBack();
         
         if (tasks.isEmpty()) {
             setFeedback("");
             Collections.shuffle(allExampleCommands);
             String exampleCommands = StringUtils.join(allExampleCommands.toArray(), "\n", 0, 3);
             
-            FadeTransition fadein = new FadeTransition(new Duration(NO_TASK_OVERLAY_FADE_IN_MILLISECONDS));
+            FadeTransition fadein = new FadeTransition(new Duration(OVERLAY_FADE_IN_MILLISECONDS));
             fadein.setNode(messageOverlay);
             fadein.setToValue(1);
 
@@ -216,13 +226,34 @@ public class Display extends VBox {
         listView.setItems(displayBoxes);
     }
 
-    public void updateHelpDisplay(ObservableList<String> list) {
-        ObservableList<HBox> displayBoxes = FXCollections.observableArrayList();
-        displayBoxes.add(new TitleBox(TITLE_HELP));
-        for (String item : list) {
-            displayBoxes.add(new HelpBox(item));
-        }
-        listView.setItems(displayBoxes);
+    public void updateHelpDisplay(ArrayList<String> list) {
+    	messageOverlay.toBack();
+    	
+    	String helpString = StringUtils.join(list.toArray(), "\n", 0, list.size());
+    	FadeTransition fadein = new FadeTransition(new Duration(OVERLAY_FADE_IN_MILLISECONDS));
+        fadein.setNode(helpOverlay);
+        fadein.setToValue(1);
+        
+        noTaskMessageTimeline = new Timeline(new KeyFrame(new Duration(1),
+                					new EventHandler<ActionEvent>() {
+                    					@Override
+                    					public void handle(ActionEvent event) {
+                    						helpOverlay.setOpacity(0);
+                    						helpOverlay.toFront();
+                    						helpTitle.setText(TITLE_HELP);
+                    						helpContent.setText(helpString);
+                    						fadein.play();
+                    					}
+                					}));
+        noTaskMessageTimeline.play();
+        
+        
+//        ObservableList<HBox> displayBoxes = FXCollections.observableArrayList();
+//        displayBoxes.add(new TitleBox(TITLE_HELP));
+//        for (String item : list) {
+//            displayBoxes.add(new HelpBox(item));
+//        }
+//        listView.setItems(displayBoxes);
     }
 
     // ================================================================
