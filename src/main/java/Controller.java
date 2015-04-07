@@ -223,15 +223,16 @@ public class Controller {
             return MESSAGE_INVALID_COMMAND;
         }
         parser.parse(input);
+        Task task;
         ArrayList<LocalDateTime> parsedDates = parser.getDates();
         String parsedWords = parser.getParsedWords();
         String notParsedWords = parser.getNotParsedWords();
         ArrayList<Task> newTask = new ArrayList<Task>();
 
         // Instantiate a new Task object
-        newTask = taskCreator.create(input, parsedDates, parsedWords, notParsedWords);
-
-        Task task = newTask.get(0);
+            newTask = taskCreator.create(input, parsedDates, parsedWords, notParsedWords);
+            task = newTask.get(0);
+        
         allTasks.addAll(newTask);
         updateStorageWithAllTasks();
         
