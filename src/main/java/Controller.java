@@ -230,8 +230,12 @@ public class Controller {
         ArrayList<Task> newTask = new ArrayList<Task>();
 
         // Instantiate a new Task object
+        try {
             newTask = taskCreator.create(input, parsedDates, parsedWords, notParsedWords);
             task = newTask.get(0);
+        } catch (IndexOutOfBoundsException e) {
+            return MESSAGE_INVALID_COMMAND;
+        }
         
         allTasks.addAll(newTask);
         updateStorageWithAllTasks();
