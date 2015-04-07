@@ -228,10 +228,10 @@ public class DateParserTest {
         dates = getParsedDates(input);
         assertEquals("Number of dates", 2, dates.size());
         assertEquals("Start date & time",
-                     LocalDateTime.now(),
+                     LocalDate.now().atTime(16, 0),
                      dates.get(0));
         assertEquals("End date & time",
-                     constructDateTime(2015, 4, 7, 18, 0),
+                     LocalDate.now().atTime(18, 0),
                      dates.get(1));
 
         input = "15 mar 4pm to 6pm";

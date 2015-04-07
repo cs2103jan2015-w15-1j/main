@@ -38,25 +38,30 @@ public class Display extends VBox {
     private Label feedbackLabel;
 
     @FXML
-    private VBox messageOverlay;
+    private VBox noTaskOverlay;
 
     @FXML
-    private Label icon;
+    private Label noTaskOverlayIcon;
 
     @FXML
-    private Label greeting;
+    private Label noTaskOverlayGreeting;
 
     @FXML
-    private Label message;
-    
-    @FXML
-    private Label helpTitle;
-    
-    @FXML
-    private Label helpContent;
+    private Label noTaskOverlayMessage;
     
     @FXML
     private VBox helpOverlay;
+    
+    @FXML
+    private Label helpOverlayIcon;
+    
+    @FXML
+    private Label helpOverlayTitle;
+    
+    @FXML
+    private ListView<HelpBox> helpOverlayContents;
+    
+
 
 
     // ================================================================
@@ -64,9 +69,10 @@ public class Display extends VBox {
     // ================================================================
     private static Logger logger;
     private Timeline feedbackTimeline;
-    private Timeline noTaskMessageTimeline;
+    private Timeline noTaskOverlayTimeline;
+    private Timeline helpOverlayTimeline;
     private ArrayList<String> allExampleCommands;
-    private ArrayList<String> helpList;
+    private ObservableList<HelpBox> helpList;
 
     // ================================================================
     // Constants
@@ -128,7 +134,8 @@ public class Display extends VBox {
         }
 
         feedbackTimeline = new Timeline();
-        noTaskMessageTimeline = new Timeline();
+        noTaskOverlayTimeline = new Timeline();
+        helpOverlayTimeline = new Timeline();
         initExampleCommands();
         initHelpList();
     }
@@ -144,16 +151,16 @@ public class Display extends VBox {
     }
     
     private void initHelpList() {
-    	helpList = new ArrayList<String>();
-    	helpList.add(HELP_ADD);
-    	helpList.add(HELP_EDIT);
-    	helpList.add(HELP_DELETE);
-    	helpList.add(HELP_COMPLETE);
-    	helpList.add(HELP_INCOMPLETE);
-    	helpList.add(HELP_UNDO);
-    	helpList.add(HELP_SET_SAVE_LOCATION);
-    	helpList.add(HELP_SEARCH);
-    	helpList.add(HELP_EXIT);
+    	helpList = FXCollections.observableArrayList();
+    	helpList.add(new HelpBox(HELP_ADD, ""));
+//    	helpList.add(HELP_EDIT);
+//    	helpList.add(HELP_DELETE);
+//    	helpList.add(HELP_COMPLETE);
+//    	helpList.add(HELP_INCOMPLETE);
+//    	helpList.add(HELP_UNDO);
+//    	helpList.add(HELP_SET_SAVE_LOCATION);
+//    	helpList.add(HELP_SEARCH);
+//    	helpList.add(HELP_EXIT);
     }
     
     private String stringFormatter(ArrayList<String> list, int size) {
@@ -196,9 +203,9 @@ public class Display extends VBox {
     }
 
     public void updateOverviewDisplay(ObservableList<Task> tasks) {
-        messageOverlay.toBack();
+        noTaskOverlay.toBack();
         helpOverlay.toBack();
-        messageOverlay.setOpacity(0);
+        noTaskOverlay.setOpacity(0);
         helpOverlay.setOpacity(0);
 
         
@@ -208,23 +215,23 @@ public class Display extends VBox {
             String exampleCommands = stringFormatter(allExampleCommands, 3);
             
             FadeTransition fadein = new FadeTransition(new Duration(OVERLAY_FADE_IN_MILLISECONDS));
-            fadein.setNode(messageOverlay);
+            fadein.setNode(noTaskOverlay);
             fadein.setToValue(1);
 
-            noTaskMessageTimeline = new Timeline(new KeyFrame(new Duration(1),
+            noTaskOverlayTimeline = new Timeline(new KeyFrame(new Duration(1),
                                                               new EventHandler<ActionEvent>() {
                                                                   @Override
                                                                   public void handle(ActionEvent event) {
-                                                                      messageOverlay.setOpacity(0);
-                                                                      messageOverlay.toFront();
-                                                                      icon.setText(NO_TASK_OVERLAY_ICON);
-                                                                      greeting.setText(NO_TASK_OVERLAY_GREETING);
-                                                                      message.setText(NO_TASK_OVERLAY_MESSAGE+exampleCommands);
+                                                                      noTaskOverlay.setOpacity(0);
+                                                                      noTaskOverlay.toFront();
+                                                                      noTaskOverlayIcon.setText(NO_TASK_OVERLAY_ICON);
+                                                                      noTaskOverlayGreeting.setText(NO_TASK_OVERLAY_GREETING);
+                                                                      noTaskOverlayMessage.setText(NO_TASK_OVERLAY_MESSAGE+exampleCommands);
                                                                       fadein.play();
                                                                   }
                                                               }));
 
-            noTaskMessageTimeline.play();
+            noTaskOverlayTimeline.play();
         }
         
         ArrayList<Task> listOfTasks = new ArrayList<Task>(tasks);
@@ -259,27 +266,28 @@ public class Display extends VBox {
         listView.setItems(displayBoxes);
     }
 
-    public void updateHelpDisplay() {
-    	messageOverlay.toBack();
-    	messageOverlay.setOpacity(0);
+    public void showHelpDisplay() {
+    	noTaskOverlay.toBack();
+    	noTaskOverlay.setOpacity(0);
     	
-    	String helpString = stringFormatter(helpList, helpList.size());
+//    	String helpString = stringFormatter(helpList, helpList.size());
     	FadeTransition fadein = new FadeTransition(new Duration(OVERLAY_FADE_IN_MILLISECONDS));
         fadein.setNode(helpOverlay);
         fadein.setToValue(1);
         
-        noTaskMessageTimeline = new Timeline(new KeyFrame(new Duration(1),
+        helpOverlayTimeline = new Timeline(new KeyFrame(new Duration(1),
                 					new EventHandler<ActionEvent>() {
                     					@Override
                     					public void handle(ActionEvent event) {
                     						helpOverlay.setOpacity(0);
                     						helpOverlay.toFront();
-                    						helpTitle.setText(TITLE_HELP);
-                    						helpContent.setText(helpString);
+                    						helpOverlayIcon.setText("\uf05a");
+                    						helpOverlayTitle.setText(TITLE_HELP);
+                    						helpOverlayContents.setItems(helpList);;
                     						fadein.play();
                     					}
                 					}));
-        noTaskMessageTimeline.play();
+        helpOverlayTimeline.play();
     }
 
     // ================================================================

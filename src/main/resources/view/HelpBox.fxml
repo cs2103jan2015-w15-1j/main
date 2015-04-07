@@ -5,8 +5,9 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<fx:root alignment="CENTER_LEFT" styleClass="helpBox" type="HBox" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root alignment="CENTER_LEFT" styleClass="helpBox" type="HBox" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <Label fx:id="category" text="Category" />
+      <Label fx:id="command" focusTraversable="false" text="Command" />
+      <Label fx:id="description" focusTraversable="false" text="Description" />
    </children>
 </fx:root>

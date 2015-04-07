@@ -427,7 +427,7 @@ public class Controller {
     }
     
     private void updateHelpDisplay() {
-    	display.updateHelpDisplay();
+    	display.showHelpDisplay();
 ;    }
 
     private void sortAllTasks() {

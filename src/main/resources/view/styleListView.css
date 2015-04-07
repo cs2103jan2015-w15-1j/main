@@ -70,45 +70,50 @@
 	-fx-font-style: italic;
 }
 
-.display #messageOverlay {
-	-fx-background-color: RGB(255, 99, 71, 0.8);
+.display #noTaskOverlay {
+	-fx-background-color: RGB(255, 99, 71, 0.9);
 	-fx-background-radius: 20;
 	-fx-padding: 10;
 }
 
-.display #icon {
+.display #noTaskOverlayIcon {
 	-fx-text-fill: white;
 	-fx-font: 80px FontAwesome;
 }
 
-.display #greeting {
+.display #noTaskOverlayGreeting {
 	-fx-text-fill: white;
 	-fx-font: 60px Roboto;
 	-fx-font-weight: bold;
 	-fx-padding: 0 0 10 0;
 }
 
-.display #message {
+.display #noTaskOverlayMessage {
 	-fx-text-fill: white;
 	-fx-font: 18px Roboto;
 }
 
 .display #helpOverlay {
-	-fx-background-color: RGB(255, 99, 71, 0.8);
+	-fx-background-color: RGB(255, 99, 71, 0.9);
 	-fx-background-radius: 20;
 	-fx-padding: 10;
 }
 
-.display #helpTitle {
+.display #helpOverlayIcon {
+	-fx-text-fill: white;
+	-fx-font: 80px FontAwesome;
+}
+
+.display #helpOverlayTitle {
 	-fx-text-fill: white;
 	-fx-font: 60px Roboto;
 	-fx-font-weight: bold;
 	-fx-padding: 0 0 10 0;
 }
 
-.display #helpContent {
+.display #helpOverlayContent {
 	-fx-text-fill: white;
-	-fx-font: 15px Roboto;
+	-fx-font: 16px Roboto;
 }
 
 /*
