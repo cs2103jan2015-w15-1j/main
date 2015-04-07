@@ -22,11 +22,11 @@ public class UserDefinedSort {
 		chain.add(comparator);
 	}
 	
+	// Execute the sort based on the order of comparator in the chain
 	public ArrayList<Task> executeSort() {
 		for (Comparator<Task> comparator: chain) {
 			Collections.sort(list, comparator);
 		}
-
 		return list;
 	}
 }
