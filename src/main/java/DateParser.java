@@ -33,39 +33,43 @@ import com.joestelmach.natty.Parser;
 
 //@author A0121520A
 public class DateParser {
+
+
+    // ================================================================
+    // Constants
+    // ================================================================
     private static final String REGEX_PATTERN_DATE_WITH_PERIOD = "\\d+[.]\\d+";
-
-//    private static final String DEFAULT_MONTH_AND_DAY = "1/1/";
-
+    private static final String ESCAPE_CHAR = "\"";
+    private static final String ONE_SPACING = " ";
+    private static final int POSITION_FIRST_DATE = 0;
     private static final int POSITION_FIRST_DATE_GROUP = 0;
 
-    private static Logger logger;
 
+    // ================================================================
+    // Variables
+    // ================================================================
+    private static Logger logger;
     private static DateParser dateParser;
 
-    private static final String ESCAPE_CHAR = "\"";
-    private static final int POSITION_FIRST_DATE = 0;
-    //    private static final String OFFENDING_NATTY_KEY = "hours";
-
-    private ArrayList<LocalDateTime> dates;
-    private String parsedWords; // words used when determining the date/s
-    private String notParsedWords;
     private Parser parser;
-    //    private boolean isIncorrectlyParsingWords;
-    //    private String incorrectlyParsedWord;
-
     private String rawInput;
+    private ArrayList<LocalDateTime> dates;
+    private String parsedWords;
+    private String notParsedWords;
 
+
+    // ================================================================
+    // Constructor
+    // ================================================================
     private DateParser() {
-        logger = Logger.getLogger("Veto");
-        logger.setLevel(Level.INFO);
+        logger = Logger.getLogger("DateParser");
+        logger.setLevel(Level.OFF);
     }
 
 
     // ================================================================
     // Public methods
     // ================================================================
-
     public static DateParser getInstance() {
         if (dateParser == null) {
             dateParser = new DateParser();
@@ -74,21 +78,16 @@ public class DateParser {
     }
 
     public void parse(String input) {
-        initVariables(input);
-
-        input = fixTimeFormatting(input);
-        rawInput = input;
-        logger.log(Level.INFO, "Input: " + input);
-        //        input = getWordsOutsideEscapeChars(input);
-
+        initInstanceVariables();
+        input = modifyInputBeforeParsing(input);
         List<DateGroup> groups = parser.parse(input);
 
-        if (!groups.isEmpty()) {
+        if (hasParsedDates(groups)) {
             input = fixInputFirstPass(input, groups);
             groups = parser.parse(input);
         }
 
-        if (!groups.isEmpty()) {
+        if (hasParsedDates(groups)) {
             input = fixInputSecondPass(input, groups);
             groups = parser.parse(input);
         }
@@ -111,32 +110,47 @@ public class DateParser {
 
 
     // ================================================================
-    // Methods to initialise and generate variables
+    // Methods used before parsing the input
     // ================================================================
-
-    private void initVariables(String input) {
+    private void initInstanceVariables() {
         dates = new ArrayList<LocalDateTime>();
         parser = new Parser();
-        //        isIncorrectlyParsingWords = false;
-        //        incorrectlyParsedWord = "";
     }
 
-
-    /**
-     * First pass to fix the given user input.
-     * 
-     * @param input
-     * @param groups
-     * @return
-     */
-    private String fixInputFirstPass(String input, List<DateGroup> groups) {
-        return escapePartiallyParsedWords(input, groups);
+    private String modifyInputBeforeParsing(String input) {
+        input = fixTimeFormatting(input);
+        input = hideWordsNotToBeParsed(input);
+        logger.log(Level.INFO, "Input before parsing: " + input);
+        return input;
     }
 
     private String fixTimeFormatting(String input) {
-        return replacePeriodsWithColons(input);
+        String modifiedInput = replacePeriodsWithColons(input);
+        rawInput = modifiedInput;
+        return modifiedInput;
     }
 
+    private String hideWordsNotToBeParsed(String input) {
+        boolean isTimeToEscapeWords = false;
+        ArrayList<String> splitInput = new ArrayList<String>(Arrays.asList(input.split(ONE_SPACING)));
+        int i = 0;
+        for (String word : splitInput) {
+            if (isSurroundedByEscapeChars(word)) {
+                isTimeToEscapeWords = false;
+                break;
+            } else if (word.startsWith(ESCAPE_CHAR)) {
+                isTimeToEscapeWords = true;
+                splitInput.set(i, word + ESCAPE_CHAR);
+            } else if (word.endsWith(ESCAPE_CHAR)) {
+                isTimeToEscapeWords = false;
+                splitInput.set(i, ESCAPE_CHAR + word);
+            } else if (isTimeToEscapeWords) {
+                splitInput.set(i, ESCAPE_CHAR + word + ESCAPE_CHAR);
+            }
+            i++;
+        }
+        return StringUtils.join(splitInput, ONE_SPACING);
+    }
 
     private String replacePeriodsWithColons(String input) {
         Pattern pattern = Pattern.compile(REGEX_PATTERN_DATE_WITH_PERIOD);
@@ -149,6 +163,13 @@ public class DateParser {
         return input;
     }
 
+
+    // ================================================================
+    // Methods for the first pass of fixing the user's input
+    // ================================================================
+    private String fixInputFirstPass(String input, List<DateGroup> groups) {
+        return escapePartiallyParsedWords(input, groups);
+    }
 
     /**
      * Escapes words that are partially parsed by Natty.
@@ -183,9 +204,9 @@ public class DateParser {
                         int position = parsePosition +
                                        input.substring(parsePosition)
                                             .indexOf(parsedWord);
-                        System.out.println("ERROR5: " + input + ", word: " +
-                                           parsedWord + ", position: " +
-                                           position);
+                        logger.log(Level.INFO, "Word partially parsed: " +
+                                               parsedWord + ", position: " +
+                                               position);
                         input = escapeWordAtPosition(input, position);
                     }
                 }
@@ -194,6 +215,10 @@ public class DateParser {
         return input;
     }
 
+
+    // ================================================================
+    // Methods for the second pass of fixing the user's input
+    // ================================================================
     /**
      * Second pass to catch several inaccuracies by Natty's parsing and fix them
      * accordingly.
@@ -205,18 +230,12 @@ public class DateParser {
     private String fixInputSecondPass(String input, List<DateGroup> groups) {
         DateGroup group = groups.get(POSITION_FIRST_DATE_GROUP);
         Map<String, List<ParseLocation>> pLocations = group.getParseLocations();
-//        int parsePosition = group.getPosition();
 
         input = catchExplicitTimeFalseMatch(input, pLocations);
-
         input = catchOptionalPrefix(input, pLocations);
-
         input = catchRelaxedYearBeforeToday(input, pLocations);
-
-//        input = catchExplicitTimeWithoutDate(input, pLocations, parsePosition);
-
         input = catchHolidays(input, group, pLocations);
-        
+
         return input;
     }
 
@@ -237,9 +256,9 @@ public class DateParser {
         if (parsedLocations.containsKey("explicit_time")) {
             for (ParseLocation parsedWord : parsedLocations.get("explicit_time")) {
                 if (parsedWord.getText().length() < 3) {
-                    System.out.println("ERROR1: " + input + ", word: " +
-                                       parsedWord + ", position: " +
-                                       parsedWord.getStart());
+                    logger.log(Level.INFO, "Caught time false match: " +
+                                           parsedWord + ", position: " +
+                                           parsedWord.getStart());
                     input = escapeWordAtPosition(input, parsedWord.getStart());
                 }
             }
@@ -261,9 +280,8 @@ public class DateParser {
                                        Map<String, List<ParseLocation>> parsedLocations) {
         if (parsedLocations.containsKey("spelled_or_int_optional_prefix")) {
             for (ParseLocation parsedWord : parsedLocations.get("spelled_or_int_optional_prefix")) {
-                System.out.println("ERROR2: " + input + ", word: " +
-                                   parsedWord + ", position: " +
-                                   parsedWord.getStart());
+                logger.log(Level.INFO, "Caught option prefix: " + parsedWord +
+                                       ", position: " + parsedWord.getStart());
                 input = escapeWordAtPosition(input, parsedWord.getStart());
             }
         }
@@ -272,7 +290,7 @@ public class DateParser {
 
     /**
      * Catches the parsing of years that are before this year.
-     * E.g. "1980" & "1521" will not be parsed.
+     * E.g. "1231" & "1521" will not be parsed.
      * 
      * @param input
      * @param parsedLocations
@@ -283,13 +301,10 @@ public class DateParser {
         if (parsedLocations.containsKey("relaxed_year")) {
             for (ParseLocation parsedWord : parsedLocations.get("relaxed_year")) {
                 if (Year.parse(parsedWord.getText()).isBefore(Year.now())) {
-                    System.out.println("ERROR3: " + input + ", word: " +
-                                       parsedWord + ", position: " +
-                                       parsedWord.getStart());
-                    input = addWordsBeforeWordAtPosition(input,
-                                                         parsedWord.getStart(),
-                                                         Year.now().toString() +
-                                                                 " ");
+                    logger.log(Level.INFO, "Caught parsing year wrongly: " +
+                                           parsedWord + ", position: " +
+                                           parsedWord.getStart());
+                    input = addYearToInput(input, parsedWord);
                 }
             }
         }
@@ -297,114 +312,47 @@ public class DateParser {
     }
 
     /**
-     * Catches words that are parsed as a timing when it should be parsed as a
-     * year.
-     * A time with no date is taken as a year.
-     * E.g. "2016" is incorrectly parsed as 8:16pm, but should be the year 2016.
+     * Catches words that are incorrectly parsed as holidays.
+     * E.g. "find easter eggs" will create a task on easter rather than a
+     * floating task.
      * 
      * @param input
-     * @param group 
+     * @param group
      * @param parsedLocations
-     * @param parsePosition
      * @return
      */
-//    private String catchExplicitTimeWithoutDate(String input,
-//                                                Map<String, List<ParseLocation>> parsedLocations,
-//                                                int parsePosition) {
-//        if (parsedLocations.containsKey("explicit_time") &&
-//            !parsedLocations.containsKey("date")) {
-//            if (parsedLocations.get("explicit_time").size() == 1) {
-//                String parsedWord = parsedLocations.get("explicit_time")
-//                                                   .get(0)
-//                                                   .getText();
-//                int position = parsePosition +
-//                               input.substring(parsePosition)
-//                                    .indexOf(parsedWord);
-//                System.out.println("ERROR4: " + input + ", word: " +
-//                                   parsedWord + ", position: " + position);
-//                input = addWordsBeforeWordAtPosition(input,
-//                                                     position,
-//                                                     DEFAULT_MONTH_AND_DAY);
-//            }
-//        }
-//        return input;
-//    }
-    
     private String catchHolidays(String input,
-                                 DateGroup group, Map<String, List<ParseLocation>> parsedLocations) {
+                                 DateGroup group,
+                                 Map<String, List<ParseLocation>> parsedLocations) {
         if (parsedLocations.containsKey("holiday")) {
             ParseLocation parsedWords = parsedLocations.get("holiday").get(0);
-            String[] parsedHolidayWords = parsedWords.getText().split(" ");
+            String[] parsedHolidayWords = parsedWords.getText()
+                                                     .split(ONE_SPACING);
             int startPosition = parsedWords.getStart();
-            System.out.println(startPosition);
-            
+
             for (String parsedWord : parsedHolidayWords) {
-                System.out.println(parsedWord);
-                int position = input.substring(startPosition).indexOf(parsedWord) + startPosition;
-                System.out.println(position);
+                int position = input.substring(startPosition)
+                                    .indexOf(parsedWord) + startPosition;
                 input = escapeWordAtPosition(input, position);
-                System.out.println(input);
             }
         }
         return input;
     }
 
-    private String addWordsBeforeWordAtPosition(String input,
-                                                int position,
-                                                String words) {
-        ArrayList<String> splitInput = new ArrayList<String>(Arrays.asList(input.split(" ")));
 
-        int i = getIndexOfWordInSplitInput(splitInput, input, position);
-        String word = splitInput.get(i);
-
-        splitInput.set(i, words + word);
-
-        return StringUtils.join(splitInput, ' ');
-    }
-
-    private String escapeWordAtPosition(String input, int position) {
-        ArrayList<String> splitInput = new ArrayList<String>(Arrays.asList(input.split(" ")));
-
-        int i = getIndexOfWordInSplitInput(splitInput, input, position);
-        String word = splitInput.get(i);
-
-        if (!isSurroundedByEscapeChars(word)) {
-            splitInput.set(i, ESCAPE_CHAR + word + ESCAPE_CHAR);
-        }
-
-        return StringUtils.join(splitInput, ' ');
-    }
-
-    private int getIndexOfWordInSplitInput(ArrayList<String> splitInput,
-                                           String input,
-                                           int index) {
-        int c = 0;
-        int i = 0;
-        for (String word : splitInput) {
-            if (index >= c && index < c + word.length() + 1) {
-                return i;
-            }
-            c += word.length() + 1;
-            i++;
-        }
-        return -1;
-    }
-
-    private boolean isSurroundedByEscapeChars(String word) {
-        return word.startsWith(ESCAPE_CHAR) && word.endsWith(ESCAPE_CHAR);
-    }
-    
+    // ================================================================
+    // Methods to generate the variables for public use
+    // ================================================================
     private void generateInstanceVariables(String input, List<DateGroup> groups) {
         DateGroup group = null;
-        if (!groups.isEmpty()) {
+
+        if (hasParsedDates(groups)) {
             group = groups.get(POSITION_FIRST_DATE_GROUP);
             generateDates(group);
         }
 
         generateParsedAndNotParsedWords(group);
-
     }
-
 
     private void generateParsedAndNotParsedWords(DateGroup group) {
         if (group != null) {
@@ -418,9 +366,7 @@ public class DateParser {
 
             Collections.reverse(splitParsedWordsArr);
             Collections.reverse(notParsedWordsArr);
-            
-            System.out.println(splitParsedWordsArr);
-            System.out.println(notParsedWordsArr);
+
             for (String parsedWord : splitParsedWordsArr) {
                 for (String inputWord : notParsedWordsArr) {
                     if (parsedWord.equalsIgnoreCase(inputWord)) {
@@ -442,22 +388,28 @@ public class DateParser {
         logger.log(Level.INFO, "Not parsed words: " + notParsedWords);
     }
 
-
     private void generateDates(DateGroup group) {
-        System.out.println(group.getParseLocations());
         List<Date> listOfDates = group.getDates();
-        for (Date d : listOfDates) {
-            dates.add(LocalDateTime.ofInstant(d.toInstant(),
-                                              ZoneId.systemDefault()));
-        }
+        addNormalDates(listOfDates);
+        addRecurringUntilDate(group);
 
+        logger.log(Level.INFO, "Generated dates: " + dates);
+    }
+
+    private void addRecurringUntilDate(DateGroup group) {
         if (group.isRecurring() && group.getRecursUntil() != null) {
             dates.add(LocalDateTime.ofInstant(group.getRecursUntil()
                                                    .toInstant(),
                                               ZoneId.systemDefault()));
 
         }
-        logger.log(Level.INFO, "Generated dates: " + dates);
+    }
+
+    private void addNormalDates(List<Date> listOfDates) {
+        for (Date d : listOfDates) {
+            dates.add(LocalDateTime.ofInstant(d.toInstant(),
+                                              ZoneId.systemDefault()));
+        }
     }
 
 
@@ -474,9 +426,6 @@ public class DateParser {
             editedDates.add(referenceDateTime);
 
             for (LocalDateTime dateTime : dates) {
-                if (dateTime.equals(referenceDateTime)) {
-                    continue;
-                }
                 if (dateTime.isAfter(referenceDateTime)) {
                     editedDates.add(dateTime);
                     referenceDateTime = dateTime;
@@ -485,12 +434,75 @@ public class DateParser {
         }
 
         dates = editedDates;
-        logger.log(Level.INFO, "Removed non chronological dates: " + dates);
+        logger.log(Level.INFO, "After removing non chronological dates: " +
+                               dates);
     }
 
 
     // ================================================================
     // Utility methods
     // ================================================================
+    private boolean hasParsedDates(List<DateGroup> groups) {
+        return !groups.isEmpty();
+    }
 
+    private String addYearToInput(String input, ParseLocation parsedWord) {
+        input = addWordsBeforeWordAtPosition(input,
+                                             parsedWord.getStart(),
+                                             Year.now().toString() +
+                                                     ONE_SPACING);
+        return input;
+    }
+
+    private String addWordsBeforeWordAtPosition(String input,
+                                                int position,
+                                                String words) {
+        ArrayList<String> splitInput = new ArrayList<String>(Arrays.asList(input.split(ONE_SPACING)));
+        modifyWordAtPosition(input, position, words, splitInput);
+        return StringUtils.join(splitInput, ONE_SPACING);
+    }
+
+
+    private void modifyWordAtPosition(String input,
+                                      int position,
+                                      String words,
+                                      ArrayList<String> splitInput) {
+        int i = getIndexOfWordInSplitInput(splitInput, input, position);
+        String word = splitInput.get(i);
+
+        splitInput.set(i, words + word);
+    }
+
+    private String escapeWordAtPosition(String input, int position) {
+        ArrayList<String> splitInput = new ArrayList<String>(Arrays.asList(input.split(ONE_SPACING)));
+
+        int i = getIndexOfWordInSplitInput(splitInput, input, position);
+        String word = splitInput.get(i);
+
+        if (!isSurroundedByEscapeChars(word)) {
+            splitInput.set(i, ESCAPE_CHAR + word + ESCAPE_CHAR);
+        }
+
+        return StringUtils.join(splitInput, ONE_SPACING);
+    }
+
+    private int getIndexOfWordInSplitInput(ArrayList<String> splitInput,
+                                           String input,
+                                           int index) {
+        int currentInputPosition = 0;
+        int currentSplitInputPosition = 0;
+        for (String word : splitInput) {
+            if (index >= currentInputPosition &&
+                index < currentInputPosition + word.length() + 1) {
+                return currentSplitInputPosition;
+            }
+            currentInputPosition += word.length() + 1;
+            currentSplitInputPosition++;
+        }
+        return -1;
+    }
+
+    private boolean isSurroundedByEscapeChars(String word) {
+        return word.startsWith(ESCAPE_CHAR) && word.endsWith(ESCAPE_CHAR);
+    }
 }

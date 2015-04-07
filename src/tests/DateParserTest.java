@@ -283,7 +283,7 @@ public class DateParserTest {
         String input;
         ArrayList<LocalDateTime> dates;
 
-        input = "\"good bye thursday and friday\" today";
+        input = "\"good bye today thursday and friday\" today ";
         dates = getParsedDates(input);
         assertEquals("Number of dates", 1, dates.size());
         assertEquals("Date", constructDate(2015, 4, 7), dates.get(0).toLocalDate());
