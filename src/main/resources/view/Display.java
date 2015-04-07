@@ -248,7 +248,7 @@ public class Display extends VBox {
         allExampleCommands.add("add watch movie with friends today");
         allExampleCommands.add("add remember wedding anniversary on 12 October");
         allExampleCommands.add("add buy the latest Harry Potter book");
-        allExampleCommands.add("add sneak in to Apple WWDC 2016");
+        allExampleCommands.add("add sneak into Apple WWDC");
         allExampleCommands.add("add remember to complete SOC project");
         allExampleCommands.add("add find partner for Orbital");
         allExampleCommands.add("add make funny YouTube video next week");
@@ -445,7 +445,7 @@ public class Display extends VBox {
 
         for (Task task : listOfTasks) {
             if (task.getDate() != null &&
-                dayOneWeekFromNow.isBefore(task.getDate())) {
+                (dayOneWeekFromNow.equals(task.getDate()) || dayOneWeekFromNow.isBefore(task.getDate()))) {
                 hasOtherTasks = true;
                 displayBoxes.add(new TaskBox(index, task.toString()));
                 index++;
