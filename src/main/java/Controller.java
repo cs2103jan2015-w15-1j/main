@@ -25,8 +25,6 @@ public class Controller {
 
     private ArrayList<Task> allTasks;
     private ObservableList<Task> displayedTasks = FXCollections.observableArrayList();
-    //private ObservableList<String> helpList = FXCollections.observableArrayList();
-    private ArrayList<String> helpList = new ArrayList<String>();
     
     private History previousStates;
 
@@ -60,17 +58,6 @@ public class Controller {
     
     private static final String EMPTY_STRING = "";
     
-    private static final String HELP_ADD = "Add a task  ---------------------------------------------  add <arguments>";
-    private static final String HELP_EDIT = "Edit a task  ---------------------  edit <index> <desc/dead> <arguments>";
-    private static final String HELP_DELETE = "Delete a task  ----------------------------------------------  delete <index>";
-    private static final String HELP_COMPLETE = "Mark a task as complete  -----------------------------  complete <index>";
-    private static final String HELP_INCOMPLETE = "Mark a task as incomplete  -------------------------  incomplete <index>";
-    private static final String HELP_UNDO = "Undo previous action  ----------------------------------------------  undo";
-    private static final String HELP_SET_SAVE_LOCATION = "Change save directory  -----------------------------------  set <directory>";
-    private static final String HELP_SEARCH = "Search for a task  -------------------------------  search <keyword/date>";
-    private static final String HELP_EXIT = "Exit Veto  -------------------------------------------------------------  exit";
-
-    
     // ================================================================
  	// Constructor
  	// ================================================================
@@ -82,8 +69,6 @@ public class Controller {
         previousStates = new History();
         
         sortAllTasks();
-        
-        instantiateHelpList();
 
         // Load the incomplete tasks into displayedTasks (MAIN VIEW WHEN APP STARTS)
         for (Task task : getIncompleteTasks(allTasks)) {
@@ -442,7 +427,7 @@ public class Controller {
     }
     
     private void updateHelpDisplay() {
-    	display.updateHelpDisplay(helpList);
+    	display.updateHelpDisplay();
 ;    }
 
     private void sortAllTasks() {
@@ -461,18 +446,6 @@ public class Controller {
         userDefinedSort.addComparator(new SortIncomplete());
         userDefinedSort.executeSort();
         displayedTasks = FXCollections.observableArrayList(userDefinedSort.getList());
-    }
-    
-    private void instantiateHelpList() {
-    	helpList.add(HELP_ADD);
-    	helpList.add(HELP_EDIT);
-    	helpList.add(HELP_DELETE);
-    	helpList.add(HELP_COMPLETE);
-    	helpList.add(HELP_INCOMPLETE);
-    	helpList.add(HELP_UNDO);
-    	helpList.add(HELP_SET_SAVE_LOCATION);
-    	helpList.add(HELP_SEARCH);
-    	helpList.add(HELP_EXIT);
     }
 
     private void updateStorageWithAllTasks() {

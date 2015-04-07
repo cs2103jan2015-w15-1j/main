@@ -93,6 +93,24 @@
 	-fx-font: 18px Roboto;
 }
 
+.display #helpOverlay {
+	-fx-background-color: RGB(255, 99, 71, 0.8);
+	-fx-background-radius: 20;
+	-fx-padding: 10;
+}
+
+.display #helpTitle {
+	-fx-text-fill: white;
+	-fx-font: 60px Roboto;
+	-fx-font-weight: bold;
+	-fx-padding: 0 0 10 0;
+}
+
+.display #helpContent {
+	-fx-text-fill: white;
+	-fx-font: 15px Roboto;
+}
+
 /*
  * ================================================================
  * ListView styles
