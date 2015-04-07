@@ -8,14 +8,14 @@ import javafx.scene.layout.HBox;
 public class HelpBox extends HBox {
 
     private static final String LOCATION_HELP_BOX_FXML = "/view/HelpBox.fxml";
-
+    
+    @FXML
+    private Label description;
+    
     @FXML
     private Label command;
 
-    @FXML
-    private Label description;
-
-    public HelpBox(String command, String description) {
+    public HelpBox(String description, String command) {
 
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(LOCATION_HELP_BOX_FXML));
@@ -26,9 +26,10 @@ public class HelpBox extends HBox {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        this.command.setText(command);
+        
         this.description.setText(description);
+        this.command.setText(command);
+        
     }
 
 }

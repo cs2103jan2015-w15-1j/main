@@ -19,6 +19,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.HBox;
@@ -48,20 +49,18 @@ public class Display extends VBox {
 
     @FXML
     private Label noTaskOverlayMessage;
-    
+
     @FXML
     private VBox helpOverlay;
-    
+
     @FXML
     private Label helpOverlayIcon;
-    
+
     @FXML
     private Label helpOverlayTitle;
-    
+
     @FXML
     private ListView<HelpBox> helpOverlayContents;
-    
-
 
 
     // ================================================================
@@ -77,6 +76,7 @@ public class Display extends VBox {
     // Constants
     // ================================================================
     private final static String LOCATION_TASK_OVERVIEW_FXML = "/view/TaskOverview.fxml";
+    private final static String EMPTY_STRING = "";
 
     private static final String LABEL_FLOATING = "Floating";
     private static final String LABEL_OVERDUE = "Overdue";
@@ -89,8 +89,9 @@ public class Display extends VBox {
     private static final String LABEL_INCOMPLETE = "Incomplete";
     private static final String LABEL_COMPLETED = "Completed";
 
-    private static final String TITLE_HELP = "Need help?";
-    
+    private static final String HELP_OVERLAY_ICON = "\uf05a";
+    private static final String HELP_OVERLAY_TITLE = "Need help?";
+
     private static final String HELP_ADD_DESC = "Add a task";
     private static final String HELP_ADD_COMMAND = "add <description> <time> <day>";
     private static final String HELP_EDIT_DESC = "Edit a task";
@@ -109,13 +110,14 @@ public class Display extends VBox {
     private static final String HELP_SEARCH_COMMAND = "search <keyword/day>";
     private static final String HELP_EXIT_DESC = "Exit Veto";
     private static final String HELP_EXIT_COMMAND = "exit";
-    
+
     private static final int OVERLAY_FADE_IN_MILLISECONDS = 1500;
-    
+
     private static final String NO_TASK_OVERLAY_GREETING = "Hello!";
     private static final String NO_TASK_OVERLAY_ICON = "\uf14a";
     private static final String NO_TASK_OVERLAY_MESSAGE = "Looks like you've got no tasks, try entering the following:\n";
-    
+    private static final int NUM_EXAMPLE_COMMANDS = 3;
+
     private static final int FEEDBACK_FADE_IN_MILLISECONDS = 500;
     private static final int FEEDBACK_FADE_OUT_MILLISECONDS = 1000;
     private static final int FEEDBACK_DISPLAY_SECONDS = 8;
@@ -124,9 +126,6 @@ public class Display extends VBox {
     // ================================================================
     // Constructor
     // ================================================================
-    /**
-     * The constructor is called before the initialize() method.
-     */
     public Display() {
         logger = Logger.getLogger("Display");
         logger.setLevel(Level.INFO);
@@ -141,10 +140,103 @@ public class Display extends VBox {
             throw new RuntimeException(e);
         }
 
-        feedbackTimeline = new Timeline();
-        overlayTimeline = new Timeline();
+        initTimelines();
         initExampleCommands();
         initHelpList();
+    }
+
+
+    // ================================================================
+    // Public methods
+    // ================================================================
+    public void updateOverviewDisplay(ObservableList<Task> tasks) {
+        hideOverlays();
+
+        if (tasks.isEmpty()) {
+            showNoTaskOverlay();
+        }
+
+        ArrayList<Task> listOfTasks = new ArrayList<Task>(tasks);
+        logger.log(Level.INFO, "List of tasks: " + listOfTasks.toString());
+
+        ObservableList<HBox> displayBoxes = FXCollections.observableArrayList();
+        LocalDate now = LocalDate.now();
+        int index = 1;
+
+        index = addOverdueTasks(displayBoxes, listOfTasks, index);
+        index = addFloatingTasks(displayBoxes, listOfTasks, index);
+        index = addThisWeeksTasks(displayBoxes, listOfTasks, now, index);
+        index = addAllOtherTasks(displayBoxes, listOfTasks, now, index);
+
+        listView.setItems(displayBoxes);
+    }
+
+
+    public void updateSearchDisplay(ObservableList<Task> searchResults,
+                                    String searchQuery) {
+        hideOverlays();
+        ArrayList<Task> listOfResults = new ArrayList<Task>(searchResults);
+        logger.log(Level.INFO, "List of results: " + listOfResults.toString());
+
+        ObservableList<HBox> displayBoxes = FXCollections.observableArrayList();
+
+        addSearchLabel(displayBoxes, searchResults, searchQuery);
+
+        int index = 1;
+
+        index = addIncompleteTasks(displayBoxes, listOfResults, index);
+        index = addCompletedTasks(displayBoxes, listOfResults, index);
+
+        listView.setItems(displayBoxes);
+    }
+
+
+    public void setFeedback(String feedback) {
+        FadeTransition fadeIn = initFadeIn(feedbackLabel,
+                                           FEEDBACK_FADE_IN_MILLISECONDS);
+        FadeTransition fadeOut = initFadeOut(feedbackLabel,
+                                             FEEDBACK_FADE_OUT_MILLISECONDS);
+
+        feedbackTimeline.stop();
+        feedbackTimeline = generateFeedbackTimeline(feedback, fadeIn, fadeOut);
+        feedbackTimeline.play();
+    }
+
+    public void showHelpDisplay() {
+        hideOverlays();
+
+        FadeTransition fadeIn = initFadeIn(helpOverlay,
+                                           OVERLAY_FADE_IN_MILLISECONDS);
+
+        overlayTimeline = generateHelpOverlayTimeline(fadeIn);
+        overlayTimeline.play();
+    }
+
+
+    // ================================================================
+    // Private overlay method
+    // ================================================================
+    private void showNoTaskOverlay() {
+        setFeedback(EMPTY_STRING);
+        Collections.shuffle(allExampleCommands);
+        String exampleCommands = generateParagraph(allExampleCommands,
+                                                   NUM_EXAMPLE_COMMANDS);
+
+        FadeTransition fadeIn = initFadeIn(noTaskOverlay,
+                                           OVERLAY_FADE_IN_MILLISECONDS);
+
+        overlayTimeline = generateNoTaskOverlayTimeline(exampleCommands, fadeIn);
+
+        overlayTimeline.play();
+    }
+
+
+    // ================================================================
+    // Initialisation methods
+    // ================================================================
+    private void initTimelines() {
+        feedbackTimeline = new Timeline();
+        overlayTimeline = new Timeline();
     }
 
     private void initExampleCommands() {
@@ -171,156 +263,110 @@ public class Display extends VBox {
         allExampleCommands.add("add run for presidential campaign");
         allExampleCommands.add("add do some community work next week");
     }
-    
+
     private void initHelpList() {
-    	helpList = FXCollections.observableArrayList();
-    	helpList.add(new HelpBox(HELP_ADD_DESC, HELP_ADD_COMMAND));
-    	helpList.add(new HelpBox(HELP_EDIT_DESC, HELP_EDIT_COMMAND));
-    	helpList.add(new HelpBox(HELP_DELETE_DESC, HELP_DELETE_COMMAND));
-    	helpList.add(new HelpBox(HELP_COMPLETE_DESC, HELP_COMPLETE_COMMAND));
-    	helpList.add(new HelpBox(HELP_INCOMPLETE_DESC, HELP_INCOMPLETE_COMMAND));
-    	helpList.add(new HelpBox(HELP_UNDO_DESC, HELP_UNDO_COMMAND));
-    	helpList.add(new HelpBox(HELP_SET_SAVE_LOCATION_DESC, HELP_SET_SAVE_LOCATION_COMMAND));
-    	helpList.add(new HelpBox(HELP_SEARCH_DESC, HELP_SEARCH_COMMAND));
-    	helpList.add(new HelpBox(HELP_EXIT_DESC, HELP_EXIT_COMMAND));
-    }
-    
-    private String stringFormatter(ArrayList<String> list, int size) {
-    	return StringUtils.join(list.toArray(), "\n", 0, size);
+        helpList = FXCollections.observableArrayList();
+        helpList.add(new HelpBox(HELP_ADD_DESC, HELP_ADD_COMMAND));
+        helpList.add(new HelpBox(HELP_EDIT_DESC, HELP_EDIT_COMMAND));
+        helpList.add(new HelpBox(HELP_DELETE_DESC, HELP_DELETE_COMMAND));
+        helpList.add(new HelpBox(HELP_COMPLETE_DESC, HELP_COMPLETE_COMMAND));
+        helpList.add(new HelpBox(HELP_INCOMPLETE_DESC, HELP_INCOMPLETE_COMMAND));
+        helpList.add(new HelpBox(HELP_UNDO_DESC, HELP_UNDO_COMMAND));
+        helpList.add(new HelpBox(HELP_SET_SAVE_LOCATION_DESC,
+                                 HELP_SET_SAVE_LOCATION_COMMAND));
+        helpList.add(new HelpBox(HELP_SEARCH_DESC, HELP_SEARCH_COMMAND));
+        helpList.add(new HelpBox(HELP_EXIT_DESC, HELP_EXIT_COMMAND));
     }
 
-    // ================================================================
-    // Public methods
-    // ================================================================
-
-    public void setFeedback(String feedback) {
-        FadeTransition fadein = new FadeTransition(new Duration(FEEDBACK_FADE_IN_MILLISECONDS));
-        fadein.setNode(feedbackLabel);
-        fadein.setToValue(1);
-
-        FadeTransition fadeout = new FadeTransition(new Duration(FEEDBACK_FADE_OUT_MILLISECONDS));
-        fadeout.setNode(feedbackLabel);
-        fadeout.setToValue(0);
-
-        feedbackTimeline.stop();
-
-        feedbackTimeline = new Timeline(new KeyFrame(Duration.seconds(0),
-                                                     new EventHandler<ActionEvent>() {
-                                                         @Override
-                                                         public void handle(ActionEvent event) {
-                                                             feedbackLabel.setOpacity(0);
-                                                             feedbackLabel.setText(feedback);
-                                                             fadein.play();
-                                                         }
-                                                     }),
-                                        new KeyFrame(Duration.seconds(FEEDBACK_DISPLAY_SECONDS),
-                                                     new EventHandler<ActionEvent>() {
-                                                         @Override
-                                                         public void handle(ActionEvent event) {
-                                                             fadeout.play();
-                                                         }
-                                                     }));
-
-        feedbackTimeline.play();
-    }
-
-    public void updateOverviewDisplay(ObservableList<Task> tasks) {
-        hideOverlays();
-
-        if (tasks.isEmpty()) {
-            setFeedback("");
-            Collections.shuffle(allExampleCommands);
-            String exampleCommands = stringFormatter(allExampleCommands, 3);
-            
-            FadeTransition fadein = new FadeTransition(new Duration(OVERLAY_FADE_IN_MILLISECONDS));
-            fadein.setNode(noTaskOverlay);
-            fadein.setToValue(1);
-
-            overlayTimeline = new Timeline(new KeyFrame(new Duration(1),
-                                                              new EventHandler<ActionEvent>() {
-                                                                  @Override
-                                                                  public void handle(ActionEvent event) {
-                                                                      noTaskOverlay.setOpacity(0);
-                                                                      noTaskOverlay.toFront();
-                                                                      noTaskOverlayIcon.setText(NO_TASK_OVERLAY_ICON);
-                                                                      noTaskOverlayGreeting.setText(NO_TASK_OVERLAY_GREETING);
-                                                                      noTaskOverlayMessage.setText(NO_TASK_OVERLAY_MESSAGE+exampleCommands);
-                                                                      fadein.play();
-                                                                  }
-                                                              }));
-
-            overlayTimeline.play();
-        }
-        
-        ArrayList<Task> listOfTasks = new ArrayList<Task>(tasks);
-        logger.log(Level.INFO, "List of tasks: " + listOfTasks.toString());
-
-        ObservableList<HBox> displayBoxes = FXCollections.observableArrayList();
-        LocalDate now = LocalDate.now();
-        int index = 1;
-
-        index = addOverdueTasks(displayBoxes, listOfTasks, index);
-        index = addFloatingTasks(displayBoxes, listOfTasks, index);
-        index = addThisWeeksTasks(displayBoxes, listOfTasks, now, index);
-        index = addAllOtherTasks(displayBoxes, listOfTasks, now, index);
-
-        listView.setItems(displayBoxes);
-    }
-
-    private void hideOverlays() {
-        noTaskOverlay.toBack();
-        helpOverlay.toBack();
+    private void initNoTaskOverlay(String exampleCommands) {
         noTaskOverlay.setOpacity(0);
-        helpOverlay.setOpacity(0);
+        noTaskOverlay.toFront();
+        noTaskOverlayIcon.setText(NO_TASK_OVERLAY_ICON);
+        noTaskOverlayGreeting.setText(NO_TASK_OVERLAY_GREETING);
+        noTaskOverlayMessage.setText(NO_TASK_OVERLAY_MESSAGE + exampleCommands);
     }
 
-    public void updateSearchDisplay(ObservableList<Task> searchResults,
-                                    String searchQuery) {
-        hideOverlays();
-        ArrayList<Task> listOfResults = new ArrayList<Task>(searchResults);
-        logger.log(Level.INFO, "List of results: " + listOfResults.toString());
-
-        ObservableList<HBox> displayBoxes = FXCollections.observableArrayList();
-
-        addSearchLabel(displayBoxes, searchResults, searchQuery);
-
-        int index = 1;
-
-        index = addIncompleteTasks(displayBoxes, listOfResults, index);
-        index = addCompletedTasks(displayBoxes, listOfResults, index);
-
-        listView.setItems(displayBoxes);
+    private void initFeedbackLabel(String feedback) {
+        feedbackLabel.setOpacity(0);
+        feedbackLabel.setText(feedback);
     }
 
-    public void showHelpDisplay() {
-        hideOverlays();
-
-    	FadeTransition fadein = new FadeTransition(new Duration(OVERLAY_FADE_IN_MILLISECONDS));
-        fadein.setNode(helpOverlay);
-        fadein.setToValue(1);
-        
-        overlayTimeline = new Timeline(new KeyFrame(new Duration(1),
-                					new EventHandler<ActionEvent>() {
-                    					@Override
-                    					public void handle(ActionEvent event) {
-                    						helpOverlay.toFront();
-                    						helpOverlayIcon.setText("\uf05a");
-                    						helpOverlayTitle.setText(TITLE_HELP);
-                    						helpOverlayContents.setItems(helpList);
-                    						fadein.play();
-                    					}
-                					}));
-        overlayTimeline.play();
+    private void initHelpOverlay() {
+        helpOverlay.toFront();
+        helpOverlayIcon.setText(HELP_OVERLAY_ICON);
+        helpOverlayTitle.setText(HELP_OVERLAY_TITLE);
+        helpOverlayContents.setItems(helpList);
     }
+
+    private FadeTransition initFadeIn(Node node, int duration) {
+        FadeTransition fadeIn = new FadeTransition(new Duration(duration));
+        fadeIn.setNode(node);
+        fadeIn.setToValue(1);
+        return fadeIn;
+    }
+
+    private FadeTransition initFadeOut(Node node, int duration) {
+        FadeTransition fadeOut = new FadeTransition(new Duration(duration));
+        fadeOut.setNode(node);
+        fadeOut.setToValue(0);
+        return fadeOut;
+    }
+
+    // ================================================================
+    // Timeline generators
+    // ================================================================
+    private Timeline generateFeedbackTimeline(String feedback,
+                                              FadeTransition fadeIn,
+                                              FadeTransition fadeOut) {
+        return new Timeline(new KeyFrame(Duration.seconds(0),
+                                         new EventHandler<ActionEvent>() {
+                                             @Override
+                                             public void handle(ActionEvent event) {
+                                                 initFeedbackLabel(feedback);
+                                                 fadeIn.play();
+                                             }
+                                         }),
+                            new KeyFrame(Duration.seconds(FEEDBACK_DISPLAY_SECONDS),
+                                         new EventHandler<ActionEvent>() {
+                                             @Override
+                                             public void handle(ActionEvent event) {
+                                                 fadeOut.play();
+                                             }
+                                         }));
+    }
+
+    private Timeline generateNoTaskOverlayTimeline(String exampleCommands,
+                                                   FadeTransition fadeIn) {
+        return new Timeline(new KeyFrame(new Duration(1),
+                                         new EventHandler<ActionEvent>() {
+                                             @Override
+                                             public void handle(ActionEvent event) {
+                                                 initNoTaskOverlay(exampleCommands);
+                                                 fadeIn.play();
+                                             }
+                                         }));
+    }
+
+
+    private Timeline generateHelpOverlayTimeline(FadeTransition fadeIn) {
+        return new Timeline(new KeyFrame(new Duration(1),
+                                         new EventHandler<ActionEvent>() {
+                                             @Override
+                                             public void handle(ActionEvent event) {
+                                                 initHelpOverlay();
+                                                 fadeIn.play();
+                                             }
+                                         }));
+    }
+
 
     // ================================================================
     // Logic methods for updateOverviewDisplay
     // ================================================================
-
     private int addFloatingTasks(ObservableList<HBox> displayBoxes,
                                  ArrayList<Task> listOfTasks,
                                  int index) {
-        CategoryBox floating = new CategoryBox(LABEL_FLOATING, "");
+        CategoryBox floating = new CategoryBox(LABEL_FLOATING);
         displayBoxes.add(floating);
 
         boolean hasFloating = false;
@@ -340,11 +386,12 @@ public class Display extends VBox {
         return index;
     }
 
+
     private int addOverdueTasks(ObservableList<HBox> displayBoxes,
                                 ArrayList<Task> listOfTasks,
                                 int index) {
         // add second category
-        CategoryBox overdue = new CategoryBox(LABEL_OVERDUE, "");
+        CategoryBox overdue = new CategoryBox(LABEL_OVERDUE);
         displayBoxes.add(overdue);
 
         boolean hasOverdue = false;
@@ -364,13 +411,13 @@ public class Display extends VBox {
         return index;
     }
 
+
     private int addThisWeeksTasks(ObservableList<HBox> displayBoxes,
                                   ArrayList<Task> listOfTasks,
                                   LocalDate now,
                                   int index) {
         // generate the dates of the 7 days from today
         ArrayList<LocalDate> days = generateDaysOfWeek(now);
-
 
         for (LocalDate day : days) {
             CategoryBox label = generateDayLabel(now, day);
@@ -382,7 +429,6 @@ public class Display extends VBox {
                 if (day.equals(task.getDate())) {
                     hasTaskOnThisDay = true;
                     displayBoxes.add(new TaskBox(index, task.toString(true)));
-
                     index++;
                 }
             }
@@ -393,6 +439,34 @@ public class Display extends VBox {
         }
         return index;
     }
+
+
+    private int addAllOtherTasks(ObservableList<HBox> displayBoxes,
+                                 ArrayList<Task> listOfTasks,
+                                 LocalDate now,
+                                 int index) {
+        CategoryBox otherTasks = new CategoryBox(LABEL_OTHERS);
+        displayBoxes.add(otherTasks);
+
+        boolean hasOtherTasks = false;
+        LocalDate dayOneWeekFromNow = now.plusWeeks(1);
+
+        for (Task task : listOfTasks) {
+            if (task.getDate() != null &&
+                dayOneWeekFromNow.isBefore(task.getDate())) {
+                hasOtherTasks = true;
+                displayBoxes.add(new TaskBox(index, task.toString()));
+                index++;
+            }
+        }
+
+        if (!hasOtherTasks) {
+            otherTasks.dim();
+        }
+
+        return index;
+    }
+
 
     private CategoryBox generateDayLabel(LocalDate now, LocalDate day) {
 
@@ -423,75 +497,20 @@ public class Display extends VBox {
 
     private ArrayList<LocalDate> generateDaysOfWeek(LocalDate now) {
         ArrayList<LocalDate> days = new ArrayList<LocalDate>();
-        days.add(now);
-        for (int j = 1; j < 8; j++) {
-            days.add(now.plusDays(j));
+        for (int i = 0; i < 7; i++) {
+            days.add(now.plusDays(i));
         }
         return days;
-    }
-
-    private int addAllOtherTasks(ObservableList<HBox> displayBoxes,
-                                 ArrayList<Task> listOfTasks,
-                                 LocalDate now,
-                                 int i) {
-        CategoryBox otherTasks = new CategoryBox(LABEL_OTHERS, "");
-        displayBoxes.add(otherTasks);
-
-        boolean hasOtherTasks = false;
-        LocalDate dayOneWeekFromNow = now.plusWeeks(1);
-
-        for (Task task : listOfTasks) {
-            if (task.getDate() != null &&
-                dayOneWeekFromNow.isBefore(task.getDate())) {
-                hasOtherTasks = true;
-                displayBoxes.add(new TaskBox(i, task.toString()));
-                i++;
-            }
-        }
-
-        if (!hasOtherTasks) {
-            otherTasks.dim();
-        }
-
-        return i;
     }
 
 
     // ================================================================
     // Logic methods for updateSearchDisplay
     // ================================================================
-
-    private void addSearchLabel(ObservableList<HBox> displayBoxes,
-                                ObservableList<Task> searchResults,
-                                String searchQuery) {
-        CategoryBox searchLabel = generateSearchLabel(searchResults,
-                                                      searchQuery);
-        displayBoxes.add(searchLabel);
-    }
-
-    private CategoryBox generateSearchLabel(ObservableList<Task> searchResults,
-                                            String searchQuery) {
-        CategoryBox searchLabel;
-        if (searchQuery.isEmpty()) {
-            searchQuery = LABEL_DEFAULT_SEARCH_QUERY;
-        }
-
-        if (searchResults.isEmpty()) {
-            searchLabel = new CategoryBox(String.format(LABEL_UNSUCCESSFUL_SEARCH,
-                                                        searchQuery),
-                                          "");
-        } else {
-            searchLabel = new CategoryBox(String.format(LABEL_SUCCESSFUL_SEARCH,
-                                                        searchQuery),
-                                          "");
-        }
-        return searchLabel;
-    }
-
     private int addIncompleteTasks(ObservableList<HBox> displayBoxes,
                                    ArrayList<Task> listOfResults,
                                    int index) {
-        CategoryBox incompleteLabel = new CategoryBox(LABEL_INCOMPLETE, "");
+        CategoryBox incompleteLabel = new CategoryBox(LABEL_INCOMPLETE);
         displayBoxes.add(incompleteLabel);
 
         boolean hasIncompleteTask = false;
@@ -511,10 +530,11 @@ public class Display extends VBox {
         return index;
     }
 
+
     private int addCompletedTasks(ObservableList<HBox> displayBoxes,
                                   ArrayList<Task> listOfResults,
                                   int index) {
-        CategoryBox completedLabel = new CategoryBox(LABEL_COMPLETED, "");
+        CategoryBox completedLabel = new CategoryBox(LABEL_COMPLETED);
         displayBoxes.add(completedLabel);
 
         boolean hasCompletedTask = false;
@@ -532,5 +552,46 @@ public class Display extends VBox {
         }
 
         return index;
+    }
+
+
+    private void addSearchLabel(ObservableList<HBox> displayBoxes,
+                                ObservableList<Task> searchResults,
+                                String searchQuery) {
+        CategoryBox searchLabel = generateSearchLabel(searchResults,
+                                                      searchQuery);
+        displayBoxes.add(searchLabel);
+    }
+
+    private CategoryBox generateSearchLabel(ObservableList<Task> searchResults,
+                                            String searchQuery) {
+        CategoryBox searchLabel;
+        if (searchQuery.isEmpty()) {
+            searchQuery = LABEL_DEFAULT_SEARCH_QUERY;
+        }
+
+        if (searchResults.isEmpty()) {
+            searchLabel = new CategoryBox(String.format(LABEL_UNSUCCESSFUL_SEARCH,
+                                                        searchQuery));
+        } else {
+            searchLabel = new CategoryBox(String.format(LABEL_SUCCESSFUL_SEARCH,
+                                                        searchQuery));
+        }
+
+        return searchLabel;
+    }
+
+    // ================================================================
+    // Utility methods
+    // ================================================================
+    private void hideOverlays() {
+        noTaskOverlay.toBack();
+        helpOverlay.toBack();
+        noTaskOverlay.setOpacity(0);
+        helpOverlay.setOpacity(0);
+    }
+
+    private String generateParagraph(ArrayList<String> list, int size) {
+        return StringUtils.join(list.toArray(), "\n", 0, size);
     }
 }
