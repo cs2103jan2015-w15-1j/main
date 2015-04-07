@@ -244,28 +244,30 @@ public class RootLayoutController extends BorderPane {
             Task task = displayedTasks.get(index - 1);
             Task.Type taskType = task.getType();
 
-            userInput.appendText(ONE_SPACING + task.toString());
+            userInput.appendText(ONE_SPACING + task.getDescription());
 
-
-//            switch (taskType) {
-//                case FLOATING :
-//                    break;
-//                case DEADLINE :
-//                    userInput.appendText(ONE_SPACING);
-//                    userInput.appendText(task.getDate().format(dateFormatter));
-//                    break;
-//                case TIMED :
-//                    userInput.appendText(ONE_SPACING);
-//                    userInput.appendText(task.getDate().format(dateFormatter) +
-//                                         ONE_SPACING +
-//                                         task.getStartTime()
-//                                             .format(timeFormatter) +
-//                                         ONE_SPACING +
-//                                         "to " +
-//                                         task.getEndTime()
-//                                             .format(timeFormatter));
-//                    break;
-//            }
+            switch (taskType) {
+                case FLOATING :
+                    break;
+                case DEADLINE :
+                    userInput.appendText(ONE_SPACING);
+                    if (task.getStartTime() != null) {
+                        userInput.appendText("by " + task.getStartTime().format(timeFormatter) + ONE_SPACING);
+                    }
+                    userInput.appendText(task.getDate().format(dateFormatter));
+                    break;
+                case TIMED :
+                    userInput.appendText(ONE_SPACING);
+                    userInput.appendText(task.getDate().format(dateFormatter) +
+                                         ONE_SPACING +
+                                         task.getStartTime()
+                                             .format(timeFormatter) +
+                                         ONE_SPACING +
+                                         "to " +
+                                         task.getEndTime()
+                                             .format(timeFormatter));
+                    break;
+            }
             userInput.end();
         }
     }
