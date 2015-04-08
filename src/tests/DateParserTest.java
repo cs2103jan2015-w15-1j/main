@@ -310,7 +310,7 @@ public class DateParserTest {
     public void inputWithDateAndNonChronologicalTime() {
         String input = "6pm to 5pm on 15 mar";
         try {
-            ArrayList<LocalDateTime> dates = getParsedDates(input);
+            getParsedDates(input);
         } catch (DateTimeException e){
             System.out.println(e.getMessage());
         }

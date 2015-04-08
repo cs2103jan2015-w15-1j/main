@@ -55,13 +55,13 @@ public class Task implements Cloneable {
 
     //@author A0122393L
     public Task(String input, ArrayList<LocalDateTime> parsedDates,
-            String parsedWords, String notParsedWords) {
+                String parsedWords, String notParsedWords) {
         markAsIncomplete();
         rawInfo = input;
         type = determineType(parsedDates);
         initDateAndTime(type, parsedDates);
-        description = extractDescription(input, notParsedWords);
-        while (description.substring(description.length()-1).equals(" ")) {
+        description = extractDescription(notParsedWords);
+        while (description.substring(description.length() - 1).equals(" ")) {
             description = description.trim();
         }
     }
@@ -151,7 +151,7 @@ public class Task implements Cloneable {
         type = determineType(parsedDates);
         initDateAndTime(type, parsedDates);
         // substring to get rid of the index being part of description
-        description = extractDescription(input, notParsedWords).substring(2);
+        description = extractDescription(notParsedWords).substring(2);
 
         updateAll(description, determineType(parsedDates), parsedDates);
     }
@@ -262,35 +262,25 @@ public class Task implements Cloneable {
     //@author A0121520A    
     /**
      * Get the description of the task
-     *
-     * @param input
-     * @param notParsedWords dates from user input
+     * @param notParsedWords
      * @return description
      */
-    private String extractDescription(String input, String notParsedWords) {
-        if (hasTwoEscapeChars(input)) {
-            return getWordsWithinEscapeChars(input);
-        } else {
-            // convert input arguments to string arrays
-            String[] wordArr = notParsedWords.split(" ");
+    private String extractDescription(String notParsedWords) {
+        String[] wordArr = notParsedWords.split(" ");
+        ArrayList<String> wordArrayList = new ArrayList<String>(Arrays.asList(wordArr));
 
-            // convert input string array to arraylist of strings
-            ArrayList<String> wordArrayList = new ArrayList<String>(
-                    Arrays.asList(wordArr));
+        // reverse as we want to delete words from the back
+        Collections.reverse(wordArrayList);
 
-            // reverse as we want to delete words from the back
-            Collections.reverse(wordArrayList);
-
-            // delete keywords that do not make up the description of tasks
-            for (String word : KEYWORDS) {
-                wordArrayList.remove(word);
-            }
-
-            Collections.reverse(wordArrayList);
-            String description = StringUtils.join(wordArrayList, ' ');
-            // return description;
-            return description.replace("\"", "");
+        // delete keywords that do not make up the description of tasks
+        for (String word : KEYWORDS) {
+            wordArrayList.remove(word);
         }
+
+        Collections.reverse(wordArrayList);
+
+        String description = StringUtils.join(wordArrayList, ' ');
+        return description.replace("\"", "");
     }
     
     //@author A0122081X
@@ -322,27 +312,6 @@ public class Task implements Cloneable {
     // ================================================================
     // Utility Methods
     // ================================================================
-    private boolean hasTwoEscapeChars(String input) {
-        return StringUtils.countMatches(input, ESCAPE_CHAR + "") == 2;
-    }
-
-    private String getWordsWithinEscapeChars(String input) {
-        String output = "";
-        boolean withinEscapeChar = false;
-        for (char c : input.toCharArray()) {
-            if (c == ESCAPE_CHAR) {
-                if (withinEscapeChar) {
-                    withinEscapeChar = false;
-                } else {
-                    withinEscapeChar = true;
-                }
-            } else if (withinEscapeChar) {
-                output += c;
-            }
-        }
-        return output;
-    }
-
     @Override
     public String toString() {
         String result = getDescription();
@@ -351,14 +320,14 @@ public class Task implements Cloneable {
         return result;
     }
 
-    public String toString(boolean withoutDate) {
-        String result = getDescription();
-        if (withoutDate) {
-            result += addFormattedTime();
+    public String toString(boolean hasDate) {
+        if (hasDate) {
+            return this.toString();
         } else {
-            this.toString();
+            String result = getDescription();
+            result += addFormattedTime();
+            return result;
         }
-        return result;
     }
     
     //@author A0121813U 

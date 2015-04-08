@@ -67,7 +67,7 @@ public class DateParser {
     // ================================================================
     private DateParser() {
         logger = Logger.getLogger("DateParser");
-        logger.setLevel(Level.INFO);
+        logger.setLevel(Level.OFF);
     }
 
 
@@ -95,8 +95,6 @@ public class DateParser {
             input = fixInputSecondPass(input, groups);
             groups = parser.parse(input);
         }
-        
-
 
         generateInstanceVariables(input, groups);
         removeNonChronologicalDates();
@@ -241,7 +239,6 @@ public class DateParser {
         input = catchOptionalPrefix(input, pLocations);
         input = catchRelaxedYearBeforeToday(input, pLocations);
         input = catchHolidays(input, group, pLocations);
-        System.out.println(input);
 
         return input;
     }
