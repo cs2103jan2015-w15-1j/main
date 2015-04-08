@@ -49,7 +49,7 @@ public class StorageTest {
         // test moving save file
         assertEquals(true, defaultFile.exists());
         assertEquals(false, testFile.exists());
-        assertEquals("File save destination has been confirmed. \n",
+        assertEquals(true,
                 test.moveSaveFileDirectory(newDirectory));
         assertEquals(true, testFile.exists());
         assertEquals(false, defaultFile.exists());
@@ -63,7 +63,7 @@ public class StorageTest {
             e.printStackTrace();
         }
         assertEquals(false, testFile2.exists());
-        assertEquals("File save destination has been confirmed. \n",
+        assertEquals(true,
                 test.moveSaveFileDirectory(newDirectory2));
         assertEquals(true, testFile2.exists());
         assertEquals(false, testFile.exists());
@@ -91,7 +91,7 @@ public class StorageTest {
 
         Storage test = Storage.getInstance();
         // write data to storage
-        assertEquals("File updated\n", test.updateFiles(tempData));
+        assertEquals(true, test.updateFiles(tempData));
         // read data from storage
         readData = test.readFile();
         compareData(tempData, readData);
@@ -110,7 +110,7 @@ public class StorageTest {
         createArrayListOfTask(data, tempData);
 
         Storage test = Storage.getInstance();
-        assertEquals("File updated\n", test.updateFiles(tempData));
+        assertEquals(true, test.updateFiles(tempData));
         
         // corrupting data
         try {

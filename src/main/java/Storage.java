@@ -18,13 +18,9 @@ import com.google.gson.JsonSyntaxException;
 public class Storage {
     private static final Logger logger = Logger.getLogger("VetoStorage");
 
-    private static final String MESSAGE_ADDED = "File updated\n";
-    private static final String MESSAGE_ADD_FAIL = "File not updated\n";
     private static final String DEFAULT_SAVE_FILE = "savefile.txt";
     private static final String SETTINGS_FILE_NAME = "settings.txt";
     private static final String BACKUP_FILE_NAME = "backup.txt";
-    private static final String MESSAGE_SAVE_MOVE = "Save file has been moved. \n";
-    private static final String MESSAGE_SAVE_MOVE_FAIL = "Moving save file failed. \n";
 
     private static Storage storage;
     private static File settingsFile;
@@ -97,7 +93,7 @@ public class Storage {
     }
 
     // Update necessary files
-    public String updateFiles(ArrayList<Task> input) {
+    public Boolean updateFiles(ArrayList<Task> input) {
         Boolean hasUpdatedSaveFile = false;
         Boolean hasUpdatedBackup = false;
 
@@ -107,9 +103,9 @@ public class Storage {
         backupFile.setWritable(false);
 
         if (hasUpdatedSaveFile && hasUpdatedBackup) {
-            return String.format(MESSAGE_ADDED);
+            return true;
         } else {
-            return String.format(MESSAGE_ADD_FAIL);
+            return false;
         }
     }
 
@@ -191,7 +187,7 @@ public class Storage {
     }
 
     // move the save file
-    public String moveSaveFileDirectory(String input) {
+    public Boolean moveSaveFileDirectory(String input) {
         saveFileName = input;
         if (saveFile.renameTo(new File(saveFileName))) {
             updateSettingsFile(saveFileName);
@@ -199,9 +195,9 @@ public class Storage {
             createIfMissingFile(saveFile);
             logger.log(Level.INFO,
                     "File directory changed to " + saveFile.toString());
-            return MESSAGE_SAVE_MOVE;
+            return true;
         } else {
-            return MESSAGE_SAVE_MOVE_FAIL;
+            return false;
         }
     }
 

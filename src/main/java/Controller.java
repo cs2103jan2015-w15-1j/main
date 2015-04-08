@@ -58,6 +58,8 @@ public class Controller {
     private static final String MESSAGE_TASK_INDEX_ERROR = "The task you specified could not be found.";
     private static final String MESSAGE_SAVE_SET = "File save destination has been confirmed. \n";
     private static final String MESSAGE_SAVE_SET_FAIL = "File save destination failed. \n";
+    private static final String MESSAGE_SAVE_MOVE = "Save file has been moved. \n";
+    private static final String MESSAGE_SAVE_MOVE_FAIL = "Moving save file failed. \n";
     private static final String MESSAGE_NON_CHRONO_DATES = "Task was not created as %s";
    
     private static final String EMPTY_STRING = "";
@@ -443,7 +445,11 @@ public class Controller {
     
     //@author A0122393L
     private String moveSaveFileDirectory(String input) {
-        return storage.moveSaveFileDirectory(input);
+        if (storage.moveSaveFileDirectory(input)) {
+            return MESSAGE_SAVE_MOVE;
+        } else {
+            return MESSAGE_SAVE_MOVE_FAIL;
+        }
     }
     
     private String setSaveFileDirectory(String input) {
