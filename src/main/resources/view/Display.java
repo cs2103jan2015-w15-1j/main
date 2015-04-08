@@ -170,6 +170,13 @@ public class Display extends VBox {
     // ================================================================
     // Public methods
     // ================================================================
+    public void hideOverlays() {
+        noTaskOverlay.toBack();
+        helpOverlay.toBack();
+        noTaskOverlay.setOpacity(0);
+        helpOverlay.setOpacity(0);
+    }
+    
     public void updateOverviewDisplay(ObservableList<Task> tasks) {
         hideOverlays();
 
@@ -628,11 +635,19 @@ public class Display extends VBox {
     // ================================================================
     // Utility methods
     // ================================================================
-    private void addTask(ObservableList<HBox> displayBoxes, int index, Task task, boolean hasDate) {
+    private void addTask(ObservableList<HBox> displayBoxes,
+                         int index,
+                         Task task,
+                         boolean hasDate) {
         if (task.isCompleted()) {
-            displayBoxes.add(new TaskBox(index, task.toString(hasDate), task.isRecurring(), true));
+            displayBoxes.add(new TaskBox(index,
+                                         task.toString(hasDate),
+                                         task.isRecurring(),
+                                         true));
         } else {
-            displayBoxes.add(new TaskBox(index, task.toString(hasDate), task.isRecurring()));
+            displayBoxes.add(new TaskBox(index,
+                                         task.toString(hasDate),
+                                         task.isRecurring()));
         }
     }
     
@@ -648,13 +663,6 @@ public class Display extends VBox {
             return new ArrayList<Task> (listOfTasks.subList(0, MAX_NUM_OF_TASKS));
         }
         return listOfTasks;
-    }
-    
-    private void hideOverlays() {
-        noTaskOverlay.toBack();
-        helpOverlay.toBack();
-        noTaskOverlay.setOpacity(0);
-        helpOverlay.setOpacity(0);
     }
     
     //@author A0121813U

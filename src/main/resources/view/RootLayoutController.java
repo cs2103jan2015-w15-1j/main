@@ -88,6 +88,8 @@ public class RootLayoutController extends BorderPane {
             handleGetPastCommands(event);
         } else if (event.getCode() == KeyCode.TAB) {
             handleCommandAutoComplete();
+        } else if (event.getCode() == KeyCode.ESCAPE) {
+            display.hideOverlays();
         }
     }
 
