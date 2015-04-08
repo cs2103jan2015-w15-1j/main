@@ -49,7 +49,6 @@ public class Controller {
     private static final String MESSAGE_DELETE_ALL = "All recurring task has been successfully deleted: %s";
     private static final String MESSAGE_EDIT = "Task has been successfully edited: %s";
     private static final String MESSAGE_EDIT_ALL = "All recurring task has been successfully edited: %s";
-    private static final String MESSAGE_EDIT_INDEX_ERROR = "The task you specified could not be found.";
     private static final String MESSAGE_COMPLETE = "\"%s\" completed.";
     private static final String MESSAGE_COMPLETE_FAILED = "\"%s\" already completed.";
     private static final String MESSAGE_INCOMPLETE = "\"%s\" marked as incomplete.";
@@ -57,6 +56,7 @@ public class Controller {
     private static final String MESSAGE_INVALID_COMMAND = "Invalid command.";
     private static final String MESSAGE_NO_UNDO = "Already at oldest change, unable to undo.";
     private static final String MESSAGE_ALL_CLEAR = "All tasks have been deleted!";
+    private static final String MESSAGE_TASK_INDEX_ERROR = "The task you specified could not be found.";
     
     private static final String EMPTY_STRING = "";
     
@@ -277,7 +277,7 @@ public class Controller {
             addTask(addArgument);
             return String.format(MESSAGE_EDIT, task);
         } catch (IndexOutOfBoundsException | NumberFormatException e) {
-            return MESSAGE_EDIT_INDEX_ERROR;
+            return MESSAGE_TASK_INDEX_ERROR;
         }
     }
 
@@ -329,43 +329,50 @@ public class Controller {
     }
 
     private String deleteTask(String input) {
-        // ArrayList is 0-indexed, but Tasks are displayed to users as 1-indexed
-        ArrayList<Task> tasksToRemove = new ArrayList<Task>();
-        Boolean isToDeleteAll = false;
-        String recurringID;
-        
+        boolean deleteAll = false;
+        Task removeTask;
+
         if (input.toLowerCase().contains("all")) {
-            isToDeleteAll = true;
+            // Remove the "all" keyword so the try-catch can parse it properly
             input = input.toLowerCase().replace("all", "").trim();
+            deleteAll = true;
         }
+
         try {
+            // ArrayList is 0-indexed, but Tasks are displayed to users as 1-indexed
             int removalIndex = Integer.parseInt(input) - 1;
-            Task removeTask = displayedTasks.get(removalIndex);
-            if (isToDeleteAll) {
-                recurringID = removeTask.getId();
-                if (recurringID.equals(null)) {
-                    return MESSAGE_INVALID_COMMAND;
-                }
-                for (Task task : allTasks) {
-                    if (task.getId()!=null && task.getId().equals(recurringID)) {
-                        tasksToRemove.add(task);
-                    }
-                }
-            } else {
-                tasksToRemove.add(removeTask);
-            }
-            
-            displayedTasks.removeAll(tasksToRemove);
-            allTasks.removeAll(tasksToRemove);
-            updateStorageWithAllTasks();
-            
-            if (isToDeleteAll) {
-                return String.format(MESSAGE_DELETE_ALL, removeTask.getDescription());
-            }
-            return String.format(MESSAGE_DELETE, removeTask);
-        } catch (Exception e) {
-            return MESSAGE_INVALID_COMMAND;
+            removeTask = displayedTasks.get(removalIndex);
+        } catch (IndexOutOfBoundsException | NumberFormatException e) {
+            return MESSAGE_TASK_INDEX_ERROR;
         }
+
+        if (deleteAll) {
+            deleteAllTasks(removeTask);
+            return String.format(MESSAGE_DELETE_ALL, removeTask.getDescription());
+        } else {
+            deleteIndividualTask(removeTask);
+            return String.format(MESSAGE_DELETE, removeTask);
+        }
+    }
+
+    private void deleteIndividualTask(Task taskToDelete) {
+        displayedTasks.remove(taskToDelete);
+        allTasks.remove(taskToDelete);
+        updateStorageWithAllTasks();
+    }
+
+    private void deleteAllTasks(Task taskToDelete) {
+        String recurringId = taskToDelete.getId();
+        ArrayList<Task> tasksToDelete = new ArrayList<Task>();
+
+        for (Task task : allTasks) {
+            if (task.getId() != null && task.getId().equals(recurringId)) {
+                tasksToDelete.add(task);
+            }
+        }
+        displayedTasks.removeAll(tasksToDelete);
+        allTasks.removeAll(tasksToDelete);
+        updateStorageWithAllTasks();
     }
 
     private String completeTask(String input) {
