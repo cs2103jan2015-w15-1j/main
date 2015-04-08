@@ -88,6 +88,7 @@ public class DateParser {
 
         if (hasParsedDates(groups)) {
             input = fixInputFirstPass(input, groups);
+            
             groups = parser.parse(input);
         }
 
@@ -353,44 +354,42 @@ public class DateParser {
         if (hasParsedDates(groups)) {
             group = groups.get(POSITION_FIRST_DATE_GROUP);
             generateDates(group);
-        }
-
-        generateParsedAndNotParsedWords(group);
-    }
-
-    private void generateParsedAndNotParsedWords(DateGroup group) {
-        if (group != null) {
-            String parsedWordsFromModifiedInput = group.getText();
-
-            String[] splitParsedWords = parsedWordsFromModifiedInput.split(ONE_SPACING);
-            ArrayList<String> splitParsedWordsArr = new ArrayList<String>(Arrays.asList(splitParsedWords));
-            
-            String[] splitRawInput = rawInput.split(ONE_SPACING);
-            ArrayList<String> notParsedWordsArr = new ArrayList<String>(Arrays.asList(splitRawInput));
-            
-            ArrayList<String> parsedWordsArr = new ArrayList<String>();
-            
-            Collections.reverse(splitParsedWordsArr);
-            Collections.reverse(notParsedWordsArr);
-
-            for (String parsedWord : splitParsedWordsArr) {
-                for (String inputWord : notParsedWordsArr) {
-                    if (parsedWord.equalsIgnoreCase(inputWord)) {
-                        notParsedWordsArr.remove(inputWord);
-                        parsedWordsArr.add(inputWord);
-                        break;
-                    }
-                }
-            }
-
-            Collections.reverse(parsedWordsArr);
-            Collections.reverse(notParsedWordsArr);
-            
-            parsedWords = StringUtils.join(parsedWordsArr, ONE_SPACING);
-            notParsedWords = StringUtils.join(notParsedWordsArr, ONE_SPACING);
+            generateParsedAndNotParsedWords(group);
         } else {
             notParsedWords = rawInput;
         }
+    }
+
+    private void generateParsedAndNotParsedWords(DateGroup group) {
+        String parsedWordsFromModifiedInput = group.getText();
+
+        String[] splitParsedWords = parsedWordsFromModifiedInput.split(ONE_SPACING);
+        ArrayList<String> splitParsedWordsArr = new ArrayList<String>(Arrays.asList(splitParsedWords));
+
+        String[] splitRawInput = rawInput.split(ONE_SPACING);
+        ArrayList<String> notParsedWordsArr = new ArrayList<String>(Arrays.asList(splitRawInput));
+
+        ArrayList<String> parsedWordsArr = new ArrayList<String>();
+
+        Collections.reverse(splitParsedWordsArr);
+        Collections.reverse(notParsedWordsArr);
+
+        for (String parsedWord : splitParsedWordsArr) {
+            for (String inputWord : notParsedWordsArr) {
+                if (parsedWord.equalsIgnoreCase(inputWord)) {
+                    notParsedWordsArr.remove(inputWord);
+                    parsedWordsArr.add(inputWord);
+                    break;
+                }
+            }
+        }
+
+        Collections.reverse(parsedWordsArr);
+        Collections.reverse(notParsedWordsArr);
+
+        parsedWords = StringUtils.join(parsedWordsArr, ONE_SPACING);
+        notParsedWords = StringUtils.join(notParsedWordsArr, ONE_SPACING);
+        
         logger.log(Level.INFO, "Parsed words: " + parsedWords);
         logger.log(Level.INFO, "Not parsed words: " + notParsedWords);
     }
