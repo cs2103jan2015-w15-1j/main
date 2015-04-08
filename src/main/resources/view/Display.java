@@ -109,8 +109,10 @@ public class Display extends VBox {
     private static final String HELP_INCOMPLETE_COMMAND = "incomplete <index>";
     private static final String HELP_UNDO_DESC = "Undo previous action";
     private static final String HELP_UNDO_COMMAND = "undo";
-    private static final String HELP_SET_SAVE_LOCATION_DESC = "Change save directory";
+    private static final String HELP_SET_SAVE_LOCATION_DESC = "Set a file as save file";
     private static final String HELP_SET_SAVE_LOCATION_COMMAND = "set <directory>";
+    private static final String HELP_MOVE_SAVE_LOCATION_DESC = "Change save directory";
+    private static final String HELP_MOVE_SAVE_LOCATION_COMMAND = "move <directory>";
     private static final String HELP_SEARCH_DESC = "Search for a task";
     private static final String HELP_SEARCH_COMMAND = "search <keyword/day>";
     private static final String HELP_DISPLAY_INCOMPLETE_DESC = "Display overview";
@@ -330,6 +332,8 @@ public class Display extends VBox {
         helpList.add(new HelpBox(HELP_UNDO_DESC, HELP_UNDO_COMMAND));
         helpList.add(new HelpBox(HELP_SET_SAVE_LOCATION_DESC,
                                  HELP_SET_SAVE_LOCATION_COMMAND));
+        helpList.add(new HelpBox(HELP_MOVE_SAVE_LOCATION_DESC,
+                                 HELP_MOVE_SAVE_LOCATION_COMMAND));
         helpList.add(new HelpBox(HELP_SEARCH_DESC, HELP_SEARCH_COMMAND));
         helpList.add(new HelpBox(HELP_DISPLAY_INCOMPLETE_DESC, HELP_DISPLAY_INCOMPLETE_COMMAND));
         helpList.add(new HelpBox(HELP_DISPLAY_COMPLETE_DESC, HELP_DISPLAY_COMPLETE_COMMAND));
