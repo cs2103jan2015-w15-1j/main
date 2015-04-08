@@ -1,8 +1,10 @@
 package main.java;
 
+import java.time.DateTimeException;
 import java.time.LocalDateTime;
 import java.time.Year;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -44,7 +46,8 @@ public class DateParser {
     private static final String ONE_SPACING = " ";
     private static final int POSITION_FIRST_DATE = 0;
     private static final int POSITION_FIRST_DATE_GROUP = 0;
-
+    private static final String EXCEPTION_NON_CHRONO_DATES = "%s is not after %s";
+    
 
     // ================================================================
     // Variables
@@ -57,14 +60,14 @@ public class DateParser {
     private ArrayList<LocalDateTime> dates;
     private String parsedWords;
     private String notParsedWords;
-
+    
 
     // ================================================================
     // Constructor
     // ================================================================
     private DateParser() {
         logger = Logger.getLogger("DateParser");
-        logger.setLevel(Level.OFF);
+        logger.setLevel(Level.INFO);
     }
 
 
@@ -78,7 +81,7 @@ public class DateParser {
         return dateParser;
     }
 
-    public void parse(String input) {
+    public void parse(String input) throws DateTimeException{
         initInstanceVariables();
         input = modifyInputBeforeParsing(input);
         List<DateGroup> groups = parser.parse(input);
@@ -92,6 +95,8 @@ public class DateParser {
             input = fixInputSecondPass(input, groups);
             groups = parser.parse(input);
         }
+        
+
 
         generateInstanceVariables(input, groups);
         removeNonChronologicalDates();
@@ -236,6 +241,7 @@ public class DateParser {
         input = catchOptionalPrefix(input, pLocations);
         input = catchRelaxedYearBeforeToday(input, pLocations);
         input = catchHolidays(input, group, pLocations);
+        System.out.println(input);
 
         return input;
     }
@@ -422,22 +428,25 @@ public class DateParser {
     // ================================================================
 
     // ensures the dates are in chronological order
-    private void removeNonChronologicalDates() {
-        ArrayList<LocalDateTime> editedDates = new ArrayList<LocalDateTime>();
+    private void removeNonChronologicalDates() throws DateTimeException {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("h.mma, d MMMM");
 
         if (!dates.isEmpty()) {
             LocalDateTime referenceDateTime = dates.get(POSITION_FIRST_DATE);
-            editedDates.add(referenceDateTime);
 
             for (LocalDateTime dateTime : dates) {
-                if (dateTime.isAfter(referenceDateTime)) {
-                    editedDates.add(dateTime);
-                    referenceDateTime = dateTime;
+                if (dateTime.isBefore(referenceDateTime)) {
+                    dates.clear();
+                    String dateTimeString = dateTime.format(formatter);
+                    String referenceDateTimeString = referenceDateTime.format(formatter);
+                    throw new DateTimeException(String.format(EXCEPTION_NON_CHRONO_DATES,
+                                                              dateTimeString,
+                                                              referenceDateTimeString));
                 }
+                referenceDateTime = dateTime;
             }
         }
 
-        dates = editedDates;
         logger.log(Level.INFO, "After removing non chronological dates: " +
                                dates);
     }
@@ -468,9 +477,9 @@ public class DateParser {
 
 
     private void appendWordAtPosInSplitInput(String input,
-                                      int position,
-                                      String words,
-                                      ArrayList<String> splitInput) {
+                                             int position,
+                                             String words,
+                                             ArrayList<String> splitInput) {
         int i = getIndexOfWordInSplitInput(splitInput, input, position);
         String word = splitInput.get(i);
         splitInput.set(i, words + word);

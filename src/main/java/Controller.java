@@ -5,6 +5,7 @@ import javafx.collections.ObservableList;
 import javafx.stage.Stage;
 import main.resources.view.Display;
 
+import java.time.DateTimeException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -57,8 +58,10 @@ public class Controller {
     private static final String MESSAGE_TASK_INDEX_ERROR = "The task you specified could not be found.";
     private static final String MESSAGE_SAVE_SET = "File save destination has been confirmed. \n";
     private static final String MESSAGE_SAVE_SET_FAIL = "File save destination failed. \n";
-    
+    private static final String MESSAGE_NON_CHRONO_DATES = "Task was not created as %s";
+   
     private static final String EMPTY_STRING = "";
+
     
     // ================================================================
  	// Constructor
@@ -229,7 +232,11 @@ public class Controller {
         if (input.isEmpty()) {
             return MESSAGE_INVALID_COMMAND;
         }
-        parser.parse(input);
+        try {
+            parser.parse(input);
+        } catch (DateTimeException e) {
+            return String.format(MESSAGE_NON_CHRONO_DATES, e.getMessage());
+        }
         Task task;
         ArrayList<LocalDateTime> parsedDates = parser.getDates();
         String parsedWords = parser.getParsedWords();
@@ -238,16 +245,19 @@ public class Controller {
 
         // Instantiate a new Task object
         try {
-            newTask = taskCreator.create(input, parsedDates, parsedWords, notParsedWords);
+            newTask = taskCreator.create(input,
+                                         parsedDates,
+                                         parsedWords,
+                                         notParsedWords);
             task = newTask.get(0);
         } catch (IndexOutOfBoundsException e) {
             return MESSAGE_INVALID_COMMAND;
         }
-        
+
         allTasks.addAll(newTask);
         updateStorageWithAllTasks();
-        
-        return String.format(MESSAGE_ADD, task);      
+
+        return String.format(MESSAGE_ADD, task);
     }
 
     /**
