@@ -346,7 +346,7 @@ public class Controller {
             return MESSAGE_TASK_INDEX_ERROR;
         }
 
-        if (deleteAll) {
+        if (deleteAll && removeTask.getId() != null) {
             deleteAllTasks(removeTask);
             return String.format(MESSAGE_DELETE_ALL, removeTask.getDescription());
         } else {
