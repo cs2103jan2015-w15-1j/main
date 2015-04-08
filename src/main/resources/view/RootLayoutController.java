@@ -265,6 +265,12 @@ public class RootLayoutController extends BorderPane {
             Task task = displayedTasks.get(index - 1);
             Task.Type taskType = task.getType();
 
+            if (task.getId() != null) {
+                userInput.appendText(ONE_SPACING + task.getRawInfo());
+                userInput.end();
+                return;
+            }
+
             userInput.appendText(ONE_SPACING + task.getDescription());
 
             switch (taskType) {
