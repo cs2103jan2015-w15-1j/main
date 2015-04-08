@@ -1,10 +1,5 @@
 package main.resources.view;
 
-import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
 import java.io.IOException;
@@ -15,7 +10,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import main.java.Command;
@@ -24,6 +18,7 @@ import main.java.Task;
 
 import java.time.format.DateTimeFormatter;
 
+//@author A0122081X
 public class RootLayoutController extends BorderPane {
 
     // ================================================================
@@ -75,16 +70,6 @@ public class RootLayoutController extends BorderPane {
     }
 
     // ================================================================
-    // Experimental
-    // ================================================================
-    final BooleanProperty ctrlPressed = new SimpleBooleanProperty(false);
-    final BooleanProperty upPresed = new SimpleBooleanProperty(false);
-    final BooleanProperty downPressed = new SimpleBooleanProperty(false);
-    final BooleanBinding ctrlAndUpPressed = ctrlPressed.and(upPresed);
-    final BooleanBinding ctrlAndDownPressed = ctrlPressed.and(downPressed);
-
-
-    // ================================================================
     // Public methods
     // ================================================================
     @FXML
@@ -119,7 +104,8 @@ public class RootLayoutController extends BorderPane {
         updateHistory();
         updateUserInput(EMPTY_STRING);
     }
-
+    
+    //@author A0121520A
     private void handleCommandAutoComplete() {
         String autoCompletedCommand = getAutoCompletedCommand(userInput.getText());
         updateUserInput(autoCompletedCommand);
@@ -226,7 +212,7 @@ public class RootLayoutController extends BorderPane {
         return history.get(pointer);
     }
 
-
+    //@author A0122081X
     // ================================================================
     // Methods to handle edit autocomplete
     // ================================================================    

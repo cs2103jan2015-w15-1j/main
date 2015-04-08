@@ -7,6 +7,7 @@ import javafx.stage.Stage;
 import main.resources.view.RootLayoutController;
 import main.resources.view.Display;
 
+//@author A0122081X
 public class MainApp extends Application {
 
     // ================================================================

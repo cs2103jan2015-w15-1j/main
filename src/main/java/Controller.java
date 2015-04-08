@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+//@author A0122081X
 public class Controller {
 	
     // ================================================================
@@ -101,6 +102,7 @@ public class Controller {
         return MESSAGE_WELCOME;
     }
 
+    //@author A0121813U
     public String executeCommand(String input) {
         Command currentCommand = new Command(input);
 
@@ -187,6 +189,7 @@ public class Controller {
     // Initialization methods
     // ================================================================
 
+    //@author A0122081X
     public void setDisplay(Display display) {
 	    this.display = display;
 	}
@@ -215,12 +218,13 @@ public class Controller {
                 .filter(task -> task.isCompleted())
                 .collect(Collectors.toList());
         return completedTasks;
-    } 
+    }
 
     // ================================================================
     // Logic methods
     // ================================================================
 
+    //@author A0122393L
     private String addTask(String input) {
         if (input.isEmpty()) {
             return MESSAGE_INVALID_COMMAND;
@@ -252,6 +256,7 @@ public class Controller {
      * with the extracted arguments.
      *
      */
+    //@author A0122081X
     private String editTask(String input) {
         String[] inputArray;
         int editIndex;
@@ -291,6 +296,7 @@ public class Controller {
         return String.format(MESSAGE_EDIT, editTask);
     }
 
+    //@author A0122393L
     private String deleteTask(String input) {
         boolean deleteAll = false;
         Task removeTask;
@@ -338,6 +344,7 @@ public class Controller {
         updateStorageWithAllTasks();
     }
 
+    //@author A0122081X
     private String completeTask(String input) {
         try {
             int index = Integer.parseInt(input.trim()) - 1;
@@ -371,6 +378,7 @@ public class Controller {
         }
     }
 
+    //@author A0121813U
     private String undo() {
         if (previousStates.isEmpty()) {
             return MESSAGE_NO_UNDO;
@@ -388,6 +396,7 @@ public class Controller {
         }
     }
 
+    //@author A0122393L
     private void search(String input) {
         displayedTasks.clear();
         parser.parse(input);
@@ -404,6 +413,7 @@ public class Controller {
         }
     }
 
+    //@author A0122081X
     private void displayTask(String input) {
         displayedTasks.clear();
 
@@ -421,6 +431,7 @@ public class Controller {
         return MESSAGE_INVALID_COMMAND;
     }
     
+    //@author A0122393L
     private String moveSaveFileDirectory(String input) {
         return storage.moveSaveFileDirectory(input);
     }
@@ -434,6 +445,7 @@ public class Controller {
         }
     }
     
+    //@author A0122081X
     private String clear() {
         allTasks = new ArrayList<Task>();
         displayedTasks = FXCollections.observableArrayList();;
@@ -450,6 +462,7 @@ public class Controller {
     // Utility methods
     // ================================================================
     
+    //@author A0121813U
     private void showAppropriateDisplay(boolean helpUser) {
     	if (helpUser) {
         	updateHelpDisplay();
@@ -461,6 +474,7 @@ public class Controller {
         }
     }
     
+    //@author A0122081X
     private void updateDisplayWithDefault() {
         displayedTasks.setAll(getIncompleteTasks(allTasks));
         display.updateOverviewDisplay(displayedTasks);
@@ -470,7 +484,8 @@ public class Controller {
         displayedTasks.setAll(getCompletedTasks(allTasks));
         display.updateOverviewDisplay(displayedTasks);
     }
-
+    
+    //@author A0121813U
     private void updateDisplaySearch() {
     	sortSearchedTasks();
         display.updateSearchDisplay(displayedTasks, searchArgument);
@@ -498,19 +513,21 @@ public class Controller {
         displayedTasks = FXCollections.observableArrayList(userDefinedSort.getList());
     }
 
-    private void updateStorageWithAllTasks() {
-        storage.updateFiles(allTasks);
+    private void saveCurrentState(String input) {
+        previousStates.storeCurrentStatus(allTasks, displayedTasks);
+        previousStates.addFeedback(input);
     }
 
-    private void saveCurrentState(String input) {
-    	previousStates.storeCurrentStatus(allTasks, displayedTasks);
-        previousStates.addFeedback(input);
+    //@author A0122393L
+    private void updateStorageWithAllTasks() {
+        storage.updateFiles(allTasks);
     }
 
     // ================================================================
     // Testing methods
     // ================================================================
 
+    //@author A0122081X
     public List<Task> getIncompleteTasksPublic() {
         return getIncompleteTasks(allTasks);
     }

@@ -10,6 +10,7 @@ import java.util.Collections;
 
 import org.apache.commons.lang.StringUtils;
 
+//@author A0121813U
 /**
  * This class contains the information of a task element.
  *
@@ -31,7 +32,6 @@ import org.apache.commons.lang.StringUtils;
  * Setters: setDescription(String), setDate(LocalDate), setTime(LocalTime,
  * LocalTime), markAsComplete()
  */
-
 public class Task implements Cloneable {
     public static enum Type {
         FLOATING, DEADLINE, TIMED
@@ -53,6 +53,7 @@ public class Task implements Cloneable {
     private boolean isCompleted;
     private String recurId;
 
+    //@author A0122393L
     public Task(String input, ArrayList<LocalDateTime> parsedDates,
             String parsedWords, String notParsedWords) {
         markAsIncomplete();
@@ -65,10 +66,10 @@ public class Task implements Cloneable {
         }
     }
 
+    //@author A0121813U
     // ================================================================
     // Public getters
     // ================================================================
-
     public Type getType() {
         return type;
     }
@@ -106,10 +107,10 @@ public class Task implements Cloneable {
         return getDate() != null && nowDate.isAfter(getDate());
     }
 
+    //@author A0122393L  
     // ================================================================
     // Public setters
     // ================================================================
-
     public void setId(String input) {
         recurId = input;
     }
@@ -155,6 +156,7 @@ public class Task implements Cloneable {
     // Initialization Methods
     // ================================================================
 
+    //@author A0121520A    
     // Determines type of task using the number of dates parsed.
     private Type determineType(ArrayList<LocalDateTime> parsedDates) {
         int numDates = parsedDates.size();
@@ -187,6 +189,7 @@ public class Task implements Cloneable {
         }
     }
 
+    //@author A0122081X
     private void unsetAllProperties() {
         setType(null);
         setDescription(null);
@@ -252,6 +255,7 @@ public class Task implements Cloneable {
 //        return true;
     }
 
+    //@author A0121520A    
     /**
      * Get the description of the task
      *
@@ -284,7 +288,8 @@ public class Task implements Cloneable {
             return description.replace("\"", "");
         }
     }
-
+    
+    //@author A0122081X
     // ================================================================
     // Private setters
     // ================================================================
@@ -308,11 +313,11 @@ public class Task implements Cloneable {
     private void setEndTime(LocalTime endTime) {
         this.endTime = endTime;
     }
-
+    
+    //@author A0121520A 
     // ================================================================
     // Utility Methods
     // ================================================================
-
     private boolean hasTwoEscapeChars(String input) {
         return StringUtils.countMatches(input, ESCAPE_CHAR + "") == 2;
     }
@@ -351,7 +356,8 @@ public class Task implements Cloneable {
         }
         return result;
     }
-
+    
+    //@author A0121813U 
     private String addFormattedTime() {
         // formats the time for the time label, eg 2:00PM to 4:00PM
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("h.mma");
@@ -377,7 +383,8 @@ public class Task implements Cloneable {
         }
         return "";
     }
-
+    
+    //@author A0122081X
     @Override
     public Task clone() throws CloneNotSupportedException {
         Task cloned = (Task) super.clone();

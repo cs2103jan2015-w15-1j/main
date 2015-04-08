@@ -5,6 +5,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 
+//@author A0121813U
 public class TitleBox extends HBox {
 	
 	private static final String LOCATION_TITLE_BOX_FXML = "/view/TitleBox.fxml";

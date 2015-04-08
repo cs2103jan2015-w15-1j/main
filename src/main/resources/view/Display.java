@@ -27,6 +27,7 @@ import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 import main.java.Task;
 
+//@author A0121520A
 public class Display extends VBox {
 
     // ================================================================
@@ -134,6 +135,7 @@ public class Display extends VBox {
     private static final int SCROLL_INCREMENT = 5;
     private static final int MAX_NUM_OF_TASKS = 100;
 
+    //@author A0122081X
     // ================================================================
     // Constructor
     // ================================================================
@@ -155,7 +157,8 @@ public class Display extends VBox {
         initExampleCommands();
         initHelpList();
     }
-
+    
+    //@author A0121520A 
     public static Display getInstance() {
         if (display == null) {
             display = new Display();
@@ -222,6 +225,7 @@ public class Display extends VBox {
         feedbackTimeline.play();
     }
 
+    //@author A0121813U
     public void showHelpDisplay() {
         hideOverlays();
         FadeTransition fadeIn = initFadeIn(helpOverlay,
@@ -230,7 +234,8 @@ public class Display extends VBox {
         overlayTimeline = generateHelpOverlayTimeline(fadeIn);
         overlayTimeline.play();
     }
-
+    
+    //@author A0122081X
     public void resetScrollIndex() {
         currentScrollIndex = 0;
     }
@@ -255,7 +260,7 @@ public class Display extends VBox {
         }
     }
 
-
+    //@author A0121520A
     // ================================================================
     // Private overlay method
     // ================================================================
@@ -272,7 +277,7 @@ public class Display extends VBox {
         overlayTimeline.play();
     }
 
-
+    //@author A0121520A
     // ================================================================
     // Initialization methods
     // ================================================================
@@ -281,6 +286,7 @@ public class Display extends VBox {
         overlayTimeline = new Timeline();
     }
 
+    //@author A0121813U 
     private void initExampleCommands() {
         allExampleCommands = new ArrayList<String>();
         allExampleCommands.add("add meet Isabel from 5pm to 6pm today");
@@ -305,7 +311,7 @@ public class Display extends VBox {
         allExampleCommands.add("add run for presidential campaign");
         allExampleCommands.add("add do some community work next week");
     }
-
+    
     private void initHelpList() {
         helpList = FXCollections.observableArrayList();
         helpList.add(new HelpBox(HELP_ADD_DESC, HELP_ADD_COMMAND));
@@ -321,7 +327,8 @@ public class Display extends VBox {
         helpList.add(new HelpBox(HELP_DISPLAY_COMPLETE_DESC, HELP_DISPLAY_COMPLETE_COMMAND));
         helpList.add(new HelpBox(HELP_EXIT_DESC, HELP_EXIT_COMMAND));
     }
-
+    
+    //@author A0121520A
     private void initNoTaskOverlay(String exampleCommands) {
         noTaskOverlay.setOpacity(0);
         noTaskOverlay.toFront();
@@ -641,7 +648,8 @@ public class Display extends VBox {
         noTaskOverlay.setOpacity(0);
         helpOverlay.setOpacity(0);
     }
-
+    
+    //@author A0121813U
     private String generateParagraph(ArrayList<String> list, int size) {
         return StringUtils.join(list.toArray(), "\n", 0, size);
     }
