@@ -23,28 +23,32 @@ public class TaskBox extends HBox {
     private static final String KEYWORD_INCOMPLETE = Command.Type.INCOMPLETE.toString();
     private static final String KEYWORD_DELETE = Command.Type.DELETE.toString();
     private static final String ICON_DELETE = "\uf014";
-
-    @FXML
-    private Label index;
+    private static final String ICON_RECURRING = ONE_SPACING + "\uf01e" + ONE_SPACING;
 
     @FXML
     private CheckBox checkbox;
 
+    @FXML
+    private Label index;
+    
+    @FXML
+    private Label recurringIcon;
+    
     @FXML
     private Label description;
 
     @FXML
     private Button delete;
 
-    public TaskBox(int idx, String desc) {
+    public TaskBox(int idx, String desc, boolean isRecurring) {
         loadFxml();
-        initListenerAndFields(idx, desc);
+        initListenerAndFields(idx, desc, isRecurring);
     }
 
-    public TaskBox(int idx, String desc, boolean completed) {
+    public TaskBox(int idx, String desc, boolean isRecurring, boolean isCompleted) {
         loadFxml();
-        checkbox.setSelected(completed);
-        initListenerAndFields(idx, desc);
+        checkbox.setSelected(isCompleted);
+        initListenerAndFields(idx, desc, isRecurring);
     }
 
     private void loadFxml() {
@@ -59,10 +63,10 @@ public class TaskBox extends HBox {
         }
     }
 
-    private void initListenerAndFields(int idx, String desc) {
+    private void initListenerAndFields(int idx, String desc, boolean isRecurring) {
         ChangeListener<Boolean> checkboxListener = initCheckboxListener(idx);
         EventHandler<ActionEvent> deleteListener = initDeleteListener(idx);
-        initFxmlFields(idx, desc, checkboxListener, deleteListener);
+        initFxmlFields(idx, desc, isRecurring, checkboxListener, deleteListener);
     }
 
     private ChangeListener<Boolean> initCheckboxListener(int idx) {
@@ -97,8 +101,14 @@ public class TaskBox extends HBox {
 
     private void initFxmlFields(int idx,
                                 String desc,
+                                boolean isRecurring,
                                 ChangeListener<Boolean> checkboxListener,
                                 EventHandler<ActionEvent> deleteListener) {
+        if (isRecurring) {
+            recurringIcon.setText(ICON_RECURRING);
+        } else {
+            recurringIcon.setText(EMPTY_STRING);
+        }
         checkbox.selectedProperty().addListener(checkboxListener);
         index.setText(idx + EMPTY_STRING);
         description.setText(desc);

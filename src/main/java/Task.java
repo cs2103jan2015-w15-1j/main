@@ -101,6 +101,10 @@ public class Task implements Cloneable {
     public String getId() {
         return recurId;
     }
+    
+    public boolean isRecurring() {
+        return getId() != null;
+    }
 
     public boolean isOverdue() {
         LocalDate nowDate = LocalDate.now();

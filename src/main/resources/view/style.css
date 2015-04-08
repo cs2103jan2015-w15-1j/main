@@ -208,6 +208,11 @@
 	-fx-text-fill: dimgray;
 }
 
+.taskBox #recurringIcon {
+	-fx-font: 14px FontAwesome;
+	-fx-text-fill: tomato;
+}
+
 .taskBox #description {
 	-fx-padding: 0 0 0 5;
 	-fx-text-fill: black;

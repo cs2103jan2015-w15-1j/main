@@ -424,7 +424,7 @@ public class Display extends VBox {
         for (Task task : listOfTasks) {
             if (task.getType() == Task.Type.FLOATING) {
                 hasFloating = true;
-                displayBoxes.add(new TaskBox(index, task.toString()));
+                addTask(displayBoxes, index, task);
                 index++;
             }
         }
@@ -448,7 +448,7 @@ public class Display extends VBox {
         for (Task task : listOfTasks) {
             if (task.isOverdue()) {
                 hasOverdue = true;
-                displayBoxes.add(new TaskBox(index, task.toString()));
+                addTask(displayBoxes, index, task);
                 index++;
             }
         }
@@ -476,7 +476,7 @@ public class Display extends VBox {
             for (Task task : listOfTasks) {
                 if (day.equals(task.getDate())) {
                     hasTaskOnThisDay = true;
-                    displayBoxes.add(new TaskBox(index, task.toString(true)));
+                    addTask(displayBoxes, index, task);
                     index++;
                 }
             }
@@ -502,7 +502,7 @@ public class Display extends VBox {
             if (task.getDate() != null &&
                 (dayOneWeekFromNow.equals(task.getDate()) || dayOneWeekFromNow.isBefore(task.getDate()))) {
                 hasOtherTasks = true;
-                displayBoxes.add(new TaskBox(index, task.toString()));
+                addTask(displayBoxes, index, task);
                 index++;
             }
         }
@@ -564,7 +564,7 @@ public class Display extends VBox {
         for (Task task : listOfResults) {
             if (!task.isCompleted()) {
                 hasIncompleteTask = true;
-                displayBoxes.add(new TaskBox(index, task.toString()));
+                addTask(displayBoxes, index, task);
                 index++;
             }
         }
@@ -587,7 +587,7 @@ public class Display extends VBox {
         for (Task task : listOfResults) {
             if (task.isCompleted()) {
                 hasCompletedTask = true;
-                displayBoxes.add(new TaskBox(index, task.toString(), true));
+                addTask(displayBoxes, index, task);
                 index++;
             }
         }
@@ -628,6 +628,14 @@ public class Display extends VBox {
     // ================================================================
     // Utility methods
     // ================================================================
+    private void addTask(ObservableList<HBox> displayBoxes, int index, Task task) {
+        if (task.isCompleted()) {
+            displayBoxes.add(new TaskBox(index, task.toString(), task.isRecurring(), true));
+        } else {
+            displayBoxes.add(new TaskBox(index, task.toString(), task.isRecurring()));
+        }
+    }
+    
     private void addNumExcessTasksLabel(ObservableList<HBox> displayBoxes) {
         if (numExcessTasks > 0) {
             displayBoxes.add(new CategoryBox(String.format(LABEL_EXCESS_TASKS, numExcessTasks)));
