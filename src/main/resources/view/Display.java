@@ -183,7 +183,7 @@ public class Display extends VBox {
         if (tasks.isEmpty()) {
             showNoTaskOverlay();
         }
-
+        
         ArrayList<Task> listOfTasks = new ArrayList<Task>(tasks);
         listOfTasks = trimListOfTasks(listOfTasks);
         logger.log(Level.INFO, "List of tasks: " + listOfTasks.toString());
@@ -198,6 +198,7 @@ public class Display extends VBox {
         index = addAllOtherTasks(displayBoxes, listOfTasks, now, index);
 
         addNumExcessTasksLabel(displayBoxes);
+        highlightChanges(displayBoxes);
         listView.setItems(displayBoxes);
     }
 
@@ -556,6 +557,35 @@ public class Display extends VBox {
         return days;
     }
 
+    private void highlightChanges(ObservableList<HBox> displayBoxes) {
+        ObservableList<HBox> oldDisplayBoxes = listView.getItems();
+        if (oldDisplayBoxes.isEmpty()) {
+            return;
+        }
+        for (HBox newBox : displayBoxes) {
+            if (newBox instanceof TaskBox) {
+                String description = ((TaskBox) newBox).getDescription();
+                if (!hasMatchingBox(oldDisplayBoxes, description)) {
+                    ((TaskBox) newBox).highlight();
+                }
+            }
+        }
+    }
+
+    private boolean hasMatchingBox(ObservableList<HBox> oldDisplayBoxes,
+                                   String description) {
+        for (HBox oldBox : oldDisplayBoxes) {
+            if (oldBox instanceof TaskBox) {
+                TaskBox tBox = (TaskBox) oldBox;
+                if (description.equals(tBox.getDescription())) {
+                    oldDisplayBoxes.remove(oldBox);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
 
     // ================================================================
     // Logic methods for updateSearchDisplay

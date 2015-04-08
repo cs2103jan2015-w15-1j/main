@@ -37,8 +37,6 @@ public class Task implements Cloneable {
         FLOATING, DEADLINE, TIMED
     };
 
-    private static final char ESCAPE_CHAR = '"';
-
     private static final int POSITION_FIRST_DATE = 0;
     private static final int POSITION_SECOND_DATE = 1;
     private static final String[] KEYWORDS = { "by", "on", "at", "from",
