@@ -23,8 +23,8 @@ public class Storage {
     private static final String DEFAULT_SAVE_FILE = "savefile.txt";
     private static final String SETTINGS_FILE_NAME = "settings.txt";
     private static final String BACKUP_FILE_NAME = "backup.txt";
-    private static final String MESSAGE_SAVE_DEST = "File save destination has been confirmed. \n";
-    private static final String MESSAGE_SAVE_FAIL = "File save destination failed. \n";
+    private static final String MESSAGE_SAVE_MOVE = "Save file has been moved. \n";
+    private static final String MESSAGE_SAVE_MOVE_FAIL = "Moving save file failed. \n";
 
     private static Storage storage;
     private static File settingsFile;
@@ -190,8 +190,8 @@ public class Storage {
         return true;
     }
 
-    // change save file directory
-    public String setSaveFileDirectory(String input) {
+    // move the save file
+    public String moveSaveFileDirectory(String input) {
         saveFileName = input;
         if (saveFile.renameTo(new File(saveFileName))) {
             updateSettingsFile(saveFileName);
@@ -199,9 +199,23 @@ public class Storage {
             createIfMissingFile(saveFile);
             logger.log(Level.INFO,
                     "File directory changed to " + saveFile.toString());
-            return MESSAGE_SAVE_DEST;
+            return MESSAGE_SAVE_MOVE;
         } else {
-            return MESSAGE_SAVE_FAIL;
+            return MESSAGE_SAVE_MOVE_FAIL;
+        }
+    }
+
+    // set a specific file as the save file
+    public Boolean setSaveFileDirectory(String input) {
+        saveFileName = input;
+        File setFile = new File(saveFileName);
+        if (setFile.exists()) {
+            updateSettingsFile(saveFileName);
+            saveFile.delete();
+            saveFile = setFile;
+            return true;
+        } else {
+            return false;
         }
     }
 

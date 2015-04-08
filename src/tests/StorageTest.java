@@ -49,7 +49,7 @@ public class StorageTest {
         assertEquals(true, defaultFile.exists());
         assertEquals(false, testFile.exists());
         assertEquals("File save destination has been confirmed. \n",
-                test.setSaveFileDirectory(newDirectory));
+                test.moveSaveFileDirectory(newDirectory));
         assertEquals(true, testFile.exists());
         assertEquals(false, defaultFile.exists());
 
@@ -63,7 +63,7 @@ public class StorageTest {
         }
         assertEquals(false, testFile2.exists());
         assertEquals("File save destination has been confirmed. \n",
-                test.setSaveFileDirectory(newDirectory2));
+                test.moveSaveFileDirectory(newDirectory2));
         assertEquals(true, testFile2.exists());
         assertEquals(false, testFile.exists());
         try {

@@ -4,6 +4,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.stage.Stage;
 import main.resources.view.Display;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,6 +54,8 @@ public class Controller {
     private static final String MESSAGE_NO_UNDO = "Already at oldest change, unable to undo.";
     private static final String MESSAGE_ALL_CLEAR = "All tasks have been deleted!";
     private static final String MESSAGE_TASK_INDEX_ERROR = "The task you specified could not be found.";
+    private static final String MESSAGE_SAVE_SET = "File save destination has been confirmed. \n";
+    private static final String MESSAGE_SAVE_SET_FAIL = "File save destination failed. \n";
     
     private static final String EMPTY_STRING = "";
     
@@ -111,6 +114,10 @@ public class Controller {
         	case SET :
 	            feedback = setSaveFileDirectory(arguments);
 	            break;
+	            
+            case MOVE :
+                feedback = moveSaveFileDirectory(arguments);
+                break;
 	        
         	case ADD :
 	            saveCurrentState(input);
@@ -414,8 +421,17 @@ public class Controller {
         return MESSAGE_INVALID_COMMAND;
     }
     
+    private String moveSaveFileDirectory(String input) {
+        return storage.moveSaveFileDirectory(input);
+    }
+    
     private String setSaveFileDirectory(String input) {
-        return storage.setSaveFileDirectory(input);
+        if (storage.setSaveFileDirectory(input)) {
+            allTasks = storage.readFile();
+            return MESSAGE_SAVE_SET;
+        } else {
+            return MESSAGE_SAVE_SET_FAIL;
+        }
     }
     
     private String clear() {

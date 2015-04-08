@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class Command {
     public static enum Type {
         ADD, DISPLAY, DELETE, EDIT, COMPLETE, INCOMPLETE, UNDO, SEARCH, EXIT,
-        SET, CLEAR, HELP, INVALID
+        SET, CLEAR, HELP, INVALID, MOVE
     };
 
     private static final int PARAM_POSITION_COMMAND = 0;
@@ -73,6 +73,8 @@ public class Command {
                 return Type.EXIT;
             case "set" :
                 return Type.SET;
+            case "move" :
+                return Type.MOVE;
             case "clear" :
                 return Type.CLEAR;
             default :
