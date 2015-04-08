@@ -100,12 +100,12 @@
 
 .display #helpOverlayIcon {
 	-fx-text-fill: white;
-	-fx-font: 80px FontAwesome;
+	-fx-font: 60px FontAwesome;
 }
 
 .display #helpOverlayTitle {
 	-fx-text-fill: white;
-	-fx-font: 60px Roboto;
+	-fx-font: 50px Roboto;
 	-fx-font-weight: bold;
 	-fx-padding: 0 0 10 0;
 }

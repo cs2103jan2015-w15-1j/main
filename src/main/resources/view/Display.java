@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import main.java.Controller;
 import org.apache.commons.lang.StringUtils;
 
 import javafx.animation.FadeTransition;
@@ -113,6 +112,10 @@ public class Display extends VBox {
     private static final String HELP_SET_SAVE_LOCATION_COMMAND = "set <directory>";
     private static final String HELP_SEARCH_DESC = "Search for a task";
     private static final String HELP_SEARCH_COMMAND = "search <keyword/day>";
+    private static final String HELP_DISPLAY_INCOMPLETE_DESC = "Display overview";
+    private static final String HELP_DISPLAY_INCOMPLETE_COMMAND = "display";
+    private static final String HELP_DISPLAY_COMPLETE_DESC = "Display completed tasks";
+    private static final String HELP_DISPLAY_COMPLETE_COMMAND = "display completed";
     private static final String HELP_EXIT_DESC = "Exit Veto";
     private static final String HELP_EXIT_COMMAND = "exit";
     
@@ -314,6 +317,8 @@ public class Display extends VBox {
         helpList.add(new HelpBox(HELP_SET_SAVE_LOCATION_DESC,
                                  HELP_SET_SAVE_LOCATION_COMMAND));
         helpList.add(new HelpBox(HELP_SEARCH_DESC, HELP_SEARCH_COMMAND));
+        helpList.add(new HelpBox(HELP_DISPLAY_INCOMPLETE_DESC, HELP_DISPLAY_INCOMPLETE_COMMAND));
+        helpList.add(new HelpBox(HELP_DISPLAY_COMPLETE_DESC, HELP_DISPLAY_COMPLETE_COMMAND));
         helpList.add(new HelpBox(HELP_EXIT_DESC, HELP_EXIT_COMMAND));
     }
 
