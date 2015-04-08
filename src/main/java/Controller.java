@@ -3,10 +3,6 @@ package main.java;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.stage.Stage;
-import main.java.Command;
-import main.java.DateParser;
-import main.java.Storage;
-import main.java.Task;
 import main.resources.view.Display;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -252,80 +248,40 @@ public class Controller {
     private String editTask(String input) {
         String[] inputArray;
         int editIndex;
+        boolean editAll = false;
+        Task editTask;
 
         // Check if it's an edit all
         if (input.toLowerCase().contains("all")) {
             input = input.toLowerCase().replace("all", "").trim();
-            return editAllTasks(input);
+            editAll = true;
         }
 
         try {
-            // Get the index from input
             inputArray = input.split(" ");
+            // ArrayList is 0-indexed, but Tasks are displayed to users as 1-indexed
             editIndex = Integer.parseInt(inputArray[0]) - 1;
-
-            // Delete the task
-            Task task = displayedTasks.remove(editIndex);
-            allTasks.remove(task);
-
-            // Creates an input to addTask
-            String[] addArgumentArray =  new String[inputArray.length - 1];
-            System.arraycopy(inputArray, 1, addArgumentArray, 0, inputArray.length - 1);
-            String addArgument = String.join(" ", addArgumentArray);
-            System.out.println(addArgument);
-
-            addTask(addArgument);
-            return String.format(MESSAGE_EDIT, task);
+            editTask = displayedTasks.get(editIndex);
         } catch (IndexOutOfBoundsException | NumberFormatException e) {
             return MESSAGE_TASK_INDEX_ERROR;
         }
-    }
 
-    private void updateIndividualTask(Task task, String input) {
-        parser.parse(input);
-        ArrayList<LocalDateTime> parsedDates = parser.getDates();
-        String parsedWords = parser.getParsedWords();
-        String notParsedWords = parser.getNotParsedWords();
+        // Creates an input to addTask
+        String[] addArgumentArray =  new String[inputArray.length - 1];
+        System.arraycopy(inputArray, 1, addArgumentArray, 0, inputArray.length - 1);
+        String addArgument = String.join(" ", addArgumentArray);
+        System.out.println(addArgument);
 
-        task.update(input, parsedDates, parsedWords, notParsedWords);
-    }
-
-    // Use this overloaded version or editAllTasks to prevent parsing n times,
-    // where n is the number of recurring tasks to edit
-    private void updateIndividualTask(Task task, String input, ArrayList<LocalDateTime> parsedDates,
-                                      String parsedWords, String notParsedWords) {
-        task.update(input, parsedDates, parsedWords, notParsedWords);
-    }
-
-    private String editAllTasks(String input) {
-        String[] inputArray;
-        int editIndex;
-        String recurringId;
-
-        try {
-            inputArray = input.split(" ");
-            editIndex = Integer.parseInt(inputArray[0]) - 1;
-            Task task = displayedTasks.get(editIndex);
-
-            recurringId = task.getId();
-
-            if (recurringId.equals(null)) {
-                return MESSAGE_INVALID_COMMAND;
-            } else {
-                parser.parse(input);
-                ArrayList<LocalDateTime> parsedDates = parser.getDates();
-                String parsedWords = parser.getParsedWords();
-                String notParsedWords = parser.getNotParsedWords();
-
-                for (Task editedTask : allTasks) {
-                    updateIndividualTask(editedTask, input, parsedDates, parsedWords, notParsedWords);
-                }
-                updateStorageWithAllTasks();
-            }
-            return String.format(MESSAGE_EDIT_ALL, task);
-        } catch (Exception e) {
-            return MESSAGE_INVALID_COMMAND;
+        if (editAll && editTask.getId() != null) {
+            deleteAllTasks(editTask);
+            addTask(addArgument);
+            return String.format(MESSAGE_EDIT_ALL, editTask);
+        } else {
+            deleteIndividualTask(editTask);
+            addTask(addArgument);
         }
+
+        return String.format(MESSAGE_EDIT, editTask);
     }
 
     private String deleteTask(String input) {
