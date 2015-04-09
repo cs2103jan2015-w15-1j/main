@@ -126,7 +126,7 @@ public class Display extends VBox {
     
     private static final String NO_TASK_OVERLAY_GREETING = "Hello!";
     private static final String NO_TASK_OVERLAY_ICON = "\uf14a";
-    private static final String NO_TASK_OVERLAY_MESSAGE = "Looks like you've got no pending tasks, try entering the following:\n\n";
+    private static final String NO_TASK_OVERLAY_MESSAGE = "Looks like you've got no pending tasks. Type \"help\" for a list of commands or try entering the following:\n\n";
     private static final int NUM_EXAMPLE_COMMANDS = 3;
     
     private static final int FEEDBACK_FADE_IN_MILLISECONDS = 500;
