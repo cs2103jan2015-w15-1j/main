@@ -76,6 +76,7 @@ public class Display extends VBox {
     private static Display display;
     private int currentScrollIndex;
     private int numExcessTasks;
+    private boolean isCurrentDisplayOverview;
 
     // ================================================================
     // Constants
@@ -200,12 +201,16 @@ public class Display extends VBox {
         index = addAllOtherTasks(displayBoxes, listOfTasks, now, index);
 
         addNumExcessTasksLabel(displayBoxes);
-        highlightChanges(displayBoxes);
+        if (isCurrentDisplayOverview) {
+            highlightChanges(displayBoxes);
+        }
         listView.setItems(displayBoxes);
+        isCurrentDisplayOverview = true;
     }
 
     public void updateSearchDisplay(ObservableList<Task> searchResults,
                                     String searchQuery) {
+        
         hideOverlays();
         ArrayList<Task> listOfResults = new ArrayList<Task>(searchResults);
         listOfResults = trimListOfTasks(listOfResults);
@@ -222,6 +227,7 @@ public class Display extends VBox {
 
         addNumExcessTasksLabel(displayBoxes);
         listView.setItems(displayBoxes);
+        isCurrentDisplayOverview = false;
     }
 
     public void setFeedback(String feedback) {

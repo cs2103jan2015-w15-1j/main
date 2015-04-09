@@ -53,7 +53,7 @@ public class TaskBox extends HBox {
                                                  ONE_SPACING;
 
     private static final int TIMELINE_FRAME_DELAY_MILLISECONDS = 10;
-    private static final int HIGHLIGHT_DISPLAY_SECONDS = 5;
+    private static final int HIGHLIGHT_DISPLAY_SECONDS = 7;
     private static final String STYLE_HIGHLIGHT_TAG_FORMAT = "-fx-background-color: %s;";
     private static final String STYLE_HIGHLIGHT_COLOR_FORMAT = "rgb(255,204,188,%.2f)";
 
