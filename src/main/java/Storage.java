@@ -205,7 +205,9 @@ public class Storage {
     public Boolean setSaveFileDirectory(String input) {
         saveFileName = input;
         File setFile = new File(saveFileName);
-        if (setFile.exists()) {
+        if (setFile.equals(saveFile)) {
+            return false;
+        } else if (setFile.exists()) {
             updateSettingsFile(saveFileName);
             saveFile.delete();
             saveFile = setFile;
