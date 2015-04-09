@@ -277,7 +277,8 @@ public class Controller {
 
         // Check if it's an edit all
         if (input.toLowerCase().contains("all")) {
-            input = input.toLowerCase().replace("all", "").trim();
+            //input = input.toLowerCase().replace("all", "").trim();
+            input = input.replace("all", "").trim();
             editAll = true;
         }
 
