@@ -305,6 +305,10 @@ public class Controller {
             deleteIndividualTask(editTask);
             addTask(addArgument);
         }
+        
+        if (switchDisplayToSearch) {
+        	search(searchArgument);
+        }
 
         return String.format(MESSAGE_EDIT, editTask);
     }
