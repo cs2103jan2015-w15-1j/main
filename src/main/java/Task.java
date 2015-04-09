@@ -312,16 +312,17 @@ public class Task implements Cloneable {
     // ================================================================
     @Override
     public String toString() {
-        String result = getDescription();
-        result += addFormattedDate();
-        result += addFormattedTime();
-        return result;
+        String result = getDescription() + " " + getFormattedTimeAndDate(true);
+        return result.trim();
     }
     
     public String getFormattedTimeAndDate(boolean includeDate) {
-        String result = addFormattedTime() + " ";
+        String result = "";
+        if (getStartTime() != null) {
+            result += addFormattedTime() + " ";
+        }
         if (includeDate) {
-            result +=  addFormattedDate();
+            result += addFormattedDate();
         }
         return result.trim();
     }
