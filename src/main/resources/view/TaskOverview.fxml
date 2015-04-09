@@ -17,11 +17,11 @@
                   <Label fx:id="noTaskOverlayMessage" focusTraversable="false" maxWidth="350.0" text="Message" wrapText="true" />
                </children>
             </VBox>
-            <VBox fx:id="helpOverlay" alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="500.0" prefWidth="500.0">
+            <VBox fx:id="helpOverlay" alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="550.0" prefWidth="500.0" StackPane.alignment="CENTER">
                <children>
                   <Label fx:id="helpOverlayIcon" focusTraversable="false" text="Help Icon" />
                   <Label fx:id="helpOverlayTitle" focusTraversable="false" text="Help title" />
-                  <ListView fx:id="helpOverlayContents" focusTraversable="false" maxWidth="-Infinity" prefHeight="400.0" prefWidth="400.0" />
+                  <ListView fx:id="helpOverlayContents" focusTraversable="false" maxWidth="-Infinity" prefWidth="400.0" />
                </children>
             </VBox>
          </children>

@@ -34,6 +34,9 @@ public class TaskBox extends HBox {
 
     @FXML
     private Label description;
+    
+    @FXML
+    private Label timeAndDate;
 
     @FXML
     private Button delete;
@@ -51,6 +54,7 @@ public class TaskBox extends HBox {
     private static final String ICON_DELETE = "\uf014";
     private static final String ICON_RECURRING = ONE_SPACING + "\uf01e" +
                                                  ONE_SPACING;
+    private static final String FORMAT_DATE = "%s";
 
     private static final int TIMELINE_FRAME_DELAY_MILLISECONDS = 10;
     private static final int HIGHLIGHT_DISPLAY_SECONDS = 7;
@@ -61,16 +65,16 @@ public class TaskBox extends HBox {
     // ================================================================
     // Constructors
     // ================================================================
-    public TaskBox(int idx, String desc, boolean isRecurring) {
+    public TaskBox(int idx, String desc, String timeAndDate, boolean isRecurring) {
         loadFxml();
-        initListenerAndFields(idx, desc, isRecurring);
+        initListenerAndFields(idx, desc, timeAndDate, isRecurring);
     }
 
-    public TaskBox(int idx, String desc, boolean isRecurring,
-                   boolean isCompleted) {
+    public TaskBox(int idx, String desc, String timeAndDate,
+                   boolean isRecurring, boolean isCompleted) {
         loadFxml();
         checkbox.setSelected(isCompleted);
-        initListenerAndFields(idx, desc, isRecurring);
+        initListenerAndFields(idx, desc, timeAndDate, isRecurring);
     }
 
     
@@ -97,10 +101,10 @@ public class TaskBox extends HBox {
         }
     }
 
-    private void initListenerAndFields(int idx, String desc, boolean isRecurring) {
+    private void initListenerAndFields(int idx, String desc, String timeAndDate, boolean isRecurring) {
         ChangeListener<Boolean> checkboxListener = initCheckboxListener(idx);
         EventHandler<ActionEvent> deleteListener = initDeleteListener(idx);
-        initFxmlFields(idx, desc, isRecurring, checkboxListener, deleteListener);
+        initFxmlFields(idx, desc, timeAndDate, isRecurring, checkboxListener, deleteListener);
     }
 
     private ChangeListener<Boolean> initCheckboxListener(int idx) {
@@ -135,19 +139,20 @@ public class TaskBox extends HBox {
 
     private void initFxmlFields(int idx,
                                 String desc,
+                                String timeAndDate,
                                 boolean isRecurring,
-                                ChangeListener<Boolean> checkboxListener,
-                                EventHandler<ActionEvent> deleteListener) {
+                                ChangeListener<Boolean> checkboxListener, EventHandler<ActionEvent> deleteListener) {
         if (isRecurring) {
-            recurringIcon.setText(ICON_RECURRING);
+            this.recurringIcon.setText(ICON_RECURRING);
         } else {
-            recurringIcon.setText(EMPTY_STRING);
+            this.recurringIcon.setText(EMPTY_STRING);
         }
-        checkbox.selectedProperty().addListener(checkboxListener);
-        index.setText(idx + EMPTY_STRING);
-        description.setText(desc);
-        delete.setText(ICON_DELETE);
-        delete.setOnAction(deleteListener);
+        this.checkbox.selectedProperty().addListener(checkboxListener);
+        this.index.setText(idx + EMPTY_STRING);
+        this.description.setText(desc);
+        this.timeAndDate.setText(String.format(FORMAT_DATE, timeAndDate));
+        this.delete.setText(ICON_DELETE);
+        this.delete.setOnAction(deleteListener);
     }
     
     

@@ -678,15 +678,17 @@ public class Display extends VBox {
     private void addTask(ObservableList<HBox> displayBoxes,
                          int index,
                          Task task,
-                         boolean hasDate) {
+                         boolean includeDate) {
         if (task.isCompleted()) {
             displayBoxes.add(new TaskBox(index,
-                                         task.toString(hasDate),
+                                         task.getDescription(),
+                                         task.getFormattedTimeAndDate(includeDate),
                                          task.isRecurring(),
                                          true));
         } else {
             displayBoxes.add(new TaskBox(index,
-                                         task.toString(hasDate),
+                                         task.getDescription(),
+                                         task.getFormattedTimeAndDate(includeDate),
                                          task.isRecurring()));
         }
     }

@@ -99,6 +99,7 @@
 }
 
 .display #helpOverlayIcon {
+	-fx-padding: 20 0 0 0;
 	-fx-text-fill: white;
 	-fx-font: 60px FontAwesome;
 }
@@ -116,7 +117,7 @@
 }
 
 .display #helpOverlayContents .list-cell {
-	-fx-padding: 3 0 3 0;
+	-fx-padding: 2 0 2 0;
 	-fx-background-color: transparent;
 }
 
@@ -217,6 +218,12 @@
 .taskBox #description {
 	-fx-padding: 0 0 0 5;
 	-fx-text-fill: black;
+}
+
+.taskBox #timeAndDate {
+	-fx-padding: 1 0 0 8;
+	-fx-font-size: 13px;
+	-fx-text-fill: gray;
 }
 
 .taskBox #delete {

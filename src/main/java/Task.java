@@ -317,15 +317,13 @@ public class Task implements Cloneable {
         result += addFormattedTime();
         return result;
     }
-
-    public String toString(boolean hasDate) {
-        if (hasDate) {
-            return this.toString();
-        } else {
-            String result = getDescription();
-            result += addFormattedTime();
-            return result;
+    
+    public String getFormattedTimeAndDate(boolean includeDate) {
+        String result = addFormattedTime() + " ";
+        if (includeDate) {
+            result +=  addFormattedDate();
         }
+        return result.trim();
     }
     
     //@author A0121813U 
@@ -336,10 +334,10 @@ public class Task implements Cloneable {
         LocalTime endTime = getEndTime();
         if (startTime != null) {
             if (endTime != null) {
-                return " from " + startTime.format(timeFormatter).toLowerCase()
+                return startTime.format(timeFormatter).toLowerCase()
                         + " to " + endTime.format(timeFormatter).toLowerCase();
             } else {
-                return " by " + startTime.format(timeFormatter).toLowerCase();
+                return startTime.format(timeFormatter).toLowerCase();
             }
         }
         return "";
@@ -350,7 +348,7 @@ public class Task implements Cloneable {
         DateTimeFormatter dateFormatter = DateTimeFormatter
                 .ofPattern("EEEE, d MMMM y");
         if (getDate() != null) {
-            return " on " + getDate().format(dateFormatter);
+            return getDate().format(dateFormatter);
         }
         return "";
     }

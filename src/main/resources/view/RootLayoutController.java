@@ -273,14 +273,14 @@ public class RootLayoutController extends BorderPane {
                     break;
                 case TIMED :
                     userInput.appendText(ONE_SPACING);
-                    userInput.appendText(task.getDate().format(dateFormatter) +
-                                         ONE_SPACING +
-                                         task.getStartTime()
+                    userInput.appendText(task.getStartTime()
                                              .format(timeFormatter) +
                                          ONE_SPACING +
                                          "to " +
                                          task.getEndTime()
-                                             .format(timeFormatter));
+                                             .format(timeFormatter) +
+                                         ONE_SPACING +
+                                         task.getDate().format(dateFormatter));
                     break;
             }
             userInput.end();

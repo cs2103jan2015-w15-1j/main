@@ -16,6 +16,7 @@
       <Label fx:id="index" focusTraversable="false" text="Index" />
       <Label fx:id="recurringIcon" focusTraversable="false" text="Recurring" />
       <Label fx:id="description" focusTraversable="false" text="Description" />
+      <Label fx:id="timeAndDate" focusTraversable="false" text="Time and Date" />
       <HBox nodeOrientation="LEFT_TO_RIGHT" HBox.hgrow="ALWAYS">
          <children>
             <Button fx:id="delete" alignment="TOP_RIGHT" contentDisplay="CENTER" focusTraversable="false" graphicTextGap="0.0" mnemonicParsing="false" text="X" textAlignment="CENTER">
