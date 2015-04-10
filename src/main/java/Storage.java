@@ -209,7 +209,6 @@ public class Storage {
             return false;
         } else if (setFile.exists()) {
             updateSettingsFile(saveFileName);
-            saveFile.delete();
             saveFile = setFile;
             return true;
         } else {
