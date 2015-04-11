@@ -31,7 +31,7 @@ public class RootLayoutController extends BorderPane {
     // Non-FXML Fields
     // ================================================================
     private Controller controller;
-    private Display display;
+    private DisplayController displayController;
 
     private ArrayList<String> history;
     private int pointer;
@@ -64,7 +64,7 @@ public class RootLayoutController extends BorderPane {
             throw new RuntimeException(e);
         }
 
-        display = Display.getInstance();
+        displayController = DisplayController.getInstance();
         initVariablesForHistory();
         initAutoCompleteCommands();
         userInput.setText(WELCOME_INPUT);
@@ -76,9 +76,9 @@ public class RootLayoutController extends BorderPane {
     @FXML
     public void handleKeyPress(KeyEvent event) {
         if (event.isControlDown() && event.getCode() == KeyCode.D) {
-            display.scrollDown();
+            displayController.scrollDown();
         } else if (event.isControlDown() && event.getCode() == KeyCode.U) {
-            display.scrollUp();
+            displayController.scrollUp();
         } else if (event.getCode() == KeyCode.SPACE) {
             listenForEdit(event);
         } else if (event.getCode() == KeyCode.ENTER) {
@@ -90,7 +90,7 @@ public class RootLayoutController extends BorderPane {
         } else if (event.getCode() == KeyCode.TAB) {
             handleCommandAutoComplete();
         } else if (event.getCode() == KeyCode.ESCAPE) {
-            display.hideOverlays();
+            displayController.hideOverlays();
         }
     }
 
@@ -220,12 +220,54 @@ public class RootLayoutController extends BorderPane {
     // Methods to handle edit autocomplete
     // ================================================================    
     private void listenForEdit(KeyEvent event) {
-        int editFormat = isValidEditFormat(userInput.getText());
-        // Validity check
-        if (editFormat > 0) {
-            int index = getEditIndex(userInput.getText(), editFormat);
-            autoCompleteEdit(index, editFormat);
+        // editIndexPosition is where the index of the integer after the edit keyword
+        int editIndexPosition = 0;
+        String inputString = userInput.getText();
+
+        if (isEditIndividualFormat(inputString)) {
+            editIndexPosition = 1;
+        } else if(isEditAllFormat(inputString)) {
+            editIndexPosition = 2;
         }
+
+        if (editIndexPosition > 0) {
+            int index = getEditIndex(inputString, editIndexPosition);
+            autoCompleteEdit(index, editIndexPosition);
+        }
+    }
+
+    private boolean isEditIndividualFormat(String input) {
+        String[] output = input.split(ONE_SPACING);
+
+        if (output.length == 2 &&
+                output[0].equalsIgnoreCase(Command.Type.EDIT.toString())) {
+            // Check for whether it's in the format "edit <int>"
+            try {
+                Integer.parseInt(output[1]);
+                return true;
+            } catch (NumberFormatException e) {
+                return false;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean isEditAllFormat(String input) {
+        String[] output = input.split(ONE_SPACING);
+
+        if (output.length == 3 &&
+                output[0].equalsIgnoreCase(Command.Type.EDIT.toString()) &&
+                output[1].equalsIgnoreCase(ALL_KEYWORD)) {
+            try {
+                Integer.parseInt(output[2]);
+                return true;
+            } catch (NumberFormatException e) {
+                return false;
+            }
+        }
+
+        return false;
     }
 
     /*
@@ -273,10 +315,11 @@ public class RootLayoutController extends BorderPane {
 
     private void autoCompleteEdit(int index, int editFormat) {
         ObservableList<Task> displayedTasks = controller.getDisplayedTasks();
-        if (index < displayedTasks.size() + 1) {
+        if (index < displayedTasks.size() + 1) { // check if supplied index is within displayedTasks' range
             Task task = displayedTasks.get(index - 1);
             Task.Type taskType = task.getType();
 
+            // edit all format
             if (editFormat == 2) {
                 userInput.appendText(ONE_SPACING + task.getRawInfo());
                 userInput.end();
