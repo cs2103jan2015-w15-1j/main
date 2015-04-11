@@ -37,6 +37,11 @@ public class Task implements Cloneable {
         FLOATING, DEADLINE, TIMED
     };
 
+    private static final String STRING_EMPTY = "";
+    private static final String STRING_EMPTY_SPACE = " ";
+    private static final String STRING_TIME_FORMAT = "h.mma";
+    private static final String STRING_DATE_FORMAT = "EEEE, d MMMM y";
+    private static final String STRING_TIME_SEPARATOR = " to ";
     private static final int POSITION_FIRST_DATE = 0;
     private static final int POSITION_SECOND_DATE = 1;
     private static final String[] KEYWORDS = { "by", "on", "at", "from",
@@ -59,7 +64,7 @@ public class Task implements Cloneable {
         type = determineType(parsedDates);
         initDateAndTime(type, parsedDates);
         description = extractDescription(notParsedWords);
-        while (description.substring(description.length() - 1).equals(" ")) {
+        while (description.substring(description.length() - 1).equals(STRING_EMPTY_SPACE)) {
             description = description.trim();
         }
     }
@@ -103,10 +108,12 @@ public class Task implements Cloneable {
     public boolean isRecurring() {
         return getId() != null;
     }
-
+    
+    // Checks whether the task is overdue
     public boolean isOverdue() {
         LocalDate nowDate = LocalDate.now();
-        return getDate() != null && nowDate.isAfter(getDate());
+        LocalTime nowTime = LocalTime.now();
+        return checkOverdue(nowDate, nowTime);
     }
 
     //@author A0122393L  
@@ -152,6 +159,42 @@ public class Task implements Cloneable {
         description = extractDescription(notParsedWords).substring(2);
 
         updateAll(description, determineType(parsedDates), parsedDates);
+    }
+    
+    //@author A0121520A 
+    // ================================================================
+    // Utility Methods
+    // ================================================================
+    @Override
+    public String toString() {
+        String result = getDescription() + STRING_EMPTY_SPACE + getFormattedTimeAndDate(true);
+        return result.trim();
+    }
+    
+    public String getFormattedTimeAndDate(boolean includeDate) {
+        String result = STRING_EMPTY;
+        if (getStartTime() != null) {
+            result += addFormattedTime() + STRING_EMPTY_SPACE;
+        }
+        if (includeDate) {
+            result += addFormattedDate();
+        }
+        return result.trim();
+    }
+    
+    //@author A0122081X
+    @Override
+    public Task clone() throws CloneNotSupportedException {
+        Task cloned = (Task) super.clone();
+
+        // Set all the attributes
+        cloned.setType(cloned.getType());
+        cloned.setDescription(cloned.getDescription());
+        cloned.setIsCompleted(cloned.isCompleted());
+        cloned.setDate(cloned.getDate());
+        cloned.setStartTime(cloned.getStartTime());
+        cloned.setEndTime(cloned.getEndTime());
+        return cloned;
     }
 
     // ================================================================
@@ -264,7 +307,7 @@ public class Task implements Cloneable {
      * @return description
      */
     private String extractDescription(String notParsedWords) {
-        String[] wordArr = notParsedWords.split(" ");
+        String[] wordArr = notParsedWords.split(STRING_EMPTY_SPACE);
         ArrayList<String> wordArrayList = new ArrayList<String>(Arrays.asList(wordArr));
 
         // reverse as we want to delete words from the back
@@ -278,7 +321,7 @@ public class Task implements Cloneable {
         Collections.reverse(wordArrayList);
 
         String description = StringUtils.join(wordArrayList, ' ');
-        return description.replace("\"", "");
+        return description.replace("\"", STRING_EMPTY);
     }
     
     //@author A0122081X
@@ -306,67 +349,51 @@ public class Task implements Cloneable {
         this.endTime = endTime;
     }
     
-    //@author A0121520A 
-    // ================================================================
-    // Utility Methods
-    // ================================================================
-    @Override
-    public String toString() {
-        String result = getDescription() + " " + getFormattedTimeAndDate(true);
-        return result.trim();
-    }
+	// @author A0121813U
+	// Change the format of the LocalTime object to our preference
+	// javadoc reference: http://goo.gl/GCyd5E
+	private String addFormattedTime() {
+		DateTimeFormatter timeFormatter = DateTimeFormatter
+				.ofPattern(STRING_TIME_FORMAT);
+		LocalTime startTime = getStartTime();
+		LocalTime endTime = getEndTime();
+		if (startTime != null && endTime != null) {
+			return startTime.format(timeFormatter).toLowerCase()
+					+ STRING_TIME_SEPARATOR
+					+ endTime.format(timeFormatter).toLowerCase();
+		} else if (startTime != null) {
+			return startTime.format(timeFormatter).toLowerCase();
+		}
+		return STRING_EMPTY;
+	}
     
-    public String getFormattedTimeAndDate(boolean includeDate) {
-        String result = "";
-        if (getStartTime() != null) {
-            result += addFormattedTime() + " ";
-        }
-        if (includeDate) {
-            result += addFormattedDate();
-        }
-        return result.trim();
-    }
+	// Change the format of the LocalDate object to our preference
+	// javadoc reference: http://goo.gl/GCyd5E
+	private String addFormattedDate() {
+		DateTimeFormatter dateFormatter = DateTimeFormatter
+				.ofPattern(STRING_DATE_FORMAT);
+		if (getDate() != null) {
+			return getDate().format(dateFormatter);
+		}
+		return STRING_EMPTY;
+	}
     
-    //@author A0121813U 
-    private String addFormattedTime() {
-        // formats the time for the time label, eg 2:00PM to 4:00PM
-        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("h.mma");
-        LocalTime startTime = getStartTime();
-        LocalTime endTime = getEndTime();
-        if (startTime != null) {
-            if (endTime != null) {
-                return startTime.format(timeFormatter).toLowerCase()
-                        + " to " + endTime.format(timeFormatter).toLowerCase();
-            } else {
-                return startTime.format(timeFormatter).toLowerCase();
-            }
-        }
-        return "";
-    }
-
-    private String addFormattedDate() {
-        // javadoc reference: http://goo.gl/GCyd5E
-        DateTimeFormatter dateFormatter = DateTimeFormatter
-                .ofPattern("EEEE, d MMMM y");
-        if (getDate() != null) {
-            return getDate().format(dateFormatter);
-        }
-        return "";
-    }
-    
-    //@author A0122081X
-    @Override
-    public Task clone() throws CloneNotSupportedException {
-        Task cloned = (Task) super.clone();
-
-        // Set all the attributes
-        cloned.setType(cloned.getType());
-        cloned.setDescription(cloned.getDescription());
-        cloned.setIsCompleted(cloned.isCompleted());
-        cloned.setDate(cloned.getDate());
-        cloned.setStartTime(cloned.getStartTime());
-        cloned.setEndTime(cloned.getEndTime());
-
-        return cloned;
-    }
+	// Given a date and time, checks whether the task is overdue
+	private boolean checkOverdue(LocalDate date, LocalTime time) {
+		if (getDate() == null) {
+			return false;
+		} else if (getDate().isBefore(date)) {
+			return true;
+		} else if (getDate().isAfter(date)) {
+			return false;
+		} else {
+			if (getStartTime() == null) {
+				return false;
+			} else if (getStartTime().isBefore(time)) {
+				return false;
+			} else {
+				return true;
+			}
+		}
+	}
 }
