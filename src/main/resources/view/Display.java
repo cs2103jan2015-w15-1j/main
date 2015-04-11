@@ -68,12 +68,13 @@ public class Display extends VBox {
     // Non-FXML Fields
     // ================================================================
     private static Logger logger;
+    private static Display display;
+    
     private Timeline feedbackTimeline;
     private Timeline overlayTimeline;
     private ArrayList<String> allExampleCommands;
     private ObservableList<HelpBox> helpList;
-
-    private static Display display;
+   
     private int currentScrollIndex;
     private int numExcessTasks;
     private boolean isCurrentDisplayOverview;
@@ -82,7 +83,7 @@ public class Display extends VBox {
     // Constants
     // ================================================================
     private final static String LOCATION_TASK_OVERVIEW_FXML = "/view/TaskOverview.fxml";
-    private final static String EMPTY_STRING = "";
+    private final static String STRING_EMPTY = "";
 
     private static final String LABEL_FLOATING = "Floating";
     private static final String LABEL_OVERDUE = "Overdue";
@@ -128,7 +129,7 @@ public class Display extends VBox {
     private static final String NO_TASK_OVERLAY_GREETING = "Hello!";
     private static final String NO_TASK_OVERLAY_ICON = "\uf14a";
     private static final String NO_TASK_OVERLAY_MESSAGE = "Looks like you've got no pending tasks. Type \"help\" for a list of commands or try entering the following:\n\n";
-    private static final int NUM_EXAMPLE_COMMANDS = 3;
+    private static final int NO_TASK_OVERLAY_NUM_EXAMPLE_COMMANDS = 3;
     
     private static final int FEEDBACK_FADE_IN_MILLISECONDS = 500;
     private static final int FEEDBACK_FADE_OUT_MILLISECONDS = 1000;
@@ -281,10 +282,10 @@ public class Display extends VBox {
     // Private overlay method
     // ================================================================
     private void showNoTaskOverlay() {
-        setFeedback(EMPTY_STRING);
+        setFeedback(STRING_EMPTY);
         Collections.shuffle(allExampleCommands);
         String exampleCommands = generateParagraph(allExampleCommands,
-                                                   NUM_EXAMPLE_COMMANDS);
+                                                   NO_TASK_OVERLAY_NUM_EXAMPLE_COMMANDS);
 
         FadeTransition fadeIn = initFadeIn(noTaskOverlay,
                                            OVERLAY_FADE_IN_MILLISECONDS);

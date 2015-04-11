@@ -19,8 +19,19 @@ public class DateParserTest {
     private ArrayList<LocalDateTime> getParsedDates(String input) {
         DateParser dateParser = DateParser.getInstance();
         dateParser.parse(input);
-        ArrayList<LocalDateTime> dates = dateParser.getDates();
-        return dates;
+        return dateParser.getDates();
+    }
+    
+    private String getParsedWords(String input) {
+        DateParser dateParser = DateParser.getInstance();
+        dateParser.parse(input);
+        return dateParser.getParsedWords();
+    }
+    
+    private String getNotParsedWords(String input) {
+        DateParser dateParser = DateParser.getInstance();
+        dateParser.parse(input);
+        return dateParser.getNotParsedWords();
     }
 
     private LocalDate constructDate(int year, int month, int day) {
@@ -44,6 +55,8 @@ public class DateParserTest {
         String input = "do homework";
         ArrayList<LocalDateTime> dates = getParsedDates(input);
         assertEquals("Number of dates", 0, dates.size());
+        assertEquals("Not parsed words", input, getNotParsedWords(input));
+        assertEquals("Parsed words", "", getParsedWords(input));
     }
 
     @Test
@@ -54,6 +67,8 @@ public class DateParserTest {
         assertEquals("Date",
                      constructDate(2015, 3, 15),
                      dates.get(0).toLocalDate());
+        assertEquals("Not parsed words", "", getNotParsedWords(input));
+        assertEquals("Parsed words", "15 mar", getParsedWords(input));
 
         input = "mar 15";
         dates = getParsedDates(input);
@@ -61,6 +76,8 @@ public class DateParserTest {
         assertEquals("Date",
                      constructDate(2015, 3, 15),
                      dates.get(0).toLocalDate());
+        assertEquals("Not parsed words", "", getNotParsedWords(input));
+        assertEquals("Parsed words", "mar 15", getParsedWords(input));
 
         input = "15 march";
         dates = getParsedDates(input);
@@ -179,6 +196,15 @@ public class DateParserTest {
         assertEquals("Date & time",
                      constructDateTime(2015, 3, 15, 18, 0),
                      dates.get(0));
+        
+        input = "read harry potter on 12 apr at 1200";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date & time",
+                     constructDateTime(2015, 4, 12, 12, 0),
+                     dates.get(0));
+        assertEquals("Not parsed words", "read harry potter on", getNotParsedWords(input));
+        assertEquals("Parsed words", "12 apr at 1200", getParsedWords(input));
     }
     
     @Test
@@ -187,29 +213,43 @@ public class DateParserTest {
         ArrayList<LocalDateTime> dates = getParsedDates(input);
         assertEquals("Number of dates", 1, dates.size());
         assertEquals("Date & time",
-                     LocalDate.now(),
-                     dates.get(0).toLocalDate());
+                     LocalDate.now().atTime(18, 0),
+                     dates.get(0));
         
         input = "6pm tomorrow";
         dates = getParsedDates(input);
         assertEquals("Number of dates", 1, dates.size());
         assertEquals("Date & time",
-                     LocalDate.now().plusDays(1),
-                     dates.get(0).toLocalDate());
+                     LocalDate.now().plusDays(1).atTime(18, 0),
+                     dates.get(0));
         
         input = "6pm next week";
         dates = getParsedDates(input);
         assertEquals("Number of dates", 1, dates.size());
         assertEquals("Date & time",
-                     LocalDate.now().plusWeeks(1),
-                     dates.get(0).toLocalDate());
+                     LocalDate.now().plusWeeks(1).atTime(18, 0),
+                     dates.get(0));
         
         input = "next week 6pm";
         dates = getParsedDates(input);
         assertEquals("Number of dates", 1, dates.size());
         assertEquals("Date & time",
-                     LocalDate.now().plusWeeks(1),
-                     dates.get(0).toLocalDate());
+                     LocalDate.now().plusWeeks(1).atTime(18, 0),
+                     dates.get(0));
+        
+        input = "2359 today";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date & time",
+                     LocalDate.now().atTime(23, 59),
+                     dates.get(0));
+        
+        input = "today 2359";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date & time",
+                     LocalDate.now().atTime(23, 59),
+                     dates.get(0));
     }
 
     
@@ -225,16 +265,6 @@ public class DateParserTest {
                      constructDateTime(2015, 3, 15, 18, 0),
                      dates.get(1));
         
-        input = "do homework 4pm to 6pm today";
-        dates = getParsedDates(input);
-        assertEquals("Number of dates", 2, dates.size());
-        assertEquals("Start date & time",
-                     LocalDate.now().atTime(16, 0),
-                     dates.get(0));
-        assertEquals("End date & time",
-                     LocalDate.now().atTime(18, 0),
-                     dates.get(1));
-
         input = "15 mar 4pm to 6pm";
         dates = getParsedDates(input);
         assertEquals("Number of dates", 2, dates.size());
@@ -295,7 +325,7 @@ public class DateParserTest {
                      constructDateTime(2015, 3, 15, 18, 30),
                      dates.get(1));
         
-        input = "attend meeting from \"20\" 1200 - 1400 on 20 Feb";
+        input = "attend meeting 1200 - 1400 on 20 Feb";
         dates = getParsedDates(input);
         assertEquals("Number of dates", 2, dates.size());
         assertEquals("Start date & time",
@@ -303,6 +333,41 @@ public class DateParserTest {
                      dates.get(0));
         assertEquals("End date & time",
                      constructDateTime(2015, 2, 20, 14, 0),
+                     dates.get(1));
+        assertEquals("Not parsed words", "attend meeting", getNotParsedWords(input));
+        assertEquals("Parsed words", "1200 - 1400 on 20 Feb", getParsedWords(input));
+    }
+    
+    @Test
+    public void inputWithRelaxedDateAndDuration() {
+        String input = "4pm to 6pm today";
+        ArrayList<LocalDateTime> dates = getParsedDates(input);
+        assertEquals("Number of dates", 2, dates.size());
+        assertEquals("Start date & time",
+                     LocalDate.now().atTime(16, 0),
+                     dates.get(0));
+        assertEquals("End date & time",
+                     LocalDate.now().atTime(18, 0),
+                     dates.get(1));
+        
+        input = "4pm to 6pm tomorrow";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 2, dates.size());
+        assertEquals("Start date & time",
+                     LocalDate.now().plusDays(1).atTime(16, 0),
+                     dates.get(0));
+        assertEquals("End date & time",
+                     LocalDate.now().plusDays(1).atTime(18, 0),
+                     dates.get(1));
+        
+        input = "4pm to 6pm next week";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 2, dates.size());
+        assertEquals("Start date & time",
+                     LocalDate.now().plusWeeks(1).atTime(16, 0),
+                     dates.get(0));
+        assertEquals("End date & time",
+                     LocalDate.now().plusWeeks(1).atTime(18, 0),
                      dates.get(1));
     }
 
@@ -322,25 +387,37 @@ public class DateParserTest {
         String input;
         ArrayList<LocalDateTime> dates;
 
-        input = "\"do assignment 2\" tomorrow";
+        input = "do assignment 2 tomorrow";
         dates = getParsedDates(input);
         assertEquals("Number of dates", 1, dates.size());
         assertEquals("Deadline",
                      LocalDate.now().plusDays(1),
                      dates.get(0).toLocalDate());
+        assertEquals("Not parsed words", "do assignment 2", getNotParsedWords(input));
+        assertEquals("Parsed words", "tomorrow", getParsedWords(input));
+        
+        input = "do CS1231 tutorial 8";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 0, dates.size());
+        assertEquals("Not parsed words", "do CS1231 tutorial 8", getNotParsedWords(input));
+        assertEquals("Parsed words", "", getParsedWords(input));
 
-        input = "do CS1231 tutorial by tomorrow";
+        input = "do CS1231 tutorial 2 by 2pm tomorrow";
         dates = getParsedDates(input);
         assertEquals("Number of dates", 1, dates.size());
         assertEquals("Deadline",
-                     LocalDate.now().plusDays(1),
-                     dates.get(0).toLocalDate());
+                     LocalDate.now().plusDays(1).atTime(14, 0),
+                     dates.get(0));
+        assertEquals("Not parsed words", "do CS1231 tutorial 2 by", getNotParsedWords(input));
+        assertEquals("Parsed words", "2pm tomorrow", getParsedWords(input));
 
         input = "create 20 word poem";
         dates = getParsedDates(input);
         assertEquals("Number of dates", 0, dates.size());
+        assertEquals("Not parsed words", "create 20 word poem", getNotParsedWords(input));
+        assertEquals("Parsed words", "", getParsedWords(input));
 
-        input = "add finish SR for assignment 2 from 12pm to 6pm today";
+        input = "add assignment 2 from 12pm to 6pm today";
         dates = getParsedDates(input);
         assertEquals("Number of dates", 2, dates.size());
         assertEquals("Start date & time",
@@ -350,7 +427,7 @@ public class DateParserTest {
                      LocalDate.now().atTime(18, 0),
                      dates.get(1));
 
-        input = "add attend meeting 23 march 1200 - 1400";
+        input = "add attend meeting 20 from 1200 - 1400 23 march";
         dates = getParsedDates(input);
         assertEquals("Number of dates", 2, dates.size());
         assertEquals("Start date & time",
@@ -359,12 +436,49 @@ public class DateParserTest {
         assertEquals("End date & time",
                      constructDateTime(2015, 3, 23, 14, 00),
                      dates.get(1));
+        assertEquals("Not parsed words", "add attend meeting 20 from", getNotParsedWords(input));
+        assertEquals("Parsed words", "1200 - 1400 23 march", getParsedWords(input));
+        
+        input = "add attend meeting 20 from 12pm - 2pm on 23 march";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 2, dates.size());
+        assertEquals("Start date & time",
+                     constructDateTime(2015, 3, 23, 12, 00),
+                     dates.get(0));
+        assertEquals("End date & time",
+                     constructDateTime(2015, 3, 23, 14, 00),
+                     dates.get(1));
+        assertEquals("Not parsed words", "add attend meeting 20 from", getNotParsedWords(input));
+        assertEquals("Parsed words", "12pm - 2pm on 23 march", getParsedWords(input));
         
         input = "2 friday";
         dates = getParsedDates(input);
         assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Not parsed words", "2", getNotParsedWords(input));
+        assertEquals("Parsed words", "friday", getParsedWords(input));
     }
 
+    @Test
+    public void inputWithPastDateTimes() {
+        String input;
+        ArrayList<LocalDateTime> dates;
+        
+        input = "do this 25 mar 2014";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Deadline",
+                     constructDate(2014, 3, 25),
+                     dates.get(0).toLocalDate());
+        
+        input = "do this 6pm 25 mar 2014";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Deadline",
+                     constructDateTime(2014, 3, 25, 18, 0),
+                     dates.get(0));
+        
+    }
+    
     @Test
     public void inputWithFalseMatchingWords() {
         String input;
@@ -374,29 +488,9 @@ public class DateParserTest {
         dates = getParsedDates(input);
         assertEquals("Number of dates", 0, dates.size());
         
-        input = "find girlfriend in 2016";
+        input = "find girlfriend";
         dates = getParsedDates(input);
-        assertEquals("Number of dates", 1, dates.size());
-    }
-
-    @Test
-    public void inputWithRecurringDate() {
-        String input;
-        ArrayList<LocalDateTime> dates;
-
-        String today = LocalDate.now().getDayOfWeek().toString();
-        input = String.format("watch tv every %s 8pm to 9pm until 6 jun", today);
-        dates = getParsedDates(input);
-        assertEquals("Number of dates", 3, dates.size());
-        assertEquals("Start date & time",
-                     LocalDate.now().plusWeeks(1).atTime(20, 0),
-                     dates.get(0));
-        assertEquals("End date & time",
-                     LocalDate.now().plusWeeks(1).atTime(21, 0),
-                     dates.get(1));
-        assertEquals("Recur until date",
-                     constructDate(2015, 6, 6),
-                     dates.get(2).toLocalDate());
+        assertEquals("Number of dates", 0, dates.size());
     }
     
     @Test
@@ -404,10 +498,15 @@ public class DateParserTest {
         String input;
         ArrayList<LocalDateTime> dates;
 
-        input = "\"good bye today thursday and friday\" today ";
+        input = "good friday";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 0, dates.size());
+        
+        input = "find easter eggs by friday";
         dates = getParsedDates(input);
         assertEquals("Number of dates", 1, dates.size());
-        assertEquals("Date", LocalDate.now(), dates.get(0).toLocalDate());
+        assertEquals("Date", getDateOfComingDay(DayOfWeek.FRIDAY), dates.get(0).toLocalDate());
+        assertEquals("Not parsed words", "find easter eggs by", getNotParsedWords(input));
+        assertEquals("Parsed words", "friday", getParsedWords(input));
     }
-
 }
