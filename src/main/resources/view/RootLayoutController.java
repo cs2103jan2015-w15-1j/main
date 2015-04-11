@@ -3,6 +3,7 @@ package main.resources.view;
 import javafx.collections.ObservableList;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -98,14 +99,43 @@ public class RootLayoutController extends BorderPane {
         this.controller = controller;
     }
 
-
     // ================================================================
     // Private Methods
     // ================================================================
     private void handleUserInput() {
-        controller.executeCommand(userInput.getText());
+        String inputString = userInput.getText();
+        if (containsEditAll(inputString)) {
+            StringBuilder newInputString = new StringBuilder(inputString);
+            int editIndex = getEditIndex(inputString, 2);
+            Task task = Controller.getInstance().getDisplayedTasks().get(editIndex);
+            ArrayList<LocalDate> exceptionDates = task.getExceptionDates();
+            assert(exceptionDates != null);
+
+            // Build the string...
+            if (exceptionDates.size() > 0) {
+                newInputString.append("except ");
+                for (LocalDate date : exceptionDates) {
+                    newInputString.append(date.toString());
+                    newInputString.append(",");
+                }
+                String output = newInputString.toString();
+                controller.executeCommand(output);
+            } else {
+                controller.executeCommand(inputString);
+            }
+        } else {
+            controller.executeCommand(inputString);
+        }
         updateHistory();
         updateUserInput(EMPTY_STRING);
+    }
+
+    private boolean containsEditAll(String input) {
+        String[] output = input.split(ONE_SPACING);
+
+        return output.length >= 3 &&
+                output[0].equalsIgnoreCase(Command.Type.EDIT.toString()) &&
+                output[1].equalsIgnoreCase(ALL_KEYWORD);
     }
     
     //@author A0121520A
@@ -126,7 +156,7 @@ public class RootLayoutController extends BorderPane {
 
 
     // ================================================================
-    // Methods to handle command autocomplete
+    // Methods to handle command auto-complete
     // ================================================================
     private void initAutoCompleteCommands() {
         commands = Command.getAllCommandTypes();
@@ -217,22 +247,31 @@ public class RootLayoutController extends BorderPane {
 
     //@author A0122081X
     // ================================================================
-    // Methods to handle edit autocomplete
-    // ================================================================    
+    // Methods to handle edit auto-complete
+    // ================================================================
+    private enum EditType {
+        INDIVIDUAL, ALL;
+    }
+
     private void listenForEdit(KeyEvent event) {
-        // editIndexPosition is where the index of the integer after the edit keyword
+        // editIndexPosition is the index of the integer after the edit keyword in the
+        // array input array
         int editIndexPosition = 0;
         String inputString = userInput.getText();
+        EditType type = null;
 
         if (isEditIndividualFormat(inputString)) {
             editIndexPosition = 1;
+            type = EditType.INDIVIDUAL;
         } else if(isEditAllFormat(inputString)) {
             editIndexPosition = 2;
+            type = EditType.ALL;
         }
 
+        // Auto-complete only if there is a valid editIndexPosition
         if (editIndexPosition > 0) {
             int index = getEditIndex(inputString, editIndexPosition);
-            autoCompleteEdit(index, editIndexPosition);
+            autoCompleteEdit(index, editIndexPosition, type);
         }
     }
 
@@ -308,49 +347,48 @@ public class RootLayoutController extends BorderPane {
         return 0;
     }
 
-    private int getEditIndex(String input, int editFormat) {
+    private int getEditIndex(String input, int editIndexPosition) {
         String[] output = input.split(ONE_SPACING);
-        return Integer.parseInt(output[editFormat]);
+        return Integer.parseInt(output[editIndexPosition]);
     }
 
-    private void autoCompleteEdit(int index, int editFormat) {
+    private void autoCompleteEdit(int index, int editIndexPosition, EditType type) {
         ObservableList<Task> displayedTasks = controller.getDisplayedTasks();
         if (index < displayedTasks.size() + 1) { // check if supplied index is within displayedTasks' range
             Task task = displayedTasks.get(index - 1);
             Task.Type taskType = task.getType();
 
-            // edit all format
-            if (editFormat == 2) {
+            if (type.equals(EditType.ALL)) {
                 userInput.appendText(ONE_SPACING + task.getRawInfo());
                 userInput.end();
                 return;
-            }
+            } else if (type.equals(EditType.INDIVIDUAL)) {
+                userInput.appendText(ONE_SPACING + task.getDescription());
 
-            userInput.appendText(ONE_SPACING + task.getDescription());
-
-            switch (taskType) {
-                case FLOATING :
-                    break;
-                case DEADLINE :
-                    userInput.appendText(ONE_SPACING);
-                    if (task.getStartTime() != null) {
-                        userInput.appendText("by " + task.getStartTime().format(timeFormatter) + ONE_SPACING);
-                    }
-                    userInput.appendText(task.getDate().format(dateFormatter));
-                    break;
-                case TIMED :
-                    userInput.appendText(ONE_SPACING);
-                    userInput.appendText(task.getStartTime()
-                                             .format(timeFormatter) +
-                                         ONE_SPACING +
-                                         "to " +
-                                         task.getEndTime()
-                                             .format(timeFormatter) +
-                                         ONE_SPACING +
-                                         task.getDate().format(dateFormatter));
-                    break;
+                switch (taskType) {
+                    case FLOATING:
+                        break;
+                    case DEADLINE:
+                        userInput.appendText(ONE_SPACING);
+                        if (task.getStartTime() != null) {
+                            userInput.appendText("by " + task.getStartTime().format(timeFormatter) + ONE_SPACING);
+                        }
+                        userInput.appendText(task.getDate().format(dateFormatter));
+                        break;
+                    case TIMED:
+                        userInput.appendText(ONE_SPACING);
+                        userInput.appendText(task.getStartTime()
+                                .format(timeFormatter) +
+                                ONE_SPACING +
+                                "to " +
+                                task.getEndTime()
+                                        .format(timeFormatter) +
+                                ONE_SPACING +
+                                task.getDate().format(dateFormatter));
+                        break;
+                }
+                userInput.end();
             }
-            userInput.end();
         }
     }
 
