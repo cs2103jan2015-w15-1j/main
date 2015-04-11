@@ -3,7 +3,7 @@ package main.java;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.stage.Stage;
-import main.resources.view.Display;
+import main.resources.view.DisplayController;
 
 import java.time.DateTimeException;
 import java.time.LocalDateTime;
@@ -35,7 +35,7 @@ public class Controller {
     
     private UserDefinedSort userDefinedSort;
     
-    private Display display;
+    private DisplayController displayController;
 
     private Stage stage;
 
@@ -96,8 +96,8 @@ public class Controller {
 
 	// To load the tasks into the display on the first load
     public void onloadDisplay() {
-        display.setFeedback(getWelcomeMessage());
-        display.updateOverviewDisplay(displayedTasks);
+        displayController.setFeedback(getWelcomeMessage());
+        displayController.updateOverviewDisplay(displayedTasks);
     }
 
     // ================================================================
@@ -185,7 +185,7 @@ public class Controller {
 	            break;
         }
         showAppropriateDisplay(helpUser);
-        display.setFeedback(feedback);
+        displayController.setFeedback(feedback);
 
         return feedback;
     }
@@ -195,8 +195,8 @@ public class Controller {
     // ================================================================
 
     //@author A0122081X
-    public void setDisplay(Display display) {
-	    this.display = display;
+    public void setDisplayController(DisplayController displayController) {
+	    this.displayController = displayController;
 	}
     
     public void setStage(Stage stage) {
@@ -474,7 +474,7 @@ public class Controller {
         allTasks = new ArrayList<Task>();
         displayedTasks = FXCollections.observableArrayList();;
         storage.updateFiles(allTasks);
-        display.resetScrollIndex();
+        displayController.resetScrollIndex();
         return MESSAGE_ALL_CLEAR;
     }
 
@@ -501,22 +501,22 @@ public class Controller {
     //@author A0122081X
     private void updateDisplayWithDefault() {
         displayedTasks.setAll(getIncompleteTasks(allTasks));
-        display.updateOverviewDisplay(displayedTasks);
+        displayController.updateOverviewDisplay(displayedTasks);
     }
 
     private void updateDisplayWithCompleted() {
         displayedTasks.setAll(getCompletedTasks(allTasks));
-        display.updateOverviewDisplay(displayedTasks);
+        displayController.updateOverviewDisplay(displayedTasks);
     }
     
     //@author A0121813U
     private void updateDisplaySearch() {
     	sortSearchedTasks();
-        display.updateSearchDisplay(displayedTasks, searchArgument);
+        displayController.updateSearchDisplay(displayedTasks, searchArgument);
     }
     
     private void updateHelpDisplay() {
-    	display.showHelpDisplay();
+    	displayController.showHelpDisplay();
 ;    }
 
     private void sortAllTasks() {

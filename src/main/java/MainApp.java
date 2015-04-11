@@ -5,7 +5,7 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import main.resources.view.RootLayoutController;
-import main.resources.view.Display;
+import main.resources.view.DisplayController;
 
 //@author A0122081X
 public class MainApp extends Application {
@@ -14,7 +14,7 @@ public class MainApp extends Application {
 	// Fields
 	// ================================================================
 	private Stage primaryStage;
-	private Display display;
+	private DisplayController displayController;
 	private RootLayoutController rootLayoutController;
 	private Controller controller;
     private static final int STAGE_MINIMUM_HEIGHT = 650;
@@ -43,7 +43,7 @@ public class MainApp extends Application {
 		rootLayoutController.setController(controller);
 
 		// Provide a display handle in controller so that controller can pass message to display
-		controller.setDisplay(display);
+		controller.setDisplayController(displayController);
 		controller.setStage(this.primaryStage);
 	}
 
@@ -54,13 +54,13 @@ public class MainApp extends Application {
 	}
 
 	public void initDisplay() {
-		display = Display.getInstance();
-		rootLayoutController.setCenter(display);
+		displayController = DisplayController.getInstance();
+		rootLayoutController.setCenter(displayController);
 	}
 
 	public void initController() {
 		controller = Controller.getInstance();
-		controller.setDisplay(display);
+		controller.setDisplayController(displayController);
 		controller.onloadDisplay();
 	}
 }
