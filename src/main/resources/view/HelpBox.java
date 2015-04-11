@@ -32,7 +32,5 @@ public class HelpBox extends HBox {
 
         this.description.setText(description);
         this.command.setText(command);
-
     }
-
 }
