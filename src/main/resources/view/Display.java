@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -69,16 +70,17 @@ public class Display extends VBox {
     // ================================================================
     private static Logger logger;
     private static Display display;
-    
+
     private Timeline feedbackTimeline;
     private Timeline overlayTimeline;
     private ArrayList<String> allExampleCommands;
     private ObservableList<HelpBox> helpList;
-   
+
     private int currentScrollIndex;
     private int numExcessTasks;
     private boolean isCurrentDisplayOverview;
 
+    
     // ================================================================
     // Constants
     // ================================================================
@@ -123,14 +125,16 @@ public class Display extends VBox {
     private static final String HELP_DISPLAY_COMPLETE_COMMAND = "display completed";
     private static final String HELP_EXIT_DESC = "Exit Veto";
     private static final String HELP_EXIT_COMMAND = "exit";
-    
+
     private static final int OVERLAY_FADE_IN_MILLISECONDS = 200;
-    
+
     private static final String NO_TASK_OVERLAY_GREETING = "Hello!";
     private static final String NO_TASK_OVERLAY_ICON = "\uf14a";
-    private static final String NO_TASK_OVERLAY_MESSAGE = "Looks like you've got no pending tasks. Type \"help\" for a list of commands or try entering the following:\n\n";
+    private static final String NO_TASK_OVERLAY_MESSAGE = "Looks like you've got no pending tasks. "
+                                                          + "Type \"help\" for a list of commands or "
+                                                          + "try entering the following:\n\n";
     private static final int NO_TASK_OVERLAY_NUM_EXAMPLE_COMMANDS = 3;
-    
+
     private static final int FEEDBACK_FADE_IN_MILLISECONDS = 500;
     private static final int FEEDBACK_FADE_OUT_MILLISECONDS = 1000;
     private static final int FEEDBACK_DISPLAY_SECONDS = 8;
@@ -139,13 +143,13 @@ public class Display extends VBox {
     private static final int SCROLL_INCREMENT = 5;
     private static final int MAX_NUM_OF_TASKS = 100;
 
-    //@author A0122081X
+    // @author A0122081X
     // ================================================================
     // Constructor
     // ================================================================
     private Display() {
         logger = Logger.getLogger("Display");
-        logger.setLevel(Level.OFF);
+        logger.setLevel(Level.INFO);
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource(LOCATION_TASK_OVERVIEW_FXML));
         loader.setRoot(this);
@@ -161,8 +165,8 @@ public class Display extends VBox {
         initExampleCommands();
         initHelpList();
     }
-    
-    //@author A0121520A 
+
+    // @author A0121520A
     public static Display getInstance() {
         if (display == null) {
             display = new Display();
@@ -180,52 +184,35 @@ public class Display extends VBox {
         noTaskOverlay.setOpacity(0);
         helpOverlay.setOpacity(0);
     }
-    
+
     public void updateOverviewDisplay(ObservableList<Task> tasks) {
-        hideOverlays();
+        handleOverlays(tasks);
 
-        if (tasks.isEmpty()) {
-            showNoTaskOverlay();
-        }
-        
-        ArrayList<Task> listOfTasks = new ArrayList<Task>(tasks);
-        listOfTasks = trimListOfTasks(listOfTasks);
+        ArrayList<Task> listOfTasks = trimListOfTasks(tasks);
         logger.log(Level.INFO, "List of tasks: " + listOfTasks.toString());
-        
+
         ObservableList<HBox> displayBoxes = FXCollections.observableArrayList();
-        LocalDate now = LocalDate.now();
-        int index = 1;
 
-        index = addOverdueTasks(displayBoxes, listOfTasks, index);
-        index = addFloatingTasks(displayBoxes, listOfTasks, index);
-        index = addThisWeeksTasks(displayBoxes, listOfTasks, now, index);
-        index = addAllOtherTasks(displayBoxes, listOfTasks, now, index);
-
+        addTasksToOverviewDisplay(listOfTasks, displayBoxes);
         addNumExcessTasksLabel(displayBoxes);
-        if (isCurrentDisplayOverview) {
-            highlightChanges(displayBoxes);
-        }
+
+        handleChangeHighlights(displayBoxes);
+
         listView.setItems(displayBoxes);
         isCurrentDisplayOverview = true;
     }
 
     public void updateSearchDisplay(ObservableList<Task> searchResults,
                                     String searchQuery) {
-        
         hideOverlays();
-        ArrayList<Task> listOfResults = new ArrayList<Task>(searchResults);
-        listOfResults = trimListOfTasks(listOfResults);
+
+        ArrayList<Task> listOfResults = trimListOfTasks(searchResults);
         logger.log(Level.INFO, "List of results: " + listOfResults.toString());
 
         ObservableList<HBox> displayBoxes = FXCollections.observableArrayList();
 
         addSearchLabel(displayBoxes, searchResults, searchQuery);
-
-        int index = 1;
-
-        index = addIncompleteTasks(displayBoxes, listOfResults, index);
-        index = addCompletedTasks(displayBoxes, listOfResults, index);
-
+        addTasksToSearchDisplay(listOfResults, displayBoxes);
         addNumExcessTasksLabel(displayBoxes);
         listView.setItems(displayBoxes);
         isCurrentDisplayOverview = false;
@@ -242,7 +229,7 @@ public class Display extends VBox {
         feedbackTimeline.play();
     }
 
-    //@author A0121813U
+    // @author A0121813U
     // Will result in the help menu to appear
     public void showHelpDisplay() {
         hideOverlays();
@@ -252,41 +239,41 @@ public class Display extends VBox {
         overlayTimeline = generateHelpOverlayTimeline(fadeIn);
         overlayTimeline.play();
     }
-    
-    //@author A0122081X
+
+    // @author A0122081X
     public void resetScrollIndex() {
         currentScrollIndex = 0;
     }
 
     public void scrollDown() {
-//        System.out.println(currentScrollIndex);
-        if (currentScrollIndex == 0 && listView.getItems().size() < DISPLAY_MAX_SIZE) {
+        // System.out.println(currentScrollIndex);
+        if (currentScrollIndex == 0 &&
+            listView.getItems().size() < DISPLAY_MAX_SIZE) {
             currentScrollIndex = 0;
-        } else if (currentScrollIndex < listView.getItems().size() - DISPLAY_MAX_SIZE) {
+        } else if (currentScrollIndex < listView.getItems().size() -
+                                        DISPLAY_MAX_SIZE) {
             currentScrollIndex += SCROLL_INCREMENT;
             listView.scrollTo(currentScrollIndex);
         }
     }
 
     public void scrollUp() {
-//        System.out.println(currentScrollIndex);
+        // System.out.println(currentScrollIndex);
         if (currentScrollIndex > 0) {
             currentScrollIndex -= SCROLL_INCREMENT;
             listView.scrollTo(currentScrollIndex);
-        } else if (currentScrollIndex < 0 ) {
+        } else if (currentScrollIndex < 0) {
             currentScrollIndex = 0;
         }
     }
 
-    //@author A0121520A
+    // @author A0121520A
     // ================================================================
     // Private overlay method
     // ================================================================
     private void showNoTaskOverlay() {
         setFeedback(STRING_EMPTY);
-        Collections.shuffle(allExampleCommands);
-        String exampleCommands = generateParagraph(allExampleCommands,
-                                                   NO_TASK_OVERLAY_NUM_EXAMPLE_COMMANDS);
+        String exampleCommands = generateExampleCommands();
 
         FadeTransition fadeIn = initFadeIn(noTaskOverlay,
                                            OVERLAY_FADE_IN_MILLISECONDS);
@@ -295,7 +282,14 @@ public class Display extends VBox {
         overlayTimeline.play();
     }
 
-    //@author A0121520A
+    private String generateExampleCommands() {
+        Collections.shuffle(allExampleCommands);
+        String exampleCommands = generateParagraph(allExampleCommands,
+                                                   NO_TASK_OVERLAY_NUM_EXAMPLE_COMMANDS);
+        return exampleCommands;
+    }
+
+    // @author A0121520A
     // ================================================================
     // Initialization methods
     // ================================================================
@@ -304,7 +298,7 @@ public class Display extends VBox {
         overlayTimeline = new Timeline();
     }
 
-    //@author A0121813U
+    // @author A0121813U
     // Append example commands for users to see when their Veto is empty
     private void initExampleCommands() {
         allExampleCommands = new ArrayList<String>();
@@ -330,7 +324,7 @@ public class Display extends VBox {
         allExampleCommands.add("add run for presidential campaign");
         allExampleCommands.add("add do some community work next week");
     }
-    
+
     // Initialize the help display
     private void initHelpList() {
         helpList = FXCollections.observableArrayList();
@@ -345,12 +339,14 @@ public class Display extends VBox {
         helpList.add(new HelpBox(HELP_MOVE_SAVE_LOCATION_DESC,
                                  HELP_MOVE_SAVE_LOCATION_COMMAND));
         helpList.add(new HelpBox(HELP_SEARCH_DESC, HELP_SEARCH_COMMAND));
-        helpList.add(new HelpBox(HELP_DISPLAY_INCOMPLETE_DESC, HELP_DISPLAY_INCOMPLETE_COMMAND));
-        helpList.add(new HelpBox(HELP_DISPLAY_COMPLETE_DESC, HELP_DISPLAY_COMPLETE_COMMAND));
+        helpList.add(new HelpBox(HELP_DISPLAY_INCOMPLETE_DESC,
+                                 HELP_DISPLAY_INCOMPLETE_COMMAND));
+        helpList.add(new HelpBox(HELP_DISPLAY_COMPLETE_DESC,
+                                 HELP_DISPLAY_COMPLETE_COMMAND));
         helpList.add(new HelpBox(HELP_EXIT_DESC, HELP_EXIT_COMMAND));
     }
-    
-    //@author A0121520A
+
+    // @author A0121520A
     private void initNoTaskOverlay(String exampleCommands) {
         noTaskOverlay.setOpacity(0);
         noTaskOverlay.toFront();
@@ -391,7 +387,7 @@ public class Display extends VBox {
     private Timeline generateFeedbackTimeline(String feedback,
                                               FadeTransition fadeIn,
                                               FadeTransition fadeOut) {
-        return new Timeline(new KeyFrame(Duration.seconds(0),
+        return new Timeline(new KeyFrame(new Duration(1),
                                          new EventHandler<ActionEvent>() {
                                              @Override
                                              public void handle(ActionEvent event) {
@@ -435,6 +431,56 @@ public class Display extends VBox {
     // ================================================================
     // Logic methods for updateOverviewDisplay
     // ================================================================
+    private void handleOverlays(ObservableList<Task> tasks) {
+        hideOverlays();
+        if (tasks.isEmpty()) {
+            showNoTaskOverlay();
+        }
+    }
+
+    private void addTasksToOverviewDisplay(ArrayList<Task> listOfTasks,
+                                           ObservableList<HBox> displayBoxes) {
+        LocalDate now = LocalDate.now();
+        int index = 1;
+        index = addOverdueTasks(displayBoxes, listOfTasks, index);
+        index = addFloatingTasks(displayBoxes, listOfTasks, index);
+        index = addThisWeeksTasks(displayBoxes, listOfTasks, now, index);
+        index = addAllOtherTasks(displayBoxes, listOfTasks, now, index);
+    }
+
+    private void handleChangeHighlights(ObservableList<HBox> displayBoxes) {
+        if (isCurrentDisplayOverview) {
+            highlightChanges(displayBoxes);
+        }
+    }
+
+    private int addOverdueTasks(ObservableList<HBox> displayBoxes,
+                                ArrayList<Task> listOfTasks,
+                                int index) {
+        CategoryBox overdue = new CategoryBox(LABEL_OVERDUE);
+        displayBoxes.add(overdue);
+
+        boolean hasOverdue = false;
+
+        // Tasks before index-1 are not applicable (not overdue).
+        List<Task> applicableTasks = listOfTasks.subList(index - 1, listOfTasks.size());
+        for (Task task : applicableTasks) {
+            if (task.isOverdue()) {
+                hasOverdue = true;
+                addTask(displayBoxes, index, task, true);
+                index++;
+            } else {
+                break;
+            }
+        }
+
+        if (!hasOverdue) {
+            overdue.dim();
+        }
+
+        return index;
+    }
+
     private int addFloatingTasks(ObservableList<HBox> displayBoxes,
                                  ArrayList<Task> listOfTasks,
                                  int index) {
@@ -443,40 +489,20 @@ public class Display extends VBox {
 
         boolean hasFloating = false;
 
-        for (Task task : listOfTasks) {
+        // Tasks before index-1 are not applicable (not floating).
+        List<Task> applicableTasks = listOfTasks.subList(index - 1, listOfTasks.size());
+        for (Task task : applicableTasks) {
             if (task.getType() == Task.Type.FLOATING) {
                 hasFloating = true;
                 addTask(displayBoxes, index, task, true);
                 index++;
+            } else {
+                break;
             }
         }
 
         if (!hasFloating) {
             floating.dim();
-        }
-
-        return index;
-    }
-
-    private int addOverdueTasks(ObservableList<HBox> displayBoxes,
-                                ArrayList<Task> listOfTasks,
-                                int index) {
-        // add second category
-        CategoryBox overdue = new CategoryBox(LABEL_OVERDUE);
-        displayBoxes.add(overdue);
-
-        boolean hasOverdue = false;
-
-        for (Task task : listOfTasks) {
-            if (task.isOverdue()) {
-                hasOverdue = true;
-                addTask(displayBoxes, index, task, true);
-                index++;
-            }
-        }
-
-        if (!hasOverdue) {
-            overdue.dim();
         }
 
         return index;
@@ -495,11 +521,15 @@ public class Display extends VBox {
 
             boolean hasTaskOnThisDay = false;
 
-            for (Task task : listOfTasks) {
+            // Tasks before index-1 are not applicable (not equal to day).
+            List<Task> applicableTasks = listOfTasks.subList(index - 1, listOfTasks.size());
+            for (Task task : applicableTasks) {
                 if (day.equals(task.getDate())) {
                     hasTaskOnThisDay = true;
                     addTask(displayBoxes, index, task, false);
                     index++;
+                } else {
+                    break;
                 }
             }
 
@@ -520,7 +550,9 @@ public class Display extends VBox {
         boolean hasOtherTasks = false;
         LocalDate dayOneWeekFromNow = now.plusWeeks(1);
 
-        for (Task task : listOfTasks) {
+        // Tasks before index-1 are not applicable as they fall under previous categories.
+        List<Task> applicableTasks = listOfTasks.subList(index - 1, listOfTasks.size());
+        for (Task task : applicableTasks) {
             if (task.getDate() != null &&
                 (dayOneWeekFromNow.equals(task.getDate()) || dayOneWeekFromNow.isBefore(task.getDate()))) {
                 hasOtherTasks = true;
@@ -544,7 +576,8 @@ public class Display extends VBox {
         // formats the date for the date label, eg. 1 April
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d MMMM");
 
-        // formats the date for the date label of special cases, eg. Wednesday, 1 April
+        // formats the date for the date label of special cases, eg. Wednesday,
+        // 1 April
         DateTimeFormatter dateFormatterForSpecialCase = DateTimeFormatter.ofPattern("EEEE, d MMMM");
 
         CategoryBox label;
@@ -599,11 +632,18 @@ public class Display extends VBox {
         }
         return false;
     }
-    
+
 
     // ================================================================
     // Logic methods for updateSearchDisplay
     // ================================================================
+    private void addTasksToSearchDisplay(ArrayList<Task> listOfResults,
+                                         ObservableList<HBox> displayBoxes) {
+        int index = 1;
+        index = addIncompleteTasks(displayBoxes, listOfResults, index);
+        index = addCompletedTasks(displayBoxes, listOfResults, index);
+    }
+
     private int addIncompleteTasks(ObservableList<HBox> displayBoxes,
                                    ArrayList<Task> listOfResults,
                                    int index) {
@@ -612,7 +652,7 @@ public class Display extends VBox {
 
         boolean hasIncompleteTask = false;
 
-        for (Task task : listOfResults) {
+        for (Task task : listOfResults.subList(index - 1, listOfResults.size())) {
             if (!task.isCompleted()) {
                 hasIncompleteTask = true;
                 addTask(displayBoxes, index, task, true);
@@ -635,7 +675,7 @@ public class Display extends VBox {
 
         boolean hasCompletedTask = false;
 
-        for (Task task : listOfResults) {
+        for (Task task : listOfResults.subList(index - 1, listOfResults.size())) {
             if (task.isCompleted()) {
                 hasCompletedTask = true;
                 addTask(displayBoxes, index, task, true);
@@ -696,22 +736,23 @@ public class Display extends VBox {
                                          task.isRecurring()));
         }
     }
-    
+
     private void addNumExcessTasksLabel(ObservableList<HBox> displayBoxes) {
         if (numExcessTasks > 0) {
-            displayBoxes.add(new CategoryBox(String.format(LABEL_EXCESS_TASKS, numExcessTasks)));
+            displayBoxes.add(new CategoryBox(String.format(LABEL_EXCESS_TASKS,
+                                                           numExcessTasks)));
         }
     }
 
-    private ArrayList<Task> trimListOfTasks(ArrayList<Task> listOfTasks) {
-        numExcessTasks = listOfTasks.size() - MAX_NUM_OF_TASKS;
+    private ArrayList<Task> trimListOfTasks(ObservableList<Task> tasks) {
+        numExcessTasks = tasks.size() - MAX_NUM_OF_TASKS;
         if (numExcessTasks > 0) {
-            return new ArrayList<Task> (listOfTasks.subList(0, MAX_NUM_OF_TASKS));
+            return new ArrayList<Task>(tasks.subList(0, MAX_NUM_OF_TASKS));
         }
-        return listOfTasks;
+        return new ArrayList<Task>(tasks);
     }
-    
-    //@author A0121813U
+
+    // @author A0121813U
     // Formats the ArrayList<String> so that it prints element by element
     private String generateParagraph(ArrayList<String> list, int size) {
         return StringUtils.join(list.toArray(), "\n", 0, size);

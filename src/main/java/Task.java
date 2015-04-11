@@ -50,7 +50,7 @@ public class Task implements Cloneable {
     private String rawInfo;
     private Type type;
     private String description; // arguments without the date and time
-    private LocalDate dateNow;
+    private LocalDate date;
     private LocalTime startTime;
     private LocalTime endTime;
     private boolean isCompleted;
@@ -86,7 +86,7 @@ public class Task implements Cloneable {
     }
 
     public LocalDate getDate() {
-        return dateNow;
+        return date;
     }
 
     public LocalTime getStartTime() {
@@ -218,12 +218,12 @@ public class Task implements Cloneable {
     private void initDateAndTime(Type type, ArrayList<LocalDateTime> parsedDates) {
         switch (type) {
         case TIMED:
-            dateNow = parsedDates.get(POSITION_FIRST_DATE).toLocalDate();
+            date = parsedDates.get(POSITION_FIRST_DATE).toLocalDate();
             startTime = parsedDates.get(POSITION_FIRST_DATE).toLocalTime();
             endTime = parsedDates.get(POSITION_SECOND_DATE).toLocalTime();
             break;
         case DEADLINE:
-            dateNow = parsedDates.get(POSITION_FIRST_DATE).toLocalDate();
+            date = parsedDates.get(POSITION_FIRST_DATE).toLocalDate();
             LocalTime time = parsedDates.get(POSITION_FIRST_DATE).toLocalTime();
             if (time.getNano() == 0) {
                 startTime = time;
@@ -330,7 +330,7 @@ public class Task implements Cloneable {
     // ================================================================
 
     private void setDate(LocalDate date) {
-        this.dateNow = date;
+        this.date = date;
     }
 
     private void setType(Type type) {
