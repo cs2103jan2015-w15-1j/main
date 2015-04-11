@@ -69,6 +69,10 @@ public class CreateTask {
         String recurId;
         Task task;
         recurId = UUID.randomUUID().toString();
+        
+        input = findExceptionDates(input);
+        System.out.println("input "+input);     
+        
         for (String string : IGNOREWORD) {
             if (input.contains(string)) {
                 hasIgnoreWords = true;
@@ -94,13 +98,9 @@ public class CreateTask {
                 }
             }
 
-            if (!exceptionString.equals(null)) {
-                input = input.replace(exceptionString, "");
-                nonParsedWords = nonParsedWords.replace(exceptionString, "");
-            }
-
             nonParsedWords = findCommonWord(input, nonParsedWords);
 
+            System.out.println("Start recurDate "+recurDate);
             createRecurring(type, input, parsedWords, nonParsedWords,
                     recurDate, recurId, rawInfo);
         } else {
@@ -108,6 +108,12 @@ public class CreateTask {
             tempList.add(task);
         }
 
+        System.out.println("parsedWords "+parsedWords);
+        System.out.println("parsedDates "+parsedDates);
+        System.out.println("nonParsedWords "+nonParsedWords);
+        System.out.println("input "+input);
+        System.out.println("type "+type);
+        System.out.println("recurDate "+recurDate);
         return tempList;
     }
 
@@ -194,22 +200,6 @@ public class CreateTask {
         LocalDate tempDate;
         Boolean hasEndWord = false;
 
-        if (input.toLowerCase().contains(EXCEPTWORD)) {
-            exceptionString = input.substring(
-                    input.toLowerCase().indexOf(EXCEPTWORD), input.length());
-            exceptionString.replace(EXCEPTWORD, "");
-
-            String[] split = exceptionString.split(",");
-            for (String string : split) {
-                try {
-                    System.out.println(string);
-                    dateParser.parse(string);
-                    exceptionDates.add(dateParser.getDates().get(0).toLocalDate());
-                } catch (NullPointerException e) {
-                }
-            }
-        }
-
         for (String check : ENDWORD2) {
             if (input.toLowerCase().contains(STARTWORD)) {
                 String endCondition = input.substring(input.toLowerCase()
@@ -293,6 +283,29 @@ public class CreateTask {
 
         limit = result.get(0).plusYears(1);
         return result;
+    }
+
+    private String findExceptionDates(String input) {
+        if (input.toLowerCase().contains(EXCEPTWORD)) {
+            exceptionString = input.substring(
+                    input.toLowerCase().indexOf(EXCEPTWORD), input.length());
+            exceptionString.replace(EXCEPTWORD, "");
+
+            String[] split = exceptionString.split(",");
+            for (String string : split) {
+                try {
+                    System.out.println(string);
+                    dateParser.parse(string);
+                    exceptionDates.add(dateParser.getDates().get(0).toLocalDate());
+                } catch (NullPointerException e) {
+                }
+            }
+        }
+
+        if (!exceptionString.equals(null)) {
+            input = input.replace(exceptionString, "");
+        }
+        return input;
     }
 
     private String processInfo(String input, String endCondition) {
