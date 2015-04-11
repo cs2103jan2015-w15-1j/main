@@ -42,6 +42,7 @@ public class RootLayoutController extends BorderPane {
     private final String WELCOME_INPUT = "Enter your task here";
     private final String ONE_SPACING = " ";
     private final String EMPTY_STRING = "";
+    private final String ALL_KEYWORD = "all";
 
     // formats the date for the date label, eg. 1 April
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d MMMM");
@@ -219,14 +220,36 @@ public class RootLayoutController extends BorderPane {
     // Methods to handle edit autocomplete
     // ================================================================    
     private void listenForEdit(KeyEvent event) {
-        if (isValidEditFormat(userInput.getText())) {
-            int index = getEditIndex(userInput.getText());
-            autoCompleteEdit(index);
+        int editFormat = isValidEditFormat(userInput.getText());
+        // Validity check
+        if (editFormat > 0) {
+            int index = getEditIndex(userInput.getText(), editFormat);
+            autoCompleteEdit(index, editFormat);
         }
     }
 
-    private boolean isValidEditFormat(String input) {
+    /*
+    *
+    *  If invalid, returns 0.
+    *  Any valid format returns an integer > 0.
+    *  If is individual, returns 1.
+    *  If is all, returns 2.
+    *
+     */
+    private int isValidEditFormat(String input) {
         String[] output = input.split(ONE_SPACING);
+
+        // Check for edit all keyword
+        if (output.length == 3 &&
+            output[0].equalsIgnoreCase(Command.Type.EDIT.toString()) &&
+            output[1].equalsIgnoreCase(ALL_KEYWORD)) {
+            try {
+                Integer.parseInt(output[2]);
+                return 2;
+            } catch (NumberFormatException e) {
+                return 0;
+            }
+        }
 
         // Check for edit keyword and length
         if (output.length == 2 &&
@@ -234,26 +257,27 @@ public class RootLayoutController extends BorderPane {
             // Check for whether it's in the format "edit <int>"
             try {
                 Integer.parseInt(output[1]);
-                return true;
+                return 1;
             } catch (NumberFormatException e) {
-                return false;
+                return 0;
             }
         }
-        return false;
+
+        return 0;
     }
 
-    private int getEditIndex(String input) {
+    private int getEditIndex(String input, int editFormat) {
         String[] output = input.split(ONE_SPACING);
-        return Integer.parseInt(output[1]);
+        return Integer.parseInt(output[editFormat]);
     }
 
-    private void autoCompleteEdit(int index) {
+    private void autoCompleteEdit(int index, int editFormat) {
         ObservableList<Task> displayedTasks = controller.getDisplayedTasks();
         if (index < displayedTasks.size() + 1) {
             Task task = displayedTasks.get(index - 1);
             Task.Type taskType = task.getType();
 
-            if (task.getId() != null) {
+            if (editFormat == 2) {
                 userInput.appendText(ONE_SPACING + task.getRawInfo());
                 userInput.end();
                 return;
