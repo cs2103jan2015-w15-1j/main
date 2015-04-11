@@ -24,17 +24,9 @@ public class UserDefinedSortTest {
 	String nonParsedWords;
 	UserDefinedSort uds;
 	ArrayList<Task> list;
-	
-	public Task createTask(String input) {
-		DateParser dp = DateParser.getInstance();
-		dp.parse(input);
-	    parsedDates = dp.getDates();
-	    parsedWords = dp.getParsedWords();
-	    nonParsedWords = dp.getNotParsedWords();
-	    return new Task(input, parsedDates, parsedWords, nonParsedWords);
-	}
 
 	@Test
+	// Test the functionality of the main container
 	public void TestUDSContainer() {
 		ArrayList<Task> sampleList = new ArrayList<Task>();
 		sampleList.add(createTask("first"));
@@ -48,6 +40,7 @@ public class UserDefinedSortTest {
 	}
 	
 	@Test
+	// Test whether the list will be sorted by Type using the SortType comparator
 	public void TestTypeSort() {
 		 
 		list = new ArrayList<Task>();
@@ -81,6 +74,7 @@ public class UserDefinedSortTest {
 	}
 	
 	@Test
+	// Test whether the list will be sorted by date using the SortDate comparator
 	public void TestDateSort() {
 		
 		list = new ArrayList<Task>();
@@ -115,6 +109,7 @@ public class UserDefinedSortTest {
 	}
 	
 	@Test
+	// Test whether the list will be sorted by overdue using the SortOverdue comparator
 	public void TestOverdueSort() {
 		
 		list = new ArrayList<Task>();
@@ -148,6 +143,7 @@ public class UserDefinedSortTest {
 	}
 	
 	@Test
+	// Test whether the list will be sorted by completeness using the SortIncomplete comparator
 	public void TestIncompleteSort() {
 		
 		list = new ArrayList<Task>();
@@ -185,6 +181,7 @@ public class UserDefinedSortTest {
 	}
 	
 	@Test
+	// Test whether the list will be sorted by time using the SortTime comparator
 	public void TestTimeSort() {
 		
 		list = new ArrayList<Task>();
@@ -218,6 +215,7 @@ public class UserDefinedSortTest {
 	}
 	
 	@Test
+	// Test the main container with all the existing comparator in its chain
 	// Two list of tasks in different order, when going through the same chain
 	// should result in same output order
 	public void TestSortChain() {
@@ -267,5 +265,14 @@ public class UserDefinedSortTest {
 	    assertEquals(list.get(1), listCopy.get(1));
 	    assertEquals(list.get(2), listCopy.get(2));
 	    assertEquals(list.get(3), listCopy.get(3));
+	}
+	
+	private Task createTask(String input) {
+		DateParser dp = DateParser.getInstance();
+		dp.parse(input);
+	    parsedDates = dp.getDates();
+	    parsedWords = dp.getParsedWords();
+	    nonParsedWords = dp.getNotParsedWords();
+	    return new Task(input, parsedDates, parsedWords, nonParsedWords);
 	}
 }
