@@ -221,11 +221,11 @@ public class UserDefinedSortTest {
 	public void TestSortChain() {
 		
 		Task taskDeadlineNoTime = createTask("buy milk tomorrow");
-	    Task taskDeadlineWithTime = createTask("buy cereal by 9am");
+	    Task taskDeadlineWithTime = createTask("buy cereal by 9am today");
 	    Task taskFloating = createTask("do homework");
 	    Task taskTimed = createTask("do assignment 9 march 2pm to 3pm");
 	    
-	    taskDeadlineNoTime.markAsCompleted();
+	    //taskDeadlineNoTime.markAsCompleted();
 		
 		// Test sequence 1
 		list = new ArrayList<Task>();
@@ -240,7 +240,7 @@ public class UserDefinedSortTest {
 	    uds.addComparator(new SortTime());
 	    uds.addComparator(new SortDate());
 	    uds.addComparator(new SortOverdue());
-	    uds.addComparator(new SortIncomplete());
+	    //uds.addComparator(new SortIncomplete());
 	    
 	    uds.executeSort();
 	    
@@ -260,6 +260,11 @@ public class UserDefinedSortTest {
 	    udsCopy.addComparator(new SortIncomplete());
 	    
 	    udsCopy.executeSort();
+	    
+	    assertEquals(list.get(0), taskTimed);
+	    assertEquals(list.get(1), taskDeadlineWithTime);
+	    assertEquals(list.get(2), taskFloating);
+	    assertEquals(list.get(3), taskDeadlineNoTime);
 	    
 	    assertEquals(list.get(0), listCopy.get(0));
 	    assertEquals(list.get(1), listCopy.get(1));
