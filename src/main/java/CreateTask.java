@@ -49,6 +49,7 @@ public class CreateTask {
     private String endDateWords;
     private int recurRate;
     private String exceptionString;
+    private String rawInfo;
 
     public static CreateTask getInstance() {
         if (taskCreator == null) {
@@ -61,7 +62,7 @@ public class CreateTask {
             ArrayList<LocalDateTime> parsedDates, String parsedWords,
             String nonParsedWords) {
         resetField();
-        String rawInfo = input;
+        rawInfo = input;
         Type type = checkRecurring(input);
         Boolean hasIgnoreWords = false;
 
@@ -140,6 +141,8 @@ public class CreateTask {
         exceptionDates = new ArrayList<LocalDate>();
         endDateWords = "";
         exceptionString = "";
+        limit = null;
+        rawInfo = "";
     }
 
     private void createRecurring(Type type, String input, String parsedWords,
@@ -303,6 +306,7 @@ public class CreateTask {
         }
 
         if (!exceptionString.equals(null)) {
+            rawInfo = rawInfo.replace(exceptionString, "").trim();
             input = input.replace(exceptionString, "");
         }
         return input;
