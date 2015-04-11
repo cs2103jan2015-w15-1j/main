@@ -11,13 +11,15 @@ public class SortType implements Comparator<Task> {
 	
 	/* Order of comparison
 	 * 
+	 * NEW! --> Now we don't need to rank DEADLINE and TIMED
+	 * 
 	 * FLOATING DEADLINE
 	 * DEADLINE FLOATING
 	 * FLOATING TIMED
 	 * TIMED FLOATING
-	 * DEADLINE TIMED
-	 * TIMED DEADLINE
-	 * SAME TYPES
+	 * DEADLINE TIMED (Removed)
+	 * TIMED DEADLINE (Removed)
+	 * SAME TYPES OR DEADLINE AND TIMED (Updated)
 	 */ 
 	
 	public int compare(Task task1, Task task2) {
@@ -28,10 +30,6 @@ public class SortType implements Comparator<Task> {
 		} else if (task1.getType() == Task.Type.FLOATING && task2.getType() == Task.Type.TIMED) {
 			return FIRST_LOWER;
 		} else if (task1.getType() == Task.Type.TIMED && task2.getType() == Task.Type.FLOATING) {
-			return FIRST_HIGHER;
-		} else if (task1.getType() == Task.Type.DEADLINE && task2.getType() == Task.Type.TIMED) {
-			return FIRST_LOWER;
-		} else if (task1.getType() == Task.Type.TIMED && task2.getType() == Task.Type.DEADLINE) {
 			return FIRST_HIGHER;
 		} else {
 			return FIRST_SAME;
