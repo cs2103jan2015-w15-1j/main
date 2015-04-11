@@ -50,6 +50,7 @@ public class Task implements Cloneable {
     private LocalTime endTime;
     private boolean isCompleted;
     private String recurId;
+    private ArrayList<LocalDate> exceptionDates;
 
     //@author A0122393L
     public Task(String input, ArrayList<LocalDateTime> parsedDates,
@@ -152,6 +153,14 @@ public class Task implements Cloneable {
         description = extractDescription(notParsedWords).substring(2);
 
         updateAll(description, determineType(parsedDates), parsedDates);
+    }
+    
+    public void setException(ArrayList<LocalDate> dates) {
+        exceptionDates = dates;
+    }
+    
+    public void addException(LocalDate date){
+        exceptionDates.add(date);
     }
 
     // ================================================================

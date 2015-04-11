@@ -45,7 +45,7 @@ public class CreateTask {
     private LocalDateTime endDateTime;
     private LocalDateTime limit;
     private ArrayList<String> removedWords;
-    private ArrayList<LocalDateTime> exceptionDates;
+    private ArrayList<LocalDate> exceptionDates;
     private String endDateWords;
     private int recurRate;
     private String exceptionString;
@@ -131,7 +131,7 @@ public class CreateTask {
         recurRate = 1;
         tempList = new ArrayList<Task>();
         removedWords = new ArrayList<String>();
-        exceptionDates = new ArrayList<LocalDateTime>();
+        exceptionDates = new ArrayList<LocalDate>();
         endDateWords = "";
         exceptionString = "";
     }
@@ -150,6 +150,7 @@ public class CreateTask {
                 task = new Task(input, recurDate, parsedWords, nonParsedWords);
                 task.setId(recurId);
                 task.setRawInfo(rawInfo);
+                task.setException(exceptionDates);
                 tempList.add(task);
             }
             hasException = false;
@@ -178,8 +179,8 @@ public class CreateTask {
     }
 
     private Boolean checkForException(LocalDateTime nextDate) {
-        for (LocalDateTime date : exceptionDates) {
-            if (date.toLocalDate().equals(nextDate.toLocalDate())) {
+        for (LocalDate date : exceptionDates) {
+            if (date.equals(nextDate.toLocalDate())) {
                 return true;
             }
         }
@@ -203,7 +204,7 @@ public class CreateTask {
                 try {
                     System.out.println(string);
                     dateParser.parse(string);
-                    exceptionDates.addAll(dateParser.getDates());
+                    exceptionDates.add(dateParser.getDates().get(0).toLocalDate());
                 } catch (NullPointerException e) {
                 }
             }
