@@ -80,12 +80,15 @@ public class Display extends VBox {
     private int numExcessTasks;
     private boolean isCurrentDisplayOverview;
 
-    
+
     // ================================================================
     // Constants
     // ================================================================
     private final static String LOCATION_TASK_OVERVIEW_FXML = "/view/TaskOverview.fxml";
     private final static String STRING_EMPTY = "";
+    private static final String FORMAT_PATTERN_DATE_SPECIAL_CASE = "EEEE, d MMMM";
+    private static final String FORMAT_PATTERN_DATE = "d MMMM";
+    private static final String FORMAT_PATTERN_DAY = "EEEE";
 
     private static final String LABEL_FLOATING = "Floating";
     private static final String LABEL_OVERDUE = "Overdue";
@@ -143,7 +146,7 @@ public class Display extends VBox {
     private static final int SCROLL_INCREMENT = 5;
     private static final int MAX_NUM_OF_TASKS = 100;
 
-    // @author A0122081X
+    //@author A0122081X
     // ================================================================
     // Constructor
     // ================================================================
@@ -166,7 +169,7 @@ public class Display extends VBox {
         initHelpList();
     }
 
-    // @author A0121520A
+    //@author A0121520A
     public static Display getInstance() {
         if (display == null) {
             display = new Display();
@@ -185,6 +188,15 @@ public class Display extends VBox {
         helpOverlay.setOpacity(0);
     }
 
+    /**
+     * Update display of tasks.
+     * The input tasks follows a predefined order of overdue tasks, floating
+     * tasks, this week's tasks then all other tasks.
+     * This ensures that the index shown in the display corresponds with the
+     * actual index in the input ObservableList.
+     * 
+     * @param tasks Must be sorted in the above order.
+     */
     public void updateOverviewDisplay(ObservableList<Task> tasks) {
         handleOverlays(tasks);
 
@@ -202,6 +214,16 @@ public class Display extends VBox {
         isCurrentDisplayOverview = true;
     }
 
+    /**
+     * Update display to show search results.
+     * The input tasks follows a predefined order of incomplete tasks then
+     * completed tasks.
+     * This ensures that the index shown in the display corresponds with the
+     * actual index in the input ObservableList.
+     * 
+     * @param searchResults Must be sorted in the above order.
+     * @param searchQuery
+     */
     public void updateSearchDisplay(ObservableList<Task> searchResults,
                                     String searchQuery) {
         hideOverlays();
@@ -229,7 +251,7 @@ public class Display extends VBox {
         feedbackTimeline.play();
     }
 
-    // @author A0121813U
+    //@author A0121813U
     // Will result in the help menu to appear
     public void showHelpDisplay() {
         hideOverlays();
@@ -240,7 +262,7 @@ public class Display extends VBox {
         overlayTimeline.play();
     }
 
-    // @author A0122081X
+    //@author A0122081X
     public void resetScrollIndex() {
         currentScrollIndex = 0;
     }
@@ -267,10 +289,13 @@ public class Display extends VBox {
         }
     }
 
-    // @author A0121520A
+    //@author A0121520A
     // ================================================================
     // Private overlay method
     // ================================================================
+    /**
+     * Shows an overlay message when there are no tasks to display.
+     */
     private void showNoTaskOverlay() {
         setFeedback(STRING_EMPTY);
         String exampleCommands = generateExampleCommands();
@@ -289,7 +314,7 @@ public class Display extends VBox {
         return exampleCommands;
     }
 
-    // @author A0121520A
+    //@author A0121520A
     // ================================================================
     // Initialization methods
     // ================================================================
@@ -298,7 +323,7 @@ public class Display extends VBox {
         overlayTimeline = new Timeline();
     }
 
-    // @author A0121813U
+    //@author A0121813U
     // Append example commands for users to see when their Veto is empty
     private void initExampleCommands() {
         allExampleCommands = new ArrayList<String>();
@@ -346,7 +371,7 @@ public class Display extends VBox {
         helpList.add(new HelpBox(HELP_EXIT_DESC, HELP_EXIT_COMMAND));
     }
 
-    // @author A0121520A
+    //@author A0121520A
     private void initNoTaskOverlay(String exampleCommands) {
         noTaskOverlay.setOpacity(0);
         noTaskOverlay.toFront();
@@ -387,7 +412,12 @@ public class Display extends VBox {
     private Timeline generateFeedbackTimeline(String feedback,
                                               FadeTransition fadeIn,
                                               FadeTransition fadeOut) {
-        return new Timeline(new KeyFrame(new Duration(1),
+        // First KeyFrame is to fade in the feedback message and the second
+        // KeyFrame is to fade it out after several seconds.
+        return new Timeline(new KeyFrame(new Duration(1), // JavaFx does not
+                                                          // work properly when
+                                                          // a duration of zero
+                                                          // is given.
                                          new EventHandler<ActionEvent>() {
                                              @Override
                                              public void handle(ActionEvent event) {
@@ -457,13 +487,15 @@ public class Display extends VBox {
     private int addOverdueTasks(ObservableList<HBox> displayBoxes,
                                 ArrayList<Task> listOfTasks,
                                 int index) {
+        // Add category label to be displayed above that category.
         CategoryBox overdue = new CategoryBox(LABEL_OVERDUE);
         displayBoxes.add(overdue);
 
         boolean hasOverdue = false;
 
         // Tasks before index-1 are not applicable (not overdue).
-        List<Task> applicableTasks = listOfTasks.subList(index - 1, listOfTasks.size());
+        List<Task> applicableTasks = listOfTasks.subList(index - 1,
+                                                         listOfTasks.size());
         for (Task task : applicableTasks) {
             if (task.isOverdue()) {
                 hasOverdue = true;
@@ -474,6 +506,8 @@ public class Display extends VBox {
             }
         }
 
+        // Changes the color of the category label to indicate the lack of tasks
+        // that fall under this category.
         if (!hasOverdue) {
             overdue.dim();
         }
@@ -490,7 +524,8 @@ public class Display extends VBox {
         boolean hasFloating = false;
 
         // Tasks before index-1 are not applicable (not floating).
-        List<Task> applicableTasks = listOfTasks.subList(index - 1, listOfTasks.size());
+        List<Task> applicableTasks = listOfTasks.subList(index - 1,
+                                                         listOfTasks.size());
         for (Task task : applicableTasks) {
             if (task.getType() == Task.Type.FLOATING) {
                 hasFloating = true;
@@ -514,6 +549,7 @@ public class Display extends VBox {
                                   int index) {
         // generate the dates of the 7 days from today
         ArrayList<LocalDate> days = generateDaysOfWeek(now);
+        assert days.size() == 7;
 
         for (LocalDate day : days) {
             CategoryBox label = generateDayLabel(now, day);
@@ -522,7 +558,8 @@ public class Display extends VBox {
             boolean hasTaskOnThisDay = false;
 
             // Tasks before index-1 are not applicable (not equal to day).
-            List<Task> applicableTasks = listOfTasks.subList(index - 1, listOfTasks.size());
+            List<Task> applicableTasks = listOfTasks.subList(index - 1,
+                                                             listOfTasks.size());
             for (Task task : applicableTasks) {
                 if (day.equals(task.getDate())) {
                     hasTaskOnThisDay = true;
@@ -550,8 +587,10 @@ public class Display extends VBox {
         boolean hasOtherTasks = false;
         LocalDate dayOneWeekFromNow = now.plusWeeks(1);
 
-        // Tasks before index-1 are not applicable as they fall under previous categories.
-        List<Task> applicableTasks = listOfTasks.subList(index - 1, listOfTasks.size());
+        // Tasks before index-1 are not applicable as they fall under previous
+        // categories.
+        List<Task> applicableTasks = listOfTasks.subList(index - 1,
+                                                         listOfTasks.size());
         for (Task task : applicableTasks) {
             if (task.getDate() != null &&
                 (dayOneWeekFromNow.equals(task.getDate()) || dayOneWeekFromNow.isBefore(task.getDate()))) {
@@ -571,14 +610,14 @@ public class Display extends VBox {
     private CategoryBox generateDayLabel(LocalDate now, LocalDate day) {
 
         // formats the date for the day label, eg. Monday, Tuesday, etc
-        DateTimeFormatter dayFormatter = DateTimeFormatter.ofPattern("EEEE");
+        DateTimeFormatter dayFormatter = DateTimeFormatter.ofPattern(FORMAT_PATTERN_DAY);
 
         // formats the date for the date label, eg. 1 April
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d MMMM");
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(FORMAT_PATTERN_DATE);
 
         // formats the date for the date label of special cases, eg. Wednesday,
         // 1 April
-        DateTimeFormatter dateFormatterForSpecialCase = DateTimeFormatter.ofPattern("EEEE, d MMMM");
+        DateTimeFormatter dateFormatterForSpecialCase = DateTimeFormatter.ofPattern(FORMAT_PATTERN_DATE_SPECIAL_CASE);
 
         CategoryBox label;
 
@@ -606,14 +645,17 @@ public class Display extends VBox {
 
     private void highlightChanges(ObservableList<HBox> displayBoxes) {
         ObservableList<HBox> oldDisplayBoxes = listView.getItems();
+
+        // Tasks previously added will not be highlighed when Veto is loaded.
         if (oldDisplayBoxes.isEmpty()) {
             return;
         }
         for (HBox newBox : displayBoxes) {
             if (newBox instanceof TaskBox) {
-                String description = ((TaskBox) newBox).getDescription();
+                TaskBox newTaskBox = (TaskBox) newBox;
+                String description = newTaskBox.getDescription();
                 if (!hasMatchingBox(oldDisplayBoxes, description)) {
-                    ((TaskBox) newBox).highlight();
+                    newTaskBox.highlight();
                 }
             }
         }
@@ -652,7 +694,9 @@ public class Display extends VBox {
 
         boolean hasIncompleteTask = false;
 
-        for (Task task : listOfResults.subList(index - 1, listOfResults.size())) {
+        List<Task> applicableTasks = listOfResults.subList(index - 1,
+                                                           listOfResults.size());
+        for (Task task : applicableTasks) {
             if (!task.isCompleted()) {
                 hasIncompleteTask = true;
                 addTask(displayBoxes, index, task, true);
@@ -675,7 +719,9 @@ public class Display extends VBox {
 
         boolean hasCompletedTask = false;
 
-        for (Task task : listOfResults.subList(index - 1, listOfResults.size())) {
+        List<Task> applicableTasks = listOfResults.subList(index - 1,
+                                                           listOfResults.size());
+        for (Task task : applicableTasks) {
             if (task.isCompleted()) {
                 hasCompletedTask = true;
                 addTask(displayBoxes, index, task, true);
@@ -702,6 +748,7 @@ public class Display extends VBox {
                                             String searchQuery) {
         CategoryBox searchLabel;
         if (searchQuery.isEmpty()) {
+            // No search query will cause all tasks to be shown.
             searchQuery = LABEL_DEFAULT_SEARCH_QUERY;
         }
 
@@ -737,6 +784,11 @@ public class Display extends VBox {
         }
     }
 
+    /**
+     * Adds a label showing the number of tasks that are not displayed.
+     * 
+     * @param displayBoxes
+     */
     private void addNumExcessTasksLabel(ObservableList<HBox> displayBoxes) {
         if (numExcessTasks > 0) {
             displayBoxes.add(new CategoryBox(String.format(LABEL_EXCESS_TASKS,
@@ -744,6 +796,12 @@ public class Display extends VBox {
         }
     }
 
+    /**
+     * Returns a sublist of MAX_NUM_OF_TASKS number of tasks.
+     * 
+     * @param tasks
+     * @return ArrayList of size MAX_NUM_OF_TASKS
+     */
     private ArrayList<Task> trimListOfTasks(ObservableList<Task> tasks) {
         numExcessTasks = tasks.size() - MAX_NUM_OF_TASKS;
         if (numExcessTasks > 0) {
@@ -752,7 +810,7 @@ public class Display extends VBox {
         return new ArrayList<Task>(tasks);
     }
 
-    // @author A0121813U
+    //@author A0121813U
     // Formats the ArrayList<String> so that it prints element by element
     private String generateParagraph(ArrayList<String> list, int size) {
         return StringUtils.join(list.toArray(), "\n", 0, size);
