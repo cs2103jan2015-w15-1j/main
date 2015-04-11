@@ -519,6 +519,7 @@ public class Controller {
     private void sortAllTasks() {
     	userDefinedSort = new UserDefinedSort(allTasks);
     	userDefinedSort.addComparator(new SortType());
+    	userDefinedSort.addComparator(new SortTime());
     	userDefinedSort.addComparator(new SortDate());
         userDefinedSort.addComparator(new SortOverdue());   
         allTasks = userDefinedSort.executeSort();
@@ -527,6 +528,7 @@ public class Controller {
     private void sortSearchedTasks() {
     	userDefinedSort = new UserDefinedSort(new ArrayList<Task>(displayedTasks));
         userDefinedSort.addComparator(new SortType());
+        userDefinedSort.addComparator(new SortTime());
         userDefinedSort.addComparator(new SortDate());
         userDefinedSort.addComparator(new SortOverdue());
         userDefinedSort.addComparator(new SortIncomplete());
