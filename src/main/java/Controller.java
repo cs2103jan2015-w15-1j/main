@@ -343,7 +343,11 @@ public class Controller {
 
     private void deleteIndividualTask(Task taskToDelete) {
         if (taskToDelete.isRecurring()) {
-            taskToDelete.addException(taskToDelete.getDate());
+            for (Task task : allTasks) {
+                if (task.getId() != null && task.getId().equals(taskToDelete.getId())) {
+                    task.addException(taskToDelete.getDate());
+                }
+            }
         }
         displayedTasks.remove(taskToDelete);
         allTasks.remove(taskToDelete);
