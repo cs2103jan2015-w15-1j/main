@@ -11,7 +11,7 @@ public class SortType implements Comparator<Task> {
 	
 	/* Order of comparison
 	 * 
-	 * NEW! --> Now we don't need to rank DEADLINE and TIMED
+	 * NEW! --> Now we don't need to rank between DEADLINE and TIMED
 	 * 
 	 * FLOATING DEADLINE
 	 * DEADLINE FLOATING

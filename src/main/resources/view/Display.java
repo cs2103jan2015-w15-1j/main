@@ -243,6 +243,7 @@ public class Display extends VBox {
     }
 
     //@author A0121813U
+    // Will result in the help menu to appear
     public void showHelpDisplay() {
         hideOverlays();
         FadeTransition fadeIn = initFadeIn(helpOverlay,
@@ -303,7 +304,8 @@ public class Display extends VBox {
         overlayTimeline = new Timeline();
     }
 
-    //@author A0121813U 
+    //@author A0121813U
+    // Append example commands for users to see when their Veto is empty
     private void initExampleCommands() {
         allExampleCommands = new ArrayList<String>();
         allExampleCommands.add("add meet Isabel from 5pm to 6pm today");
@@ -329,6 +331,7 @@ public class Display extends VBox {
         allExampleCommands.add("add do some community work next week");
     }
     
+    // Initialize the help display
     private void initHelpList() {
         helpList = FXCollections.observableArrayList();
         helpList.add(new HelpBox(HELP_ADD_DESC, HELP_ADD_COMMAND));
@@ -709,6 +712,7 @@ public class Display extends VBox {
     }
     
     //@author A0121813U
+    // Formats the ArrayList<String> so that it prints element by element
     private String generateParagraph(ArrayList<String> list, int size) {
         return StringUtils.join(list.toArray(), "\n", 0, size);
     }
