@@ -115,31 +115,31 @@ public class UserDefinedSortTest {
 		list = new ArrayList<Task>();
 		uds = new UserDefinedSort(list);
 		
-		Task taskDeadlineNoTime = createTask("buy milk tomorrow");
-	    Task taskDeadlineWithTime = createTask("buy cereal by 9am");
-	    Task taskFloating = createTask("do homework");
+		Task taskFloating = createTask("do homework");
 	    Task taskTimed = createTask("do assignment 9 march 2pm to 3pm");
+		Task taskDeadlineNoTime = createTask("buy milk tomorrow");
+	    Task taskDeadlineWithTime = createTask("do this by 4pm today");     
 	    
-	    list.add(taskDeadlineWithTime);
+	    list.add(taskFloating);
 	    list.add(taskTimed);
 	    list.add(taskDeadlineNoTime);
-	    list.add(taskFloating);
+	    list.add(taskDeadlineWithTime);    
 	    
 	    uds.addComparator(new SortOverdue());
 	    
 	    // Test before sort
-	    assertEquals(list.get(0), taskDeadlineWithTime);
+	    assertEquals(list.get(0), taskFloating);
 	    assertEquals(list.get(1), taskTimed);
 	    assertEquals(list.get(2), taskDeadlineNoTime);
-	    assertEquals(list.get(3), taskFloating);
-	    
+	    assertEquals(list.get(3), taskDeadlineWithTime);
+
 	    uds.executeSort();
 	    
 	    // Test after sort
 	    assertEquals(list.get(0), taskTimed);
 	    assertEquals(list.get(1), taskDeadlineWithTime);
-	    assertEquals(list.get(2), taskDeadlineNoTime);
-	    assertEquals(list.get(3), taskFloating);
+	    assertEquals(list.get(2), taskFloating);
+	    assertEquals(list.get(3), taskDeadlineNoTime); 
 	}
 	
 	@Test
