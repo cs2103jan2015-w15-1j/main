@@ -23,6 +23,7 @@ public class CreateTask {
     };
 
     private static final String KEYWORD = "every";
+    private static final String EXCEPTWORD = "except";
     private static final String STARTWORD = "from";
     private static final String[] IGNOREWORD = { " day from", " week from",
             " month from", " year from" };
@@ -44,8 +45,10 @@ public class CreateTask {
     private LocalDateTime endDateTime;
     private LocalDateTime limit;
     private ArrayList<String> removedWords;
+    private ArrayList<LocalDateTime> exceptionDates;
     private String endDateWords;
     private int recurRate;
+    private String exceptionString;
 
     public static CreateTask getInstance() {
         if (taskCreator == null) {
@@ -72,7 +75,7 @@ public class CreateTask {
             }
         }
         if (type != null) {
-            recurDate = new ArrayList<LocalDateTime>(findRecurDates(input));
+            recurDate = new ArrayList<LocalDateTime>(findNeededDates(input));
 
             if (!parsedDates.isEmpty()
                     && !hasIgnoreWords
@@ -82,7 +85,7 @@ public class CreateTask {
                             .isBefore(parsedDates.get(0).toLocalDate())) {
                 recurDate.set(0, parsedDates.get(0));
             }
-            
+
             getEndDateTime(recurDate);
             if (!removedWords.isEmpty()) {
                 for (String remove : removedWords) {
@@ -90,11 +93,14 @@ public class CreateTask {
                     nonParsedWords = nonParsedWords.replace(remove, "");
                 }
             }
-            System.out.println(input);
-            System.out.println(nonParsedWords);
-            nonParsedWords = findCommonWord(input,nonParsedWords);
-            System.out.println(nonParsedWords);
-            
+
+            if (!exceptionString.equals(null)) {
+                input = input.replace(exceptionString, "");
+                nonParsedWords = nonParsedWords.replace(exceptionString, "");
+            }
+
+            nonParsedWords = findCommonWord(input, nonParsedWords);
+
             createRecurring(type, input, parsedWords, nonParsedWords,
                     recurDate, recurId, rawInfo);
         } else {
@@ -108,13 +114,13 @@ public class CreateTask {
     private String findCommonWord(String input, String nonParsedWords) {
         String result = null;
         int stringLength = Math.min(input.length(), nonParsedWords.length());
-        
-        for(int i=0; i<=stringLength; i++){
-                if(input.substring(0, i).equals(nonParsedWords.substring(0, i))){
-                        result = input.substring(0, i);
-                } else {
-                        break;
-                }
+
+        for (int i = 0; i <= stringLength; i++) {
+            if (input.substring(0, i).equals(nonParsedWords.substring(0, i))) {
+                result = input.substring(0, i);
+            } else {
+                break;
+            }
         }
         return result;
     }
@@ -125,7 +131,9 @@ public class CreateTask {
         recurRate = 1;
         tempList = new ArrayList<Task>();
         removedWords = new ArrayList<String>();
+        exceptionDates = new ArrayList<LocalDateTime>();
         endDateWords = "";
+        exceptionString = "";
     }
 
     private void createRecurring(Type type, String input, String parsedWords,
@@ -133,13 +141,19 @@ public class CreateTask {
             String recurId, String rawInfo) {
         Task task;
         LocalDateTime nextDate = null;
+        boolean hasException = false;
 
         while (!recurDate.get(0).toLocalDate()
                 .isAfter(endDateTime.toLocalDate())) {
-            task = new Task(input, recurDate, parsedWords, nonParsedWords);
-            task.setId(recurId);
-            task.setRawInfo(rawInfo);
-            tempList.add(task);
+            hasException = checkForException(recurDate.get(0));
+            if (!hasException) {
+                task = new Task(input, recurDate, parsedWords, nonParsedWords);
+                task.setId(recurId);
+                task.setRawInfo(rawInfo);
+                tempList.add(task);
+            }
+            hasException = false;
+            
             switch (type) {
             case DAILY:
                 nextDate = recurDate.get(0).plusDays(recurRate);
@@ -156,20 +170,49 @@ public class CreateTask {
             default:
                 break;
             }
-            recurDate.set(0, nextDate);
+            if (!hasException) {
+                recurDate.set(0, nextDate);
+            }
         }
 
     }
 
-    private ArrayList<LocalDateTime> findRecurDates(String input) {
+    private Boolean checkForException(LocalDateTime nextDate) {
+        for (LocalDateTime date : exceptionDates) {
+            if (date.toLocalDate().equals(nextDate.toLocalDate())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private ArrayList<LocalDateTime> findNeededDates(String input) {
+
         ArrayList<LocalDateTime> result = new ArrayList<LocalDateTime>();
         ArrayList<LocalDateTime> tempResult = new ArrayList<LocalDateTime>();
         LocalDate tempDate;
         Boolean hasEndWord = false;
+
+        if (input.toLowerCase().contains(EXCEPTWORD)) {
+            exceptionString = input.substring(
+                    input.toLowerCase().indexOf(EXCEPTWORD), input.length());
+            exceptionString.replace(EXCEPTWORD, "");
+
+            String[] split = exceptionString.split(",");
+            for (String string : split) {
+                try {
+                    System.out.println(string);
+                    dateParser.parse(string);
+                    exceptionDates.addAll(dateParser.getDates());
+                } catch (NullPointerException e) {
+                }
+            }
+        }
+
         for (String check : ENDWORD2) {
             if (input.toLowerCase().contains(STARTWORD)) {
-                String endCondition = input.substring(input.indexOf(STARTWORD),
-                        input.length());
+                String endCondition = input.substring(input.toLowerCase()
+                        .indexOf(STARTWORD), input.length());
                 dateParser.parse(endCondition);
                 if (dateParser.getDates().size() > 1
                         && !dateParser
