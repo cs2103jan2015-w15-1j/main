@@ -50,7 +50,7 @@ public class Task implements Cloneable {
     private String rawInfo;
     private Type type;
     private String description; // arguments without the date and time
-    private LocalDate date;
+    private LocalDate dateNow;
     private LocalTime startTime;
     private LocalTime endTime;
     private boolean isCompleted;
@@ -86,7 +86,7 @@ public class Task implements Cloneable {
     }
 
     public LocalDate getDate() {
-        return date;
+        return dateNow;
     }
 
     public LocalTime getStartTime() {
@@ -218,12 +218,12 @@ public class Task implements Cloneable {
     private void initDateAndTime(Type type, ArrayList<LocalDateTime> parsedDates) {
         switch (type) {
         case TIMED:
-            date = parsedDates.get(POSITION_FIRST_DATE).toLocalDate();
+            dateNow = parsedDates.get(POSITION_FIRST_DATE).toLocalDate();
             startTime = parsedDates.get(POSITION_FIRST_DATE).toLocalTime();
             endTime = parsedDates.get(POSITION_SECOND_DATE).toLocalTime();
             break;
         case DEADLINE:
-            date = parsedDates.get(POSITION_FIRST_DATE).toLocalDate();
+            dateNow = parsedDates.get(POSITION_FIRST_DATE).toLocalDate();
             LocalTime time = parsedDates.get(POSITION_FIRST_DATE).toLocalTime();
             if (time.getNano() == 0) {
                 startTime = time;
@@ -330,7 +330,7 @@ public class Task implements Cloneable {
     // ================================================================
 
     private void setDate(LocalDate date) {
-        this.date = date;
+        this.dateNow = date;
     }
 
     private void setType(Type type) {
@@ -379,17 +379,19 @@ public class Task implements Cloneable {
 	}
     
 	// Given a date and time, checks whether the task is overdue
-	private boolean checkOverdue(LocalDate date, LocalTime time) {
+	private boolean checkOverdue(LocalDate dateNow, LocalTime timeNow) {
 		if (getDate() == null) {
 			return false;
-		} else if (getDate().isBefore(date)) {
+		} else if (getDate().isBefore(dateNow)) {
 			return true;
-		} else if (getDate().isAfter(date)) {
+		} else if (getDate().isAfter(dateNow)) {
 			return false;
 		} else {
 			if (getStartTime() == null) {
 				return false;
-			} else if (getStartTime().isBefore(time)) {
+			} else if (getStartTime().isBefore(timeNow)) {
+				return true;
+			} else if (getStartTime().isAfter(timeNow)) {
 				return false;
 			} else {
 				return true;
