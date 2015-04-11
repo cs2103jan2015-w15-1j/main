@@ -72,7 +72,6 @@ public class CreateTask {
         recurId = UUID.randomUUID().toString();
         
         input = findExceptionDates(input);
-        System.out.println("input "+input);     
         
         for (String string : IGNOREWORD) {
             if (input.contains(string)) {
@@ -101,7 +100,6 @@ public class CreateTask {
 
             nonParsedWords = findCommonWord(input, nonParsedWords);
 
-            System.out.println("Start recurDate "+recurDate);
             createRecurring(type, input, parsedWords, nonParsedWords,
                     recurDate, recurId, rawInfo);
         } else {
@@ -109,12 +107,6 @@ public class CreateTask {
             tempList.add(task);
         }
 
-        System.out.println("parsedWords "+parsedWords);
-        System.out.println("parsedDates "+parsedDates);
-        System.out.println("nonParsedWords "+nonParsedWords);
-        System.out.println("input "+input);
-        System.out.println("type "+type);
-        System.out.println("recurDate "+recurDate);
         return tempList;
     }
 
@@ -297,7 +289,6 @@ public class CreateTask {
             String[] split = exceptionString.split(",");
             for (String string : split) {
                 try {
-                    System.out.println(string);
                     dateParser.parse(string);
                     exceptionDates.add(dateParser.getDates().get(0).toLocalDate());
                 } catch (NullPointerException e) {
