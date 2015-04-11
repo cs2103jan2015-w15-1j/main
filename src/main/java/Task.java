@@ -163,6 +163,10 @@ public class Task implements Cloneable {
         exceptionDates.add(date);
     }
 
+    public ArrayList<LocalDate> getExceptionDates() {
+        return exceptionDates;
+    }
+
     // ================================================================
     // Initialization Methods
     // ================================================================
