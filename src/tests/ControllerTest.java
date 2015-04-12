@@ -17,6 +17,7 @@ public class ControllerTest extends TestCase {
     // Fields
     // ================================================================
     private static final String MESSAGE_INVALID_COMMAND = "Invalid command.";
+    private static final String MESSAGE_WELCOME = "Welcome to Veto! Here is an overview of the week ahead.";
 
     // ================================================================
     // Utility methods
@@ -41,6 +42,28 @@ public class ControllerTest extends TestCase {
 
         return output;
     }
+
+    // ================================================================
+    // Tests for non-task related functions
+    // ================================================================
+    @Test
+    public void testOnloadDisplay() {
+        Controller controller = Controller.getInstance();
+        controller.onloadDisplay();
+    }
+
+    @Test
+    public void testWelcomeMessage() {
+        Controller controller = Controller.getInstance();
+        assertEquals(MESSAGE_WELCOME, controller.getWelcomeMessage());
+    }
+
+    @Test
+    public void testHelpMessage() {
+        Controller controller = Controller.getInstance();
+        controller.executeCommand("help");
+    }
+
 
     // ================================================================
     // Tests for non-recurring tasks
