@@ -35,8 +35,6 @@ import com.joestelmach.natty.Parser;
 
 // @author A0121520A
 public class DateParser {
-
-    
    
     // ================================================================
     // Constants

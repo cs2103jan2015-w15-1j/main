@@ -509,4 +509,24 @@ public class DateParserTest {
         assertEquals("Not parsed words", "find easter eggs by", getNotParsedWords(input));
         assertEquals("Parsed words", "friday", getParsedWords(input));
     }
+    
+    @Test
+    public void inputWithEscapeChar() {
+        String input;
+        ArrayList<LocalDateTime> dates;
+        
+        input = "watch \"day after tomorrow\" today";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date", LocalDate.now(), dates.get(0).toLocalDate());
+        assertEquals("Not parsed words", "watch \"day after tomorrow\"", getNotParsedWords(input));
+        assertEquals("Parsed words", "today", getParsedWords(input));
+        
+        input = "read \"today\" today";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date", LocalDate.now(), dates.get(0).toLocalDate());
+        assertEquals("Not parsed words", "read \"today\"", getNotParsedWords(input));
+        assertEquals("Parsed words", "today", getParsedWords(input));
+    }
 }
