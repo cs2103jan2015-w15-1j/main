@@ -27,7 +27,7 @@ public class UserDefinedSortTest {
 
 	@Test
 	// Test the functionality of the main container
-	public void TestUDSContainer() {
+	public void testUDSContainer() {
 		ArrayList<Task> sampleList = new ArrayList<Task>();
 		sampleList.add(createTask("first"));
 		sampleList.add(createTask("second"));
@@ -41,7 +41,7 @@ public class UserDefinedSortTest {
 	
 	@Test
 	// Test whether the list will be sorted by Type using the SortType comparator
-	public void TestTypeSort() {
+	public void testTypeSort() {
 		 
 		list = new ArrayList<Task>();
 		uds = new UserDefinedSort(list);
@@ -75,7 +75,7 @@ public class UserDefinedSortTest {
 	
 	@Test
 	// Test whether the list will be sorted by date using the SortDate comparator
-	public void TestDateSort() {
+	public void testDateSort() {
 		
 		list = new ArrayList<Task>();
 		uds = new UserDefinedSort(list);
@@ -110,7 +110,7 @@ public class UserDefinedSortTest {
 	
 	@Test
 	// Test whether the list will be sorted by overdue using the SortOverdue comparator
-	public void TestOverdueSort() {
+	public void testOverdueSort() {
 		
 		list = new ArrayList<Task>();
 		uds = new UserDefinedSort(list);
@@ -144,7 +144,7 @@ public class UserDefinedSortTest {
 	
 	@Test
 	// Test whether the list will be sorted by completeness using the SortIncomplete comparator
-	public void TestIncompleteSort() {
+	public void testIncompleteSort() {
 		
 		list = new ArrayList<Task>();
 		uds = new UserDefinedSort(list);
@@ -182,7 +182,7 @@ public class UserDefinedSortTest {
 	
 	@Test
 	// Test whether the list will be sorted by time using the SortTime comparator
-	public void TestTimeSort() {
+	public void testTimeSort() {
 		
 		list = new ArrayList<Task>();
 		uds = new UserDefinedSort(list);
@@ -218,14 +218,12 @@ public class UserDefinedSortTest {
 	// Test the main container with all the existing comparator in its chain
 	// Two list of tasks in different order, when going through the same chain
 	// should result in same output order
-	public void TestSortChain() {
+	public void testSortChain() {
 		
 		Task taskDeadlineNoTime = createTask("buy milk tomorrow");
 	    Task taskDeadlineWithTime = createTask("buy cereal by 9am today");
 	    Task taskFloating = createTask("do homework");
 	    Task taskTimed = createTask("do assignment 9 march 2pm to 3pm");
-	    
-	    //taskDeadlineNoTime.markAsCompleted();
 		
 		// Test sequence 1
 		list = new ArrayList<Task>();
@@ -240,7 +238,6 @@ public class UserDefinedSortTest {
 	    uds.addComparator(new SortTime());
 	    uds.addComparator(new SortDate());
 	    uds.addComparator(new SortOverdue());
-	    //uds.addComparator(new SortIncomplete());
 	    
 	    uds.executeSort();
 	    

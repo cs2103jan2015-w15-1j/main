@@ -20,14 +20,14 @@ public class HistoryTest {
 
 	@Test
 	// Checks if the newly created object have nothing inside
-	public void TestEmptyHistory() {
+	public void testEmptyHistory() {
 		History history = new History();
 		assertTrue(history.isEmpty());
 	}
 	
 	@Test
 	// Checks that the ArrayList and Observablist passed into History wont manipulate other data
-	public void TestHistoryWithTasks() {
+	public void testHistoryWithTasks() {
 		ArrayList<Task> listA = new ArrayList<Task>();
 		ObservableList<Task> listO = FXCollections.observableArrayList();
 		
@@ -100,7 +100,7 @@ public class HistoryTest {
 	
 	@Test
 	// Checks whether the Feedback String is stored properly
-	public void TestFeedbackHistory() {
+	public void testFeedbackHistory() {
 		History history = new History();
 		String string1 = "Hello";
 		String string2 = "Good morning";

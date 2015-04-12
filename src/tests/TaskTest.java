@@ -176,7 +176,7 @@ public class TaskTest {
     @Test
     // Test a variety of Tasks object with different date and time combination
     // and check if they are overdue
-    public void TestOverdue() {
+    public void testOverdue() {
     	Task taskFloating = createNewTask("do homework");
     	
     	Task taskDeadlineNoTimeOverdue = createNewTask("do homework 9 march");
@@ -200,7 +200,7 @@ public class TaskTest {
     
     @Test
     // Checks whether the Task object is printed out in order
-    public void TestToString() {
+    public void testToString() {
     	Task taskFloating = createNewTask("do homework");
     	Task taskDeadlineNoTime = createNewTask("do homework today");
     	Task taskDeadlineWithTime = createNewTask("do homework by 11pm today");
