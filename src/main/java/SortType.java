@@ -3,6 +3,12 @@ package main.java;
 import java.util.Comparator;
 
 //@author A0121813U
+/**
+ * SortType is a comparator, when used on a list object, will sort the
+ * list placing those floating tasks at the front while the deadline/timed
+ * tasks will be placed at the back. Note that there is no ranking between
+ * deadline task and timed task.
+ */
 public class SortType implements Comparator<Task> {
 	
 	private static final int FIRST_LOWER = -1;

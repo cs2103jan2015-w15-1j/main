@@ -4,6 +4,11 @@ import java.time.LocalTime;
 import java.util.Comparator;
 
 //@author A0121813U
+/**
+ * SortTime is a comparator, when used on a list object, will sort the
+ * list by time (regardless of the date) in chronological order. Note that those
+ * tasks with no time will be placed in front of the list.
+ */
 public class SortTime implements Comparator<Task> {
 	
 	private static final int FIRST_LOWER = -1;

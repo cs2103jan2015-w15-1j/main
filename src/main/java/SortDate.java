@@ -4,6 +4,11 @@ import java.time.LocalDate;
 import java.util.Comparator;
 
 //@author A0121813U
+/**
+ * SortDate is a comparator, when used on a list object, will sort the list by date
+ * in chronological order. Note that Task with no dates will be placed infront
+ * of the list.
+ */
 public class SortDate implements Comparator<Task> {
 	
 	private static final int FIRST_LOWER = -1;
