@@ -125,7 +125,7 @@ public class RootLayoutController extends BorderPane {
 
     private ArrayList<LocalDate> extractExceptionDates(String inputString) {
         int editIndex = getEditIndex(inputString, 2);
-        Task task = Controller.getInstance().getDisplayedTasks().get(editIndex);
+        Task task = Controller.getInstance().getDisplayedTasks().get(editIndex - 1);
         ArrayList<LocalDate> exceptionDates = task.getExceptionDates();
 
         return exceptionDates;
@@ -354,7 +354,7 @@ public class RootLayoutController extends BorderPane {
 
     private int getEditIndex(String input, int editIndexPosition) {
         String[] output = input.split(ONE_SPACING);
-        return Integer.parseInt(output[editIndexPosition])-1;
+        return Integer.parseInt(output[editIndexPosition]);
     }
 
     private void autoCompleteEdit(int index, EditType type) {
