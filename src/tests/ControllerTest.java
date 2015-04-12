@@ -14,6 +14,12 @@ import java.util.ArrayList;
 
 //@author A0122081X
 public class ControllerTest extends TestCase {
+
+    // ================================================================
+    // Fields
+    // ================================================================
+    private static final String MESSAGE_INVALID_COMMAND = "Invalid command.";
+
     // ================================================================
     // Utility methods
     // ================================================================
@@ -36,9 +42,12 @@ public class ControllerTest extends TestCase {
     public void testClear() {
         Controller controller = Controller.getInstance();
         controller.executeCommand("clear");
-        ArrayList<Task> emptyArrayList = new ArrayList<>();
 
-        assertEquals(controller.getAllTasks(), emptyArrayList);
+        ArrayList<Task> testList = new ArrayList<>();
+
+        controller.executeCommand("clear");
+
+        assertEquals(testList, controller.getAllTasks());
     }
 
     @Test
@@ -131,43 +140,98 @@ public class ControllerTest extends TestCase {
 
     @Test
     public void testComplete() {
+        Controller controller = Controller.getInstance();
+        controller.executeCommand("clear");
 
+        ArrayList<Task> testList = new ArrayList<Task>();
+
+        controller.executeCommand("add this");
+        controller.executeCommand("complete 1");
+
+        assertEquals(testList.toString(), controller.getIncompleteTasksPublic().toString());
     }
 
     @Test
     public void testIncomplete() {
+        Controller controller = Controller.getInstance();
+        controller.executeCommand("clear");
 
+        ArrayList<Task> testList = new ArrayList<Task>();
+
+        controller.executeCommand("add this");
+        controller.executeCommand("complete 1");
+        controller.executeCommand("display completed");
+        controller.executeCommand("incomplete 1");
+
+        assertEquals(testList.toString(), controller.getCompleteTasksPublic().toString());
     }
 
     @Test
     public void testSearch() {
+        Controller controller = Controller.getInstance();
+        controller.executeCommand("clear");
 
+        ArrayList<Task> testList = new ArrayList<Task>();
+        Task taskOne = createNewTask("this on 1 apr");
+        Task taskTwo = createNewTask("this on 2 apr");
+        testList.add(taskOne);
+        testList.add(taskTwo);
+
+        controller.executeCommand("add this on 1 apr");
+        controller.executeCommand("add this on 2 apr");
+        controller.executeCommand("add that");
+        controller.executeCommand("add foo on 3 apr by 1pm");
+        controller.executeCommand("add bar on 3 apr from 2pm to 4pm");
+
+        // Search by description
+        controller.executeCommand("search this");
+        assertEquals(testList.toString(), controller.getDisplayedTasks().toString());
+
+        // Search by date
+        testList.clear();
+        Task taskThree = createNewTask("foo on 3 apr by 1pm");
+        Task taskFour = createNewTask("bar on 3 apr by 2pm to 4pm");
+        testList.add(taskThree);
+        testList.add(taskFour);
+        controller.executeCommand("search 3 apr");
+        assertEquals(testList.toString(), controller.getDisplayedTasks().toString());
     }
 
-
     @Test
-    public void testInvalid() {
+    public void testInvalidCommands() {
+        Controller controller = Controller.getInstance();
+        controller.executeCommand("clear");
 
-    }
-
-    @Test
-    public void testExit() {
-
+        assertEquals(MESSAGE_INVALID_COMMAND, controller.executeCommand("asjdhaskjdkj"));
+        assertEquals(MESSAGE_INVALID_COMMAND, controller.executeCommand("addd"));
+        assertEquals(MESSAGE_INVALID_COMMAND, controller.executeCommand("deelete"));
+        assertEquals(MESSAGE_INVALID_COMMAND, controller.executeCommand("editt"));
     }
 
     @Test
     public void testUndo() {
-
-
-    }
-
-    @Test
-    public void testCompleteOld() {
-        String[] args = {"holaamigos.txt"};
         Controller controller = Controller.getInstance();
+        controller.executeCommand("clear");
 
-        controller.executeCommand("add this by 4 feb");
-        //assertEquals("hello", getTaskDesc(controller.getIncompleteTasksPublic()));
+        ArrayList<Task> testList = new ArrayList<Task>();
+
+        // Undo add
+        controller.executeCommand("add this");
+        controller.executeCommand("undo");
+        assertEquals(testList.toString(), controller.getIncompleteTasksPublic().toString());
+
+        // Undo edit
+        controller.executeCommand("add that 1 apr by 4pm");
+        controller.executeCommand("edit 1 that 1 apr by 6pm");
+        controller.executeCommand("undo");
+        Task task = createNewTask("that 1 apr by 4pm");
+        testList.add(task);
+        assertEquals(testList.toString(), controller.getIncompleteTasksPublic().toString());
+
+        // Undo delete
+        controller.executeCommand("delete 1");
+        controller.executeCommand("undo");
+        assertEquals(testList.toString(), controller.getIncompleteTasksPublic().toString());
     }
 
     private ArrayList<String> getTaskDesc(ArrayList<Task> input) {
@@ -177,7 +241,6 @@ public class ControllerTest extends TestCase {
         }
 
         return output;
-
     }
 
     // ================================================================
