@@ -3,7 +3,7 @@ package main.java;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.stage.Stage;
-import main.resources.view.Display;
+import main.resources.view.DisplayController;
 
 import java.time.DateTimeException;
 import java.time.LocalDateTime;
@@ -35,7 +35,7 @@ public class Controller {
     
     private UserDefinedSort userDefinedSort;
     
-    private Display display;
+    private DisplayController display;
 
     private Stage stage;
 
@@ -196,7 +196,7 @@ public class Controller {
     // ================================================================
 
     //@author A0122081X
-    public void setDisplay(Display display) {
+    public void setDisplay(DisplayController display) {
 	    this.display = display;
 	}
     

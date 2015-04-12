@@ -29,7 +29,7 @@ import javafx.util.Duration;
 import main.java.Task;
 
 //@author A0121520A
-public class Display extends VBox {
+public class DisplayController extends VBox {
 
     // ================================================================
     // FXML Fields
@@ -69,7 +69,7 @@ public class Display extends VBox {
     // Non-FXML Fields
     // ================================================================
     private static Logger logger;
-    private static Display display;
+    private static DisplayController display;
 
     private Timeline feedbackTimeline;
     private Timeline overlayTimeline;
@@ -84,7 +84,7 @@ public class Display extends VBox {
     // ================================================================
     // Constants
     // ================================================================
-    private final static String LOCATION_TASK_OVERVIEW_FXML = "/view/TaskOverview.fxml";
+    private final static String LOCATION_TASK_OVERVIEW_FXML = "/view/Display.fxml";
     private final static String STRING_EMPTY = "";
     private static final String FORMAT_PATTERN_DATE_SPECIAL_CASE = "EEEE, d MMMM";
     private static final String FORMAT_PATTERN_DATE = "d MMMM";
@@ -150,7 +150,7 @@ public class Display extends VBox {
     // ================================================================
     // Constructor
     // ================================================================
-    private Display() {
+    private DisplayController() {
         logger = Logger.getLogger("Display");
         logger.setLevel(Level.INFO);
 
@@ -170,9 +170,9 @@ public class Display extends VBox {
     }
 
     //@author A0121520A
-    public static Display getInstance() {
+    public static DisplayController getInstance() {
         if (display == null) {
-            display = new Display();
+            display = new DisplayController();
         }
         return display;
     }

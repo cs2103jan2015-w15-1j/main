@@ -31,7 +31,7 @@ public class RootLayoutController extends BorderPane {
     // Non-FXML Fields
     // ================================================================
     private Controller controller;
-    private Display display;
+    private DisplayController display;
 
     private ArrayList<String> history;
     private int pointer;
@@ -64,7 +64,7 @@ public class RootLayoutController extends BorderPane {
             throw new RuntimeException(e);
         }
 
-        display = Display.getInstance();
+        display = DisplayController.getInstance();
         initVariablesForHistory();
         initAutoCompleteCommands();
         userInput.setText(WELCOME_INPUT);
