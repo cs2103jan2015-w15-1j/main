@@ -556,7 +556,11 @@ public class CreateTask {
         ArrayList<String> output = new ArrayList<String>();
         output.add(getInstance().findNeededDates(frequency, input, false)
                 .get(0).toLocalDate().toString());
-        output.add(getInstance().endDateTime.toLocalDate().toString());
+        try {
+            output.add(getInstance().endDateTime.toLocalDate().toString());
+        } catch (NullPointerException e) {
+            output.add("");
+        }
         output.add(getInstance().limit.toLocalDate().toString());
         return output;
     }
