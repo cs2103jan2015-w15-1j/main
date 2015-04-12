@@ -86,6 +86,7 @@ public class StorageTest {
             e.printStackTrace();
         }
         assertEquals(true, test.setSaveFileDirectory(newDirectory3));
+        assertEquals("blank.txt", test.getSaveFileName());
 
         System.out.println("End of settings test");
     }

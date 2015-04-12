@@ -416,7 +416,7 @@ public class Controller {
         if (previousStates.isEmpty()) {
             return MESSAGE_NO_UNDO;
         } else {
-        	previousStates.extractLatestStatus();
+        	previousStates.getLatestStatus();
             allTasks = previousStates.getAllTasks();
             displayedTasks = previousStates.getDisplayedTasks();
             
@@ -425,7 +425,7 @@ public class Controller {
             if (switchDisplayToSearch) {
             	search(searchArgument);
             }
-            return String.format(MESSAGE_UNDO, previousStates.getPreviousFeedback());
+            return String.format(MESSAGE_UNDO, previousStates.getPreviousCommand());
         }
     }
 
@@ -561,7 +561,7 @@ public class Controller {
     // Save the current state of allTasks and displayedTasks field before execution of command
     private void saveCurrentState(String input) {
         previousStates.storeCurrentStatus(allTasks, displayedTasks);
-        previousStates.addFeedback(input);
+        previousStates.storeCommand(input);
     }
 
     //@author A0122393L
