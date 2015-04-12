@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 //@author A0122393L
+/**
+* This class process the infomation and creates the Task (Object/s) accordingly
+*/
 public class CreateTask {
     public static enum Type {
         YEARLY, MONTHLY, WEEKLY, DAILY,
@@ -44,6 +47,10 @@ public class CreateTask {
     private String exceptionString;
     private String rawInfo;
 
+
+    // -------------------------------------------------------------------
+    // get instance of createTask
+    // -------------------------------------------------------------------
     public static CreateTask getInstance() {
         if (taskCreator == null) {
             taskCreator = new CreateTask();
@@ -51,6 +58,8 @@ public class CreateTask {
         return taskCreator;
     }
 
+    // -------------------------------------------------------------------
+    // -------------------------------------------------------------------
     public ArrayList<Task> create(String input,
             ArrayList<LocalDateTime> parsedDates, String parsedWords,
             String nonParsedWords) {
@@ -115,6 +124,8 @@ public class CreateTask {
         return tempList;
     }
 
+    // -------------------------------------------------------------------
+    // -------------------------------------------------------------------
     private Boolean searchIgnoreWord(String input, String[] list) {
         for (String string : list) {
             if (input.contains(string)) {
@@ -124,6 +135,8 @@ public class CreateTask {
         return false;
     }
 
+    // -------------------------------------------------------------------
+    // -------------------------------------------------------------------
     private String findCommonWord(String input, String nonParsedWords) {
         String result = null;
         int stringLength = Math.min(input.length(), nonParsedWords.length());
@@ -138,6 +151,9 @@ public class CreateTask {
         return result;
     }
 
+    // -------------------------------------------------------------------
+    // resets all the variables in CreateTask
+    // -------------------------------------------------------------------
     private void resetField() {
         endDateTime = null;
         dateParser = DateParser.getInstance();
@@ -151,6 +167,8 @@ public class CreateTask {
         rawInfo = "";
     }
 
+    // -------------------------------------------------------------------
+    // -------------------------------------------------------------------
     private void createRecurring(Type type, String input, String parsedWords,
             String nonParsedWords, ArrayList<LocalDateTime> recurDate,
             String recurId, String rawInfo) {
@@ -193,6 +211,8 @@ public class CreateTask {
 
     }
 
+    // -------------------------------------------------------------------
+    // -------------------------------------------------------------------
     private Boolean checkForException(LocalDateTime nextDate) {
         for (LocalDate date : exceptionDates) {
             if (date.equals(nextDate.toLocalDate())) {
@@ -202,6 +222,8 @@ public class CreateTask {
         return false;
     }
 
+    // -------------------------------------------------------------------
+    // -------------------------------------------------------------------
     private ArrayList<LocalDateTime> findNeededDates(String input) {
 
         ArrayList<LocalDateTime> result = new ArrayList<LocalDateTime>();
@@ -294,6 +316,8 @@ public class CreateTask {
         return result;
     }
 
+    // -------------------------------------------------------------------
+    // -------------------------------------------------------------------
     private String findExceptionDates(String input) {
         if (input.toLowerCase().contains(EXCEPTWORD)) {
             exceptionString = input.substring(
@@ -318,6 +342,8 @@ public class CreateTask {
         return input;
     }
 
+    // -------------------------------------------------------------------
+    // -------------------------------------------------------------------
     private String processInfo(String input, String endCondition) {
         dateParser.parse(endCondition);
         endDateWords = dateParser.getParsedWords();
@@ -329,6 +355,8 @@ public class CreateTask {
         return input;
     }
 
+    // -------------------------------------------------------------------
+    // -------------------------------------------------------------------
     private void getEndDateTime(ArrayList<LocalDateTime> recurDate) {
         if (endDateTime == null) {
             if (recurDate.size() > 1
@@ -341,7 +369,9 @@ public class CreateTask {
         }
     }
 
+    // -------------------------------------------------------------------
     // Checks if the input contains words to indicate recurring tasks
+    // -------------------------------------------------------------------
     private Type checkRecurring(String input) {
         for (String check : MAINWORD) {
             if (input.toLowerCase().contains(check)) {
@@ -374,63 +404,37 @@ public class CreateTask {
             } catch (NumberFormatException e) {
                 recurRate = 1;
             }
-            for (String find : YEARWORD) {
-                if (split[0].toLowerCase().contains(find)
-                        || (split.length > 1 && split[1].toLowerCase()
-                                .contains(find))) {
-                    if (split.length > 1
-                            && split[1].toLowerCase().contains(find)) {
-                        removedWords.add(split[0] + " " + split[1]);
-                        removedWords.add(KEYWORD + " " + split[0]);
-                    } else {
-                        removedWords.add(KEYWORD + " " + split[0]);
-                    }
-                    return Type.YEARLY;
-                }
-            }
-            for (String find : MONTHWORD) {
-                if (split[0].toLowerCase().contains(find)
-                        || (split.length > 1 && split[1].toLowerCase()
-                                .contains(find))) {
-                    if (split.length > 1
-                            && split[1].toLowerCase().contains(find)) {
-                        removedWords.add(split[0] + " " + split[1]);
-                        removedWords.add(KEYWORD + " " + split[0]);
-                    } else {
-                        removedWords.add(KEYWORD + " " + split[0]);
-                    }
-                    return Type.MONTHLY;
-                }
-            }
-            for (String find : WEEKWORD) {
-                if (split[0].toLowerCase().contains(find)
-                        || (split.length > 1 && split[1].toLowerCase()
-                                .contains(find))) {
-                    if (split.length > 1
-                            && split[1].toLowerCase().contains(find)) {
-                        removedWords.add(split[0] + " " + split[1]);
-                        removedWords.add(KEYWORD + " " + split[0]);
-                    } else {
-                        removedWords.add(KEYWORD + " " + split[0]);
-                    }
-                    return Type.WEEKLY;
-                }
-            }
-            for (String find : DAYWORD) {
-                if (split[0].toLowerCase().contains(find)
-                        || (split.length > 1 && split[1].toLowerCase()
-                                .contains(find))) {
-                    if (split.length > 1
-                            && split[1].toLowerCase().contains(find)) {
-                        removedWords.add(split[0] + " " + split[1]);
-                        removedWords.add(KEYWORD + " " + split[0]);
-                    } else {
-                        removedWords.add(KEYWORD + " " + split[0]);
-                    }
-                    return Type.DAILY;
-                }
+            if (findFrequency(split,YEARWORD)) {
+                return Type.YEARLY;
+            } else if (findFrequency(split,MONTHWORD)) {
+                return Type.MONTHLY;
+            }else if (findFrequency(split,WEEKWORD)) {
+                return Type.WEEKLY;
+            }else if (findFrequency(split,DAYWORD)) {
+                return Type.DAILY;
             }
         }
         return null;
+    }
+
+    // -------------------------------------------------------------------
+    // checks if the splited string contains any frequency string
+    // -------------------------------------------------------------------
+    private Boolean findFrequency(String[] split, String[] frequency) {
+        for (String find : frequency) {
+            if (split[0].toLowerCase().contains(find)
+                    || (split.length > 1 && split[1].toLowerCase()
+                            .contains(find))) {
+                if (split.length > 1
+                        && split[1].toLowerCase().contains(find)) {
+                    removedWords.add(split[0] + " " + split[1]);
+                    removedWords.add(KEYWORD + " " + split[0]);
+                } else {
+                    removedWords.add(KEYWORD + " " + split[0]);
+                }
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import main.resources.view.DisplayController;
+
 //@author A0122081X
 public class Controller {
 	
@@ -37,10 +39,10 @@ public class Controller {
     private Stage stage;
 
     // For testing purposes ONLY, un-comment the following line. Comment it for deployment.
-    private DisplayControllerStub displayController = DisplayControllerStub.getInstance();
+//    private DisplayControllerStub displayController = DisplayControllerStub.getInstance();
 
     // For deployment purposes, un-comment the following line. Comment it for JUnit testing.
-//    private DisplayController displayController = DisplayController.getInstance();
+    private DisplayController displayController = DisplayController.getInstance();
 
     // ================================================================
     // Constants
