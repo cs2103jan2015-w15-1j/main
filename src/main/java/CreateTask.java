@@ -71,9 +71,6 @@ public class CreateTask {
 
         if (type != null) {
             recurDate = new ArrayList<LocalDateTime>(findNeededDates(input));
-            System.out.println("before ignore date: " + recurDate);
-            System.out.println("before parsed date: " + parsedDates);
-            System.out.println("before parsed words: " + parsedWords);
 
             if (!parsedDates.isEmpty()
                     && !hasIgnoreWords
@@ -98,7 +95,6 @@ public class CreateTask {
             }
 
             getEndDateTime(recurDate);
-            System.out.println("Start date: " + recurDate);
 
             if (!removedWords.isEmpty()) {
                 for (String remove : removedWords) {
