@@ -35,10 +35,13 @@ public class Controller {
     
     private UserDefinedSort userDefinedSort;
 
-    private DisplayControllerStub displayController = DisplayControllerStub.getInstance();
-//    private DisplayController displayController = DisplayController.getInstance();
-
     private Stage stage;
+
+    // For testing purposes ONLY, un-comment the following line. Comment it for deployment.
+    private DisplayControllerStub displayController = DisplayControllerStub.getInstance();
+
+    // For deployment purposes, un-comment the following line. Comment it for JUnit testing.
+//    private DisplayController displayController = DisplayController.getInstance();
 
     // ================================================================
     // Constants

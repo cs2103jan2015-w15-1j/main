@@ -3,19 +3,36 @@ package tests;
 import junit.framework.TestCase;
 import static org.junit.Assert.assertEquals;
 import main.java.Controller;
+import main.java.DateParser;
 import main.java.Task;
 
 import main.resources.view.DisplayController;
 import org.junit.Test;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 //@author A0122081X
 public class ControllerTest extends TestCase {
     // ================================================================
+    // Utility methods
+    // ================================================================
+    //@author A0121813U
+    // Created for the purpose for this test. Simplify the constructor of Task. NOT A TEST
+    public Task createNewTask(String input) {
+        DateParser parser = DateParser.getInstance();
+        parser.parse(input);
+        ArrayList<LocalDateTime> parsedDates = parser.getDates();
+        String parsedWords = parser.getParsedWords();
+        String nonParsedWords = parser.getNotParsedWords();
+        return new Task(input, parsedDates, parsedWords, nonParsedWords);
+    }
+
+    // ================================================================
     // Tests for non-recurring tasks
     // ================================================================
     @Test
+    //@author A0122081X
     public void testClear() {
         Controller controller = Controller.getInstance();
         controller.executeCommand("clear");
@@ -28,30 +45,63 @@ public class ControllerTest extends TestCase {
     public void testAddFloat() {
         Controller controller = Controller.getInstance();
         controller.executeCommand("clear");
-        String input = "add this today";
+
+        String input = "add this";
         controller.executeCommand(input);
 
-        assertEquals("this", controller.getIncompleteTasksPublic());
+        ArrayList<Task> testList = new ArrayList<Task>();
+        Task testingTask = createNewTask("this");
+        testList.add(testingTask);
 
+        assertEquals(testList.toString(), controller.getIncompleteTasksPublic().toString());
     }
 
     @Test
     public void testAddDeadline() {
         Controller controller = Controller.getInstance();
-        String input = "add this today";
+        controller.executeCommand("clear");
+
+        String input = "add this 1 apr";
         controller.executeCommand(input);
+
+        ArrayList<Task> testList = new ArrayList<Task>();
+        Task testingTask = createNewTask("this 1 apr");
+        testList.add(testingTask);
+
+        assertEquals(testList.toString(), controller.getIncompleteTasksPublic().toString());
     }
 
     @Test
     public void testAddTimed() {
         Controller controller = Controller.getInstance();
-        String input = "add this today";
+        controller.executeCommand("clear");
+
+        String input = "add this 1 apr 4pm to 6pm";
         controller.executeCommand(input);
+
+        ArrayList<Task> testList = new ArrayList<Task>();
+        Task testingTask = createNewTask("this 1 apr 4pm to 6pm");
+        testList.add(testingTask);
+
+        assertEquals(testList.toString(), controller.getIncompleteTasksPublic().toString());
     }
 
     @Test
     public void testDelete() {
+        Controller controller = Controller.getInstance();
+        controller.executeCommand("clear");
 
+        String input = "add this";
+        controller.executeCommand(input);
+
+        ArrayList<Task> testList = new ArrayList<Task>();
+        Task testingTask = createNewTask("this");
+        testList.add(testingTask);
+
+        controller.executeCommand("delete 1");
+        testList.remove(0);
+
+        assertEquals(testList.toString(), controller.getIncompleteTasksPublic().toString());
     }
 
     @Test
