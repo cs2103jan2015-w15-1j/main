@@ -15,6 +15,21 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
 //@author A0122393L
+/**
+* This class creates the necessary files needed to save the data
+*       - creates a settings file where the location of the savefile is stored
+*       - creates a savefile where the data is saved
+*       - creates a backup where the data is also saved
+* 
+* This class is able to handle the following function
+*       - writing of data from savefile
+*       - reading of data from savefile
+*       - setting another file as save file
+*       - moving savefile to another directory
+* 
+* Should the reading of the savefile fail, due to corruption or missing file,
+* Storage.java tries to read the backup and tries to restore the data
+*/
 public class Storage {
     private static final Logger logger = Logger.getLogger("VetoStorage");
 
@@ -31,7 +46,9 @@ public class Storage {
     private PrintWriter writer;
     private Gson gson;
 
+    // -------------------------------------------------------------------
     // search the settings file and open the save file
+    // -------------------------------------------------------------------
     public static Storage getInstance() {
         if (storage == null || !settingsFile.exists()) {
             storage = new Storage();
@@ -39,6 +56,9 @@ public class Storage {
         return storage;
     }
 
+    // -------------------------------------------------------------------
+    // constructor
+    // -------------------------------------------------------------------
     private Storage() {
         gson = new Gson();
         settingsFile = new File(SETTINGS_FILE_NAME);
@@ -53,7 +73,9 @@ public class Storage {
         logger.log(Level.INFO, "Storage Initialised");
     }
 
+    // -------------------------------------------------------------------
     // update settings file on the changes of save file directory
+    // -------------------------------------------------------------------
     private void updateSettingsFile(String fileName) {
         try {
             writer = new PrintWriter(settingsFile, "UTF-8");
@@ -64,7 +86,9 @@ public class Storage {
         }
     }
 
+    // -------------------------------------------------------------------
     // get the directory of the save file from settings file
+    // -------------------------------------------------------------------
     private String getSaveFileNameFromSettingsFile(File fileName) {
         String text = "";
         initBufferedReader(fileName);
@@ -79,7 +103,9 @@ public class Storage {
         return text;
     }
 
+    // -------------------------------------------------------------------
     // create the file if not found
+    // -------------------------------------------------------------------
     private void createIfMissingFile(File fileName) {
         try {
             if (!fileName.exists()) {
@@ -92,7 +118,9 @@ public class Storage {
         }
     }
 
+    // -------------------------------------------------------------------
     // Update necessary files
+    // -------------------------------------------------------------------
     public Boolean updateFiles(ArrayList<Task> input) {
         Boolean hasUpdatedSaveFile = false;
         Boolean hasUpdatedBackup = false;
@@ -109,7 +137,9 @@ public class Storage {
         }
     }
 
+    // -------------------------------------------------------------------
     // writes all task objects in the list to the save file
+    // -------------------------------------------------------------------
     private Boolean writeTasksToFile(File fileName, ArrayList<Task> input) {
         try {
             writer = new PrintWriter(fileName, "UTF-8");
@@ -124,18 +154,22 @@ public class Storage {
         return true;
     }
 
+    // -------------------------------------------------------------------
     // converts task object to string
+    // -------------------------------------------------------------------
     private Object taskToJson(Task task) {
         return gson.toJson(task);
     }
 
+    // -------------------------------------------------------------------
     // select file to read
+    // -------------------------------------------------------------------
     public ArrayList<Task> readFile() {
         ArrayList<Task> storage;
         storage = readSavedTasks(saveFile);
-        if (storage == null) {
+        if (storage == null || storage.isEmpty()) {
             storage = readSavedTasks(backupFile);
-            if (storage == null) {
+            if (storage == null || storage.isEmpty()) {
                 storage = new ArrayList<Task>();
                 logger.log(Level.INFO, "File corrupted, backup failed");
             } else if (!storage.isEmpty()) {
@@ -146,7 +180,9 @@ public class Storage {
         return storage;
     }
 
+    // -------------------------------------------------------------------
     // reads tasks in the file
+    // -------------------------------------------------------------------
     private ArrayList<Task> readSavedTasks(File saveFile) {
         ArrayList<Task> storageData;
         String text = "";
@@ -167,7 +203,9 @@ public class Storage {
         return storageData;
     }
 
+    // -------------------------------------------------------------------
     // close buffered reader
+    // -------------------------------------------------------------------
     private void closeBufferedReader() {
         try {
             reader.close();
@@ -176,7 +214,9 @@ public class Storage {
         }
     }
 
+    // -------------------------------------------------------------------
     // initialize buffered reader
+    // -------------------------------------------------------------------
     private Boolean initBufferedReader(File file) {
         try {
             reader = new BufferedReader(new FileReader(file));
@@ -186,7 +226,9 @@ public class Storage {
         return true;
     }
 
+    // -------------------------------------------------------------------
     // move the save file
+    // -------------------------------------------------------------------
     public Boolean moveSaveFileDirectory(String input) {
         saveFileName = input;
         if (saveFile.renameTo(new File(saveFileName))) {
@@ -201,7 +243,9 @@ public class Storage {
         }
     }
 
+    // -------------------------------------------------------------------
     // set a specific file as the save file
+    // -------------------------------------------------------------------
     public Boolean setSaveFileDirectory(String input) {
         saveFileName = input;
         File setFile = new File(saveFileName);
@@ -216,7 +260,9 @@ public class Storage {
         }
     }
 
+    // -------------------------------------------------------------------
     // get the name of save file
+    // -------------------------------------------------------------------
     public String getSaveFileName() {
         return saveFileName;
     }
