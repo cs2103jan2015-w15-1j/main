@@ -3,6 +3,11 @@ package main.java;
 import java.util.Comparator;
 
 //@author A0121813U
+/**
+ * SortOverdue is a comparator, when used on a list object, will sort the list
+ * placing those overdue tasks at the front while the pending tasks will be placed
+ * at the back.
+ */
 public class SortOverdue implements Comparator<Task> {
 	
 	private static final int FIRST_LOWER = -1;

@@ -23,14 +23,15 @@ import com.joestelmach.natty.Parser;
 
 //@author A0121520A
 /**
- * This class helps parse date inputs using Natty.
- * Usage:
+ * <h1>This class helps parse date inputs using Natty.</h1>
  * 
- * DateParser dateParser = DateParser.getInstance();
- * dateParser.parse("do homework from 4pm to 6pm on 15 mar");
- * ArrayList<LocalDateTime> dates = dateParser.getDates();
- * String parsedWords = dateParser.getParsedWords();
- * String notParsedWords = dateParser.getNotParsedWords();
+ * <p>Usage:
+ * 
+ * <p><tt>DateParser dateParser = DateParser.getInstance();</tt>
+ * <p><tt>dateParser.parse("do homework from 4pm to 6pm on 15 mar");</tt>
+ * <p><tt>ArrayList&lt;LocalDateTime&gt; dates = dateParser.getDates();</tt>
+ * <p><tt>String parsedWords = dateParser.getParsedWords();</tt>
+ * <p><tt>String notParsedWords = dateParser.getNotParsedWords();</tt>
  */
 public class DateParser {
    
