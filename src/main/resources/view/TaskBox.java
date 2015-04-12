@@ -58,7 +58,7 @@ public class TaskBox extends HBox {
     private static final int TIMELINE_FRAME_DELAY_MILLISECONDS = 10;
     private static final int HIGHLIGHT_DISPLAY_SECONDS = 7;
     private static final String STYLE_HIGHLIGHT_TAG_FORMAT = "-fx-background-color: %s;";
-    private static final String STYLE_HIGHLIGHT_COLOR_FORMAT = "rgb(105, 240, 174, %.2f)";
+    private static final String STYLE_HIGHLIGHT_COLOR_FORMAT = "rgb(255, 187, 141, %.2f)";
 
 
     // ================================================================
@@ -99,6 +99,10 @@ public class TaskBox extends HBox {
     // ================================================================
     public String getDescription() {
         return description.getText();
+    }
+    
+    public String getTimeAndDate() {
+        return timeAndDate.getText();
     }
 
     public void highlight() {
