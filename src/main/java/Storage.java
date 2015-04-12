@@ -47,7 +47,7 @@ public class Storage {
     private Gson gson;
 
     // -------------------------------------------------------------------
-    // search the settings file and open the save file
+    // get instance of Storage
     // -------------------------------------------------------------------
     public static Storage getInstance() {
         logger.setLevel(Level.OFF);
