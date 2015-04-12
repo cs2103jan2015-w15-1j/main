@@ -174,6 +174,8 @@ public class TaskTest {
     }
     
     @Test
+    // Test a variety of Tasks object with different date and time combination
+    // and check if they are overdue
     public void TestOverdue() {
     	Task taskFloating = createNewTask("do homework");
     	
