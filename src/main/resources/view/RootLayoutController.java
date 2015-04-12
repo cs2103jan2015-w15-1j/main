@@ -109,10 +109,8 @@ public class RootLayoutController extends BorderPane {
             if (exceptionDates != null && exceptionDates.size() > 0) {
                 inputString = buildExceptStringToAdd(inputString, exceptionDates);
             }
-            controller.executeCommand(inputString);
-        } else {
-            controller.executeCommand(inputString);
         }
+        controller.executeCommand(inputString);
         updateHistory();
         updateUserInput(EMPTY_STRING);
     }
@@ -278,7 +276,7 @@ public class RootLayoutController extends BorderPane {
         // Auto-complete only if there is a valid editIndexPosition
         if (editIndexPosition > 0) {
             int index = getEditIndex(inputString, editIndexPosition);
-            autoCompleteEdit(index, editIndexPosition, type);
+            autoCompleteEdit(index, type);
         }
     }
 
@@ -356,10 +354,10 @@ public class RootLayoutController extends BorderPane {
 
     private int getEditIndex(String input, int editIndexPosition) {
         String[] output = input.split(ONE_SPACING);
-        return Integer.parseInt(output[editIndexPosition]);
+        return Integer.parseInt(output[editIndexPosition])-1;
     }
 
-    private void autoCompleteEdit(int index, int editIndexPosition, EditType type) {
+    private void autoCompleteEdit(int index, EditType type) {
         ObservableList<Task> displayedTasks = controller.getDisplayedTasks();
         if (index < displayedTasks.size() + 1) { // check if supplied index is within displayedTasks' range
             Task task = displayedTasks.get(index - 1);
