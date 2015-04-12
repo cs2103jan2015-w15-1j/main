@@ -118,7 +118,7 @@ public class UserDefinedSortTest {
 		Task taskFloating = createTask("do homework");
 	    Task taskTimed = createTask("do assignment 9 march 2pm to 3pm");
 		Task taskDeadlineNoTime = createTask("buy milk tomorrow");
-	    Task taskDeadlineWithTime = createTask("do this by 4pm today");     
+	    Task taskDeadlineWithTime = createTask("do this by 3am today");     
 	    
 	    list.add(taskFloating);
 	    list.add(taskTimed);
