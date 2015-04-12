@@ -350,7 +350,9 @@ public class CreateTask {
             endDateTime = null;
         }
 
-        if (result.size() > 1 && result.get(0).equals(result.get(1))) {
+        if (result.size() > 1
+                && (result.get(0).getSecond() == result.get(1).getSecond() || result
+                        .get(1).equals(LocalDateTime.now()))) {
             result.remove(1);
         }
 
