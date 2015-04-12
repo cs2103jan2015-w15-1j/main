@@ -42,8 +42,7 @@ public class MainApp extends Application {
 		// Provide a TOC handle inside of RLC so that user input can be passed to TOC from RLC
 		rootLayoutController.setController(controller);
 
-		// Provide a display handle in controller so that controller can pass message to display
-		controller.setDisplayController(displayController);
+		// Provide a stage handle in controller so that controller can close it when exiting
 		controller.setStage(this.primaryStage);
 	}
 
@@ -60,7 +59,6 @@ public class MainApp extends Application {
 
 	public void initController() {
 		controller = Controller.getInstance();
-		controller.setDisplayController(displayController);
 		controller.onloadDisplay();
 	}
 }

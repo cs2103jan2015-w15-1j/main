@@ -34,8 +34,9 @@ public class Controller {
     private boolean switchDisplayToSearch = false;
     
     private UserDefinedSort userDefinedSort;
-    
-    private DisplayController displayController;
+
+    private DisplayControllerStub displayController = DisplayControllerStub.getInstance();
+//    private DisplayController displayController = DisplayController.getInstance();
 
     private Stage stage;
 
@@ -196,10 +197,6 @@ public class Controller {
     // ================================================================
 
     //@author A0122081X
-    public void setDisplayController(DisplayController displayController) {
-	    this.displayController = displayController;
-	}
-    
     public void setStage(Stage stage) {
 	    this.stage = stage;
 	}
@@ -575,5 +572,9 @@ public class Controller {
 
     public List<Task> getCompleteTasksPublic() {
         return getCompletedTasks(allTasks);
+    }
+
+    public List<Task> getAllTasks() {
+        return allTasks;
     }
 }

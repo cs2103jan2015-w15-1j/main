@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import main.java.Controller;
 import main.java.Task;
 
+import main.resources.view.DisplayController;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -15,8 +16,37 @@ public class ControllerTest extends TestCase {
     // Tests for non-recurring tasks
     // ================================================================
     @Test
-    public void testAdd() {
+    public void testClear() {
+        Controller controller = Controller.getInstance();
+        controller.executeCommand("clear");
+        ArrayList<Task> emptyArrayList = new ArrayList<>();
 
+        assertEquals(controller.getAllTasks(), emptyArrayList);
+    }
+
+    @Test
+    public void testAddFloat() {
+        Controller controller = Controller.getInstance();
+        controller.executeCommand("clear");
+        String input = "add this today";
+        controller.executeCommand(input);
+
+        assertEquals("this", controller.getIncompleteTasksPublic());
+
+    }
+
+    @Test
+    public void testAddDeadline() {
+        Controller controller = Controller.getInstance();
+        String input = "add this today";
+        controller.executeCommand(input);
+    }
+
+    @Test
+    public void testAddTimed() {
+        Controller controller = Controller.getInstance();
+        String input = "add this today";
+        controller.executeCommand(input);
     }
 
     @Test
@@ -44,10 +74,6 @@ public class ControllerTest extends TestCase {
 
     }
 
-    @Test
-    public void testClear() {
-
-    }
 
     @Test
     public void testInvalid() {
@@ -61,12 +87,7 @@ public class ControllerTest extends TestCase {
 
     @Test
     public void testUndo() {
-        Controller controller = Controller.getInstance();
-        controller.executeCommand("add this by 14 apr");
-        controller.executeCommand("add that by 20 mar");
 
-        controller.executeCommand("edit 1 desc foobar");
-        System.out.println(controller.getIncompleteTasksPublic());
 
     }
 
