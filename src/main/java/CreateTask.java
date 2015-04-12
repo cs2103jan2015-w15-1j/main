@@ -349,11 +349,11 @@ public class CreateTask {
             result.add(endDateTime);
             endDateTime = null;
         }
-        
-        if (result.get(0).equals(result.get(1))){
+
+        if (result.size() > 1 && result.get(0).equals(result.get(1))) {
             result.remove(1);
         }
-        
+
         if (type.equals(Type.YEARLY)) {
             limit = result.get(0).plusYears(YEAR_LIMIT);
         } else if (type.equals(Type.MONTHLY)) {
