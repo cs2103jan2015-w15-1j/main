@@ -366,32 +366,18 @@ public class RootLayoutController extends BorderPane {
             Task.Type taskType = task.getType();
 
             if (type.equals(EditType.ALL)) {
-                userInput.appendText(ONE_SPACING + task.getRawInfo());
-                userInput.end();
+                autoCompleteRecurringTask(userInput, task);
                 return;
             } else if (type.equals(EditType.INDIVIDUAL)) {
                 userInput.appendText(ONE_SPACING + task.getDescription());
-
                 switch (taskType) {
                     case FLOATING:
                         break;
                     case DEADLINE:
-                        userInput.appendText(ONE_SPACING);
-                        if (task.getStartTime() != null) {
-                            userInput.appendText("by " + task.getStartTime().format(timeFormatter) + ONE_SPACING);
-                        }
-                        userInput.appendText(task.getDate().format(dateFormatter));
+                        autoCompleteDeadlineTask(userInput, task);
                         break;
                     case TIMED:
-                        userInput.appendText(ONE_SPACING);
-                        userInput.appendText(task.getStartTime()
-                                .format(timeFormatter) +
-                                ONE_SPACING +
-                                "to " +
-                                task.getEndTime()
-                                        .format(timeFormatter) +
-                                ONE_SPACING +
-                                task.getDate().format(dateFormatter));
+                        autoCompleteTimedTask(userInput, task);
                         break;
                 }
                 userInput.end();
@@ -399,4 +385,28 @@ public class RootLayoutController extends BorderPane {
         }
     }
 
+    private void autoCompleteRecurringTask(TextField userInput, Task task) {
+        userInput.appendText(ONE_SPACING + task.getRawInfo());
+        userInput.end();
+    }
+
+    private void autoCompleteDeadlineTask(TextField userInput, Task task) {
+        userInput.appendText(ONE_SPACING);
+        if (task.getStartTime() != null) {
+            userInput.appendText("by " + task.getStartTime().format(timeFormatter) + ONE_SPACING);
+        }
+        userInput.appendText(task.getDate().format(dateFormatter));
+    }
+
+    private void autoCompleteTimedTask(TextField userInput, Task task) {
+        userInput.appendText(ONE_SPACING);
+        userInput.appendText(task.getStartTime()
+                .format(timeFormatter) +
+                ONE_SPACING +
+                "to " +
+                task.getEndTime()
+                        .format(timeFormatter) +
+                ONE_SPACING +
+                task.getDate().format(dateFormatter));
+    }
 }
