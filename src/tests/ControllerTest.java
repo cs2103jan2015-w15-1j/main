@@ -1,12 +1,10 @@
 package tests;
 
 import junit.framework.TestCase;
-import static org.junit.Assert.assertEquals;
 import main.java.Controller;
 import main.java.DateParser;
 import main.java.Task;
 
-import main.resources.view.DisplayController;
 import org.junit.Test;
 
 import java.time.LocalDateTime;
@@ -182,10 +180,8 @@ public class ControllerTest extends TestCase {
         controller.executeCommand("clear");
 
         ArrayList<Task> testList = new ArrayList<Task>();
-        Task taskOne = createNewTask("this on 1 apr");
-        Task taskTwo = createNewTask("this on 2 apr");
-        testList.add(taskOne);
-        testList.add(taskTwo);
+        testList.add(createNewTask("this on 1 apr"));
+        testList.add(createNewTask("this on 2 apr"));
 
         controller.executeCommand("add this on 1 apr");
         controller.executeCommand("add this on 2 apr");
@@ -199,10 +195,8 @@ public class ControllerTest extends TestCase {
 
         // Search by date
         testList.clear();
-        Task taskThree = createNewTask("foo on 3 apr by 1pm");
-        Task taskFour = createNewTask("bar on 3 apr by 2pm to 4pm");
-        testList.add(taskThree);
-        testList.add(taskFour);
+        testList.add(createNewTask("foo on 3 apr by 1pm"));
+        testList.add(createNewTask("bar on 3 apr by 2pm to 4pm"));
         controller.executeCommand("search 3 apr");
         assertEquals(testList.toString(), controller.getDisplayedTasks().toString());
     }
@@ -258,10 +252,31 @@ public class ControllerTest extends TestCase {
         controller.executeCommand("clear");
 
         ArrayList<Task> testList = new ArrayList<>();
+        testList.add(createNewTask("this on 1 apr"));
+        testList.add(createNewTask("this on 2 apr"));
+        testList.add(createNewTask("this on 3 apr"));
+        testList.add(createNewTask("this on 4 apr"));
+        testList.add(createNewTask("this on 5 apr"));
 
+        controller.executeCommand("add this everyday from 1 apr to 5 apr");
+
+        assertEquals(testList.toString(), controller.getIncompleteTasksPublic().toString());
+    }
+
+    @Test
+    public void testAddRecurringWithExceptions() {
+        Controller controller = Controller.getInstance();
         controller.executeCommand("clear");
 
-        assertEquals(testList, controller.getAllTasks());
+        ArrayList<Task> testList = new ArrayList<>();
+        testList.add(createNewTask("this on 1 apr"));
+        testList.add(createNewTask("this on 2 apr"));
+        testList.add(createNewTask("this on 3 apr"));
+        testList.add(createNewTask("this on 5 apr"));
+
+        controller.executeCommand("add this everyday from 1 apr to 5 apr except 4 apr");
+
+        assertEquals(testList.toString(), controller.getIncompleteTasksPublic().toString());
     }
 
     @Test
@@ -270,10 +285,16 @@ public class ControllerTest extends TestCase {
         controller.executeCommand("clear");
 
         ArrayList<Task> testList = new ArrayList<>();
+        testList.add(createNewTask("this on 1 apr"));
+        testList.add(createNewTask("this on 2 apr"));
+        testList.add(createNewTask("this on 3 apr"));
+        testList.add(createNewTask("this on 4 apr"));
+        testList.add(createNewTask("that on 6 apr"));
 
-        controller.executeCommand("clear");
+        controller.executeCommand("add this everyday from 1 apr to 5 apr");
+        controller.executeCommand("edit 5 that on 6 apr");
 
-        assertEquals(testList, controller.getAllTasks());
+        assertEquals(testList.toString(), controller.getIncompleteTasksPublic().toString());
     }
 
     @Test
@@ -282,10 +303,21 @@ public class ControllerTest extends TestCase {
         controller.executeCommand("clear");
 
         ArrayList<Task> testList = new ArrayList<>();
+        testList.add(createNewTask("that on 1 apr"));
+        testList.add(createNewTask("that on 2 apr"));
+        testList.add(createNewTask("that on 3 apr"));
+        testList.add(createNewTask("that on 4 apr"));
+        testList.add(createNewTask("that on 5 apr"));
+        testList.add(createNewTask("that on 6 apr"));
+        testList.add(createNewTask("that on 7 apr"));
+        testList.add(createNewTask("that on 8 apr"));
+        testList.add(createNewTask("that on 9 apr"));
+        testList.add(createNewTask("that on 10 apr"));
 
-        controller.executeCommand("clear");
+        controller.executeCommand("add this everyday from 1 apr to 5 apr");
+        controller.executeCommand("edit all 5 that everyday from 1 apr to 10 apr");
 
-        assertEquals(testList, controller.getAllTasks());
+        assertEquals(testList.toString(), controller.getIncompleteTasksPublic().toString());
     }
 
     @Test
@@ -294,10 +326,15 @@ public class ControllerTest extends TestCase {
         controller.executeCommand("clear");
 
         ArrayList<Task> testList = new ArrayList<>();
+        testList.add(createNewTask("this on 1 apr"));
+        testList.add(createNewTask("this on 2 apr"));
+        testList.add(createNewTask("this on 3 apr"));
+        testList.add(createNewTask("this on 4 apr"));
 
-        controller.executeCommand("clear");
+        controller.executeCommand("add this everyday from 1 apr to 5 apr");
+        controller.executeCommand("delete 5");
 
-        assertEquals(testList, controller.getAllTasks());
+        assertEquals(testList.toString(), controller.getIncompleteTasksPublic().toString());
     }
 
     @Test
@@ -307,11 +344,9 @@ public class ControllerTest extends TestCase {
 
         ArrayList<Task> testList = new ArrayList<>();
 
-        controller.executeCommand("clear");
+        controller.executeCommand("add this everyday from 1 apr to 5 apr");
+        controller.executeCommand("delete all 3");
 
-        assertEquals(testList, controller.getAllTasks());
+        assertEquals(testList.toString(), controller.getIncompleteTasksPublic().toString());
     }
-
-
-
 }
