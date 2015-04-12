@@ -118,7 +118,7 @@ public class UserDefinedSortTest {
 		Task taskFloating = createTask("do homework");
 	    Task taskTimed = createTask("do assignment 9 march 2pm to 3pm");
 		Task taskDeadlineNoTime = createTask("buy milk tomorrow");
-	    Task taskDeadlineWithTime = createTask("do this by 3am today");     
+	    Task taskDeadlineWithTime = createTask("do this by 3am 12 Apr");     
 	    
 	    list.add(taskFloating);
 	    list.add(taskTimed);
@@ -221,7 +221,7 @@ public class UserDefinedSortTest {
 	public void testSortChain() {
 		
 		Task taskDeadlineNoTime = createTask("buy milk tomorrow");
-	    Task taskDeadlineWithTime = createTask("buy cereal by 9am today");
+	    Task taskDeadlineWithTime = createTask("buy cereal by 9am 12 Apr");
 	    Task taskFloating = createTask("do homework");
 	    Task taskTimed = createTask("do assignment 9 march 2pm to 3pm");
 		

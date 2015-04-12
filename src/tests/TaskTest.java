@@ -181,11 +181,11 @@ public class TaskTest {
     	
     	Task taskDeadlineNoTimeOverdue = createNewTask("do homework 9 march");
     	Task taskDeadlineNoTimeNotOverdue = createNewTask("do homework today");
-    	Task taskDeadlineWithTimeOverdue = createNewTask("do homework by 3am today");
+    	Task taskDeadlineWithTimeOverdue = createNewTask("do homework by 12am today");
     	Task taskDeadlineWithTimeNotOverdue = createNewTask("do homework by 11.59pm today");
     	
     	Task taskTimedOverdueByDate = createNewTask("do homework 2pm to 3pm 9 march");
-    	Task taskTimedOverdueByTime = createNewTask("do homework 3am to 4am today");
+    	Task taskTimedOverdueByTime = createNewTask("do homework 12am to 4am today");
     	Task taskTimedNotOverdue = createNewTask("do homework 11.59pm to 11.59pm today");
     	
     	assertFalse(taskFloating.isOverdue());
@@ -202,9 +202,9 @@ public class TaskTest {
     // Checks whether the Task object is printed out in order
     public void testToString() {
     	Task taskFloating = createNewTask("do homework");
-    	Task taskDeadlineNoTime = createNewTask("do homework today");
-    	Task taskDeadlineWithTime = createNewTask("do homework by 11pm today");
-    	Task taskTimed = createNewTask("do homework 10pm to 11pm today");
+    	Task taskDeadlineNoTime = createNewTask("do homework 12 Apr");
+    	Task taskDeadlineWithTime = createNewTask("do homework by 11pm 12 Apr");
+    	Task taskTimed = createNewTask("do homework 10pm to 11pm 12 Apr");
     	
     	assertEquals("do homework", taskFloating.toString());
     	assertEquals("do homework Sunday, 12 April 2015", taskDeadlineNoTime.toString());
