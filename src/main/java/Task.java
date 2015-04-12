@@ -152,17 +152,6 @@ public class Task implements Cloneable {
         isCompleted = false;
     }
 
-    public void update(String input, ArrayList<LocalDateTime> parsedDates,
-                          String parsedWords, String notParsedWords) {
-        type = determineType(parsedDates);
-        initDateAndTime(type, parsedDates);
-        // substring to get rid of the index being part of description
-        description = extractDescription(notParsedWords).substring(2);
-
-        updateAll(description, determineType(parsedDates), parsedDates);
-    }
-    
-
     public void setException(ArrayList<LocalDate> dates) {
         exceptionDates = dates;
     }
@@ -248,73 +237,7 @@ public class Task implements Cloneable {
         }
     }
 
-    //@author A0122081X
-    private void unsetAllProperties() {
-        setType(null);
-        setDescription(null);
-        setDate(null);
-        setTime(null, null);
-    }
-
-    private void updateAll(String newDesc, Type newType,
-                              ArrayList<LocalDateTime> parsedDates) {
-
-        unsetAllProperties();
-        setDescription(newDesc);
-        setType(newType);
-
-        switch (newType) {
-            case FLOATING :
-                break;
-            case DEADLINE :
-                setDate(parsedDates.get(POSITION_FIRST_DATE).toLocalDate());
-                break;
-            case TIMED :
-                setDate(parsedDates.get(POSITION_FIRST_DATE).toLocalDate());
-                setStartTime(parsedDates.get(POSITION_FIRST_DATE).toLocalTime());
-                setEndTime(parsedDates.get(POSITION_SECOND_DATE).toLocalTime());
-        }
-
-        // KEPT FOR THE MOMENT IN CASE THERE ARE CHANGES TO EDIT AGAIN
-//        // parsedDates correspond to the parsedDates of the update
-//        // type refers to CURRENT type
-//        switch (newType) {
-//        case FLOATING:
-//            setDate(null);
-//            setStartTime(null);
-//            setEndTime(null);
-//            break;
-//        case DEADLINE:
-//            if (type.equals(Type.FLOATING)) {
-//                setDate(parsedDates.get(POSITION_FIRST_DATE).toLocalDate());
-//            } else if (type.equals(Type.DEADLINE)) {
-//                setDate(parsedDates.get(POSITION_FIRST_DATE).toLocalDate());
-//            } else { // current: TIMED
-//                setDate(parsedDates.get(POSITION_FIRST_DATE).toLocalDate());
-//                return true;
-//            }
-//            break;
-//        case TIMED:
-//            if (type.equals(Type.FLOATING)) {
-//                setDate(parsedDates.get(POSITION_FIRST_DATE).toLocalDate());
-//                setStartTime(parsedDates.get(POSITION_FIRST_DATE).toLocalTime());
-//                setEndTime(parsedDates.get(POSITION_SECOND_DATE).toLocalTime());
-//            } else if (type.equals(Type.DEADLINE)) {
-//                setStartTime(parsedDates.get(POSITION_FIRST_DATE).toLocalTime());
-//                setEndTime(parsedDates.get(POSITION_SECOND_DATE).toLocalTime());
-//            } else { // current: TIMED
-//                setStartTime(parsedDates.get(POSITION_FIRST_DATE).toLocalTime());
-//                setEndTime(parsedDates.get(POSITION_SECOND_DATE).toLocalTime());
-//            }
-//            break;
-//        default:
-//            break;
-//        }
-//        setType(newType);
-//        return true;
-    }
-
-    //@author A0121520A    
+    //@author A0121520A
     /**
      * Get the description of the task
      * @param notParsedWords
