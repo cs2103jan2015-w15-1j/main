@@ -48,7 +48,7 @@ public class History {
 	}
 	
 	// Pop the Stacks and store them in thier respective fields
-	public void extractLatestStatus() {
+	public void getLatestStatus() {
 		allTasks = mainStack.pop();
 		displayedTasks = displayedStack.pop();
 	}

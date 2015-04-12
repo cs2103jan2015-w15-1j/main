@@ -417,7 +417,7 @@ public class Controller {
         if (previousStates.isEmpty()) {
             return MESSAGE_NO_UNDO;
         } else {
-        	previousStates.extractLatestStatus();
+        	previousStates.getLatestStatus();
             allTasks = previousStates.getAllTasks();
             displayedTasks = previousStates.getDisplayedTasks();
             
