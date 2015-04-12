@@ -14,10 +14,12 @@ import java.util.ArrayList;
 public class ControllerTest extends TestCase {
 
     // ================================================================
-    // Fields
+    // Constants
     // ================================================================
     private static final String MESSAGE_INVALID_COMMAND = "Invalid command.";
     private static final String MESSAGE_WELCOME = "Welcome to Veto! Here is an overview of the week ahead.";
+    private static final String MESSAGE_TASK_INDEX_ERROR = "The task you specified could not be found.";
+    private static final String MESSAGE_NO_UNDO = "Already at oldest change, unable to undo.";
 
     // ================================================================
     // Utility methods
@@ -69,7 +71,6 @@ public class ControllerTest extends TestCase {
     // Tests for non-recurring tasks
     // ================================================================
     @Test
-    //@author A0122081X
     public void testClear() {
         Controller controller = Controller.getInstance();
         controller.executeCommand("clear");
@@ -79,6 +80,12 @@ public class ControllerTest extends TestCase {
         controller.executeCommand("clear");
 
         assertEquals(testList, controller.getAllTasks());
+    }
+
+    @Test
+    public void testAddInvalid() {
+        Controller controller = Controller.getInstance();
+        assertEquals(MESSAGE_INVALID_COMMAND, controller.executeCommand("add"));
     }
 
     @Test
@@ -123,6 +130,12 @@ public class ControllerTest extends TestCase {
         assertEquals(testList.toString(), controller.getIncompleteTasksPublic().toString());
     }
 
+    public void testDeleteInvalidIndex() {
+        Controller controller = Controller.getInstance();
+        controller.executeCommand("clear");
+        assertEquals(MESSAGE_TASK_INDEX_ERROR, controller.executeCommand("delete 1"));
+    }
+
     @Test
     public void testDelete() {
         Controller controller = Controller.getInstance();
@@ -138,6 +151,22 @@ public class ControllerTest extends TestCase {
         controller.executeCommand("delete 1");
 
         assertEquals(testList.toString(), controller.getIncompleteTasksPublic().toString());
+    }
+
+    @Test
+    public void testEditInvalidIndex() {
+        Controller controller = Controller.getInstance();
+        controller.executeCommand("clear");
+        assertEquals(MESSAGE_TASK_INDEX_ERROR, controller.executeCommand("edit 1 this"));
+        assertEquals(MESSAGE_TASK_INDEX_ERROR, controller.executeCommand("edit asdkasjd"));
+    }
+
+    @Test
+    public void testEditInvalidDescription() {
+        Controller controller = Controller.getInstance();
+        controller.executeCommand("clear");
+        controller.executeCommand("add this");
+        assertEquals(MESSAGE_INVALID_COMMAND, controller.executeCommand("edit 1"));
     }
 
     @Test
@@ -170,6 +199,16 @@ public class ControllerTest extends TestCase {
     }
 
     @Test
+    public void testCompleteInvalidIndex() {
+        Controller controller = Controller.getInstance();
+        controller.executeCommand("clear");
+
+        controller.executeCommand("add this");
+
+        assertEquals(MESSAGE_TASK_INDEX_ERROR, controller.executeCommand("complete 2"));
+    }
+
+    @Test
     public void testComplete() {
         Controller controller = Controller.getInstance();
         controller.executeCommand("clear");
@@ -180,6 +219,17 @@ public class ControllerTest extends TestCase {
         controller.executeCommand("complete 1");
 
         assertEquals(testList.toString(), controller.getIncompleteTasksPublic().toString());
+    }
+
+    public void testIncompleteInvalidIndex() {
+        Controller controller = Controller.getInstance();
+        controller.executeCommand("clear");
+
+        controller.executeCommand("add this");
+        controller.executeCommand("complete 1");
+        controller.executeCommand("display completed");
+
+        assertEquals(MESSAGE_TASK_INDEX_ERROR, controller.executeCommand("incomplete 2"));
     }
 
     @Test
@@ -234,6 +284,8 @@ public class ControllerTest extends TestCase {
         assertEquals(MESSAGE_INVALID_COMMAND, controller.executeCommand("deelete"));
         assertEquals(MESSAGE_INVALID_COMMAND, controller.executeCommand("editt"));
     }
+
+
 
     @Test
     public void testUndo() {

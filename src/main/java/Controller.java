@@ -3,7 +3,6 @@ package main.java;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.stage.Stage;
-import main.resources.view.DisplayController;
 
 import java.time.DateTimeException;
 import java.time.LocalDateTime;
@@ -393,7 +392,7 @@ public class Controller {
 
             return String.format(MESSAGE_COMPLETE, task.getDescription());
         } catch (NumberFormatException | IndexOutOfBoundsException e) {
-            return MESSAGE_INVALID_COMMAND;
+            return MESSAGE_TASK_INDEX_ERROR;
         }
     }
 
@@ -407,7 +406,7 @@ public class Controller {
 
             return String.format(MESSAGE_INCOMPLETE, task.getDescription());
         } catch (NumberFormatException | IndexOutOfBoundsException e) {
-            return MESSAGE_INVALID_COMMAND;
+            return MESSAGE_TASK_INDEX_ERROR;
         }
     }
 
