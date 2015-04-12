@@ -87,8 +87,6 @@ public class StorageTest {
         }
         assertEquals(true, test.setSaveFileDirectory(newDirectory3));
         assertEquals("blank.txt", test.getSaveFileName());
-
-        System.out.println("End of settings test");
     }
 
     // -------------------------------------------------------------------
@@ -109,8 +107,6 @@ public class StorageTest {
         // read data from storage
         readData = test.readFile();
         compareData(tempData, readData);
-
-        System.out.println("End of write and read test");
     }
 
     // -------------------------------------------------------------------
@@ -160,8 +156,6 @@ public class StorageTest {
         // if backup file is not found
         readData = test.readFile();
         assertEquals(true, readData.isEmpty());
-
-        System.out.println("End of backup test");
     }
 
     // -------------------------------------------------------------------
