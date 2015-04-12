@@ -48,7 +48,7 @@ public class HistoryTest {
 		
 		History history = new History();
 		
-		history.storeCurrentStatus(listA, listO);
+		history.storeCurrentState(listA, listO);
 		
 		assertFalse(history.isEmpty());
 		
@@ -56,15 +56,15 @@ public class HistoryTest {
 		listA.remove(1); // --> (1,3,4)
 		listO.remove(3); // --> (1,2,3)
 		
-		history.storeCurrentStatus(listA, listO);
+		history.storeCurrentState(listA, listO);
 		
 		// Put some changes in listA and listO
 		listA.remove(0); // --> (3,4)
 		listO.remove(1); // --> (1,3)
 		
-		history.storeCurrentStatus(listA, listO);
+		history.storeCurrentState(listA, listO);
 		
-		history.getLatestStatus(); // First "undo"
+		history.getPreviousState(); // First "undo"
 		
 		assertEquals(2, history.getAllSize());
 		assertEquals(2, history.getDisplayedSize());
@@ -73,7 +73,7 @@ public class HistoryTest {
 		assertEquals(task1.toString(), history.getDisplayedTasks().get(0).toString());
 		assertEquals(task3.toString(), history.getDisplayedTasks().get(1).toString());
 		
-		history.getLatestStatus(); // Second "undo"
+		history.getPreviousState(); // Second "undo"
 		
 		assertEquals(3, history.getAllSize());
 		assertEquals(3, history.getDisplayedSize());
@@ -84,7 +84,7 @@ public class HistoryTest {
 		assertEquals(task2.toString(), history.getDisplayedTasks().get(1).toString());
 		assertEquals(task3.toString(), history.getDisplayedTasks().get(2).toString());
 		
-		history.getLatestStatus(); // Third "undo"
+		history.getPreviousState(); // Third "undo"
 		
 		assertEquals(4, history.getAllSize());
 		assertEquals(4, history.getDisplayedSize());

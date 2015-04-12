@@ -316,9 +316,7 @@ public class Controller {
             addTask(addArgument);
         }
         
-        if (switchDisplayToSearch) {
-        	search(searchArgument);
-        }
+        checkPreviousDisplay();
 
         return String.format(MESSAGE_EDIT, editTask);
     }
@@ -418,18 +416,31 @@ public class Controller {
         if (previousStates.isEmpty()) {
             return MESSAGE_NO_UNDO;
         } else {
-        	previousStates.getLatestStatus();
-            allTasks = previousStates.getAllTasks();
-            displayedTasks = previousStates.getDisplayedTasks();
-            
-            updateStorageWithAllTasks();
-            
-            if (switchDisplayToSearch) {
-            	search(searchArgument);
-            }
+        	assert previousStates != null;
+        	try {
+        		previousStates.getPreviousState();
+        	} catch (NullPointerException e) {
+        		e.printStackTrace();
+        	}
+            restorePreviousState(); 
+            updateStorageWithAllTasks(); 
+            checkPreviousDisplay();
             return String.format(MESSAGE_UNDO, previousStates.getPreviousCommand());
         }
     }
+    
+    // Execute search if the previous display is on search display
+	private void checkPreviousDisplay() {
+		if (switchDisplayToSearch) {
+			search(searchArgument);
+		}
+	}
+
+	// Assign the allTasks and displayedTasks field to its previous state
+	private void restorePreviousState() {
+		allTasks = previousStates.getAllTasks();
+		displayedTasks = previousStates.getDisplayedTasks();
+	}
 
     //@author A0122393L
     private void search(String input) {
@@ -529,6 +540,7 @@ public class Controller {
     //@author A0121813U
     // Call the display object to show the "search" display
     private void updateDisplaySearch() {
+    	assert displayedTasks != null;
     	sortSearchedTasks();
         displayController.updateSearchDisplay(displayedTasks, searchArgument);
     }
@@ -540,6 +552,7 @@ public class Controller {
 
     // Sorts the allTasks field based on developer's preference
     private void sortAllTasks() {
+    	assert allTasks != null;
     	userDefinedSort = new UserDefinedSort(allTasks);
     	userDefinedSort.addComparator(new SortType());
     	userDefinedSort.addComparator(new SortTime());
@@ -550,6 +563,7 @@ public class Controller {
     
     // Sorts the displayedTasks when the "search" command is entered
     private void sortSearchedTasks() {
+    	assert displayedTasks != null;
     	userDefinedSort = new UserDefinedSort(new ArrayList<Task>(displayedTasks));
         userDefinedSort.addComparator(new SortType());
         userDefinedSort.addComparator(new SortTime());
@@ -562,7 +576,9 @@ public class Controller {
 
     // Save the current state of allTasks and displayedTasks field before execution of command
     private void saveCurrentState(String input) {
-        previousStates.storeCurrentStatus(allTasks, displayedTasks);
+    	assert allTasks != null;
+    	assert displayedTasks != null;
+        previousStates.storeCurrentState(allTasks, displayedTasks);
         previousStates.storeCommand(input);
     }
 

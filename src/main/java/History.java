@@ -42,13 +42,13 @@ public class History {
 	// ================================================================
 	
 	// Push the arguments into their respective Stacks
-	public void storeCurrentStatus(ArrayList<Task> allTasks, ObservableList<Task> displayedTasks) {
+	public void storeCurrentState(ArrayList<Task> allTasks, ObservableList<Task> displayedTasks) {
 		mainStack.push(cloneState(allTasks));
 		displayedStack.push(cloneState(displayedTasks));
 	}
 	
 	// Pop the Stacks and store them in thier respective fields
-	public void getLatestStatus() {
+	public void getPreviousState() {
 		allTasks = mainStack.pop();
 		displayedTasks = displayedStack.pop();
 	}
