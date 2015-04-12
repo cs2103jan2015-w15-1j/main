@@ -199,6 +199,7 @@ public class TaskTest {
     }
     
     @Test
+    // Checks whether the Task object is printed out in order
     public void TestToString() {
     	Task taskFloating = createNewTask("do homework");
     	Task taskDeadlineNoTime = createNewTask("do homework today");
