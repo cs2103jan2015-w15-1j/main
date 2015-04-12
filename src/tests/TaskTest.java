@@ -182,11 +182,11 @@ public class TaskTest {
     	Task taskDeadlineNoTimeOverdue = createNewTask("do homework 9 march");
     	Task taskDeadlineNoTimeNotOverdue = createNewTask("do homework today");
     	Task taskDeadlineWithTimeOverdue = createNewTask("do homework by 3am today");
-    	Task taskDeadlineWithTimeNotOverdue = createNewTask("do homework by 11pm today");
+    	Task taskDeadlineWithTimeNotOverdue = createNewTask("do homework by 11.59pm today");
     	
     	Task taskTimedOverdueByDate = createNewTask("do homework 2pm to 3pm 9 march");
     	Task taskTimedOverdueByTime = createNewTask("do homework 3am to 4am today");
-    	Task taskTimedNotOverdue = createNewTask("do homework 11pm to 11.59pm today");
+    	Task taskTimedNotOverdue = createNewTask("do homework 11.59pm to 11.59pm today");
     	
     	assertFalse(taskFloating.isOverdue());
     	assertTrue(taskDeadlineNoTimeOverdue.isOverdue());
