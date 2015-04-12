@@ -44,6 +44,8 @@ public class CreateTask {
     private static final String[] WEEKWORD = { "weekly", "week", "mon", "tue",
             "wed", "thu", "fri", "sat", "sun" };
     private static final String[] DAYWORD = { "day", "daily" };
+    private static final int YEAR_LIMIT = 10;
+    private static final int MONTH_LIMIT = 3;
 
     private static CreateTask taskCreator;
     private DateParser dateParser;
@@ -75,7 +77,7 @@ public class CreateTask {
             String nonParsedWords) {
         resetField();
         rawInfo = input;
-        Type type = checkRecurring(input);
+        Type type = checkFrequency(input);
         Boolean hasIgnoreWords = false;
         Boolean hasIgnoreWords2 = false;
 
@@ -89,7 +91,8 @@ public class CreateTask {
         hasIgnoreWords2 = searchIgnoreWord(input, IGNOREWORD2);
 
         if (type != null) {
-            recurDate = new ArrayList<LocalDateTime>(findNeededDates(input));
+            recurDate = new ArrayList<LocalDateTime>(findNeededDates(type,
+                    input));
 
             if (!parsedDates.isEmpty()
                     && !hasIgnoreWords
@@ -106,8 +109,9 @@ public class CreateTask {
                 recurDate.set(0, parsedDates.get(0));
             }
 
-            if (parsedDates.get(0).toLocalTime().getSecond() != recurDate
-                    .get(0).toLocalTime().getSecond()) {
+            if (!parsedDates.isEmpty()
+                    && parsedDates.get(0).toLocalTime().getSecond() != recurDate
+                            .get(0).toLocalTime().getSecond()) {
                 LocalDateTime timeFix = LocalDateTime.of(recurDate.get(0)
                         .toLocalDate(), parsedDates.get(0).toLocalTime());
                 recurDate.set(0, timeFix);
@@ -239,7 +243,7 @@ public class CreateTask {
     // -------------------------------------------------------------------
     // find the start date time, end date time and the limit
     // -------------------------------------------------------------------
-    private ArrayList<LocalDateTime> findNeededDates(String input) {
+    private ArrayList<LocalDateTime> findNeededDates(Type type, String input) {
         ArrayList<LocalDateTime> result = new ArrayList<LocalDateTime>();
         ArrayList<LocalDateTime> tempResult = new ArrayList<LocalDateTime>();
         LocalDate tempDate;
@@ -321,10 +325,16 @@ public class CreateTask {
             endDateTime = null;
         }
 
-        limit = result.get(0).plusYears(1);
+        if (type.equals(Type.YEARLY)) {
+            limit = result.get(0).plusYears(YEAR_LIMIT);
+        } else if (type.equals(Type.MONTHLY)) {
+            limit = result.get(0).plusYears(MONTH_LIMIT);
+        } else {
+            limit = result.get(0).plusYears(1);
+        }
         return result;
     }
-    
+
     // -------------------------------------------------------------------
     // adds current date time if no date is avaible from parsing
     // -------------------------------------------------------------------
@@ -398,7 +408,7 @@ public class CreateTask {
     // -------------------------------------------------------------------
     // checks if the input contains words to indicate recurring tasks
     // -------------------------------------------------------------------
-    private Type checkRecurring(String input) {
+    private Type checkFrequency(String input) {
         for (String check : MAINWORD) {
             if (input.toLowerCase().contains(check)) {
                 switch (check) {
@@ -461,5 +471,35 @@ public class CreateTask {
             }
         }
         return false;
+    }
+
+    // -------------------------------------------------------------------
+    // methods for testing
+    // -------------------------------------------------------------------
+    private String getRecurRate() {
+        return Integer.toString(recurRate);
+    }
+
+    public static String frequencyTest(String input) {
+        String output;
+        Type frequency = getInstance().checkFrequency(input);
+        switch (frequency) {
+        case DAILY:
+            output = getInstance().getRecurRate() + " daily";
+            break;
+        case WEEKLY:
+            output = getInstance().getRecurRate() + " weekly";
+            break;
+        case MONTHLY:
+            output = getInstance().getRecurRate() + " monthly";
+            break;
+        case YEARLY:
+            output = getInstance().getRecurRate() + " yearly";
+            break;
+        default:
+            output = getInstance().getRecurRate() + "";
+            break;
+        }
+        return output;
     }
 }
