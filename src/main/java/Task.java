@@ -177,7 +177,6 @@ public class Task implements Cloneable {
     }
     
     public String getFormattedTimeAndDate(boolean includeDate) {
-        assert includeDate == true || includeDate == false;
         String result = STRING_EMPTY;
         if (getStartTime() != null) {
             result += addFormattedTime() + STRING_EMPTY_SPACE;

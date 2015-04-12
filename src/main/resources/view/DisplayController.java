@@ -655,8 +655,9 @@ public class DisplayController extends VBox {
         for (HBox newBox : displayBoxes) {
             if (newBox instanceof TaskBox) {
                 TaskBox newTaskBox = (TaskBox) newBox;
-                String description = newTaskBox.getDescription();
-                if (!hasMatchingBox(oldDisplayBoxes, description)) {
+                String query = newTaskBox.getDescription() +
+                               newTaskBox.getTimeAndDate();
+                if (!hasMatchingBox(oldDisplayBoxes, query)) {
                     newTaskBox.highlight();
                 }
             }
@@ -664,11 +665,13 @@ public class DisplayController extends VBox {
     }
 
     private boolean hasMatchingBox(ObservableList<HBox> oldDisplayBoxes,
-                                   String description) {
+                                   String query) {
         for (HBox oldBox : oldDisplayBoxes) {
             if (oldBox instanceof TaskBox) {
                 TaskBox tBox = (TaskBox) oldBox;
-                if (description.equals(tBox.getDescription())) {
+                String descAndDate = tBox.getDescription() +
+                                     tBox.getTimeAndDate();
+                if (query.equals(descAndDate)) {
                     oldDisplayBoxes.remove(oldBox);
                     return true;
                 }

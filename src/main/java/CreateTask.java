@@ -73,6 +73,7 @@ public class CreateTask {
             recurDate = new ArrayList<LocalDateTime>(findNeededDates(input));
             System.out.println("before ignore date: " + recurDate);
             System.out.println("before parsed date: " + parsedDates);
+            System.out.println("before parsed words: " + parsedWords);
 
             if (!parsedDates.isEmpty()
                     && !hasIgnoreWords
@@ -87,6 +88,13 @@ public class CreateTask {
                                     parsedDates.get(0).toLocalDate()
                                             .minusWeeks(1)))) {
                 recurDate.set(0, parsedDates.get(0));
+            }
+
+            if (parsedDates.get(0).toLocalTime().getSecond() != recurDate
+                    .get(0).toLocalTime().getSecond()) {
+                LocalDateTime timeFix = LocalDateTime.of(recurDate.get(0)
+                        .toLocalDate(), parsedDates.get(0).toLocalTime());
+                recurDate.set(0, timeFix);
             }
 
             getEndDateTime(recurDate);
