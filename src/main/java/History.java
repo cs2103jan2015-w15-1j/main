@@ -48,8 +48,16 @@ public class History {
 		return allTasks;
 	}
 	
+	public int getAllSize() {
+		return allTasks.size();
+	}
+	
 	public ObservableList<Task> getDisplayedTasks() {
 		return displayedTasks;
+	}
+	
+	public int getDisplayedSize() {
+		return displayedTasks.size();
 	}
 	
 	public boolean isEmpty() {
