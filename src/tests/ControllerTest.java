@@ -46,12 +46,11 @@ public class ControllerTest extends TestCase {
         Controller controller = Controller.getInstance();
         controller.executeCommand("clear");
 
-        String input = "add this";
-        controller.executeCommand(input);
-
         ArrayList<Task> testList = new ArrayList<Task>();
         Task testingTask = createNewTask("this");
         testList.add(testingTask);
+
+        controller.executeCommand("add this");
 
         assertEquals(testList.toString(), controller.getIncompleteTasksPublic().toString());
     }
@@ -61,12 +60,11 @@ public class ControllerTest extends TestCase {
         Controller controller = Controller.getInstance();
         controller.executeCommand("clear");
 
-        String input = "add this 1 apr";
-        controller.executeCommand(input);
-
         ArrayList<Task> testList = new ArrayList<Task>();
         Task testingTask = createNewTask("this 1 apr");
         testList.add(testingTask);
+
+        controller.executeCommand("add this 1 apr");
 
         assertEquals(testList.toString(), controller.getIncompleteTasksPublic().toString());
     }
@@ -76,12 +74,11 @@ public class ControllerTest extends TestCase {
         Controller controller = Controller.getInstance();
         controller.executeCommand("clear");
 
-        String input = "add this 1 apr 4pm to 6pm";
-        controller.executeCommand(input);
-
         ArrayList<Task> testList = new ArrayList<Task>();
         Task testingTask = createNewTask("this 1 apr 4pm to 6pm");
         testList.add(testingTask);
+
+        controller.executeCommand("add this 1 apr 4pm to 6pm");
 
         assertEquals(testList.toString(), controller.getIncompleteTasksPublic().toString());
     }
@@ -91,22 +88,45 @@ public class ControllerTest extends TestCase {
         Controller controller = Controller.getInstance();
         controller.executeCommand("clear");
 
-        String input = "add this";
-        controller.executeCommand(input);
-
         ArrayList<Task> testList = new ArrayList<Task>();
         Task testingTask = createNewTask("this");
         testList.add(testingTask);
 
-        controller.executeCommand("delete 1");
+        controller.executeCommand("add this");
+
         testList.remove(0);
+        controller.executeCommand("delete 1");
 
         assertEquals(testList.toString(), controller.getIncompleteTasksPublic().toString());
     }
 
     @Test
-    public void testEdit() {
+    public void testEditDescription() {
+        Controller controller = Controller.getInstance();
+        controller.executeCommand("clear");
 
+        ArrayList<Task> testList = new ArrayList<Task>();
+        Task testingTask = createNewTask("that");
+        testList.add(testingTask);
+
+        controller.executeCommand("add this");
+        controller.executeCommand("edit 1 that");
+
+        assertEquals(testList.toString(), controller.getIncompleteTasksPublic().toString());
+    }
+
+    public void testEditDeadline() {
+        Controller controller = Controller.getInstance();
+        controller.executeCommand("clear");
+
+        ArrayList<Task> testList = new ArrayList<Task>();
+        Task testingTask = createNewTask("this on 2 apr");
+        testList.add(testingTask);
+
+        controller.executeCommand("add this 1 apr");
+        controller.executeCommand("edit 1 this 2 apr");
+
+        assertEquals(testList.toString(), controller.getIncompleteTasksPublic().toString());
     }
 
     @Test
