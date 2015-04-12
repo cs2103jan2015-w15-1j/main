@@ -7,8 +7,18 @@ import java.util.UUID;
 
 //@author A0122393L
 /**
-* This class process the infomation and creates the Task (Object/s) accordingly
-*/
+ * This class process the infomation and creates the Task (Object/s) accordingly
+ * - creates a task if it is not recurring - creates multiple instances of the
+ * recurring task
+ * 
+ * CreateTask will determine if it is a recurring Task or not by finding the
+ * rate and frequency at which the Task is recurring at. - frequncy is
+ * represented by YEARLY, MONTHLY, WEEKLY, DAILY - rate is represented by a
+ * integer
+ * 
+ * CreateTask will then split the information up and find the start date and
+ * time, end date and time of recurring, and date exceptions should there be any
+ */
 public class CreateTask {
     public static enum Type {
         YEARLY, MONTHLY, WEEKLY, DAILY,
@@ -47,7 +57,6 @@ public class CreateTask {
     private String exceptionString;
     private String rawInfo;
 
-
     // -------------------------------------------------------------------
     // get instance of createTask
     // -------------------------------------------------------------------
@@ -59,6 +68,7 @@ public class CreateTask {
     }
 
     // -------------------------------------------------------------------
+    // passes the information to various methods for processing
     // -------------------------------------------------------------------
     public ArrayList<Task> create(String input,
             ArrayList<LocalDateTime> parsedDates, String parsedWords,
@@ -125,6 +135,7 @@ public class CreateTask {
     }
 
     // -------------------------------------------------------------------
+    // check if input consist any of the word in list
     // -------------------------------------------------------------------
     private Boolean searchIgnoreWord(String input, String[] list) {
         for (String string : list) {
@@ -136,6 +147,7 @@ public class CreateTask {
     }
 
     // -------------------------------------------------------------------
+    // compare the 2 strings and returns the first similar substring
     // -------------------------------------------------------------------
     private String findCommonWord(String input, String nonParsedWords) {
         String result = null;
@@ -168,6 +180,7 @@ public class CreateTask {
     }
 
     // -------------------------------------------------------------------
+    // creates the instances of the recurring task
     // -------------------------------------------------------------------
     private void createRecurring(Type type, String input, String parsedWords,
             String nonParsedWords, ArrayList<LocalDateTime> recurDate,
@@ -212,6 +225,7 @@ public class CreateTask {
     }
 
     // -------------------------------------------------------------------
+    // check if nextDate is and exception date
     // -------------------------------------------------------------------
     private Boolean checkForException(LocalDateTime nextDate) {
         for (LocalDate date : exceptionDates) {
@@ -223,14 +237,15 @@ public class CreateTask {
     }
 
     // -------------------------------------------------------------------
+    // find the start date time, end date time and the limit
     // -------------------------------------------------------------------
     private ArrayList<LocalDateTime> findNeededDates(String input) {
-
         ArrayList<LocalDateTime> result = new ArrayList<LocalDateTime>();
         ArrayList<LocalDateTime> tempResult = new ArrayList<LocalDateTime>();
         LocalDate tempDate;
         Boolean hasEndWord = false;
 
+        // checks for "to" or "by" after "from"
         for (String check : ENDWORD2) {
             if (input.toLowerCase().contains(STARTWORD)) {
                 String endCondition = input.substring(input.toLowerCase()
@@ -248,7 +263,7 @@ public class CreateTask {
                         endCondition = endCondition.substring(
                                 endCondition.indexOf(check),
                                 endCondition.length());
-                        input = processInfo(input, endCondition);
+                        input = findEndDate(input, endCondition);
                         hasEndWord = true;
                         break;
                     }
@@ -256,18 +271,21 @@ public class CreateTask {
             }
         }
 
+        // checks for "till" or "until"
         if (!hasEndWord) {
             for (String check : ENDWORD) {
                 if (input.toLowerCase().contains(check)) {
                     String endCondition = input.substring(input.indexOf(check),
                             input.length());
-                    input = processInfo(input, endCondition);
+                    input = findEndDate(input, endCondition);
                     break;
                 }
             }
         }
 
         dateParser.parse(input);
+
+        // search for the desired start date in the string based
         if (dateParser.getDates().size() > 1
                 && input.toLowerCase().contains(STARTWORD)) {
             String subString = input.substring(input.indexOf(STARTWORD),
@@ -288,23 +306,14 @@ public class CreateTask {
         } else if (input.toLowerCase().contains(STARTWORD)) {
             String subString = input.substring(input.indexOf(STARTWORD),
                     input.length());
-            dateParser.parse(subString);
-            if (dateParser.getDates().isEmpty()) {
-                result.add(LocalDateTime.now());
-            } else {
-                result.addAll(dateParser.getDates());
-            }
+            result = partialParse(subString, result);
             removedWords.add(dateParser.getParsedWords());
         } else {
-            dateParser.parse(input);
-            if (dateParser.getDates().isEmpty()) {
-                result.add(LocalDateTime.now());
-            } else {
-                result.addAll(dateParser.getDates());
-            }
+            result = partialParse(input, result);
             removedWords.add(dateParser.getParsedWords());
         }
 
+        // ensures that endDateTime is not the same as StartDateTime
         if (endDateTime != null
                 && result.get(0).toLocalDate()
                         .isEqual(endDateTime.toLocalDate())) {
@@ -315,8 +324,23 @@ public class CreateTask {
         limit = result.get(0).plusYears(1);
         return result;
     }
+    
+    // -------------------------------------------------------------------
+    // adds current date time if no date is avaible from parsing
+    // -------------------------------------------------------------------
+    private ArrayList<LocalDateTime> partialParse(String input,
+            ArrayList<LocalDateTime> result) {
+        dateParser.parse(input);
+        if (dateParser.getDates().isEmpty()) {
+            result.add(LocalDateTime.now());
+        } else {
+            result.addAll(dateParser.getDates());
+        }
+        return result;
+    }
 
     // -------------------------------------------------------------------
+    // find and remove exception dates from the recurring task
     // -------------------------------------------------------------------
     private String findExceptionDates(String input) {
         if (input.toLowerCase().contains(EXCEPTWORD)) {
@@ -343,8 +367,9 @@ public class CreateTask {
     }
 
     // -------------------------------------------------------------------
+    // determines find the end date and remove from input
     // -------------------------------------------------------------------
-    private String processInfo(String input, String endCondition) {
+    private String findEndDate(String input, String endCondition) {
         dateParser.parse(endCondition);
         endDateWords = dateParser.getParsedWords();
         if (!dateParser.getDates().isEmpty()) {
@@ -356,6 +381,7 @@ public class CreateTask {
     }
 
     // -------------------------------------------------------------------
+    // determine when to stop recurring of task
     // -------------------------------------------------------------------
     private void getEndDateTime(ArrayList<LocalDateTime> recurDate) {
         if (endDateTime == null) {
@@ -370,7 +396,7 @@ public class CreateTask {
     }
 
     // -------------------------------------------------------------------
-    // Checks if the input contains words to indicate recurring tasks
+    // checks if the input contains words to indicate recurring tasks
     // -------------------------------------------------------------------
     private Type checkRecurring(String input) {
         for (String check : MAINWORD) {
@@ -404,13 +430,13 @@ public class CreateTask {
             } catch (NumberFormatException e) {
                 recurRate = 1;
             }
-            if (findFrequency(split,YEARWORD)) {
+            if (findFrequency(split, YEARWORD)) {
                 return Type.YEARLY;
-            } else if (findFrequency(split,MONTHWORD)) {
+            } else if (findFrequency(split, MONTHWORD)) {
                 return Type.MONTHLY;
-            }else if (findFrequency(split,WEEKWORD)) {
+            } else if (findFrequency(split, WEEKWORD)) {
                 return Type.WEEKLY;
-            }else if (findFrequency(split,DAYWORD)) {
+            } else if (findFrequency(split, DAYWORD)) {
                 return Type.DAILY;
             }
         }
@@ -423,10 +449,9 @@ public class CreateTask {
     private Boolean findFrequency(String[] split, String[] frequency) {
         for (String find : frequency) {
             if (split[0].toLowerCase().contains(find)
-                    || (split.length > 1 && split[1].toLowerCase()
-                            .contains(find))) {
-                if (split.length > 1
-                        && split[1].toLowerCase().contains(find)) {
+                    || (split.length > 1 && split[1].toLowerCase().contains(
+                            find))) {
+                if (split.length > 1 && split[1].toLowerCase().contains(find)) {
                     removedWords.add(split[0] + " " + split[1]);
                     removedWords.add(KEYWORD + " " + split[0]);
                 } else {
