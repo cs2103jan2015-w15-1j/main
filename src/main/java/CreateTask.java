@@ -46,6 +46,7 @@ public class CreateTask {
     private static final String[] DAYWORD = { "day", "daily" };
     private static final int YEAR_LIMIT = 10;
     private static final int MONTH_LIMIT = 3;
+    private static final int LENGHT_OF_KEYWORD = 6;
 
     private static CreateTask taskCreator;
     private DateParser dateParser;
@@ -432,8 +433,8 @@ public class CreateTask {
         }
 
         if (input.toLowerCase().contains(KEYWORD)) {
-            String check = input.substring(input.lastIndexOf(KEYWORD) + 6,
-                    input.length());
+            String check = input.substring(input.lastIndexOf(KEYWORD)
+                    + LENGHT_OF_KEYWORD, input.length());
             String[] split = check.split(" ");
             try {
                 recurRate = Integer.parseInt(split[0]);
@@ -480,25 +481,31 @@ public class CreateTask {
         return Integer.toString(recurRate);
     }
 
+    // for testing if methods is able to give the correct rate and frequency
     public static String frequencyTest(String input) {
-        String output;
+        String output = "";
+        getInstance().resetField();
         Type frequency = getInstance().checkFrequency(input);
-        switch (frequency) {
-        case DAILY:
-            output = getInstance().getRecurRate() + " daily";
-            break;
-        case WEEKLY:
-            output = getInstance().getRecurRate() + " weekly";
-            break;
-        case MONTHLY:
-            output = getInstance().getRecurRate() + " monthly";
-            break;
-        case YEARLY:
-            output = getInstance().getRecurRate() + " yearly";
-            break;
-        default:
-            output = getInstance().getRecurRate() + "";
-            break;
+        try {
+            switch (frequency) {
+            case DAILY:
+                output = getInstance().getRecurRate() + " daily";
+                break;
+            case WEEKLY:
+                output = getInstance().getRecurRate() + " weekly";
+                break;
+            case MONTHLY:
+                output = getInstance().getRecurRate() + " monthly";
+                break;
+            case YEARLY:
+                output = getInstance().getRecurRate() + " yearly";
+                break;
+            default:
+                output = getInstance().getRecurRate() + "";
+                break;
+            }
+        } catch (NullPointerException e) {
+            return output;
         }
         return output;
     }
