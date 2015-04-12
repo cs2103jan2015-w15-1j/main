@@ -105,23 +105,10 @@ public class RootLayoutController extends BorderPane {
     private void handleUserInput() {
         String inputString = userInput.getText();
         if (containsEditAll(inputString)) {
-            StringBuilder newInputString = new StringBuilder(inputString);
-            int editIndex = getEditIndex(inputString, 2);
-            Task task = Controller.getInstance().getDisplayedTasks().get(editIndex);
-            ArrayList<LocalDate> exceptionDates = task.getExceptionDates();
-            assert(exceptionDates != null);
-
-            // Build the string...
-            if (exceptionDates.size() > 0) {
-                newInputString.append("except ");
-                for (LocalDate date : exceptionDates) {
-                    newInputString.append(date.toString());
-                    newInputString.append(",");
-                }
-                String output = newInputString.toString();
+            ArrayList<LocalDate> exceptionDates = extractExceptionDates(inputString);
+            if (exceptionDates != null && exceptionDates.size() > 0) {
+                String output = buildStringToAdd(inputString, exceptionDates);
                 controller.executeCommand(output);
-            } else {
-                controller.executeCommand(inputString);
             }
         } else {
             controller.executeCommand(inputString);
@@ -136,6 +123,26 @@ public class RootLayoutController extends BorderPane {
         return output.length >= 3 &&
                 output[0].equalsIgnoreCase(Command.Type.EDIT.toString()) &&
                 output[1].equalsIgnoreCase(ALL_KEYWORD);
+    }
+
+    private ArrayList<LocalDate> extractExceptionDates(String inputString) {
+        int editIndex = getEditIndex(inputString, 2);
+        Task task = Controller.getInstance().getDisplayedTasks().get(editIndex);
+        ArrayList<LocalDate> exceptionDates = task.getExceptionDates();
+
+        return exceptionDates;
+    }
+
+    private String buildStringToAdd(String inputString, ArrayList<LocalDate> exceptionDates) {
+        StringBuilder newInputString = new StringBuilder(inputString);
+        newInputString.append("except ");
+        for (LocalDate date : exceptionDates) {
+            newInputString.append(date.toString());
+            newInputString.append(",");
+        }
+        String output = newInputString.toString();
+
+        return output;
     }
     
     //@author A0121520A
