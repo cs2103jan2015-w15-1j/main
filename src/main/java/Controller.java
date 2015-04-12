@@ -35,7 +35,7 @@ public class Controller {
     
     private UserDefinedSort userDefinedSort;
     
-    private DisplayController display;
+    private DisplayController displayController;
 
     private Stage stage;
 
@@ -96,8 +96,8 @@ public class Controller {
 
 	// To load the tasks into the display on the first load
     public void onloadDisplay() {
-        display.setFeedback(getWelcomeMessage());
-        display.updateOverviewDisplay(displayedTasks);
+        displayController.setFeedback(getWelcomeMessage());
+        displayController.updateOverviewDisplay(displayedTasks);
     }
 
     // ================================================================
@@ -186,7 +186,7 @@ public class Controller {
 	            break;
         }
         showAppropriateDisplay(helpUser);
-        display.setFeedback(feedback);
+        displayController.setFeedback(feedback);
 
         return feedback;
     }
@@ -196,8 +196,8 @@ public class Controller {
     // ================================================================
 
     //@author A0122081X
-    public void setDisplay(DisplayController display) {
-	    this.display = display;
+    public void setDisplayController(DisplayController displayController) {
+	    this.displayController = displayController;
 	}
     
     public void setStage(Stage stage) {
@@ -473,7 +473,7 @@ public class Controller {
         allTasks = new ArrayList<Task>();
         displayedTasks = FXCollections.observableArrayList();;
         storage.updateFiles(allTasks);
-        display.resetScrollIndex();
+        displayController.resetScrollIndex();
         return MESSAGE_ALL_CLEAR;
     }
 
@@ -502,24 +502,24 @@ public class Controller {
     //@author A0122081X
     private void updateDisplayWithDefault() {
         displayedTasks.setAll(getIncompleteTasks(allTasks));
-        display.updateOverviewDisplay(displayedTasks);
+        displayController.updateOverviewDisplay(displayedTasks);
     }
 
     private void updateDisplayWithCompleted() {
         displayedTasks.setAll(getCompletedTasks(allTasks));
-        display.updateOverviewDisplay(displayedTasks);
+        displayController.updateOverviewDisplay(displayedTasks);
     }
     
     //@author A0121813U
     // Call the display object to show the "search" display
     private void updateDisplaySearch() {
     	sortSearchedTasks();
-        display.updateSearchDisplay(displayedTasks, searchArgument);
+        displayController.updateSearchDisplay(displayedTasks, searchArgument);
     }
     
     // Call the display object to show the "search" display
     private void updateHelpDisplay() {
-    	display.showHelpDisplay();
+    	displayController.showHelpDisplay();
     }
 
     // Sorts the allTasks field based on developer's preference

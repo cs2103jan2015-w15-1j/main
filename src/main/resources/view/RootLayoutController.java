@@ -31,7 +31,7 @@ public class RootLayoutController extends BorderPane {
     // Non-FXML Fields
     // ================================================================
     private Controller controller;
-    private DisplayController display;
+    private DisplayController displayController;
 
     private ArrayList<String> history;
     private int pointer;
@@ -64,7 +64,7 @@ public class RootLayoutController extends BorderPane {
             throw new RuntimeException(e);
         }
 
-        display = DisplayController.getInstance();
+        displayController = DisplayController.getInstance();
         initVariablesForHistory();
         initAutoCompleteCommands();
         userInput.setText(WELCOME_INPUT);
@@ -76,9 +76,9 @@ public class RootLayoutController extends BorderPane {
     @FXML
     public void handleKeyPress(KeyEvent event) {
         if (event.isControlDown() && event.getCode() == KeyCode.D) {
-            display.scrollDown();
+            displayController.scrollDown();
         } else if (event.isControlDown() && event.getCode() == KeyCode.U) {
-            display.scrollUp();
+            displayController.scrollUp();
         } else if (event.getCode() == KeyCode.SPACE) {
             listenForEdit(event);
         } else if (event.getCode() == KeyCode.ENTER) {
@@ -90,7 +90,7 @@ public class RootLayoutController extends BorderPane {
         } else if (event.getCode() == KeyCode.TAB) {
             handleCommandAutoComplete();
         } else if (event.getCode() == KeyCode.ESCAPE) {
-            display.hideOverlays();
+            displayController.hideOverlays();
         }
     }
 

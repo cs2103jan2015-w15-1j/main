@@ -69,7 +69,7 @@ public class DisplayController extends VBox {
     // Non-FXML Fields
     // ================================================================
     private static Logger logger;
-    private static DisplayController display;
+    private static DisplayController displayController;
 
     private Timeline feedbackTimeline;
     private Timeline overlayTimeline;
@@ -171,10 +171,10 @@ public class DisplayController extends VBox {
 
     //@author A0121520A
     public static DisplayController getInstance() {
-        if (display == null) {
-            display = new DisplayController();
+        if (displayController == null) {
+            displayController = new DisplayController();
         }
-        return display;
+        return displayController;
     }
 
 

@@ -14,7 +14,7 @@ public class MainApp extends Application {
 	// Fields
 	// ================================================================
 	private Stage primaryStage;
-	private DisplayController display;
+	private DisplayController displayController;
 	private RootLayoutController rootLayoutController;
 	private Controller controller;
     private static final int STAGE_MINIMUM_HEIGHT = 650;
@@ -43,7 +43,7 @@ public class MainApp extends Application {
 		rootLayoutController.setController(controller);
 
 		// Provide a display handle in controller so that controller can pass message to display
-		controller.setDisplay(display);
+		controller.setDisplayController(displayController);
 		controller.setStage(this.primaryStage);
 	}
 
@@ -54,13 +54,13 @@ public class MainApp extends Application {
 	}
 
 	public void initDisplay() {
-		display = DisplayController.getInstance();
-		rootLayoutController.setCenter(display);
+		displayController = DisplayController.getInstance();
+		rootLayoutController.setCenter(displayController);
 	}
 
 	public void initController() {
 		controller = Controller.getInstance();
-		controller.setDisplay(display);
+		controller.setDisplayController(displayController);
 		controller.onloadDisplay();
 	}
 }
