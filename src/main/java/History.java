@@ -26,7 +26,7 @@ public class History {
 	private ArrayList<Task> allTasks;
 	private ObservableList<Task> displayedTasks;
 
-	private Stack<String> feedbackHistory;
+	private Stack<String> commandHistory;
 
 	// ================================================================
 	// Constructor
@@ -34,7 +34,7 @@ public class History {
 	public History() {
 		mainStack = new Stack<ArrayList<Task>>();
 		displayedStack = new Stack<ObservableList<Task>>();
-		feedbackHistory = new Stack<String>();
+		commandHistory = new Stack<String>();
 	}
 
 	// ================================================================
@@ -78,13 +78,13 @@ public class History {
 	}
 	
 	// Push the feedback string into its Stack
-	public void addFeedback(String feedback) {
-		feedbackHistory.push(feedback);
+	public void storeCommand(String feedback) {
+		commandHistory.push(feedback);
 	}
 
 	// Pop the feedback string from its Stack
-	public String getPreviousFeedback() {
-		return feedbackHistory.pop();
+	public String getPreviousCommand() {
+		return commandHistory.pop();
 	}
 
 	// ================================================================

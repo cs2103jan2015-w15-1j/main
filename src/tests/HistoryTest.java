@@ -107,15 +107,15 @@ public class HistoryTest {
 		String string3 = "Wazzzzzzupppp";
 		String string4 = "How are you?";
 		
-		history.addFeedback(string3);
-		history.addFeedback(string1);
-		history.addFeedback(string4);
-		history.addFeedback(string2);
+		history.storeCommand(string3);
+		history.storeCommand(string1);
+		history.storeCommand(string4);
+		history.storeCommand(string2);
 		
-		assertEquals("Good morning", history.getPreviousFeedback());
-		assertEquals("How are you?", history.getPreviousFeedback());
-		assertEquals("Hello", history.getPreviousFeedback());
-		assertEquals("Wazzzzzzupppp", history.getPreviousFeedback());	
+		assertEquals("Good morning", history.getPreviousCommand());
+		assertEquals("How are you?", history.getPreviousCommand());
+		assertEquals("Hello", history.getPreviousCommand());
+		assertEquals("Wazzzzzzupppp", history.getPreviousCommand());	
 	}
 	
 	// Helper function to create an instance of a Task object quickly
