@@ -50,6 +50,7 @@ public class Storage {
     // search the settings file and open the save file
     // -------------------------------------------------------------------
     public static Storage getInstance() {
+        logger.setLevel(Level.OFF);
         if (storage == null || !settingsFile.exists()) {
             storage = new Storage();
         }
