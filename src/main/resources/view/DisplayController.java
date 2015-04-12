@@ -28,7 +28,7 @@ import javafx.util.Duration;
 import main.java.Task;
 
 //@author A0121520A
-public class Display extends VBox {
+public class DisplayController extends VBox {
 
     // ================================================================
     // FXML Fields
@@ -73,7 +73,7 @@ public class Display extends VBox {
     private ArrayList<String> allExampleCommands;
     private ObservableList<HelpBox> helpList;
 
-    private static Display display;
+    private static DisplayController displayController;
     private int currentScrollIndex;
     private int numExcessTasks;
     private boolean isCurrentDisplayOverview;
@@ -81,7 +81,7 @@ public class Display extends VBox {
     // ================================================================
     // Constants
     // ================================================================
-    private final static String LOCATION_TASK_OVERVIEW_FXML = "/view/TaskOverview.fxml";
+    private final static String LOCATION_TASK_OVERVIEW_FXML = "/view/Display.fxml";
     private final static String EMPTY_STRING = "";
 
     private static final String LABEL_FLOATING = "Floating";
@@ -142,7 +142,7 @@ public class Display extends VBox {
     // ================================================================
     // Constructor
     // ================================================================
-    private Display() {
+    private DisplayController() {
         logger = Logger.getLogger("Display");
         logger.setLevel(Level.OFF);
 
@@ -162,11 +162,11 @@ public class Display extends VBox {
     }
     
     //@author A0121520A 
-    public static Display getInstance() {
-        if (display == null) {
-            display = new Display();
+    public static DisplayController getInstance() {
+        if (displayController == null) {
+            displayController = new DisplayController();
         }
-        return display;
+        return displayController;
     }
 
 
