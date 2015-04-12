@@ -474,9 +474,9 @@ public class CreateTask {
         return false;
     }
 
-    // -------------------------------------------------------------------
-    // methods for testing
-    // -------------------------------------------------------------------
+    // ================================================================
+    // Utility methods for testing purpose
+    // ================================================================
     private String getRecurRate() {
         return Integer.toString(recurRate);
     }

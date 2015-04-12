@@ -36,9 +36,9 @@ public class StorageTest {
     PrintWriter writer;
     BufferedReader reader;
 
-    // -------------------------------------------------------------------
+    // ================================================================
     // test initializing settings file and moving save file
-    // -------------------------------------------------------------------
+    // ================================================================
     @Test
     public void testSettings() {
         // delete any existing file before testing
@@ -89,9 +89,9 @@ public class StorageTest {
         assertEquals("blank.txt", test.getSaveFileName());
     }
 
-    // -------------------------------------------------------------------
+    // ================================================================
     // Test the write and read the task from the file
-    // -------------------------------------------------------------------
+    // ================================================================
     @Test
     public void testWriteAndRead() {
         // data for testing
@@ -109,9 +109,9 @@ public class StorageTest {
         compareData(tempData, readData);
     }
 
-    // -------------------------------------------------------------------
+    // ================================================================
     // Test backup file
-    // -------------------------------------------------------------------
+    // ================================================================
     @Test
     public void testBackup() {
         // data for testing
@@ -158,9 +158,10 @@ public class StorageTest {
         assertEquals(true, readData.isEmpty());
     }
 
-    // -------------------------------------------------------------------
+    // ================================================================
+    // Utility methods
+    // ================================================================
     // method to set-up the ArrayList
-    // -------------------------------------------------------------------
     private void createArrayListOfTask(String[] data, ArrayList<Task> tempData) {
         DateParser parser = DateParser.getInstance();
         for (String string : data) {
@@ -173,9 +174,7 @@ public class StorageTest {
         }
     }
 
-    // -------------------------------------------------------------------
     // method to compare and check all variables of tasks
-    // -------------------------------------------------------------------
     private void compareData(ArrayList<Task> tempData, ArrayList<Task> readData) {
         for (int i = 0; i < readData.size(); i++) {
             assertEquals(tempData.get(i).isCompleted(), readData.get(i)
