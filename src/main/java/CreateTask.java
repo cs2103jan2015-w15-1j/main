@@ -7,17 +7,6 @@ import java.util.UUID;
 
 //@author A0122393L
 public class CreateTask {
-    // Not fully Tested!!!!
-    // seem to be working add for recuring:
-    // "add do homework every 2 monday from 3 apr to 25 jul"
-    // "add do nothing every week from today to 30 jul"
-    // "add foo every friday"
-    // "add foo every day from 2pm to 4pm"
-    // "add foo every week until 20 may"
-    // "add foo weekly from 2pm to 5pm until 21 may"
-    // "add foo every month from 4 apr to 6 sep"
-    // needs more testing
-
     public static enum Type {
         YEARLY, MONTHLY, WEEKLY, DAILY,
     };
@@ -26,7 +15,11 @@ public class CreateTask {
     private static final String EXCEPTWORD = "except";
     private static final String STARTWORD = "from";
     private static final String[] IGNOREWORD = { " day from", " week from",
-            " month from", " year from" };
+            " month from", " year from", "everyday from" };
+    private static final String[] IGNOREWORD2 = { "monday from",
+            "tuesday from", "wednesday from", "thursday from", "friday from",
+            "saturday from", "sunday from", "mon from", "tue from", "wed from",
+            "thu from", "fri from", "sat from", "sun from" };
     private static final String[] ENDWORD = { "until", "till" };
     private static final String[] ENDWORD2 = { " to ", " by " };
     private static final String[] MAINWORD = { "daily", "everyday", "monthly",
@@ -65,32 +58,40 @@ public class CreateTask {
         rawInfo = input;
         Type type = checkRecurring(input);
         Boolean hasIgnoreWords = false;
+        Boolean hasIgnoreWords2 = false;
 
         ArrayList<LocalDateTime> recurDate = new ArrayList<LocalDateTime>();
         String recurId;
         Task task;
         recurId = UUID.randomUUID().toString();
-        
+
         input = findExceptionDates(input);
-        
-        for (String string : IGNOREWORD) {
-            if (input.contains(string)) {
-                hasIgnoreWords = true;
-            }
-        }
+        hasIgnoreWords = searchIgnoreWord(input, IGNOREWORD);
+        hasIgnoreWords2 = searchIgnoreWord(input, IGNOREWORD2);
+
         if (type != null) {
             recurDate = new ArrayList<LocalDateTime>(findNeededDates(input));
+            System.out.println("before ignore date: " + recurDate);
+            System.out.println("before parsed date: " + parsedDates);
 
             if (!parsedDates.isEmpty()
                     && !hasIgnoreWords
                     && parsedDates.size() > 1
                     && !recurDate.get(0).toLocalDate().isEqual(LocalDate.now())
                     && recurDate.get(0).toLocalDate()
-                            .isBefore(parsedDates.get(0).toLocalDate())) {
+                            .isBefore(parsedDates.get(0).toLocalDate())
+                    && !(hasIgnoreWords2 && recurDate
+                            .get(0)
+                            .toLocalDate()
+                            .isEqual(
+                                    parsedDates.get(0).toLocalDate()
+                                            .minusWeeks(1)))) {
                 recurDate.set(0, parsedDates.get(0));
             }
 
             getEndDateTime(recurDate);
+            System.out.println("Start date: " + recurDate);
+
             if (!removedWords.isEmpty()) {
                 for (String remove : removedWords) {
                     input = input.replace(remove, "");
@@ -108,6 +109,15 @@ public class CreateTask {
         }
 
         return tempList;
+    }
+
+    private Boolean searchIgnoreWord(String input, String[] list) {
+        for (String string : list) {
+            if (input.contains(string)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private String findCommonWord(String input, String nonParsedWords) {
@@ -155,7 +165,7 @@ public class CreateTask {
                 tempList.add(task);
             }
             hasException = false;
-            
+
             switch (type) {
             case DAILY:
                 nextDate = recurDate.get(0).plusDays(recurRate);
@@ -290,7 +300,8 @@ public class CreateTask {
             for (String string : split) {
                 try {
                     dateParser.parse(string);
-                    exceptionDates.add(dateParser.getDates().get(0).toLocalDate());
+                    exceptionDates.add(dateParser.getDates().get(0)
+                            .toLocalDate());
                 } catch (NullPointerException e) {
                 }
             }
