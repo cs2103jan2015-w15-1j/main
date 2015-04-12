@@ -2,6 +2,7 @@ package tests;
 
 import static org.junit.Assert.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
@@ -109,7 +110,7 @@ public class TaskTest {
         
         // Testing before modifying description
         assertEquals("finish homework", task.getDescription());
-        assertEquals("2015-04-08", task.getDate().toString());
+        assertEquals(LocalDate.now().toString(), task.getDate().toString());
         assertEquals(null, task.getStartTime());
         assertEquals(null, task.getEndTime());
         
@@ -117,7 +118,7 @@ public class TaskTest {
         
         // Testing after modifying description
         assertEquals("do not do homework", task.getDescription());
-        assertEquals("2015-04-08", task.getDate().toString());
+        assertEquals(LocalDate.now().toString(), task.getDate().toString());
         assertEquals(null, task.getStartTime());
         assertEquals(null, task.getEndTime());
     }
