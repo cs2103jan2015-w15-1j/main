@@ -11,6 +11,54 @@ import java.util.ArrayList;
 
 //@author A0122081X
 public class ControllerTest extends TestCase {
+    // ================================================================
+    // Tests for non-recurring tasks
+    // ================================================================
+    @Test
+    public void testAdd() {
+
+    }
+
+    @Test
+    public void testDelete() {
+
+    }
+
+    @Test
+    public void testEdit() {
+
+    }
+
+    @Test
+    public void testComplete() {
+
+    }
+
+    @Test
+    public void testIncomplete() {
+
+    }
+
+    @Test
+    public void testSearch() {
+
+    }
+
+    @Test
+    public void testClear() {
+
+    }
+
+    @Test
+    public void testInvalid() {
+
+    }
+
+    @Test
+    public void testExit() {
+
+    }
+
     @Test
     public void testUndo() {
         Controller controller = Controller.getInstance();
@@ -23,7 +71,7 @@ public class ControllerTest extends TestCase {
     }
 
     @Test
-    public void testComplete() {
+    public void testCompleteOld() {
         String[] args = {"holaamigos.txt"};
         Controller controller = Controller.getInstance();
 
@@ -40,5 +88,12 @@ public class ControllerTest extends TestCase {
         return output;
 
     }
+
+    // ================================================================
+    // Tests for recurring tasks
+    // ================================================================
+
+    // Need to cover
+    // add, edit, delete
 
 }
