@@ -3,7 +3,6 @@ package main.java;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.stage.Stage;
-import main.resources.view.DisplayController;
 
 import java.time.DateTimeException;
 import java.time.LocalDateTime;
@@ -60,13 +59,16 @@ public class Controller {
     private static final String MESSAGE_NO_UNDO = "Already at oldest change, unable to undo.";
     private static final String MESSAGE_ALL_CLEAR = "All tasks have been deleted!";
     private static final String MESSAGE_TASK_INDEX_ERROR = "The task you specified could not be found.";
-    private static final String MESSAGE_SAVE_SET = "File save destination has been confirmed. \n";
-    private static final String MESSAGE_SAVE_SET_FAIL = "File save destination failed. \n";
-    private static final String MESSAGE_SAVE_MOVE = "Save file has been moved. \n";
-    private static final String MESSAGE_SAVE_MOVE_FAIL = "Moving save file failed. \n";
+    private static final String MESSAGE_SAVE_SET = "File save destination has been confirmed.";
+    private static final String MESSAGE_SAVE_SET_FAIL = "File save destination failed.";
+    private static final String MESSAGE_SAVE_MOVE = "Save file has been moved.";
+    private static final String MESSAGE_SAVE_MOVE_FAIL = "Moving save file failed.";
     private static final String MESSAGE_NON_CHRONO_DATES = "Task was not created as %s";
    
-    private static final String EMPTY_STRING = "";
+    private static final String STRING_EMPTY = "";
+    private static final String STRING_SPACE = " ";
+    private static final String STRING_ALL = "all";
+    private static final String STRING_COMPLETED = "completed";
 
     
     // ================================================================
@@ -77,17 +79,10 @@ public class Controller {
         storage = Storage.getInstance();
         taskCreator = CreateTask.getInstance();
         allTasks = storage.readFile();
-        previousStates = new History();
-        
+        previousStates = new History();       
         sortAllTasks();
-
-        // Load the incomplete tasks into displayedTasks (MAIN VIEW WHEN APP STARTS)
-        for (Task task : getIncompleteTasks(allTasks)) {
-            displayedTasks.add(task);
-        }
-        
-        // THIS FIXES THE SLOW ADDITION OF FIRST TASK
-        parser.parse("foo today");
+        loadIncompleteTasks();
+        warmUpParser();
     }
 
 	// Singleton pattern for Controller
@@ -115,10 +110,9 @@ public class Controller {
     // Based on what the user has type, this method will call the respective methods
     public String executeCommand(String input) {
         Command currentCommand = new Command(input);
-
         Command.Type commandType = currentCommand.getCommandType();
         String arguments = currentCommand.getArguments();
-        String feedback = EMPTY_STRING;
+        String feedback = STRING_EMPTY;
         boolean helpUser = false;
 
         switch (commandType) {
@@ -191,7 +185,6 @@ public class Controller {
         }
         showAppropriateDisplay(helpUser);
         displayController.setFeedback(feedback);
-
         return feedback;
     }
 
@@ -202,6 +195,18 @@ public class Controller {
     //@author A0122081X
     public void setStage(Stage stage) {
 	    this.stage = stage;
+	}
+    
+    // THIS FIXES THE SLOW ADDITION OF FIRST TASK
+	private void warmUpParser() {
+		parser.parse("foo today");
+	}
+
+	// Load the incomplete tasks into displayedTasks (MAIN VIEW WHEN APP STARTS)
+	private void loadIncompleteTasks() {
+		for (Task task : getIncompleteTasks(allTasks)) {
+            displayedTasks.add(task);
+        }
 	}
 
 	// ================================================================
@@ -277,13 +282,13 @@ public class Controller {
         Task editTask;
 
         // Check if it's an edit all
-        if (input.toLowerCase().contains("all")) {
-            input = input.replace("all", "").trim();
+        if (input.toLowerCase().contains(STRING_ALL)) {
+            input = input.replace(STRING_ALL, STRING_EMPTY).trim();
             editAll = true;
         }
 
         try {
-            inputArray = input.split(" ");
+            inputArray = input.split(STRING_SPACE);
             // ArrayList is 0-indexed, but Tasks are displayed to users as 1-indexed
             editIndex = Integer.parseInt(inputArray[0]) - 1;
             editTask = displayedTasks.get(editIndex);
@@ -321,9 +326,9 @@ public class Controller {
         boolean deleteAll = false;
         Task removeTask;
 
-        if (input.toLowerCase().contains("all")) {
+        if (input.toLowerCase().contains(STRING_ALL)) {
             // Remove the "all" keyword so the try-catch can parse it properly
-            input = input.toLowerCase().replace("all", "").trim();
+            input = input.toLowerCase().replace(STRING_ALL, STRING_EMPTY).trim();
             deleteAll = true;
         }
 
@@ -445,7 +450,7 @@ public class Controller {
     private void displayTask(String input) {
         displayedTasks.clear();
 
-        if (input.equals("completed")) {
+        if (input.equals(STRING_COMPLETED)) {
             switchDisplayToSearch = true;
             searchArgument = input;
             updateDisplayWithCompleted();
@@ -526,7 +531,7 @@ public class Controller {
         displayController.updateSearchDisplay(displayedTasks, searchArgument);
     }
     
-    // Call the display object to show the "search" display
+    // Call the display object to show the "help" display
     private void updateHelpDisplay() {
     	displayController.showHelpDisplay();
     }
