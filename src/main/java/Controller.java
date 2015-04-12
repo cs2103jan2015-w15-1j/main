@@ -278,7 +278,6 @@ public class Controller {
 
         // Check if it's an edit all
         if (input.toLowerCase().contains("all")) {
-            //input = input.toLowerCase().replace("all", "").trim();
             input = input.replace("all", "").trim();
             editAll = true;
         }
@@ -296,7 +295,10 @@ public class Controller {
         String[] addArgumentArray =  new String[inputArray.length - 1];
         System.arraycopy(inputArray, 1, addArgumentArray, 0, inputArray.length - 1);
         String addArgument = String.join(" ", addArgumentArray);
-        System.out.println(addArgument);
+
+        if (addArgument.isEmpty()) {
+            return MESSAGE_INVALID_COMMAND;
+        }
 
         if (editAll && editTask.getId() != null) {
             deleteAllTasks(editTask);
