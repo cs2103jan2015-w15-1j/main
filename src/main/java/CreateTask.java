@@ -78,9 +78,9 @@ public class CreateTask {
             String nonParsedWords) {
         resetField();
         rawInfo = input;
-        
+
         input = removeTime(input);
-        
+
         Type type = checkFrequency(input);
         Boolean hasIgnoreWords = false;
         Boolean hasIgnoreWords2 = false;
@@ -97,7 +97,7 @@ public class CreateTask {
         if (type != null) {
             recurDate = new ArrayList<LocalDateTime>(findNeededDates(type,
                     input, hasIgnoreWords2));
-            
+
             if (!parsedDates.isEmpty()
                     && !hasIgnoreWords
                     && parsedDates.size() > 1
@@ -149,7 +149,7 @@ public class CreateTask {
         String[] split = input.split(" ");
         String output = "";
         for (String subString : split) {
-            if (subString.contains("pm")){
+            if (subString.contains("pm")) {
                 subString = subString.replaceAll(subString, "");
             } else {
                 output += " " + subString;
@@ -349,7 +349,11 @@ public class CreateTask {
             result.add(endDateTime);
             endDateTime = null;
         }
-
+        
+        if (result.get(0).equals(result.get(1))){
+            result.remove(1);
+        }
+        
         if (type.equals(Type.YEARLY)) {
             limit = result.get(0).plusYears(YEAR_LIMIT);
         } else if (type.equals(Type.MONTHLY)) {
@@ -550,9 +554,10 @@ public class CreateTask {
         getInstance().resetField();
         Type frequency = getInstance().checkFrequency(input);
         ArrayList<String> output = new ArrayList<String>();
-        output.add(getInstance().findNeededDates(frequency, input, false).get(0).toLocalDate().toString());
+        output.add(getInstance().findNeededDates(frequency, input, false)
+                .get(0).toLocalDate().toString());
         output.add(getInstance().endDateTime.toLocalDate().toString());
-        output.add(getInstance().limit.toString());
+        output.add(getInstance().limit.toLocalDate().toString());
         return output;
     }
 }
