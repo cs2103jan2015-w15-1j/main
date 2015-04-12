@@ -487,8 +487,24 @@ public class DateParserTest {
         input = "fries";
         dates = getParsedDates(input);
         assertEquals("Number of dates", 0, dates.size());
-        
+
         input = "find girlfriend";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 0, dates.size());
+
+        input = "return money owed to John";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 0, dates.size());
+
+        input = "return money owed to John on wed";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Not parsed words",
+                     "return money owed to John on",
+                     getNotParsedWords(input));
+        assertEquals("Parsed words", "wed", getParsedWords(input));
+
+        input = "abcd owed dcba"; // length = 14
         dates = getParsedDates(input);
         assertEquals("Number of dates", 0, dates.size());
     }

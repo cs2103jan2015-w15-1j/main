@@ -21,7 +21,7 @@ import com.joestelmach.natty.DateGroup;
 import com.joestelmach.natty.ParseLocation;
 import com.joestelmach.natty.Parser;
 
-
+//@author A0121520A
 /**
  * This class helps parse date inputs using Natty.
  * Usage:
@@ -32,8 +32,6 @@ import com.joestelmach.natty.Parser;
  * String parsedWords = dateParser.getParsedWords();
  * String notParsedWords = dateParser.getNotParsedWords();
  */
-
-// @author A0121520A
 public class DateParser {
    
     // ================================================================
@@ -224,20 +222,21 @@ public class DateParser {
 
         for (String parsedWord : splitParsed) {
             int numChars = 0;
+            int parsePositionFromBack = input.length() - parsePosition - 1;
 
             for (String inputWord : splitInput) {
                 numChars += inputWord.length() + 1;
 
                 if (inputWord.contains(parsedWord)) {
-                    
                     if (inputWord.equals(parsedWord)) {
+                        // inputWord is correctly parsed, so is not partially parsed.
                         splitInput.remove(inputWord);
                         break;
                         
-                    } else if (numChars >= parsePosition) {
-                        // if current character position is after the position
+                    } else if (numChars >= parsePositionFromBack) {
+                        // if current character num is after the position
                         // of the character that marks the start of words that
-                        // were parsed.
+                        // were parsed (from the back).
                         int position = getActualIndexOfWord(input,
                                                             parsePosition,
                                                             parsedWord);

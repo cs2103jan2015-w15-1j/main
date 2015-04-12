@@ -117,7 +117,7 @@ public class Task implements Cloneable {
         return checkOverdue(nowDate, nowTime);
     }
 
-    //@author A0122393L  
+    //@author A0122393L
     // ================================================================
     // Public setters
     // ================================================================
@@ -164,7 +164,7 @@ public class Task implements Cloneable {
         return exceptionDates;
     }
 
-    //@author A0121520A 
+    //@author A0121520A
     // ================================================================
     // Utility Methods
     // ================================================================
@@ -204,7 +204,7 @@ public class Task implements Cloneable {
     // Initialization Methods
     // ================================================================
 
-    //@author A0121520A    
+    //@author A0121520A
     // Determines type of task using the number of dates parsed.
     private Type determineType(ArrayList<LocalDateTime> parsedDates) {
         int numDates = parsedDates.size();
@@ -240,6 +240,7 @@ public class Task implements Cloneable {
     //@author A0121520A
     /**
      * Get the description of the task
+     * 
      * @param notParsedWords
      * @return description
      */
