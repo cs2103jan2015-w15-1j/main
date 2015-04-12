@@ -56,7 +56,7 @@ public class Command {
     // ================================================================
     // Private methods
     // ================================================================
-    private Type determineCommandType(String userCommand2) {
+    private Type determineCommandType(String userCommand) {
         switch (userCommand.toLowerCase()) {
             case "add" :
                 return Type.ADD;

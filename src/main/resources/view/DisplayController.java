@@ -224,7 +224,7 @@ public class DisplayController extends VBox {
      * actual index in the input ObservableList.
      * 
      * @param searchResults Must be sorted in the above order.
-     * @param searchQuery
+     * @param searchQuery   User's input query
      */
     public void updateSearchDisplay(ObservableList<Task> searchResults,
                                     String searchQuery) {
