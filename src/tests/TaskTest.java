@@ -173,6 +173,29 @@ public class TaskTest {
         assertEquals("do that", clone.getDescription());
     }
     
+    @Test
+    public void TestOverdue() {
+    	Task taskFloating = createNewTask("do homework");
+    	
+    	Task taskDeadlineNoTimeOverdue = createNewTask("do homework 9 march");
+    	Task taskDeadlineNoTimeNotOverdue = createNewTask("do homework today");
+    	Task taskDeadlineWithTimeOverdue = createNewTask("do homework by 3am today");
+    	Task taskDeadlineWithTimeNotOverdue = createNewTask("do homework by 11pm today");
+    	
+    	Task taskTimedOverdueByDate = createNewTask("do homework 2pm to 3pm 9 march");
+    	Task taskTimedOverdueByTime = createNewTask("do homework 3am to 4am today");
+    	Task taskTimedNotOverdue = createNewTask("do homework 11pm to 11.59pm today");
+    	
+    	assertFalse(taskFloating.isOverdue());
+    	assertTrue(taskDeadlineNoTimeOverdue.isOverdue());
+    	assertFalse(taskDeadlineNoTimeNotOverdue.isOverdue());
+    	assertTrue(taskDeadlineWithTimeOverdue.isOverdue());
+    	assertFalse(taskDeadlineWithTimeNotOverdue.isOverdue());
+    	assertTrue(taskTimedOverdueByDate.isOverdue());
+    	assertTrue(taskTimedOverdueByTime.isOverdue());
+    	assertFalse(taskTimedNotOverdue.isOverdue());   	
+    }
+    
     // Created for the purpose for this test. Simplify the constructor of Task. NOT A TEST
     public Task createNewTask(String input) {
         DateParser parser = DateParser.getInstance();
