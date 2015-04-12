@@ -107,9 +107,9 @@ public class RootLayoutController extends BorderPane {
         if (containsEditAll(inputString)) {
             ArrayList<LocalDate> exceptionDates = extractExceptionDates(inputString);
             if (exceptionDates != null && exceptionDates.size() > 0) {
-                String output = buildStringToAdd(inputString, exceptionDates);
-                controller.executeCommand(output);
+                inputString = buildExceptStringToAdd(inputString, exceptionDates);
             }
+            controller.executeCommand(inputString);
         } else {
             controller.executeCommand(inputString);
         }
@@ -133,7 +133,7 @@ public class RootLayoutController extends BorderPane {
         return exceptionDates;
     }
 
-    private String buildStringToAdd(String inputString, ArrayList<LocalDate> exceptionDates) {
+    private String buildExceptStringToAdd(String inputString, ArrayList<LocalDate> exceptionDates) {
         StringBuilder newInputString = new StringBuilder(inputString);
         newInputString.append("except ");
         for (LocalDate date : exceptionDates) {
