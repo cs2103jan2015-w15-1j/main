@@ -34,6 +34,16 @@ public class ControllerTest extends TestCase {
         return new Task(input, parsedDates, parsedWords, nonParsedWords);
     }
 
+    //@author A0122081X
+    private ArrayList<String> getTaskDesc(ArrayList<Task> input) {
+        ArrayList<String> output = new ArrayList<String>();
+        for (Task task : input) {
+            output.add(task.getDescription());
+        }
+
+        return output;
+    }
+
     // ================================================================
     // Tests for non-recurring tasks
     // ================================================================
@@ -234,14 +244,6 @@ public class ControllerTest extends TestCase {
         assertEquals(testList.toString(), controller.getIncompleteTasksPublic().toString());
     }
 
-    private ArrayList<String> getTaskDesc(ArrayList<Task> input) {
-        ArrayList<String> output = new ArrayList<String>();
-        for (Task task : input) {
-            output.add(task.getDescription());
-        }
-
-        return output;
-    }
 
     // ================================================================
     // Tests for recurring tasks
@@ -249,5 +251,67 @@ public class ControllerTest extends TestCase {
 
     // Need to cover
     // add, edit, delete
+
+    @Test
+    public void testAddRecurring() {
+        Controller controller = Controller.getInstance();
+        controller.executeCommand("clear");
+
+        ArrayList<Task> testList = new ArrayList<>();
+
+        controller.executeCommand("clear");
+
+        assertEquals(testList, controller.getAllTasks());
+    }
+
+    @Test
+     public void testEditOneRecurring() {
+        Controller controller = Controller.getInstance();
+        controller.executeCommand("clear");
+
+        ArrayList<Task> testList = new ArrayList<>();
+
+        controller.executeCommand("clear");
+
+        assertEquals(testList, controller.getAllTasks());
+    }
+
+    @Test
+    public void testEditAllRecurring() {
+        Controller controller = Controller.getInstance();
+        controller.executeCommand("clear");
+
+        ArrayList<Task> testList = new ArrayList<>();
+
+        controller.executeCommand("clear");
+
+        assertEquals(testList, controller.getAllTasks());
+    }
+
+    @Test
+    public void testDeleteOneRecurring() {
+        Controller controller = Controller.getInstance();
+        controller.executeCommand("clear");
+
+        ArrayList<Task> testList = new ArrayList<>();
+
+        controller.executeCommand("clear");
+
+        assertEquals(testList, controller.getAllTasks());
+    }
+
+    @Test
+    public void testDeleteAllRecurring() {
+        Controller controller = Controller.getInstance();
+        controller.executeCommand("clear");
+
+        ArrayList<Task> testList = new ArrayList<>();
+
+        controller.executeCommand("clear");
+
+        assertEquals(testList, controller.getAllTasks());
+    }
+
+
 
 }
