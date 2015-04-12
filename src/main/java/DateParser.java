@@ -65,7 +65,7 @@ public class DateParser {
     // ================================================================
     private DateParser() {
         logger = Logger.getLogger("DateParser");
-        logger.setLevel(Level.INFO);
+        logger.setLevel(Level.OFF);
     }
 
 

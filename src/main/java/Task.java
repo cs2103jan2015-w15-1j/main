@@ -37,6 +37,7 @@ public class Task implements Cloneable {
         FLOATING, DEADLINE, TIMED
     };
 
+    private static final String ESCAPE_CHAR = "\"";
     private static final String STRING_EMPTY = "";
     private static final String STRING_EMPTY_SPACE = " ";
     private static final String STRING_TIME_FORMAT = "h.mma";
@@ -46,7 +47,7 @@ public class Task implements Cloneable {
     private static final int POSITION_SECOND_DATE = 1;
     private static final String[] KEYWORDS = { "by", "on", "at", "from",
             "until", "till" , "except"};
-
+    
     private String rawInfo;
     private Type type;
     private String description; // arguments without the date and time
@@ -170,11 +171,13 @@ public class Task implements Cloneable {
     // ================================================================
     @Override
     public String toString() {
-        String result = getDescription() + STRING_EMPTY_SPACE + getFormattedTimeAndDate(true);
+        String result = getDescription() + STRING_EMPTY_SPACE +
+                        getFormattedTimeAndDate(true);
         return result.trim();
     }
     
     public String getFormattedTimeAndDate(boolean includeDate) {
+        assert includeDate == true || includeDate == false;
         String result = STRING_EMPTY;
         if (getStartTime() != null) {
             result += addFormattedTime() + STRING_EMPTY_SPACE;
@@ -199,45 +202,52 @@ public class Task implements Cloneable {
         cloned.setEndTime(cloned.getEndTime());
         return cloned;
     }
-
+    
+    
+    //@author A0121520A
     // ================================================================
     // Initialization Methods
     // ================================================================
 
-    //@author A0121520A
     // Determines type of task using the number of dates parsed.
     private Type determineType(ArrayList<LocalDateTime> parsedDates) {
         int numDates = parsedDates.size();
         switch (numDates) {
-        case 2:
-            return Type.TIMED;
-        case 1:
-            return Type.DEADLINE;
-        default:
-            return Type.FLOATING;
+            case 2 :
+                return Type.TIMED;
+            case 1 :
+                return Type.DEADLINE;
+            default :
+                return Type.FLOATING;
         }
     }
 
     private void initDateAndTime(Type type, ArrayList<LocalDateTime> parsedDates) {
         switch (type) {
-        case TIMED:
-            date = parsedDates.get(POSITION_FIRST_DATE).toLocalDate();
-            startTime = parsedDates.get(POSITION_FIRST_DATE).toLocalTime();
-            endTime = parsedDates.get(POSITION_SECOND_DATE).toLocalTime();
-            break;
-        case DEADLINE:
-            date = parsedDates.get(POSITION_FIRST_DATE).toLocalDate();
-            LocalTime time = parsedDates.get(POSITION_FIRST_DATE).toLocalTime();
-            if (time.getNano() == 0) {
-                startTime = time;
-            }
-            break;
-        default:
-            break;
+            case TIMED :
+                LocalDateTime firstDate = parsedDates.get(POSITION_FIRST_DATE);
+                LocalDateTime secondDate = parsedDates.get(POSITION_SECOND_DATE);
+                date = firstDate.toLocalDate();
+                startTime = firstDate.toLocalTime();
+                endTime = secondDate.toLocalTime();
+                break;
+            case DEADLINE :
+                firstDate = parsedDates.get(POSITION_FIRST_DATE);
+                date = firstDate.toLocalDate();
+                LocalTime time = firstDate.toLocalTime();
+                if (isUserEnteredTime(time)) {
+                    startTime = time;
+                }
+                break;
+            default :
+                break;
         }
     }
 
-    //@author A0121520A
+    private boolean isUserEnteredTime(LocalTime time) {
+        return time.getNano() == 0;
+    }
+
     /**
      * Get the description of the task
      * 
@@ -248,6 +258,13 @@ public class Task implements Cloneable {
         String[] wordArr = notParsedWords.split(STRING_EMPTY_SPACE);
         ArrayList<String> wordArrayList = new ArrayList<String>(Arrays.asList(wordArr));
 
+        removeKeywords(wordArrayList);
+
+        String description = StringUtils.join(wordArrayList, STRING_EMPTY_SPACE);
+        return description.replace(ESCAPE_CHAR, STRING_EMPTY);
+    }
+
+    private void removeKeywords(ArrayList<String> wordArrayList) {
         // reverse as we want to delete words from the back
         Collections.reverse(wordArrayList);
 
@@ -257,9 +274,6 @@ public class Task implements Cloneable {
         }
 
         Collections.reverse(wordArrayList);
-
-        String description = StringUtils.join(wordArrayList, ' ');
-        return description.replace("\"", STRING_EMPTY);
     }
     
     //@author A0122081X

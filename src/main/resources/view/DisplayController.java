@@ -153,7 +153,7 @@ public class DisplayController extends VBox {
     // ================================================================
     private DisplayController() {
         logger = Logger.getLogger("Display");
-        logger.setLevel(Level.INFO);
+        logger.setLevel(Level.OFF);
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource(LOCATION_TASK_OVERVIEW_FXML));
         loader.setRoot(this);
