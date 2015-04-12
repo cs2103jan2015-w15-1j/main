@@ -108,6 +108,7 @@ public class Controller {
     }
 
     //@author A0121813U
+    // Based on what the user has type, this method will call the respective methods
     public String executeCommand(String input) {
         Command currentCommand = new Command(input);
 
@@ -403,6 +404,7 @@ public class Controller {
     }
 
     //@author A0121813U
+    // The previous state of the ArrayList and the ObservableList are restored
     private String undo() {
         if (previousStates.isEmpty()) {
             return MESSAGE_NO_UNDO;
@@ -491,6 +493,8 @@ public class Controller {
     // ================================================================
     
     //@author A0121813U
+    // Based on what input the user has typed, 
+    // this method will determine the appropriate screen to display
     private void showAppropriateDisplay(boolean helpUser) {
     	if (helpUser) {
         	updateHelpDisplay();
@@ -514,26 +518,32 @@ public class Controller {
     }
     
     //@author A0121813U
+    // Call the display object to show the "search" display
     private void updateDisplaySearch() {
     	sortSearchedTasks();
         displayController.updateSearchDisplay(displayedTasks, searchArgument);
     }
     
+    // Call the display object to show the "search" display
     private void updateHelpDisplay() {
     	displayController.showHelpDisplay();
-;    }
+    }
 
+    // Sorts the allTasks field based on developer's preference
     private void sortAllTasks() {
     	userDefinedSort = new UserDefinedSort(allTasks);
     	userDefinedSort.addComparator(new SortType());
+    	userDefinedSort.addComparator(new SortTime());
     	userDefinedSort.addComparator(new SortDate());
         userDefinedSort.addComparator(new SortOverdue());   
         allTasks = userDefinedSort.executeSort();
     }
     
+    // Sorts the displayedTasks when the "search" command is entered
     private void sortSearchedTasks() {
     	userDefinedSort = new UserDefinedSort(new ArrayList<Task>(displayedTasks));
         userDefinedSort.addComparator(new SortType());
+        userDefinedSort.addComparator(new SortTime());
         userDefinedSort.addComparator(new SortDate());
         userDefinedSort.addComparator(new SortOverdue());
         userDefinedSort.addComparator(new SortIncomplete());
@@ -541,6 +551,7 @@ public class Controller {
         displayedTasks = FXCollections.observableArrayList(userDefinedSort.getList());
     }
 
+    // Save the current state of allTasks and displayedTasks field before execution of command
     private void saveCurrentState(String input) {
         previousStates.storeCurrentStatus(allTasks, displayedTasks);
         previousStates.addFeedback(input);

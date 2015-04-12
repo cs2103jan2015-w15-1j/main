@@ -24,8 +24,6 @@ public class TitleBox extends HBox {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
 		 this.title.setText(desc);
 	}
-
 }

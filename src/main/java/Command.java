@@ -12,7 +12,7 @@ public class Command {
     private static final int PARAM_POSITION_COMMAND = 0;
     private static final int PARAM_START_POSITION_ARGUMENT = 1;
 
-    private final String ONE_SPACING = " ";
+    private static final String STRING_ONE_SPACING = " ";
 
     private Type commandType;
     private String userCommand;
@@ -27,9 +27,15 @@ public class Command {
         commandType = determineCommandType(userCommand);
     }
 
+    
     // ================================================================
     // Public getters
     // ================================================================
+    /**
+     * Get all command types as an ArrayList of Strings.
+     * 
+     * @return ArrayList of String representations of command types
+     */
     public static ArrayList<String> getAllCommandTypes() {
         ArrayList<String> allCommands = new ArrayList<String>();
         for (Type command : Type.values()) {
@@ -91,12 +97,12 @@ public class Command {
         StringBuilder builder = new StringBuilder();
         for (int i = PARAM_START_POSITION_ARGUMENT; i < parameters.length; i++) {
             builder.append(parameters[i]);
-            builder.append(ONE_SPACING);
+            builder.append(STRING_ONE_SPACING);
         }
         return builder.toString().trim();
     }
 
     private String[] splitUserInput(String input) {
-        return input.trim().split(ONE_SPACING);
+        return input.trim().split(STRING_ONE_SPACING);
     }
 }

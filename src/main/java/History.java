@@ -31,11 +31,14 @@ public class History {
 	// ================================================================
 	// Public methods
 	// ================================================================
+	
+	// Push the arguments into their respective Stacks
 	public void storeCurrentStatus(ArrayList<Task> allTasks, ObservableList<Task> displayedTasks) {
 		mainStack.push(cloneState(allTasks));
 		displayedStack.push(cloneState(displayedTasks));
 	}
 	
+	// Pop the Stacks and store them in thier respective fields
 	public void extractLatestStatus() {
 		allTasks = mainStack.pop();
 		displayedTasks = displayedStack.pop();
@@ -52,17 +55,20 @@ public class History {
 	public boolean isEmpty() {
 		return mainStack.empty();
 	}
-
+	
+	// Push the feedback string into its Stack
 	public void addFeedback(String feedback) {
 		feedbackHistory.push(feedback);
 	}
 
+	// Pop the feedback string from its Stack
 	public String getPreviousFeedback() {
 		return feedbackHistory.pop();
 	}
 
 	// ================================================================
-	// Private methods
+	// Private methods --> The two methods below are to help developers to 
+	//                      create a deep copy of its arguments
 	// ================================================================
 	private ArrayList<Task> cloneState(ArrayList<Task> input) {
         ArrayList<Task> output = new ArrayList<Task>();
