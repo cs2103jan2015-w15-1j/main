@@ -60,9 +60,9 @@ public class CreateTask {
     private String exceptionString;
     private String rawInfo;
 
-    // -------------------------------------------------------------------
+    // ================================================================
     // get instance of createTask
-    // -------------------------------------------------------------------
+    // ================================================================
     public static CreateTask getInstance() {
         if (taskCreator == null) {
             taskCreator = new CreateTask();
@@ -70,14 +70,17 @@ public class CreateTask {
         return taskCreator;
     }
 
-    // -------------------------------------------------------------------
+    // ================================================================
     // passes the information to various methods for processing
-    // -------------------------------------------------------------------
+    // ================================================================
     public ArrayList<Task> create(String input,
             ArrayList<LocalDateTime> parsedDates, String parsedWords,
             String nonParsedWords) {
         resetField();
         rawInfo = input;
+        
+        input = removeTime(input);
+        
         Type type = checkFrequency(input);
         Boolean hasIgnoreWords = false;
         Boolean hasIgnoreWords2 = false;
@@ -93,8 +96,8 @@ public class CreateTask {
 
         if (type != null) {
             recurDate = new ArrayList<LocalDateTime>(findNeededDates(type,
-                    input));
-
+                    input, hasIgnoreWords2));
+            
             if (!parsedDates.isEmpty()
                     && !hasIgnoreWords
                     && parsedDates.size() > 1
@@ -139,9 +142,26 @@ public class CreateTask {
         return tempList;
     }
 
-    // -------------------------------------------------------------------
+    // ================================================================
+    // remove the time from input
+    // ================================================================
+    private String removeTime(String input) {
+        String[] split = input.split(" ");
+        String output = "";
+        for (String subString : split) {
+            if (subString.contains("pm")){
+                subString = subString.replaceAll(subString, "");
+            } else {
+                output += " " + subString;
+            }
+            output = output.trim();
+        }
+        return output;
+    }
+
+    // ================================================================
     // check if input consist any of the word in list
-    // -------------------------------------------------------------------
+    // ================================================================
     private Boolean searchIgnoreWord(String input, String[] list) {
         for (String string : list) {
             if (input.contains(string)) {
@@ -151,9 +171,9 @@ public class CreateTask {
         return false;
     }
 
-    // -------------------------------------------------------------------
+    // ================================================================
     // compare the 2 strings and returns the first similar substring
-    // -------------------------------------------------------------------
+    // ================================================================
     private String findCommonWord(String input, String nonParsedWords) {
         String result = null;
         int stringLength = Math.min(input.length(), nonParsedWords.length());
@@ -168,9 +188,9 @@ public class CreateTask {
         return result;
     }
 
-    // -------------------------------------------------------------------
+    // ================================================================
     // resets all the variables in CreateTask
-    // -------------------------------------------------------------------
+    // ================================================================
     private void resetField() {
         endDateTime = null;
         dateParser = DateParser.getInstance();
@@ -184,9 +204,9 @@ public class CreateTask {
         rawInfo = "";
     }
 
-    // -------------------------------------------------------------------
+    // ================================================================
     // creates the instances of the recurring task
-    // -------------------------------------------------------------------
+    // ================================================================
     private void createRecurring(Type type, String input, String parsedWords,
             String nonParsedWords, ArrayList<LocalDateTime> recurDate,
             String recurId, String rawInfo) {
@@ -229,9 +249,9 @@ public class CreateTask {
 
     }
 
-    // -------------------------------------------------------------------
+    // ================================================================
     // check if nextDate is and exception date
-    // -------------------------------------------------------------------
+    // ================================================================
     private Boolean checkForException(LocalDateTime nextDate) {
         for (LocalDate date : exceptionDates) {
             if (date.equals(nextDate.toLocalDate())) {
@@ -241,10 +261,11 @@ public class CreateTask {
         return false;
     }
 
-    // -------------------------------------------------------------------
+    // ================================================================
     // find the start date time, end date time and the limit
-    // -------------------------------------------------------------------
-    private ArrayList<LocalDateTime> findNeededDates(Type type, String input) {
+    // ================================================================
+    private ArrayList<LocalDateTime> findNeededDates(Type type, String input,
+            Boolean hasIgnoreWords2) {
         ArrayList<LocalDateTime> result = new ArrayList<LocalDateTime>();
         ArrayList<LocalDateTime> tempResult = new ArrayList<LocalDateTime>();
         LocalDate tempDate;
@@ -288,7 +309,7 @@ public class CreateTask {
             }
         }
 
-        dateParser.parse(input);
+        dateParser.parse(rawInfo);
 
         // search for the desired start date in the string based
         if (dateParser.getDates().size() > 1
@@ -307,6 +328,9 @@ public class CreateTask {
             for (LocalDateTime time : tempResult) {
                 result.add(LocalDateTime.of(tempDate, time.toLocalTime()));
             }
+            removedWords.add(dateParser.getParsedWords());
+        } else if (hasIgnoreWords2) {
+            result = partialParse(input, result);
             removedWords.add(dateParser.getParsedWords());
         } else if (input.toLowerCase().contains(STARTWORD)) {
             String subString = input.substring(input.indexOf(STARTWORD),
@@ -336,9 +360,9 @@ public class CreateTask {
         return result;
     }
 
-    // -------------------------------------------------------------------
+    // ================================================================
     // adds current date time if no date is avaible from parsing
-    // -------------------------------------------------------------------
+    // ================================================================
     private ArrayList<LocalDateTime> partialParse(String input,
             ArrayList<LocalDateTime> result) {
         dateParser.parse(input);
@@ -350,9 +374,9 @@ public class CreateTask {
         return result;
     }
 
-    // -------------------------------------------------------------------
+    // ================================================================
     // find and remove exception dates from the recurring task
-    // -------------------------------------------------------------------
+    // ================================================================
     private String findExceptionDates(String input) {
         if (input.toLowerCase().contains(EXCEPTWORD)) {
             exceptionString = input.substring(
@@ -377,9 +401,9 @@ public class CreateTask {
         return input;
     }
 
-    // -------------------------------------------------------------------
+    // ================================================================
     // determines find the end date and remove from input
-    // -------------------------------------------------------------------
+    // ================================================================
     private String findEndDate(String input, String endCondition) {
         dateParser.parse(endCondition);
         endDateWords = dateParser.getParsedWords();
@@ -391,9 +415,9 @@ public class CreateTask {
         return input;
     }
 
-    // -------------------------------------------------------------------
+    // ================================================================
     // determine when to stop recurring of task
-    // -------------------------------------------------------------------
+    // ================================================================
     private void getEndDateTime(ArrayList<LocalDateTime> recurDate) {
         if (endDateTime == null) {
             if (recurDate.size() > 1
@@ -406,9 +430,9 @@ public class CreateTask {
         }
     }
 
-    // -------------------------------------------------------------------
+    // ================================================================
     // checks if the input contains words to indicate recurring tasks
-    // -------------------------------------------------------------------
+    // ================================================================
     private Type checkFrequency(String input) {
         for (String check : MAINWORD) {
             if (input.toLowerCase().contains(check)) {
@@ -454,9 +478,9 @@ public class CreateTask {
         return null;
     }
 
-    // -------------------------------------------------------------------
+    // ================================================================
     // checks if the splited string contains any frequency string
-    // -------------------------------------------------------------------
+    // ================================================================
     private Boolean findFrequency(String[] split, String[] frequency) {
         for (String find : frequency) {
             if (split[0].toLowerCase().contains(find)
@@ -481,8 +505,8 @@ public class CreateTask {
         return Integer.toString(recurRate);
     }
 
-    // for testing if methods is able to give the correct rate and frequency
-    public static String frequencyTest(String input) {
+    // test getting the correct rate and frequency
+    public static String testFrequency(String input) {
         String output = "";
         getInstance().resetField();
         Type frequency = getInstance().checkFrequency(input);
@@ -507,6 +531,28 @@ public class CreateTask {
         } catch (NullPointerException e) {
             return output;
         }
+        return output;
+    }
+
+    // test getting the dates for exception
+    public static String testException(String input) {
+        getInstance().resetField();
+        getInstance().findExceptionDates(input);
+        String output = "";
+        for (LocalDate date : getInstance().exceptionDates) {
+            output += date.toString() + " ";
+        }
+        return output;
+    }
+
+    // test extracting the needed dates
+    public static ArrayList<String> testNeededDates(String input) {
+        getInstance().resetField();
+        Type frequency = getInstance().checkFrequency(input);
+        ArrayList<String> output = new ArrayList<String>();
+        output.add(getInstance().findNeededDates(frequency, input, false).get(0).toLocalDate().toString());
+        output.add(getInstance().endDateTime.toLocalDate().toString());
+        output.add(getInstance().limit.toString());
         return output;
     }
 }
