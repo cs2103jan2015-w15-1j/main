@@ -32,12 +32,13 @@ public class MainApp extends Application {
 		initController();
 		initRootLayout();
 		initPrimaryStage(primaryStage);
+
+		// Provide a stage handle in controller so that controller can close it when exiting
+		controller.setStage(this.primaryStage);
 	}
 
     private void initController() {
         controller = Controller.getInstance();
-	    // Provide a stage handle in controller so that controller can close it when exiting
-        controller.setStage(this.primaryStage);
     }
 
     private void initPrimaryStage(Stage primaryStage) {
@@ -54,5 +55,4 @@ public class MainApp extends Application {
 	public void initRootLayout() {
 		rootLayoutController = new RootLayoutController(controller);
 	}
-
 }
