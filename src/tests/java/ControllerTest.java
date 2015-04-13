@@ -1,4 +1,4 @@
-package tests;
+package tests.java;
 
 import junit.framework.TestCase;
 import main.java.Controller;
