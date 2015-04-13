@@ -51,6 +51,8 @@ public class Controller {
     // Constants
     // ================================================================
     private static final String MESSAGE_WELCOME = "Welcome to Veto! Here is an overview of the week ahead.";
+    private static final String MESSAGE_DISPLAY_INCOMPLETE = "Displaying all incomplete tasks.";
+    private static final String MESSAGE_DISPLAY_COMPLETE = "Displaying all completed tasks.";
     private static final String MESSAGE_ADD = "Task has been successfully added: %s";
     private static final String MESSAGE_DELETE = "Task has been successfully deleted: %s";
     private static final String MESSAGE_DELETE_ALL = "All recurring task has been successfully deleted: %s";
@@ -74,7 +76,6 @@ public class Controller {
     private static final String STRING_SPACE = " ";
     private static final String STRING_ALL = "all";
     private static final String STRING_COMPLETED = "completed";
-
     
     // ================================================================
  	// Constructor
@@ -155,7 +156,7 @@ public class Controller {
 	            break;
 	        
         	case DISPLAY :
-                displayTask(arguments);
+                feedback = displayTask(arguments);
 	            break;
 	        
         	case COMPLETE :
@@ -473,16 +474,20 @@ public class Controller {
     }
 
     //@author A0122081X
-    private void displayTask(String input) {
+    private String displayTask(String input) {
         displayedTasks.clear();
 
         if (input.equals(STRING_COMPLETED)) {
             switchDisplayToSearch = true;
             searchArgument = input;
             updateDisplayWithCompleted();
-        } else {
+            return MESSAGE_DISPLAY_COMPLETE;
+        } else if (input.equals((STRING_EMPTY))) {
             switchDisplayToSearch = false;
             searchArgument = null;
+            return MESSAGE_DISPLAY_INCOMPLETE;
+        } else {
+            return MESSAGE_INVALID_COMMAND;
         }
     }
 
