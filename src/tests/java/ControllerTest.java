@@ -19,7 +19,6 @@ public class ControllerTest extends TestCase {
     private static final String MESSAGE_INVALID_COMMAND = "Invalid command.";
     private static final String MESSAGE_WELCOME = "Welcome to Veto! Here is an overview of the week ahead.";
     private static final String MESSAGE_TASK_INDEX_ERROR = "The task you specified could not be found.";
-    private static final String MESSAGE_NO_UNDO = "Already at oldest change, unable to undo.";
 
     // ================================================================
     // Utility methods
@@ -35,24 +34,9 @@ public class ControllerTest extends TestCase {
         return new Task(input, parsedDates, parsedWords, nonParsedWords);
     }
 
-    //@author A0122081X
-    private ArrayList<String> getTaskDesc(ArrayList<Task> input) {
-        ArrayList<String> output = new ArrayList<String>();
-        for (Task task : input) {
-            output.add(task.getDescription());
-        }
-
-        return output;
-    }
-
     // ================================================================
     // Tests for non-task related functions
     // ================================================================
-    @Test
-    public void testOnloadDisplay() {
-        Controller controller = Controller.getInstance();
-    }
-
     @Test
     public void testWelcomeMessage() {
         Controller controller = Controller.getInstance();
@@ -64,7 +48,6 @@ public class ControllerTest extends TestCase {
         Controller controller = Controller.getInstance();
         controller.executeCommand("help");
     }
-
 
     // ================================================================
     // Tests for non-recurring tasks

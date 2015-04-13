@@ -13,8 +13,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import main.resources.view.DisplayController;
-
 //@author A0122081X
 public class Controller {
 	
@@ -24,7 +22,7 @@ public class Controller {
     // Singleton
     private static Controller controller;
 
-    private Logger logger;
+    private static Logger logger;
 
     private Storage storage;
 
@@ -82,7 +80,7 @@ public class Controller {
  	// Constructor
  	// ================================================================
     private Controller() {
-        logger = Logger.getLogger("Display");
+        logger = Logger.getLogger("Controller");
         logger.setLevel(Level.OFF);
 
         parser = DateParser.getInstance();
@@ -315,7 +313,7 @@ public class Controller {
         // Creates an input to addTask
         String[] addArgumentArray =  new String[inputArray.length - 1];
         System.arraycopy(inputArray, 1, addArgumentArray, 0, inputArray.length - 1);
-        String addArgument = String.join(" ", addArgumentArray);
+        String addArgument = String.join(STRING_SPACE, addArgumentArray);
 
         if (addArgument.isEmpty()) {
             return MESSAGE_INVALID_COMMAND;

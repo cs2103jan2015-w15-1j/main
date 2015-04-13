@@ -3,12 +3,10 @@ package tests.java;
 import static org.junit.Assert.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 import main.java.CreateTask;
 import main.java.DateParser;
-import main.java.Task;
 
 import org.junit.Test;
 

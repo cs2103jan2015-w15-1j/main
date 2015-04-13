@@ -270,7 +270,7 @@ public class DisplayController extends VBox {
     }
 
     public void scrollDown() {
-        // System.out.println(currentScrollIndex);
+        logger.log(Level.INFO, "Current scroll index: " + currentScrollIndex);
         if (currentScrollIndex == 0 &&
             listView.getItems().size() < DISPLAY_MAX_SIZE) {
             currentScrollIndex = 0;
@@ -282,7 +282,7 @@ public class DisplayController extends VBox {
     }
 
     public void scrollUp() {
-        // System.out.println(currentScrollIndex);
+        logger.log(Level.INFO, "Current scroll index: " + currentScrollIndex);
         if (currentScrollIndex > 0) {
             currentScrollIndex -= SCROLL_INCREMENT;
             listView.scrollTo(currentScrollIndex);

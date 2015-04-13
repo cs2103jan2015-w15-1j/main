@@ -44,6 +44,9 @@ public class RootLayoutController extends BorderPane {
     private final String ONE_SPACING = " ";
     private final String EMPTY_STRING = "";
     private final String ALL_KEYWORD = "all";
+    private final String EXCEPT_KEYWORD = "except ";
+    private final String BY_KEYWORD = "by  ";
+    private final String TO_KEYWORD = "to  ";
 
     // formats the date for the date label, eg. 1 April
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d MMMM");
@@ -143,7 +146,7 @@ public class RootLayoutController extends BorderPane {
 
     private String buildExceptStringToAdd(String inputString, ArrayList<LocalDate> exceptionDates) {
         StringBuilder newInputString = new StringBuilder(inputString);
-        newInputString.append("except ");
+        newInputString.append(EXCEPT_KEYWORD);
         for (LocalDate date : exceptionDates) {
             newInputString.append(date.toString());
             newInputString.append(",");
@@ -293,6 +296,8 @@ public class RootLayoutController extends BorderPane {
     private boolean isEditIndividualFormat(String input) {
         String[] output = input.split(ONE_SPACING);
 
+        // Performs a check when the input box has "edit <int>"
+        // Length is 2. Index 0 is the word "edit" and index 1 is the int
         if (output.length == 2 &&
                 output[0].equalsIgnoreCase(Command.Type.EDIT.toString())) {
             // Check for whether it's in the format "edit <int>"
@@ -310,6 +315,8 @@ public class RootLayoutController extends BorderPane {
     private boolean isEditAllFormat(String input) {
         String[] output = input.split(ONE_SPACING);
 
+        // Performs a check when the input box has "edit all <int>"
+        // Length is 3. Index 0 is the word "edit" and index 2 is the int
         if (output.length == 3 &&
                 output[0].equalsIgnoreCase(Command.Type.EDIT.toString()) &&
                 output[1].equalsIgnoreCase(ALL_KEYWORD)) {
@@ -322,44 +329,6 @@ public class RootLayoutController extends BorderPane {
         }
 
         return false;
-    }
-
-    /*
-    *
-    *  If invalid, returns 0.
-    *  Any valid format returns an integer > 0.
-    *  If is individual, returns 1.
-    *  If is all, returns 2.
-    *
-     */
-    private int isValidEditFormat(String input) {
-        String[] output = input.split(ONE_SPACING);
-
-        // Check for edit all keyword
-        if (output.length == 3 &&
-            output[0].equalsIgnoreCase(Command.Type.EDIT.toString()) &&
-            output[1].equalsIgnoreCase(ALL_KEYWORD)) {
-            try {
-                Integer.parseInt(output[2]);
-                return 2;
-            } catch (NumberFormatException e) {
-                return 0;
-            }
-        }
-
-        // Check for edit keyword and length
-        if (output.length == 2 &&
-            output[0].equalsIgnoreCase(Command.Type.EDIT.toString())) {
-            // Check for whether it's in the format "edit <int>"
-            try {
-                Integer.parseInt(output[1]);
-                return 1;
-            } catch (NumberFormatException e) {
-                return 0;
-            }
-        }
-
-        return 0;
     }
 
     private int getEditIndex(String input, int editIndexPosition) {
@@ -401,7 +370,7 @@ public class RootLayoutController extends BorderPane {
     private void autoCompleteDeadlineTask(TextField userInput, Task task) {
         userInput.appendText(ONE_SPACING);
         if (task.getStartTime() != null) {
-            userInput.appendText("by " + task.getStartTime().format(timeFormatter) + ONE_SPACING);
+            userInput.appendText(BY_KEYWORD + task.getStartTime().format(timeFormatter) + ONE_SPACING);
         }
         userInput.appendText(task.getDate().format(dateFormatter));
     }
@@ -411,7 +380,7 @@ public class RootLayoutController extends BorderPane {
         userInput.appendText(task.getStartTime()
                 .format(timeFormatter) +
                 ONE_SPACING +
-                "to " +
+                TO_KEYWORD +
                 task.getEndTime()
                         .format(timeFormatter) +
                 ONE_SPACING +
