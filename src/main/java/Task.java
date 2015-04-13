@@ -16,21 +16,27 @@ import org.apache.commons.lang.StringUtils;
  *
  * Types of tasks:
  *
- * Floating task: no keywords required. Example: "do assignment" Deadline task:
- * one date must be provided. Example: "do assignment by 23 Mar" Timed-task: two
- * times must be provided for one date. Example:
- * "attend meeting at 1200 - 1400 on 20 Apr"
+ * Floating task: no keywords required.
+ * Example: "do assignment".
+ * 
+ * Deadline task: one date must be provided. It is optional to include a timing.
+ * Example: "do assignment by 23 Mar" or "complete homework by 9pm today"
+ * 
+ * Timed-task: two times must be provided for one date.
+ * Example: "attend meeting at 12pm to 2pm on 20 Apr"
  *
- * NOTE THAT IF THE INFORMATION DOES NOT FOLLOW THE ABOVE FORMAT, IT WILL BE
- * DEEMED AS A FLOATING TASK.
- *
+ * NOTE: For deadline and timed tasks, time should be typed first, then date.
+ * 		 May not work if the order is reversed
+ * 
  * API:
  *
  * Getters: getRawInfo(), getType(), getDescription(), getDate(),
- * getStartTime(), getEndTime(), isCompleted()
+ * getStartTime(), getEndTime(), isCompleted(), isOverdue(), getId(),
+ * isRecurring(), getExceptionDates(), getFormattedTimeAndDate(boolean)
  *
  * Setters: setDescription(String), setDate(LocalDate), setTime(LocalTime,
- * LocalTime), markAsComplete()
+ * LocalTime), markAsComplete(), markAsIncomplete(), setId(String), setRawInfo(String),
+ * setException(ArrayList<LocalDate>)
  */
 public class Task implements Cloneable {
     public static enum Type {
