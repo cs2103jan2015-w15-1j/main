@@ -51,7 +51,6 @@ public class ControllerTest extends TestCase {
     @Test
     public void testOnloadDisplay() {
         Controller controller = Controller.getInstance();
-        controller.onloadDisplay();
     }
 
     @Test

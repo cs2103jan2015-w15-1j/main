@@ -91,12 +91,13 @@ public class Controller {
 	public static Controller getInstance() {
 	    if (controller == null) {
 	        controller = new Controller();
+	        controller.initFirstDisplay();
 	    }
 	    return controller;
 	}
 
 	// To load the tasks into the display on the first load
-    public void onloadDisplay() {
+    private void initFirstDisplay() {
         displayController.setFeedback(getWelcomeMessage());
         displayController.updateOverviewDisplay(displayedTasks);
     }

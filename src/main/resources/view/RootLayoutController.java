@@ -54,7 +54,7 @@ public class RootLayoutController extends BorderPane {
     // ================================================================
     // Constructor
     // ================================================================
-    public RootLayoutController() {
+    public RootLayoutController(Controller controller) {
         FXMLLoader loader = new FXMLLoader(getClass().getResource(ROOT_LAYOUT_LOCATION));
         loader.setRoot(this);
         loader.setController(this);
@@ -65,11 +65,13 @@ public class RootLayoutController extends BorderPane {
             throw new RuntimeException(e);
         }
 
-        displayController = DisplayController.getInstance();
+        setController(controller);
+        initDisplay();
         initVariablesForHistory();
         initAutoCompleteCommands();
         userInput.setText(WELCOME_INPUT);
     }
+    
 
     // ================================================================
     // Public methods
@@ -95,13 +97,21 @@ public class RootLayoutController extends BorderPane {
         }
     }
 
-    public void setController(Controller controller) {
-        this.controller = controller;
-    }
-
+    
     // ================================================================
     // Private Methods
     // ================================================================
+    private void initDisplay() {
+        this.displayController = DisplayController.getInstance();
+        this.setCenter(displayController);
+    }
+    
+    // So that user input can be passed to Controller from RLC
+    private void setController(Controller controller) {
+        assert controller != null;
+        this.controller = controller;
+    }
+    
     private void handleUserInput() {
         String inputString = userInput.getText();
         if (containsEditAll(inputString)) {
