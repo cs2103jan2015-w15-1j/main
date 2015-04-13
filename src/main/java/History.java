@@ -51,7 +51,7 @@ public class History {
 	
 	// Push the arguments into their respective Stacks
 	public void storeCurrentState(ArrayList<Task> allTasks, ObservableList<Task> displayedTasks) {
-		logger.log(Level.INFO, "stack size before push: ", mainStack.size() + displayedStack.size());
+		logger.log(Level.INFO, "stack size before push: " + mainStack.size() + ", " + displayedStack.size());
 		mainStack.push(cloneState(allTasks));
 		displayedStack.push(cloneState(displayedTasks));
 		assert !mainStack.empty();
@@ -60,7 +60,7 @@ public class History {
 	
 	// Pop the Stacks and store them in thier respective fields
 	public void getPreviousState() {
-		logger.log(Level.INFO, "stack size before pop: ", mainStack.size() + displayedStack.size());
+		logger.log(Level.INFO, "stack size before pop: " + mainStack.size() + ", " + displayedStack.size());
 		try {
 			allTasks = mainStack.pop();
 			displayedTasks = displayedStack.pop();
@@ -99,14 +99,14 @@ public class History {
 	
 	// Push the feedback string into its Stack
 	public void storeCommand(String feedback) {
-		logger.log(Level.INFO, "stack size before push: ", commandHistory.size());
+		logger.log(Level.INFO, "stack size before push: " + commandHistory.size());
 		commandHistory.push(feedback);
 		assert !commandHistory.empty();
 	}
 
 	// Pop the feedback string from its Stack
 	public String getPreviousCommand() {
-		logger.log(Level.INFO, "stack size before pop: ", commandHistory.size());
+		logger.log(Level.INFO, "stack size before pop: " + commandHistory.size());
 		String previousCommand = null;
 		try {
 			previousCommand = commandHistory.pop();
