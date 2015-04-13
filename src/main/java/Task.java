@@ -199,9 +199,21 @@ public class Task implements Cloneable {
         cloned.setDate(cloned.getDate());
         cloned.setStartTime(cloned.getStartTime());
         cloned.setEndTime(cloned.getEndTime());
+        cloned.setId(cloned.getId());
+        cloned.setException(cloneExceptionDates(cloned.getExceptionDates()));
         return cloned;
     }
-    
+
+    private ArrayList<LocalDate> cloneExceptionDates(ArrayList<LocalDate> exceptionDates) {
+        if (exceptionDates == null) {
+            return null;
+        }
+        ArrayList<LocalDate> output = new ArrayList<LocalDate>();
+        for (LocalDate date : exceptionDates) {
+            output.add(date);
+        }
+        return output;
+    }
     
     //@author A0121520A
     // ================================================================

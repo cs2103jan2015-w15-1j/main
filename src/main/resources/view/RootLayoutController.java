@@ -44,7 +44,7 @@ public class RootLayoutController extends BorderPane {
     private final String ONE_SPACING = " ";
     private final String EMPTY_STRING = "";
     private final String ALL_KEYWORD = "all";
-    private final String EXCEPT_KEYWORD = "except ";
+    private final String EXCEPT_KEYWORD = " except ";
     private final String BY_KEYWORD = "by  ";
     private final String TO_KEYWORD = "to  ";
 
