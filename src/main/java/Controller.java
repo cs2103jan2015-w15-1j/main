@@ -413,20 +413,15 @@ public class Controller {
     //@author A0121813U
     // The previous state of the ArrayList and the ObservableList are restored
     private String undo() {
+    	assert previousStates != null;
         if (previousStates.isEmpty()) {
             return MESSAGE_NO_UNDO;
-        } else {
-        	assert previousStates != null;
-        	try {
-        		previousStates.getPreviousState();
-        	} catch (NullPointerException e) {
-        		e.printStackTrace();
-        	}
-            restorePreviousState(); 
-            updateStorageWithAllTasks(); 
-            checkPreviousDisplay();
-            return String.format(MESSAGE_UNDO, previousStates.getPreviousCommand());
         }
+        previousStates.getPreviousState();
+        restorePreviousState(); 
+        updateStorageWithAllTasks(); 
+        checkPreviousDisplay();
+        return String.format(MESSAGE_UNDO, previousStates.getPreviousCommand());
     }
     
     // Execute search if the previous display is on search display
