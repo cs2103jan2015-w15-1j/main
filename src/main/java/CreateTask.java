@@ -98,9 +98,6 @@ public class CreateTask {
             recurDate = new ArrayList<LocalDateTime>(findNeededDates(type,
                     input, hasIgnoreWords2));
 
-            System.out.println("Start: " + recurDate);
-            System.out.println("parsed: " + parsedDates);
-
             if (parsedDates.size() > 1
                     && parsedDates.get(0).toLocalDate()
                             .equals(parsedDates.get(1).toLocalDate())) {
