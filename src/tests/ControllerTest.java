@@ -337,7 +337,7 @@ public class ControllerTest extends TestCase {
 
         assertEquals(testList.toString(), controller.getIncompleteTasksPublic().toString());
     }
-
+    
     @Test
     public void testAddRecurringWithExceptions() {
         Controller controller = Controller.getInstance();
@@ -421,6 +421,21 @@ public class ControllerTest extends TestCase {
 
         controller.executeCommand("add this everyday from 1 apr to 5 apr");
         controller.executeCommand("delete all 3");
+
+        assertEquals(testList.toString(), controller.getIncompleteTasksPublic().toString());
+    }
+    
+    //author A0122393L
+    @Test
+    public void testAddRecurringMonthWithExcceptions() {
+        Controller controller = Controller.getInstance();
+        controller.executeCommand("clear");
+
+        ArrayList<Task> testList = new ArrayList<>();
+        testList.add(createNewTask("this on 1 apr"));
+        testList.add(createNewTask("this on 1 oct"));
+
+        controller.executeCommand("add this every 2 month from 1 apr to 1 oct except 1 jun, 1 aug");
 
         assertEquals(testList.toString(), controller.getIncompleteTasksPublic().toString());
     }
