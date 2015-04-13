@@ -9,6 +9,8 @@ import java.time.DateTimeException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import main.resources.view.DisplayController;
@@ -21,6 +23,8 @@ public class Controller {
     // ================================================================
     // Singleton
     private static Controller controller;
+
+    private Logger logger;
 
     private Storage storage;
 
@@ -78,6 +82,9 @@ public class Controller {
  	// Constructor
  	// ================================================================
     private Controller() {
+        logger = Logger.getLogger("Display");
+        logger.setLevel(Level.OFF);
+
         parser = DateParser.getInstance();
         storage = Storage.getInstance();
         taskCreator = CreateTask.getInstance();
@@ -118,6 +125,10 @@ public class Controller {
         String arguments = currentCommand.getArguments();
         String feedback = STRING_EMPTY;
         boolean helpUser = false;
+
+        logger.log(Level.INFO, "User's input: " + input);
+        logger.log(Level.INFO, "Type of command: " + commandType.toString());
+        logger.log(Level.INFO, "Arguments: " + arguments);
 
         switch (commandType) {
         	
@@ -201,12 +212,12 @@ public class Controller {
 	    this.stage = stage;
 	}
     
-    // THIS FIXES THE SLOW ADDITION OF FIRST TASK
+    // Fixes the delay when adding first task upon start up
 	private void warmUpParser() {
 		parser.parse("foo today");
 	}
 
-	// Load the incomplete tasks into displayedTasks (MAIN VIEW WHEN APP STARTS)
+	// Load the incomplete tasks into displayedTasks
 	private void loadIncompleteTasks() {
 		for (Task task : getIncompleteTasks(allTasks)) {
             displayedTasks.add(task);
@@ -289,6 +300,7 @@ public class Controller {
         if (input.toLowerCase().contains(STRING_ALL)) {
             input = input.replace(STRING_ALL, STRING_EMPTY).trim();
             editAll = true;
+            logger.log(Level.INFO, "Contains 'all' in edit");
         }
 
         try {
@@ -362,6 +374,7 @@ public class Controller {
         displayedTasks.remove(taskToDelete);
         allTasks.remove(taskToDelete);
         updateStorageWithAllTasks();
+        logger.log(Level.INFO, "displayedTasks after individual deletion: " + displayedTasks);
     }
 
     private void deleteAllTasks(Task taskToDelete) {
@@ -376,6 +389,7 @@ public class Controller {
         displayedTasks.removeAll(tasksToDelete);
         allTasks.removeAll(tasksToDelete);
         updateStorageWithAllTasks();
+        logger.log(Level.INFO, "displayedTasks after all deletion: " + displayedTasks);
     }
 
     //@author A0122081X
@@ -389,9 +403,11 @@ public class Controller {
             }
             
             task.markAsCompleted();
+            logger.log(Level.INFO, "the completed task: " + task.toString());
 
             updateStorageWithAllTasks();
 
+            logger.log(Level.INFO, "completed tasks after complete: " + getCompletedTasks(allTasks));
             return String.format(MESSAGE_COMPLETE, task.getDescription());
         } catch (NumberFormatException | IndexOutOfBoundsException e) {
             return MESSAGE_TASK_INDEX_ERROR;
@@ -403,9 +419,11 @@ public class Controller {
             int index = Integer.parseInt(input.trim()) - 1;
             Task task = displayedTasks.get(index);
             task.markAsIncomplete();
+            logger.log(Level.INFO, "the incompleted task: " + task.toString());
 
             updateStorageWithAllTasks();
 
+            logger.log(Level.INFO, "incomplete tasks after incomplete: " + getIncompleteTasks(allTasks));
             return String.format(MESSAGE_INCOMPLETE, task.getDescription());
         } catch (NumberFormatException | IndexOutOfBoundsException e) {
             return MESSAGE_TASK_INDEX_ERROR;
@@ -527,11 +545,13 @@ public class Controller {
     private void updateDisplayWithDefault() {
         displayedTasks.setAll(getIncompleteTasks(allTasks));
         displayController.updateOverviewDisplay(displayedTasks);
+        logger.log(Level.INFO, "Displayed tasks: " + displayedTasks);
     }
 
     private void updateDisplayWithCompleted() {
         displayedTasks.setAll(getCompletedTasks(allTasks));
         displayController.updateOverviewDisplay(displayedTasks);
+        logger.log(Level.INFO, "Displayed tasks: " + displayedTasks);
     }
     
     //@author A0121813U
@@ -574,7 +594,7 @@ public class Controller {
     // Save the current state of allTasks and displayedTasks field before execution of command
     private void saveCurrentState(String input) {
     	assert allTasks != null;
-    	assert displayedTasks != null;
+        assert displayedTasks != null;
         previousStates.storeCurrentState(allTasks, displayedTasks);
         previousStates.storeCommand(input);
     }

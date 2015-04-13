@@ -34,6 +34,7 @@ public class MainApp extends Application {
 		initPrimaryStage(primaryStage);
 
 		// Provide a stage handle in controller so that controller can close it when exiting
+		assert primaryStage != null;
 		controller.setStage(this.primaryStage);
 	}
 
@@ -52,7 +53,7 @@ public class MainApp extends Application {
         this.primaryStage.show();
     }
 
-	public void initRootLayout() {
+	private void initRootLayout() {
 		rootLayoutController = new RootLayoutController(controller);
 	}
 }
