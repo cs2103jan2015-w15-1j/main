@@ -1,0 +1,2270 @@
+//@author: a0121813u
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\java\Controller.java
+	 */
+
+    // Based on what the user has type, this method will call the respective methods
+    public String executeCommand(String input) {
+        Command currentCommand = new Command(input);
+        Command.Type commandType = currentCommand.getCommandType();
+        String arguments = currentCommand.getArguments();
+        String feedback = STRING_EMPTY;
+        boolean helpUser = false;
+
+        logger.log(Level.INFO, "User's input: " + input);
+        logger.log(Level.INFO, "Type of command: " + commandType.toString());
+        logger.log(Level.INFO, "Arguments: " + arguments);
+
+        switch (commandType) {
+        	
+        	case SET :
+	            feedback = setSaveFileDirectory(arguments);
+	            break;
+	            
+            case MOVE :
+                feedback = moveSaveFileDirectory(arguments);
+                break;
+	        
+        	case ADD :
+	            saveCurrentState(input);
+	            feedback = addTask(arguments);
+	            switchDisplayToSearch = false;
+	            break; 
+	        
+        	case DELETE :
+	            saveCurrentState(input);
+	            feedback = deleteTask(arguments);
+	            break;
+	        
+        	case EDIT :
+	            saveCurrentState(input);
+	            feedback = editTask(arguments);
+	            break;
+	        
+        	case DISPLAY :
+                feedback = displayTask(arguments);
+	            break;
+	        
+        	case COMPLETE :
+	            saveCurrentState(input);
+	            feedback = completeTask(arguments);
+	            break;
+	        
+        	case INCOMPLETE :
+	            saveCurrentState(input);
+                feedback = incompleteTask(arguments);
+	            break;
+	        
+        	case UNDO :
+	            feedback = undo();
+	            break;
+	        
+        	case SEARCH :
+	            search(arguments);
+                searchArgument = arguments;
+	            switchDisplayToSearch = true;
+	            break;
+	        
+        	case CLEAR :
+	        	saveCurrentState(input);
+	        	feedback = clear();
+	        	break;
+	        
+        	case INVALID :
+	            feedback = invalid();
+	            break;
+	        
+        	case HELP :
+	        	helpUser = true;
+	        	break;
+	        
+        	case EXIT :
+	        	exit();
+                stage.hide();
+	            break;
+        }
+        showAppropriateDisplay(helpUser);
+        displayController.setFeedback(feedback);
+        return feedback;
+    }
+
+    // ================================================================
+    // Initialization methods
+    // ================================================================
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\java\Controller.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\java\Controller.java
+	 */
+
+    // The previous state of the ArrayList and the ObservableList are restored
+    private String undo() {
+    	assert previousStates != null;
+        if (previousStates.isEmpty()) {
+            return MESSAGE_NO_UNDO;
+        }
+        previousStates.getPreviousState();
+        restorePreviousState(); 
+        updateStorageWithAllTasks(); 
+        checkPreviousDisplay();
+        return String.format(MESSAGE_UNDO, previousStates.getPreviousCommand());
+    }
+    
+    // Execute search if the previous display is on search display
+	private void checkPreviousDisplay() {
+		if (switchDisplayToSearch) {
+			search(searchArgument);
+		}
+	}
+
+	// Assign the allTasks and displayedTasks field to its previous state
+	private void restorePreviousState() {
+		allTasks = previousStates.getAllTasks();
+		displayedTasks = previousStates.getDisplayedTasks();
+	}
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\java\Controller.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\java\Controller.java
+	 */
+
+    // Based on what input the user has typed, 
+    // this method will determine the appropriate screen to display
+    private void showAppropriateDisplay(boolean helpUser) {
+    	if (helpUser) {
+        	updateHelpDisplay();
+        } else if (switchDisplayToSearch) {
+            updateDisplaySearch();
+        } else {
+        	sortAllTasks();
+            updateDisplayWithDefault();
+        }
+    }
+    
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\java\Controller.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\java\Controller.java
+	 */
+
+    // Call the display object to show the "search" display
+    private void updateDisplaySearch() {
+    	assert displayedTasks != null;
+    	sortSearchedTasks();
+        displayController.updateSearchDisplay(displayedTasks, searchArgument);
+    }
+    
+    // Call the display object to show the "help" display
+    private void updateHelpDisplay() {
+    	displayController.showHelpDisplay();
+    }
+
+    // Sorts the allTasks field based on developer's preference
+    private void sortAllTasks() {
+    	assert allTasks != null;
+    	userDefinedSort = new UserDefinedSort(allTasks);
+    	userDefinedSort.addComparator(new SortType());
+    	userDefinedSort.addComparator(new SortTime());
+    	userDefinedSort.addComparator(new SortDate());
+        userDefinedSort.addComparator(new SortOverdue());   
+        allTasks = userDefinedSort.executeSort();
+    }
+    
+    // Sorts the displayedTasks when the "search" command is entered
+    private void sortSearchedTasks() {
+    	assert displayedTasks != null;
+    	userDefinedSort = new UserDefinedSort(new ArrayList<Task>(displayedTasks));
+        userDefinedSort.addComparator(new SortType());
+        userDefinedSort.addComparator(new SortTime());
+        userDefinedSort.addComparator(new SortDate());
+        userDefinedSort.addComparator(new SortOverdue());
+        userDefinedSort.addComparator(new SortIncomplete());
+        userDefinedSort.executeSort();
+        displayedTasks = FXCollections.observableArrayList(userDefinedSort.getList());
+    }
+
+    // Save the current state of allTasks and displayedTasks field before execution of command
+    private void saveCurrentState(String input) {
+    	assert allTasks != null;
+        assert displayedTasks != null;
+        previousStates.storeCurrentState(allTasks, displayedTasks);
+        previousStates.storeCommand(input);
+    }
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\java\Controller.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\java\History.java
+	 */
+
+/**
+ * This class helps to store all of the previous states of the ArrayList and ObservableList
+ * in the controller as a stack. This is to allow the command, "undo" to take place.
+ * History class stores for 3 different fields:
+ * ArrayList<Task> allTasks, ObservableList<Task> displayedTasks, String feedback
+ * 
+ * Basically it works like a normal Stack object. The only difference is that it manages 3 Stack objects 
+ * altogether
+ */
+public class History {
+
+	// ================================================================
+	// Fields
+	// ================================================================
+	private static Logger logger;
+	
+	private Stack<ArrayList<Task>> mainStack;
+	private Stack<ObservableList<Task>> displayedStack;
+	
+	private ArrayList<Task> allTasks;
+	private ObservableList<Task> displayedTasks;
+
+	private Stack<String> commandHistory;
+
+	// ================================================================
+	// Constructor
+	// ================================================================
+	public History() {
+		logger = Logger.getLogger("History");
+		logger.setLevel(Level.OFF);
+		mainStack = new Stack<ArrayList<Task>>();
+		displayedStack = new Stack<ObservableList<Task>>();
+		commandHistory = new Stack<String>();
+	}
+
+	// ================================================================
+	// Public methods
+	// ================================================================
+	
+	// Push the arguments into their respective Stacks
+	public void storeCurrentState(ArrayList<Task> allTasks, ObservableList<Task> displayedTasks) {
+		logger.log(Level.INFO, "stack size before push: " + mainStack.size() + ", " + displayedStack.size());
+		mainStack.push(cloneState(allTasks));
+		displayedStack.push(cloneState(displayedTasks));
+		assert !mainStack.empty();
+		assert !displayedStack.empty();
+	}
+	
+	// Pop the Stacks and store them in thier respective fields
+	public void getPreviousState() {
+		logger.log(Level.INFO, "stack size before pop: " + mainStack.size() + ", " + displayedStack.size());
+		try {
+			allTasks = mainStack.pop();
+			displayedTasks = displayedStack.pop();
+		} catch (EmptyStackException e) {
+			e.printStackTrace();
+		}
+ 	}
+	
+	// Return the allTasks field.
+	public ArrayList<Task> getAllTasks() {
+		assert allTasks != null;
+		return allTasks;
+	}
+	
+	// Return the number of elements in the allTasks field. Wont be called if empty
+	public int getAllSize() {
+		assert allTasks.size() >= 0;
+		return allTasks.size();
+	}
+	
+	// Return the displayedTasks field.
+	public ObservableList<Task> getDisplayedTasks() {
+		assert displayedTasks != null;
+		return displayedTasks;
+	}
+	
+	// Return the number of elements in the displayedTasks field. Wont be called if empty
+	public int getDisplayedSize() {
+		assert displayedTasks.size() >= 0;
+		return displayedTasks.size();
+	}
+	
+	public boolean isEmpty() {
+		return mainStack.empty();
+	}
+	
+	// Push the feedback string into its Stack
+	public void storeCommand(String feedback) {
+		logger.log(Level.INFO, "stack size before push: " + commandHistory.size());
+		commandHistory.push(feedback);
+		assert !commandHistory.empty();
+	}
+
+	// Pop the feedback string from its Stack
+	public String getPreviousCommand() {
+		logger.log(Level.INFO, "stack size before pop: " + commandHistory.size());
+		String previousCommand = null;
+		try {
+			previousCommand = commandHistory.pop();
+		} catch (EmptyStackException e) {
+			e.printStackTrace();
+		}
+		return previousCommand;
+	}
+
+	// ================================================================
+	// Private methods --> The two methods below are to help developers to 
+	//                      create a deep copy of its arguments
+	// ================================================================
+	private ArrayList<Task> cloneState(ArrayList<Task> input) {
+        ArrayList<Task> output = new ArrayList<Task>();
+        try {
+            for (Task task : input) {
+                output.add(task.clone());
+            }
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+        return output;
+    }
+    
+    private ObservableList<Task> cloneState(ObservableList<Task> input) {
+        ArrayList<Task> output = new ArrayList<Task>();
+        try {
+            for (Task task : input) {
+                output.add(task.clone());
+            }
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+        return FXCollections.observableArrayList(output);
+    }
+ }
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\java\History.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\java\SortDate.java
+	 */
+
+/**
+ * SortDate is a comparator, when used on a list object, will sort the list by date
+ * in chronological order. Note that Task with no dates will be placed infront
+ * of the list.
+ */
+public class SortDate implements Comparator<Task> {
+	
+	private static final int FIRST_LOWER = -1;
+	private static final int FIRST_HIGHER = 1;
+	private static final int FIRST_SAME = 0;
+	
+	/* Order of comparison
+	 * 
+	 * NULL EXIST
+	 * EXIST NULL
+	 * NULL NULL
+	 * EARLY LATER
+	 * LATER EARLY
+	 * SAME DAY
+	 */
+	
+	public int compare(Task task1, Task task2) {
+		
+		LocalDate date1 = task1.getDate();
+		LocalDate date2 = task2.getDate();
+		
+		if (date1 == null && date2 != null) {
+			return FIRST_LOWER;
+		} else if (date1 != null && date2 == null) {
+			return FIRST_HIGHER;
+		} else if (date1 == null && date2 == null) {
+			return FIRST_SAME;
+		} else if (date1.isBefore(date2)) {
+			return FIRST_LOWER;
+		} else if (date1.isAfter(date2)) {
+			return FIRST_HIGHER;
+		} else {
+			return FIRST_SAME;
+		}
+	}
+}
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\java\SortDate.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\java\SortIncomplete.java
+	 */
+
+/**
+ * SortIncomplete is a comparator, when used on a list object, will sort the
+ * list placing those incomplete tasks at the front while the completed one
+ * will be placed at the back.
+ */
+public class SortIncomplete implements Comparator<Task> {
+	
+	private static final int FIRST_LOWER = -1;
+	private static final int FIRST_HIGHER = 1;
+	private static final int FIRST_SAME = 0;
+	
+	/* Order of comparison
+	 * 
+	 * COMPLETE INCOMPLETE
+	 * INCOMPLETE COMPLETE
+	 * SAME
+	 */
+	
+	public int compare(Task task1, Task task2) {
+		if (task1.isCompleted() && !task2.isCompleted()) {
+			return FIRST_HIGHER;
+		} else if (!task1.isCompleted() && task2.isCompleted()) {
+			return FIRST_LOWER;
+		} else {
+			return FIRST_SAME;
+		}
+	}
+}
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\java\SortIncomplete.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\java\SortOverdue.java
+	 */
+
+/**
+ * SortOverdue is a comparator, when used on a list object, will sort the list
+ * placing those overdue tasks at the front while the pending tasks will be placed
+ * at the back.
+ */
+public class SortOverdue implements Comparator<Task> {
+	
+	private static final int FIRST_LOWER = -1;
+	private static final int FIRST_HIGHER = 1;
+	private static final int FIRST_SAME = 0;
+	
+	/* Order of comparison
+	 * 
+	 * OVERDUE PENDING
+	 * PENDING OVERDUE
+	 * SAME
+	 */
+	
+	public int compare (Task task1, Task task2) {
+		if (task1.isOverdue() && !task2.isOverdue()) {
+			return FIRST_LOWER;
+		} else if (!task1.isOverdue() && task2.isOverdue()) {
+			return FIRST_HIGHER;
+		} else {
+			return FIRST_SAME;
+		}
+	}
+}
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\java\SortOverdue.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\java\SortTime.java
+	 */
+
+/**
+ * SortTime is a comparator, when used on a list object, will sort the
+ * list by time (regardless of the date) in chronological order. Note that those
+ * tasks with no time will be placed in front of the list.
+ */
+public class SortTime implements Comparator<Task> {
+	
+	private static final int FIRST_LOWER = -1;
+	private static final int FIRST_HIGHER = 1;
+	private static final int FIRST_SAME = 0;
+	
+	/* Order of comparison
+	 * 
+	 * NULL EXIST
+	 * EXIST NULL
+	 * NULL NULL
+	 * EARLY LATER
+	 * LATER EARLY
+	 * SAME TIME
+	 */
+	
+	public int compare(Task task1, Task task2) {
+		
+		LocalTime time1 = task1.getStartTime();
+		LocalTime time2 = task2.getStartTime();
+		
+		if (time1 == null && time2 != null) {
+			return FIRST_LOWER;
+		} else if (time1 != null && time2 == null) {
+			return FIRST_HIGHER;
+		} else if (time1 == null && time2 == null) {
+			return FIRST_SAME;
+		} else if (time1.isBefore(time2)) {
+			return FIRST_LOWER;
+		} else if (time1.isAfter(time2)) {
+			return FIRST_HIGHER;
+		} else {
+			return FIRST_SAME;
+		}
+	}
+}
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\java\SortTime.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\java\SortType.java
+	 */
+
+/**
+ * SortType is a comparator, when used on a list object, will sort the
+ * list placing those floating tasks at the front while the deadline/timed
+ * tasks will be placed at the back. Note that there is no ranking between
+ * deadline task and timed task.
+ */
+public class SortType implements Comparator<Task> {
+	
+	private static final int FIRST_LOWER = -1;
+	private static final int FIRST_HIGHER = 1;
+	private static final int FIRST_SAME = 0;
+	
+	/* Order of comparison
+	 * 
+	 * NEW! --> Now we don't need to rank between DEADLINE and TIMED
+	 * 
+	 * FLOATING DEADLINE
+	 * DEADLINE FLOATING
+	 * FLOATING TIMED
+	 * TIMED FLOATING
+	 * DEADLINE TIMED (Removed)
+	 * TIMED DEADLINE (Removed)
+	 * SAME TYPES OR DEADLINE AND TIMED (Updated)
+	 */ 
+	
+	public int compare(Task task1, Task task2) {
+		if (task1.getType() == Task.Type.FLOATING && task2.getType() == Task.Type.DEADLINE) {
+			return FIRST_LOWER;
+		} else if (task1.getType() == Task.Type.DEADLINE && task2.getType() == Task.Type.FLOATING) {
+			return FIRST_HIGHER;
+		} else if (task1.getType() == Task.Type.FLOATING && task2.getType() == Task.Type.TIMED) {
+			return FIRST_LOWER;
+		} else if (task1.getType() == Task.Type.TIMED && task2.getType() == Task.Type.FLOATING) {
+			return FIRST_HIGHER;
+		} else {
+			return FIRST_SAME;
+		}
+	}
+}
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\java\SortType.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\java\Task.java
+	 */
+
+/**
+ * This class contains the information of a task element.
+ *
+ * Types of tasks:
+ *
+ * Floating task: no keywords required.
+ * Example: "do assignment".
+ * 
+ * Deadline task: one date must be provided. It is optional to include a timing.
+ * Example: "do assignment by 23 Mar" or "complete homework by 9pm today"
+ * 
+ * Timed-task: two times must be provided for one date.
+ * Example: "attend meeting at 12pm to 2pm on 20 Apr"
+ *
+ * NOTE: For deadline and timed tasks, time should be typed first, then date.
+ * 		 May not work if the order is reversed
+ * 
+ * API:
+ *
+ * Getters: getRawInfo(), getType(), getDescription(), getDate(),
+ * getStartTime(), getEndTime(), isCompleted(), isOverdue(), getId(),
+ * isRecurring(), getExceptionDates(), getFormattedTimeAndDate(boolean)
+ *
+ * Setters: setDescription(String), setDate(LocalDate), setTime(LocalTime,
+ * LocalTime), markAsComplete(), markAsIncomplete(), setId(String), setRawInfo(String),
+ * setException(ArrayList<LocalDate>)
+ */
+public class Task implements Cloneable {
+    public static enum Type {
+        FLOATING, DEADLINE, TIMED
+    };
+
+    private static final String ESCAPE_CHAR = "\"";
+    private static final String STRING_EMPTY = "";
+    private static final String STRING_EMPTY_SPACE = " ";
+    private static final String STRING_TIME_FORMAT = "h.mma";
+    private static final String STRING_DATE_FORMAT = "EEEE, d MMMM y";
+    private static final String STRING_TIME_SEPARATOR = " to ";
+    private static final int POSITION_FIRST_DATE = 0;
+    private static final int POSITION_SECOND_DATE = 1;
+    private static final String[] KEYWORDS = { "by", "on", "at", "from",
+            "until", "till" , "except"};
+    
+    private String rawInfo;
+    private Type type;
+    private String description; // arguments without the date and time
+    private LocalDate date;
+    private LocalTime startTime;
+    private LocalTime endTime;
+    private boolean isCompleted;
+    private String recurId;
+    private ArrayList<LocalDate> exceptionDates;
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\java\Task.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\java\Task.java
+	 */
+
+    // ================================================================
+    // Public getters
+    // ================================================================
+    public Type getType() {
+        return type;
+    }
+    
+    public String getRawInfo() {
+        return rawInfo;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public LocalTime getStartTime() {
+        return startTime;
+    }
+
+    public LocalTime getEndTime() {
+        return endTime;
+    }
+
+    public boolean isCompleted() {
+        return isCompleted;
+    }
+
+    public String getId() {
+        return recurId;
+    }
+    
+    public boolean isRecurring() {
+        return getId() != null;
+    }
+    
+    // Checks whether the task is overdue
+    public boolean isOverdue() {
+        LocalDate nowDate = LocalDate.now();
+        LocalTime nowTime = LocalTime.now();
+        return checkOverdue(nowDate, nowTime);
+    }
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\java\Task.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\java\Task.java
+	 */
+
+	// Change the format of the LocalTime object to our preference
+	// javadoc reference: http://goo.gl/GCyd5E
+	private String addFormattedTime() {
+		DateTimeFormatter timeFormatter = DateTimeFormatter
+				.ofPattern(STRING_TIME_FORMAT);
+		LocalTime startTime = getStartTime();
+		LocalTime endTime = getEndTime();
+		if (startTime != null && endTime != null) {
+			return startTime.format(timeFormatter).toLowerCase()
+					+ STRING_TIME_SEPARATOR
+					+ endTime.format(timeFormatter).toLowerCase();
+		} else if (startTime != null) {
+			return startTime.format(timeFormatter).toLowerCase();
+		}
+		return STRING_EMPTY;
+	}
+    
+	// Change the format of the LocalDate object to our preference
+	// javadoc reference: http://goo.gl/GCyd5E
+	private String addFormattedDate() {
+		DateTimeFormatter dateFormatter = DateTimeFormatter
+				.ofPattern(STRING_DATE_FORMAT);
+		if (getDate() != null) {
+			return getDate().format(dateFormatter);
+		}
+		return STRING_EMPTY;
+	}
+    
+	// Given a date and time, checks whether the task is overdue
+	private boolean checkOverdue(LocalDate dateNow, LocalTime timeNow) {
+		if (getDate() == null) {
+			return false;
+		} else if (getDate().isBefore(dateNow)) {
+			return true;
+		} else if (getDate().isAfter(dateNow)) {
+			return false;
+		} else {
+			if (getStartTime() == null) {
+				return false;
+			} else if (getStartTime().isBefore(timeNow)) {
+				return true;
+			} else if (getStartTime().isAfter(timeNow)) {
+				return false;
+			} else {
+				return true;
+			}
+		}
+	}
+}
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\java\Task.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\java\UserDefinedSort.java
+	 */
+
+/**
+ * UserDefinedSort (UDS) is used to sort a list object comparator by comparator
+ * It is important to note that the different order of the comparator in the 
+ * field "chain" may affect the outcome of the list. In other words, different 
+ * sequence of comparator may result in different sequence in the list.
+ */
+public class UserDefinedSort {
+
+	private ArrayList<Comparator<Task>> chain;
+	private ArrayList<Task> list;
+	private Logger logger;
+	
+	public UserDefinedSort(ArrayList<Task> list) {
+		logger = Logger.getLogger("UDS");
+        logger.setLevel(Level.OFF);
+		this.list = list;
+		chain = new ArrayList<Comparator<Task>>();
+	}
+	
+	public ArrayList<Task> getList() {
+		return list;
+	}
+	
+	// Add a comparator object in the "chain" field for future use
+	public void addComparator(Comparator<Task> comparator) {
+		assert comparator != null;
+		chain.add(comparator);
+	}
+	
+	// Execute the sort based on the order of comparator in the chain
+	public ArrayList<Task> executeSort() {
+		assert list != null;
+		logger.log(Level.INFO, "Before sort: " + list);
+		for (Comparator<Task> comparator: chain) {
+			Collections.sort(list, comparator);
+		}
+		logger.log(Level.INFO, "After sort: " + list);
+		return list;
+	}
+}
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\java\UserDefinedSort.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\resources\view\DisplayController.java
+	 */
+
+    // Will result in the help menu to appear
+    public void showHelpDisplay() {
+        hideOverlays();
+        FadeTransition fadeIn = initFadeIn(helpOverlay,
+                                           OVERLAY_FADE_IN_MILLISECONDS);
+
+        overlayTimeline = generateHelpOverlayTimeline(fadeIn);
+        overlayTimeline.play();
+    }
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\resources\view\DisplayController.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\resources\view\DisplayController.java
+	 */
+
+    // Append example commands for users to see when their Veto is empty
+    private void initExampleCommands() {
+        allExampleCommands = new ArrayList<String>();
+        allExampleCommands.add("add meet Isabel from 5pm to 6pm today");
+        allExampleCommands.add("add do tutorial 10 tomorrow");
+        allExampleCommands.add("add finish assignment by 2359 tomorrow");
+        allExampleCommands.add("add find easter eggs by 10 apr");
+        allExampleCommands.add("add complete proposal by friday");
+        allExampleCommands.add("add exercise every tuesday");
+        allExampleCommands.add("add lunch with boss tomorrow");
+        allExampleCommands.add("add remember to buy milk");
+        allExampleCommands.add("add watch movie with friends today");
+        allExampleCommands.add("add remember wedding anniversary on 12 October");
+        allExampleCommands.add("add buy the latest Harry Potter book");
+        allExampleCommands.add("add sneak into Apple WWDC");
+        allExampleCommands.add("add remember to complete SOC project");
+        allExampleCommands.add("add find partner for Orbital");
+        allExampleCommands.add("add make funny YouTube video next week");
+        allExampleCommands.add("add study for final exams");
+        allExampleCommands.add("add plan for overseas trip next week");
+        allExampleCommands.add("add meeting with boss 23 July");
+        allExampleCommands.add("add return money owed to John");
+        allExampleCommands.add("add run for presidential campaign");
+        allExampleCommands.add("add do some community work next week");
+    }
+
+    // Initialize the help display
+    private void initHelpList() {
+        helpList = FXCollections.observableArrayList();
+        helpList.add(new HelpBox(HELP_ADD_DESC, HELP_ADD_COMMAND));
+        helpList.add(new HelpBox(HELP_EDIT_DESC, HELP_EDIT_COMMAND));
+        helpList.add(new HelpBox(HELP_DELETE_DESC, HELP_DELETE_COMMAND));
+        helpList.add(new HelpBox(HELP_COMPLETE_DESC, HELP_COMPLETE_COMMAND));
+        helpList.add(new HelpBox(HELP_INCOMPLETE_DESC, HELP_INCOMPLETE_COMMAND));
+        helpList.add(new HelpBox(HELP_UNDO_DESC, HELP_UNDO_COMMAND));
+        helpList.add(new HelpBox(HELP_SET_SAVE_LOCATION_DESC,
+                                 HELP_SET_SAVE_LOCATION_COMMAND));
+        helpList.add(new HelpBox(HELP_MOVE_SAVE_LOCATION_DESC,
+                                 HELP_MOVE_SAVE_LOCATION_COMMAND));
+        helpList.add(new HelpBox(HELP_SEARCH_DESC, HELP_SEARCH_COMMAND));
+        helpList.add(new HelpBox(HELP_DISPLAY_INCOMPLETE_DESC,
+                                 HELP_DISPLAY_INCOMPLETE_COMMAND));
+        helpList.add(new HelpBox(HELP_DISPLAY_COMPLETE_DESC,
+                                 HELP_DISPLAY_COMPLETE_COMMAND));
+        helpList.add(new HelpBox(HELP_EXIT_DESC, HELP_EXIT_COMMAND));
+    }
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\resources\view\DisplayController.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\resources\view\DisplayController.java
+	 */
+
+    // Formats the ArrayList<String> so that it prints element by element
+    private String generateParagraph(ArrayList<String> list, int size) {
+        return StringUtils.join(list.toArray(), "\n", 0, size);
+    }
+}
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\resources\view\DisplayController.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\resources\view\HelpBox.java
+	 */
+
+public class HelpBox extends HBox {
+
+    private static final String LOCATION_HELP_BOX_FXML = "/view/HelpBox.fxml";
+
+    @FXML
+    private Label description;
+
+    @FXML
+    private Label command;
+
+    public HelpBox(String description, String command) {
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(
+                    LOCATION_HELP_BOX_FXML));
+            loader.setRoot(this);
+            loader.setController(this);
+            loader.load();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        this.description.setText(description);
+        this.command.setText(command);
+    }
+}
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\resources\view\HelpBox.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\resources\view\TitleBox.java
+	 */
+
+public class TitleBox extends HBox {
+	
+	private static final String LOCATION_TITLE_BOX_FXML = "/view/TitleBox.fxml";
+	
+	 @FXML
+	 private Label title;
+	
+	public TitleBox(String desc) {
+		
+		try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(LOCATION_TITLE_BOX_FXML));
+            loader.setRoot(this);
+            loader.setController(this);
+            loader.load();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		 this.title.setText(desc);
+	}
+}
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\resources\view\TitleBox.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\tests\java\CommandTest.java
+	 */
+
+    @Test
+    public void testIncompleteCommandType() {
+        Command command = new Command("incomplete 1");
+        String commandTypeString = command.getCommandType().toString();
+        assertEquals("Correct command type", "INCOMPLETE", commandTypeString);
+        
+        command = new Command("incomplete 1231");
+        commandTypeString = command.getCommandType().toString();
+        assertEquals("Correct command type", "INCOMPLETE", commandTypeString);
+    }
+    
+    @Test
+    public void testUndoCommandType() {
+        Command command = new Command("undo");
+        String commandTypeString = command.getCommandType().toString();
+        assertEquals("Correct command type", "UNDO", commandTypeString);
+        
+        command = new Command("UndO");
+        commandTypeString = command.getCommandType().toString();
+        assertEquals("Correct command type", "UNDO", commandTypeString);
+    }
+    
+    @Test
+    public void testSearchCommandType() {
+        Command command = new Command("search blah blah blah");
+        String commandTypeString = command.getCommandType().toString();
+        assertEquals("Correct command type", "SEARCH", commandTypeString);
+        
+        command = new Command("Search 12345");
+        commandTypeString = command.getCommandType().toString();
+        assertEquals("Correct command type", "SEARCH", commandTypeString);
+    }
+    
+    @Test
+    public void testHelpCommandType() {
+        Command command = new Command("help");
+        String commandTypeString = command.getCommandType().toString();
+        assertEquals("Correct command type", "HELP", commandTypeString);
+        
+        command = new Command("HeLP");
+        commandTypeString = command.getCommandType().toString();
+        assertEquals("Correct command type", "HELP", commandTypeString);
+    }
+    
+    @Test
+    public void testExitCommandType() {
+        Command command = new Command("exit");
+        String commandTypeString = command.getCommandType().toString();
+        assertEquals("Correct command type", "EXIT", commandTypeString);
+        
+        command = new Command("eXIT");
+        commandTypeString = command.getCommandType().toString();
+        assertEquals("Correct command type", "EXIT", commandTypeString);
+    }
+    
+    @Test
+    public void testClearCommandType() {
+        Command command = new Command("clear");
+        String commandTypeString = command.getCommandType().toString();
+        assertEquals("Correct command type", "CLEAR", commandTypeString);
+        
+        command = new Command("CLEAr");
+        commandTypeString = command.getCommandType().toString();
+        assertEquals("Correct command type", "CLEAR", commandTypeString);
+    }
+
+    @Test
+    public void testSetCommandType() {
+        Command command = new Command("set directory");
+        String commandTypeString = command.getCommandType().toString();
+        assertEquals("Correct command type", "SET", commandTypeString);
+        
+        command = new Command("SET directory");
+        commandTypeString = command.getCommandType().toString();
+        assertEquals("Correct command type", "SET", commandTypeString);
+    }
+
+    @Test
+    public void testMoveCommandType() {
+        Command command = new Command("move here");
+        String commandTypeString = command.getCommandType().toString();
+        assertEquals("Correct command type", "MOVE", commandTypeString);
+        
+        command = new Command("Move there");
+        commandTypeString = command.getCommandType().toString();
+        assertEquals("Correct command type", "MOVE", commandTypeString);
+    }
+}
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\tests\java\CommandTest.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\tests\java\ControllerTest.java
+	 */
+
+    // Created for the purpose for this test. Simplify the constructor of Task. NOT A TEST
+    public Task createNewTask(String input) {
+        DateParser parser = DateParser.getInstance();
+        parser.parse(input);
+        ArrayList<LocalDateTime> parsedDates = parser.getDates();
+        String parsedWords = parser.getParsedWords();
+        String nonParsedWords = parser.getNotParsedWords();
+        return new Task(input, parsedDates, parsedWords, nonParsedWords);
+    }
+
+    // ================================================================
+    // Tests for non-task related functions
+    // ================================================================
+    @Test
+    public void testWelcomeMessage() {
+        Controller controller = Controller.getInstance();
+        assertEquals(MESSAGE_WELCOME, controller.getWelcomeMessage());
+    }
+
+    @Test
+    public void testHelpMessage() {
+        Controller controller = Controller.getInstance();
+        controller.executeCommand("help");
+    }
+
+    // ================================================================
+    // Tests for non-recurring tasks
+    // ================================================================
+    @Test
+    public void testClear() {
+        Controller controller = Controller.getInstance();
+        controller.executeCommand("clear");
+
+        ArrayList<Task> testList = new ArrayList<>();
+
+        controller.executeCommand("clear");
+
+        assertEquals(testList, controller.getAllTasks());
+    }
+
+    @Test
+    public void testAddInvalid() {
+        Controller controller = Controller.getInstance();
+        assertEquals(MESSAGE_INVALID_COMMAND, controller.executeCommand("add"));
+    }
+
+    @Test
+    public void testAddFloat() {
+        Controller controller = Controller.getInstance();
+        controller.executeCommand("clear");
+
+        ArrayList<Task> testList = new ArrayList<Task>();
+        Task testingTask = createNewTask("this");
+        testList.add(testingTask);
+
+        controller.executeCommand("add this");
+
+        assertEquals(testList.toString(), controller.getIncompleteTasksPublic().toString());
+    }
+
+    @Test
+    public void testAddDeadline() {
+        Controller controller = Controller.getInstance();
+        controller.executeCommand("clear");
+
+        ArrayList<Task> testList = new ArrayList<Task>();
+        Task testingTask = createNewTask("this 1 apr");
+        testList.add(testingTask);
+
+        controller.executeCommand("add this 1 apr");
+
+        assertEquals(testList.toString(), controller.getIncompleteTasksPublic().toString());
+    }
+
+    @Test
+    public void testAddTimed() {
+        Controller controller = Controller.getInstance();
+        controller.executeCommand("clear");
+
+        ArrayList<Task> testList = new ArrayList<Task>();
+        Task testingTask = createNewTask("this 1 apr 4pm to 6pm");
+        testList.add(testingTask);
+
+        controller.executeCommand("add this 1 apr 4pm to 6pm");
+
+        assertEquals(testList.toString(), controller.getIncompleteTasksPublic().toString());
+    }
+
+    public void testDeleteInvalidIndex() {
+        Controller controller = Controller.getInstance();
+        controller.executeCommand("clear");
+        assertEquals(MESSAGE_TASK_INDEX_ERROR, controller.executeCommand("delete 1"));
+    }
+
+    @Test
+    public void testDelete() {
+        Controller controller = Controller.getInstance();
+        controller.executeCommand("clear");
+
+        ArrayList<Task> testList = new ArrayList<Task>();
+        Task testingTask = createNewTask("this");
+        testList.add(testingTask);
+
+        controller.executeCommand("add this");
+
+        testList.remove(0);
+        controller.executeCommand("delete 1");
+
+        assertEquals(testList.toString(), controller.getIncompleteTasksPublic().toString());
+    }
+
+    @Test
+    public void testEditInvalidIndex() {
+        Controller controller = Controller.getInstance();
+        controller.executeCommand("clear");
+        assertEquals(MESSAGE_TASK_INDEX_ERROR, controller.executeCommand("edit 1 this"));
+        assertEquals(MESSAGE_TASK_INDEX_ERROR, controller.executeCommand("edit asdkasjd"));
+    }
+
+    @Test
+    public void testEditInvalidDescription() {
+        Controller controller = Controller.getInstance();
+        controller.executeCommand("clear");
+        controller.executeCommand("add this");
+        assertEquals(MESSAGE_INVALID_COMMAND, controller.executeCommand("edit 1"));
+    }
+
+    @Test
+    public void testEditDescription() {
+        Controller controller = Controller.getInstance();
+        controller.executeCommand("clear");
+
+        ArrayList<Task> testList = new ArrayList<Task>();
+        Task testingTask = createNewTask("that");
+        testList.add(testingTask);
+
+        controller.executeCommand("add this");
+        controller.executeCommand("edit 1 that");
+
+        assertEquals(testList.toString(), controller.getIncompleteTasksPublic().toString());
+    }
+
+    public void testEditDeadline() {
+        Controller controller = Controller.getInstance();
+        controller.executeCommand("clear");
+
+        ArrayList<Task> testList = new ArrayList<Task>();
+        Task testingTask = createNewTask("this on 2 apr");
+        testList.add(testingTask);
+
+        controller.executeCommand("add this 1 apr");
+        controller.executeCommand("edit 1 this 2 apr");
+
+        assertEquals(testList.toString(), controller.getIncompleteTasksPublic().toString());
+    }
+
+    @Test
+    public void testCompleteInvalidIndex() {
+        Controller controller = Controller.getInstance();
+        controller.executeCommand("clear");
+
+        controller.executeCommand("add this");
+
+        assertEquals(MESSAGE_TASK_INDEX_ERROR, controller.executeCommand("complete 2"));
+    }
+
+    @Test
+    public void testComplete() {
+        Controller controller = Controller.getInstance();
+        controller.executeCommand("clear");
+
+        ArrayList<Task> testList = new ArrayList<Task>();
+
+        controller.executeCommand("add this");
+        controller.executeCommand("complete 1");
+
+        assertEquals(testList.toString(), controller.getIncompleteTasksPublic().toString());
+    }
+
+    public void testIncompleteInvalidIndex() {
+        Controller controller = Controller.getInstance();
+        controller.executeCommand("clear");
+
+        controller.executeCommand("add this");
+        controller.executeCommand("complete 1");
+        controller.executeCommand("display completed");
+
+        assertEquals(MESSAGE_TASK_INDEX_ERROR, controller.executeCommand("incomplete 2"));
+    }
+
+    @Test
+    public void testIncomplete() {
+        Controller controller = Controller.getInstance();
+        controller.executeCommand("clear");
+
+        ArrayList<Task> testList = new ArrayList<Task>();
+
+        controller.executeCommand("add this");
+        controller.executeCommand("complete 1");
+        controller.executeCommand("display completed");
+        controller.executeCommand("incomplete 1");
+
+        assertEquals(testList.toString(), controller.getCompleteTasksPublic().toString());
+    }
+
+    @Test
+    public void testSearch() {
+        Controller controller = Controller.getInstance();
+        controller.executeCommand("clear");
+
+        ArrayList<Task> testList = new ArrayList<Task>();
+        testList.add(createNewTask("this on 1 apr"));
+        testList.add(createNewTask("this on 2 apr"));
+
+        controller.executeCommand("add this on 1 apr");
+        controller.executeCommand("add this on 2 apr");
+        controller.executeCommand("add that");
+        controller.executeCommand("add foo on 3 apr by 1pm");
+        controller.executeCommand("add bar on 3 apr from 2pm to 4pm");
+
+        // Search by description
+        controller.executeCommand("search this");
+        assertEquals(testList.toString(), controller.getDisplayedTasks().toString());
+
+        // Search by date
+        testList.clear();
+        testList.add(createNewTask("foo on 3 apr by 1pm"));
+        testList.add(createNewTask("bar on 3 apr by 2pm to 4pm"));
+        controller.executeCommand("search 3 apr");
+        assertEquals(testList.toString(), controller.getDisplayedTasks().toString());
+    }
+
+    @Test
+    public void testInvalidCommands() {
+        Controller controller = Controller.getInstance();
+        controller.executeCommand("clear");
+
+        assertEquals(MESSAGE_INVALID_COMMAND, controller.executeCommand("asjdhaskjdkj"));
+        assertEquals(MESSAGE_INVALID_COMMAND, controller.executeCommand("addd"));
+        assertEquals(MESSAGE_INVALID_COMMAND, controller.executeCommand("deelete"));
+        assertEquals(MESSAGE_INVALID_COMMAND, controller.executeCommand("editt"));
+    }
+
+
+
+    @Test
+    public void testUndo() {
+        Controller controller = Controller.getInstance();
+        controller.executeCommand("clear");
+
+        ArrayList<Task> testList = new ArrayList<Task>();
+
+        // Undo add
+        controller.executeCommand("add this");
+        controller.executeCommand("undo");
+        assertEquals(testList.toString(), controller.getIncompleteTasksPublic().toString());
+
+        // Undo edit
+        controller.executeCommand("add that 1 apr by 4pm");
+        controller.executeCommand("edit 1 that 1 apr by 6pm");
+        controller.executeCommand("undo");
+        Task task = createNewTask("that 1 apr by 4pm");
+        testList.add(task);
+        assertEquals(testList.toString(), controller.getIncompleteTasksPublic().toString());
+
+        // Undo delete
+        controller.executeCommand("delete 1");
+        controller.executeCommand("undo");
+        assertEquals(testList.toString(), controller.getIncompleteTasksPublic().toString());
+    }
+
+
+    // ================================================================
+    // Tests for recurring tasks
+    // ================================================================
+
+    // Need to cover
+    // add, edit, delete
+
+    @Test
+    public void testAddRecurring() {
+        Controller controller = Controller.getInstance();
+        controller.executeCommand("clear");
+
+        ArrayList<Task> testList = new ArrayList<>();
+        testList.add(createNewTask("this on 1 apr"));
+        testList.add(createNewTask("this on 2 apr"));
+        testList.add(createNewTask("this on 3 apr"));
+        testList.add(createNewTask("this on 4 apr"));
+        testList.add(createNewTask("this on 5 apr"));
+
+        controller.executeCommand("add this everyday from 1 apr to 5 apr");
+
+        assertEquals(testList.toString(), controller.getIncompleteTasksPublic().toString());
+    }
+    
+    @Test
+    public void testAddRecurringWithExceptions() {
+        Controller controller = Controller.getInstance();
+        controller.executeCommand("clear");
+
+        ArrayList<Task> testList = new ArrayList<>();
+        testList.add(createNewTask("this on 1 apr"));
+        testList.add(createNewTask("this on 2 apr"));
+        testList.add(createNewTask("this on 3 apr"));
+        testList.add(createNewTask("this on 5 apr"));
+
+        controller.executeCommand("add this everyday from 1 apr to 5 apr except 4 apr");
+
+        assertEquals(testList.toString(), controller.getIncompleteTasksPublic().toString());
+    }
+
+    @Test
+     public void testEditOneRecurring() {
+        Controller controller = Controller.getInstance();
+        controller.executeCommand("clear");
+
+        ArrayList<Task> testList = new ArrayList<>();
+        testList.add(createNewTask("this on 1 apr"));
+        testList.add(createNewTask("this on 2 apr"));
+        testList.add(createNewTask("this on 3 apr"));
+        testList.add(createNewTask("this on 4 apr"));
+        testList.add(createNewTask("that on 6 apr"));
+
+        controller.executeCommand("add this everyday from 1 apr to 5 apr");
+        controller.executeCommand("edit 5 that on 6 apr");
+
+        assertEquals(testList.toString(), controller.getIncompleteTasksPublic().toString());
+    }
+
+    @Test
+    public void testEditAllRecurring() {
+        Controller controller = Controller.getInstance();
+        controller.executeCommand("clear");
+
+        ArrayList<Task> testList = new ArrayList<>();
+        testList.add(createNewTask("that on 1 apr"));
+        testList.add(createNewTask("that on 2 apr"));
+        testList.add(createNewTask("that on 3 apr"));
+        testList.add(createNewTask("that on 4 apr"));
+        testList.add(createNewTask("that on 5 apr"));
+        testList.add(createNewTask("that on 6 apr"));
+        testList.add(createNewTask("that on 7 apr"));
+        testList.add(createNewTask("that on 8 apr"));
+        testList.add(createNewTask("that on 9 apr"));
+        testList.add(createNewTask("that on 10 apr"));
+
+        controller.executeCommand("add this everyday from 1 apr to 5 apr");
+        controller.executeCommand("edit all 5 that everyday from 1 apr to 10 apr");
+
+        assertEquals(testList.toString(), controller.getIncompleteTasksPublic().toString());
+    }
+
+    @Test
+    public void testDeleteOneRecurring() {
+        Controller controller = Controller.getInstance();
+        controller.executeCommand("clear");
+
+        ArrayList<Task> testList = new ArrayList<>();
+        testList.add(createNewTask("this on 1 apr"));
+        testList.add(createNewTask("this on 2 apr"));
+        testList.add(createNewTask("this on 3 apr"));
+        testList.add(createNewTask("this on 4 apr"));
+
+        controller.executeCommand("add this everyday from 1 apr to 5 apr");
+        controller.executeCommand("delete 5");
+
+        assertEquals(testList.toString(), controller.getIncompleteTasksPublic().toString());
+    }
+
+    @Test
+    public void testDeleteAllRecurring() {
+        Controller controller = Controller.getInstance();
+        controller.executeCommand("clear");
+
+        ArrayList<Task> testList = new ArrayList<>();
+
+        controller.executeCommand("add this everyday from 1 apr to 5 apr");
+        controller.executeCommand("delete all 3");
+
+        assertEquals(testList.toString(), controller.getIncompleteTasksPublic().toString());
+    }
+    
+    //author A0122393L
+    @Test
+    public void testAddRecurringMonthWithExcceptions() {
+        Controller controller = Controller.getInstance();
+        controller.executeCommand("clear");
+
+        ArrayList<Task> testList = new ArrayList<>();
+        testList.add(createNewTask("this on 1 apr"));
+        testList.add(createNewTask("this on 1 oct"));
+
+        controller.executeCommand("add this every 2 month from 1 apr to 1 oct except 1 jun, 1 aug");
+
+        assertEquals(testList.toString(), controller.getIncompleteTasksPublic().toString());
+    }
+}
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\tests\java\ControllerTest.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\tests\java\HistoryTest.java
+	 */
+
+public class HistoryTest {
+
+	private ArrayList<LocalDateTime> parsedDates;
+	private String parsedWords;
+	private String nonParsedWords;
+
+	@Test
+	// Checks if the newly created object have nothing inside
+	public void testEmptyHistory() {
+		History history = new History();
+		assertTrue(history.isEmpty());
+	}
+	
+	@Test
+	// Checks that the ArrayList and Observablist passed into History wont manipulate other data
+	public void testHistoryWithTasks() {
+		ArrayList<Task> listA = new ArrayList<Task>();
+		ObservableList<Task> listO = FXCollections.observableArrayList();
+		
+		Task task1 = createTask("First");
+		Task task2 = createTask("Second");
+		Task task3 = createTask("Third");
+		Task task4 = createTask("Fourth");
+		
+		listA.add(task1);
+		listA.add(task2);
+		listA.add(task3);
+		listA.add(task4);
+		
+		listO.add(task1);
+		listO.add(task2);
+		listO.add(task3);
+		listO.add(task4);
+		
+		History history = new History();
+		
+		history.storeCurrentState(listA, listO);
+		
+		assertFalse(history.isEmpty());
+		
+		// Put some changes in listA and listO
+		listA.remove(1); // --> (1,3,4)
+		listO.remove(3); // --> (1,2,3)
+		
+		history.storeCurrentState(listA, listO);
+		
+		// Put some changes in listA and listO
+		listA.remove(0); // --> (3,4)
+		listO.remove(1); // --> (1,3)
+		
+		history.storeCurrentState(listA, listO);
+		
+		history.getPreviousState(); // First "undo"
+		
+		assertEquals(2, history.getAllSize());
+		assertEquals(2, history.getDisplayedSize());
+		assertEquals(task3.toString(), history.getAllTasks().get(0).toString());
+		assertEquals(task4.toString(), history.getAllTasks().get(1).toString());
+		assertEquals(task1.toString(), history.getDisplayedTasks().get(0).toString());
+		assertEquals(task3.toString(), history.getDisplayedTasks().get(1).toString());
+		
+		history.getPreviousState(); // Second "undo"
+		
+		assertEquals(3, history.getAllSize());
+		assertEquals(3, history.getDisplayedSize());
+		assertEquals(task1.toString(), history.getAllTasks().get(0).toString());
+		assertEquals(task3.toString(), history.getAllTasks().get(1).toString());
+		assertEquals(task4.toString(), history.getAllTasks().get(2).toString());
+		assertEquals(task1.toString(), history.getDisplayedTasks().get(0).toString());
+		assertEquals(task2.toString(), history.getDisplayedTasks().get(1).toString());
+		assertEquals(task3.toString(), history.getDisplayedTasks().get(2).toString());
+		
+		history.getPreviousState(); // Third "undo"
+		
+		assertEquals(4, history.getAllSize());
+		assertEquals(4, history.getDisplayedSize());
+		assertEquals(task1.toString(), history.getAllTasks().get(0).toString());
+		assertEquals(task2.toString(), history.getAllTasks().get(1).toString());
+		assertEquals(task3.toString(), history.getAllTasks().get(2).toString());
+		assertEquals(task4.toString(), history.getAllTasks().get(3).toString());
+		assertEquals(task1.toString(), history.getDisplayedTasks().get(0).toString());
+		assertEquals(task2.toString(), history.getDisplayedTasks().get(1).toString());
+		assertEquals(task3.toString(), history.getDisplayedTasks().get(2).toString());
+		assertEquals(task4.toString(), history.getDisplayedTasks().get(3).toString());
+	}
+	
+	@Test
+	// Checks whether the Feedback String is stored properly
+	public void testFeedbackHistory() {
+		History history = new History();
+		String string1 = "Hello";
+		String string2 = "Good morning";
+		String string3 = "Wazzzzzzupppp";
+		String string4 = "How are you?";
+		
+		history.storeCommand(string3);
+		history.storeCommand(string1);
+		history.storeCommand(string4);
+		history.storeCommand(string2);
+		
+		assertEquals("Good morning", history.getPreviousCommand());
+		assertEquals("How are you?", history.getPreviousCommand());
+		assertEquals("Hello", history.getPreviousCommand());
+		assertEquals("Wazzzzzzupppp", history.getPreviousCommand());	
+	}
+	
+	// Helper function to create an instance of a Task object quickly
+	private Task createTask(String input) {
+		DateParser dp = DateParser.getInstance();
+		dp.parse(input);
+	    parsedDates = dp.getDates();
+	    parsedWords = dp.getParsedWords();
+	    nonParsedWords = dp.getNotParsedWords();
+	    return new Task(input, parsedDates, parsedWords, nonParsedWords);
+	}
+
+}
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\tests\java\HistoryTest.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\tests\java\TaskTest.java
+	 */
+
+public class TaskTest {
+
+    @Test
+    public void testFloat() {
+        String text = "attend meeting later";
+        Task testingTask = createNewTask(text);
+        
+        // Testing type and the info w/wo parsed
+        assertEquals(Task.Type.FLOATING, testingTask.getType());
+        assertEquals("attend meeting later", testingTask.getRawInfo());
+        assertEquals("attend meeting later", testingTask.getDescription());
+        
+        // Testing LocalDateTime 
+        assertEquals(null, testingTask.getDate());
+        assertEquals(null, testingTask.getStartTime());
+        assertEquals(null, testingTask.getEndTime());
+        
+        // Testing other attributes
+        assertFalse(testingTask.isCompleted());
+        assertEquals(null, testingTask.getId());
+        assertFalse(testingTask.isOverdue());
+    }
+
+    @Test
+    public void testTimed() {
+        String text = "attend meeting later at 1200 - 1400 on 20 Feb";
+        Task testingTask = createNewTask(text);
+        
+        // Testing type and the info w/wo parsed
+        assertEquals(Task.Type.TIMED, testingTask.getType());
+        assertEquals("attend meeting later at 1200 - 1400 on 20 Feb", testingTask.getRawInfo());
+        assertEquals("attend meeting later", testingTask.getDescription());
+        
+        // Testing LocalDateTime
+        assertEquals("2015-02-20", testingTask.getDate().toString());
+        assertEquals(20, testingTask.getDate().getDayOfMonth());
+        assertEquals(2, testingTask.getDate().getMonthValue());
+        assertEquals(2015, testingTask.getDate().getYear());
+        assertEquals("12:00", testingTask.getStartTime().toString());
+        assertEquals("14:00", testingTask.getEndTime().toString());
+        
+        // Testing other attributes
+        assertFalse(testingTask.isCompleted());
+        assertEquals(null, testingTask.getId());
+        assertTrue(testingTask.isOverdue());
+    }
+
+    @Test
+    public void testDeadline() {
+        String text = "finish homework by 20 Feb";
+        Task testingTask = createNewTask(text);
+        
+        // Testing type and the info w/wo parsed
+        assertEquals(Task.Type.DEADLINE, testingTask.getType());
+        assertEquals("finish homework by 20 Feb", testingTask.getRawInfo());
+        assertEquals("finish homework", testingTask.getDescription());
+        
+        // Testing LocalDateTime
+        assertEquals("2015-02-20", testingTask.getDate().toString());
+        assertEquals(20, testingTask.getDate().getDayOfMonth());
+        assertEquals(2, testingTask.getDate().getMonthValue());
+        assertEquals(2015, testingTask.getDate().getYear());
+        assertEquals(null, testingTask.getStartTime());
+        assertEquals(null, testingTask.getEndTime());
+        
+        // Testing other attributes
+        assertFalse(testingTask.isCompleted());
+        assertEquals(null, testingTask.getId());
+        assertTrue(testingTask.isOverdue());
+    }
+
+    @Test
+    public void testSetDescriptionFloating() {
+        String text = "finish homework";
+        Task task = createNewTask(text);
+        
+        // Testing before modifying description
+        assertEquals("finish homework", task.getDescription());
+        assertEquals(null, task.getDate());
+        assertEquals(null, task.getStartTime());
+        assertEquals(null, task.getEndTime());
+        
+        task.setDescription("do not do homework");
+        
+        // Testing after modifying description
+        assertEquals("do not do homework", task.getDescription());
+        assertEquals(null, task.getDate());
+        assertEquals(null, task.getStartTime());
+        assertEquals(null, task.getEndTime());
+    }
+    
+    @Test
+    public void testSetDescriptionDeadline() {
+        String text = "finish homework by today";
+        Task task = createNewTask(text);
+        
+        // Testing before modifying description
+        assertEquals("finish homework", task.getDescription());
+        assertEquals(LocalDate.now().toString(), task.getDate().toString());
+        assertEquals(null, task.getStartTime());
+        assertEquals(null, task.getEndTime());
+        
+        task.setDescription("do not do homework");
+        
+        // Testing after modifying description
+        assertEquals("do not do homework", task.getDescription());
+        assertEquals(LocalDate.now().toString(), task.getDate().toString());
+        assertEquals(null, task.getStartTime());
+        assertEquals(null, task.getEndTime());
+    }
+    
+    @Test
+    public void testSetDescriptionTimed() {
+        String text = "attend meeting 2pm to 3pm on 25 april";
+        Task task = createNewTask(text);
+        
+    	// Testing before modifying description
+        assertEquals("attend meeting", task.getDescription());
+        assertEquals("2015-04-25", task.getDate().toString());
+        assertEquals("14:00", task.getStartTime().toString());
+        assertEquals("15:00", task.getEndTime().toString());
+        
+        task.setDescription("watch movie");
+        
+        // Testing after modifying description
+        assertEquals("watch movie", task.getDescription());
+        assertEquals("2015-04-25", task.getDate().toString());
+        assertEquals("14:00", task.getStartTime().toString());
+        assertEquals("15:00", task.getEndTime().toString());
+    }
+
+    @Test
+    public void testCompleteness() {
+    	String text = "do this by 14 apr";
+    	Task task = createNewTask(text);
+    	
+    	assertFalse(task.isCompleted());
+    	task.markAsCompleted();
+    	assertTrue(task.isCompleted());
+    	task.markAsIncomplete();
+    	assertFalse(task.isCompleted());
+    }
+
+    @Test
+    public void testTaskClone() throws CloneNotSupportedException {
+        String text = "do this by 14 apr 1pm to 3pm";
+        Task original = createNewTask(text);
+        Task clone = original.clone();
+
+        // Check that the clone has the same properties as the original
+        assertEquals(original.getDescription(), clone.getDescription());
+        assertEquals(original.getDate(), clone.getDate());
+        assertEquals(original.getStartTime(), clone.getStartTime());
+        assertEquals(original.getEndTime(), clone.getEndTime());
+
+        // Check that changes to clone does not affect original
+        clone.setDescription("do that");
+        assertNotEquals(original.getDescription(), clone.getDescription());
+        assertEquals("do that", clone.getDescription());
+    }
+    
+    @Test
+    // Test a variety of Tasks object with different date and time combination
+    // and check if they are overdue
+    public void testOverdue() {
+    	Task taskFloating = createNewTask("do homework");
+    	
+    	Task taskDeadlineNoTimeOverdue = createNewTask("do homework 9 march");
+    	Task taskDeadlineNoTimeNotOverdue = createNewTask("do homework today");
+    	Task taskDeadlineWithTimeOverdue = createNewTask("do homework by 12am today");
+    	Task taskDeadlineWithTimeNotOverdue = createNewTask("do homework by 11.59pm today");
+    	
+    	Task taskTimedOverdueByDate = createNewTask("do homework 2pm to 3pm 9 march");
+    	Task taskTimedOverdueByTime = createNewTask("do homework 12am to 4am today");
+    	Task taskTimedNotOverdue = createNewTask("do homework 11.59pm to 11.59pm today");
+    	
+    	assertFalse(taskFloating.isOverdue());
+    	assertTrue(taskDeadlineNoTimeOverdue.isOverdue());
+    	assertFalse(taskDeadlineNoTimeNotOverdue.isOverdue());
+    	assertTrue(taskDeadlineWithTimeOverdue.isOverdue());
+    	assertFalse(taskDeadlineWithTimeNotOverdue.isOverdue());
+    	assertTrue(taskTimedOverdueByDate.isOverdue());
+    	assertTrue(taskTimedOverdueByTime.isOverdue());
+    	assertFalse(taskTimedNotOverdue.isOverdue());   	
+    }
+    
+    @Test
+    // Checks whether the Task object is printed out in order
+    public void testToString() {
+    	Task taskFloating = createNewTask("do homework");
+    	Task taskDeadlineNoTime = createNewTask("do homework 12 Apr");
+    	Task taskDeadlineWithTime = createNewTask("do homework by 11pm 12 Apr");
+    	Task taskTimed = createNewTask("do homework 10pm to 11pm 12 Apr");
+    	
+    	assertEquals("do homework", taskFloating.toString());
+    	assertEquals("do homework Sunday, 12 April 2015", taskDeadlineNoTime.toString());
+    	assertEquals("do homework 11.00pm Sunday, 12 April 2015", taskDeadlineWithTime.toString());
+    	assertEquals("do homework 10.00pm to 11.00pm Sunday, 12 April 2015", taskTimed.toString());
+    }
+    
+    // Created for the purpose for this test. Simplify the constructor of Task. NOT A TEST
+    public Task createNewTask(String input) {
+        DateParser parser = DateParser.getInstance();
+        parser.parse(input);
+        ArrayList<LocalDateTime> parsedDates = parser.getDates();
+        String parsedWords = parser.getParsedWords();
+        String nonParsedWords = parser.getNotParsedWords();
+        return new Task(input, parsedDates, parsedWords, nonParsedWords);
+    }
+}
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\tests\java\TaskTest.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\tests\java\UserDefinedSortTest.java
+	 */
+
+public class UserDefinedSortTest {
+	
+	ArrayList<LocalDateTime> parsedDates;
+	String parsedWords;
+	String nonParsedWords;
+	UserDefinedSort uds;
+	ArrayList<Task> list;
+
+	@Test
+	// Test the functionality of the main container
+	public void testUDSContainer() {
+		ArrayList<Task> sampleList = new ArrayList<Task>();
+		sampleList.add(createTask("first"));
+		sampleList.add(createTask("second"));
+		sampleList.add(createTask("third"));
+		
+		UserDefinedSort testContainer = new UserDefinedSort(sampleList);
+		
+		assertEquals(sampleList, testContainer.getList());
+		assertEquals(sampleList, testContainer.executeSort());
+	}
+	
+	@Test
+	// Test whether the list will be sorted by Type using the SortType comparator
+	public void testTypeSort() {
+		 
+		list = new ArrayList<Task>();
+		uds = new UserDefinedSort(list);
+		
+	    Task taskDeadlineNoTime = createTask("buy milk tomorrow");
+	    Task taskDeadlineWithTime = createTask("buy cereal tomorrow by 9am");
+	    Task taskFloating = createTask("do homework");
+	    Task taskTimed = createTask("do assignment today 2pm to 3pm");
+	   
+	    list.add(taskTimed);
+	    list.add(taskDeadlineWithTime);
+	    list.add(taskDeadlineNoTime);
+	    list.add(taskFloating);
+	    
+	    uds.addComparator(new SortType());
+	    
+	    // Test before sort
+	    assertEquals(list.get(0), taskTimed);
+	    assertEquals(list.get(1), taskDeadlineWithTime);
+	    assertEquals(list.get(2), taskDeadlineNoTime);
+	    assertEquals(list.get(3), taskFloating);
+	    
+	    uds.executeSort();
+	    
+	    // Test after sort
+	    assertEquals(list.get(0), taskFloating);
+	    assertEquals(list.get(1), taskTimed);
+	    assertEquals(list.get(2), taskDeadlineWithTime);
+	    assertEquals(list.get(3), taskDeadlineNoTime);
+	}
+	
+	@Test
+	// Test whether the list will be sorted by date using the SortDate comparator
+	public void testDateSort() {
+		
+		list = new ArrayList<Task>();
+		uds = new UserDefinedSort(list);
+		
+		Task taskDeadlineNoTime = createTask("buy milk tomorrow");
+	    Task taskDeadlineWithTime = createTask("buy cereal tomorrow by 9am");
+	    Task taskFloating = createTask("do homework");
+	    Task taskTimed = createTask("do assignment today 2pm to 3pm");
+
+	    list.add(taskTimed);
+	    list.add(taskDeadlineNoTime);
+	    list.add(taskDeadlineWithTime);
+	    list.add(taskFloating);
+	    
+	    uds.addComparator(new SortDate());
+	    
+	    // Test before sort
+	    assertEquals(list.get(0), taskTimed);
+	    assertEquals(list.get(1), taskDeadlineNoTime);
+	    assertEquals(list.get(2), taskDeadlineWithTime);
+	    assertEquals(list.get(3), taskFloating);
+	      
+	    uds.executeSort();
+	    
+	    // Test after sort
+	    assertEquals(list.get(0), taskFloating);
+	    assertEquals(list.get(1), taskTimed);
+	    assertEquals(list.get(2), taskDeadlineNoTime);
+	    assertEquals(list.get(3), taskDeadlineWithTime);
+	    
+	}
+	
+	@Test
+	// Test whether the list will be sorted by overdue using the SortOverdue comparator
+	public void testOverdueSort() {
+		
+		list = new ArrayList<Task>();
+		uds = new UserDefinedSort(list);
+		
+		Task taskFloating = createTask("do homework");
+	    Task taskTimed = createTask("do assignment 9 march 2pm to 3pm");
+		Task taskDeadlineNoTime = createTask("buy milk tomorrow");
+	    Task taskDeadlineWithTime = createTask("do this by 3am 12 Apr");     
+	    
+	    list.add(taskFloating);
+	    list.add(taskTimed);
+	    list.add(taskDeadlineNoTime);
+	    list.add(taskDeadlineWithTime);    
+	    
+	    uds.addComparator(new SortOverdue());
+	    
+	    // Test before sort
+	    assertEquals(list.get(0), taskFloating);
+	    assertEquals(list.get(1), taskTimed);
+	    assertEquals(list.get(2), taskDeadlineNoTime);
+	    assertEquals(list.get(3), taskDeadlineWithTime);
+
+	    uds.executeSort();
+	    
+	    // Test after sort
+	    assertEquals(list.get(0), taskTimed);
+	    assertEquals(list.get(1), taskDeadlineWithTime);
+	    assertEquals(list.get(2), taskFloating);
+	    assertEquals(list.get(3), taskDeadlineNoTime); 
+	}
+	
+	@Test
+	// Test whether the list will be sorted by completeness using the SortIncomplete comparator
+	public void testIncompleteSort() {
+		
+		list = new ArrayList<Task>();
+		uds = new UserDefinedSort(list);
+		
+		Task taskDeadlineNoTime = createTask("buy milk tomorrow");
+	    Task taskDeadlineWithTime = createTask("buy cereal by 9am");
+	    Task taskFloating = createTask("do homework");
+	    Task taskTimed = createTask("do assignment 9 march 2pm to 3pm");
+
+	    // Make 2 tasks completed
+	    taskTimed.markAsCompleted();
+	    taskFloating.markAsCompleted();
+	    
+	    list.add(taskDeadlineNoTime);
+	    list.add(taskTimed);
+	    list.add(taskDeadlineWithTime);
+	    list.add(taskFloating);
+	    
+	    uds.addComparator(new SortIncomplete());
+	    
+	    // Test before sort
+	    assertEquals(list.get(0), taskDeadlineNoTime);
+	    assertEquals(list.get(1), taskTimed);
+	    assertEquals(list.get(2), taskDeadlineWithTime);
+	    assertEquals(list.get(3), taskFloating);
+	    
+	    uds.executeSort();
+	    
+	    // Test after sort
+	    assertEquals(list.get(0), taskDeadlineNoTime);
+	    assertEquals(list.get(1), taskDeadlineWithTime);
+	    assertEquals(list.get(2), taskTimed);
+	    assertEquals(list.get(3), taskFloating);
+	}
+	
+	@Test
+	// Test whether the list will be sorted by time using the SortTime comparator
+	public void testTimeSort() {
+		
+		list = new ArrayList<Task>();
+		uds = new UserDefinedSort(list);
+		
+		Task taskDeadlineNoTime = createTask("buy milk tomorrow");
+	    Task taskDeadlineWithTime = createTask("buy cereal by 9am");
+	    Task taskFloating = createTask("do homework");
+	    Task taskTimed = createTask("do assignment 9 march 2pm to 3pm");
+	    
+	    list.add(taskDeadlineNoTime);
+	    list.add(taskTimed);
+	    list.add(taskDeadlineWithTime);
+	    list.add(taskFloating);
+	    
+	    uds.addComparator(new SortTime());
+	    
+	    // Test before sort
+	    assertEquals(list.get(0), taskDeadlineNoTime);
+	    assertEquals(list.get(1), taskTimed);
+	    assertEquals(list.get(2), taskDeadlineWithTime);
+	    assertEquals(list.get(3), taskFloating);
+	    
+	    uds.executeSort();
+	    
+	    // Test after sort
+	    assertEquals(list.get(0), taskDeadlineNoTime);
+	    assertEquals(list.get(1), taskFloating);
+	    assertEquals(list.get(2), taskDeadlineWithTime);
+	    assertEquals(list.get(3), taskTimed);
+	}
+	
+	@Test
+	// Test the main container with all the existing comparator in its chain
+	// Two list of tasks in different order, when going through the same chain
+	// should result in same output order
+	public void testSortChain() {
+		
+		Task taskDeadlineNoTime = createTask("buy milk tomorrow");
+	    Task taskDeadlineWithTime = createTask("buy cereal by 9am 12 Apr");
+	    Task taskFloating = createTask("do homework");
+	    Task taskTimed = createTask("do assignment 9 march 2pm to 3pm");
+		
+		// Test sequence 1
+		list = new ArrayList<Task>();
+		uds = new UserDefinedSort(list);
+	    
+	    list.add(taskDeadlineNoTime);
+	    list.add(taskTimed);
+	    list.add(taskDeadlineWithTime);
+	    list.add(taskFloating);
+	    
+	    uds.addComparator(new SortType());
+	    uds.addComparator(new SortTime());
+	    uds.addComparator(new SortDate());
+	    uds.addComparator(new SortOverdue());
+	    
+	    uds.executeSort();
+	    
+	    // Test sequence 2
+	    ArrayList<Task> listCopy = new ArrayList<Task>();
+	    UserDefinedSort udsCopy = new UserDefinedSort(listCopy);
+	    
+	    listCopy.add(taskFloating);
+	    listCopy.add(taskDeadlineWithTime);
+	    listCopy.add(taskTimed);
+	    listCopy.add(taskDeadlineNoTime);
+
+	    udsCopy.addComparator(new SortType());
+	    udsCopy.addComparator(new SortTime());
+	    udsCopy.addComparator(new SortDate());
+	    udsCopy.addComparator(new SortOverdue());
+	    udsCopy.addComparator(new SortIncomplete());
+	    
+	    udsCopy.executeSort();
+	    
+	    assertEquals(list.get(0), taskTimed);
+	    assertEquals(list.get(1), taskDeadlineWithTime);
+	    assertEquals(list.get(2), taskFloating);
+	    assertEquals(list.get(3), taskDeadlineNoTime);
+	    
+	    assertEquals(list.get(0), listCopy.get(0));
+	    assertEquals(list.get(1), listCopy.get(1));
+	    assertEquals(list.get(2), listCopy.get(2));
+	    assertEquals(list.get(3), listCopy.get(3));
+	}
+	
+	private Task createTask(String input) {
+		DateParser dp = DateParser.getInstance();
+		dp.parse(input);
+	    parsedDates = dp.getDates();
+	    parsedWords = dp.getParsedWords();
+	    nonParsedWords = dp.getNotParsedWords();
+	    return new Task(input, parsedDates, parsedWords, nonParsedWords);
+	}
+}
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\tests\java\UserDefinedSortTest.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\target\classes\view\DisplayController.java
+	 */
+
+    // Will result in the help menu to appear
+    public void showHelpDisplay() {
+        hideOverlays();
+        FadeTransition fadeIn = initFadeIn(helpOverlay,
+                                           OVERLAY_FADE_IN_MILLISECONDS);
+
+        overlayTimeline = generateHelpOverlayTimeline(fadeIn);
+        overlayTimeline.play();
+    }
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\target\classes\view\DisplayController.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\target\classes\view\DisplayController.java
+	 */
+
+    // Append example commands for users to see when their Veto is empty
+    private void initExampleCommands() {
+        allExampleCommands = new ArrayList<String>();
+        allExampleCommands.add("add meet Isabel from 5pm to 6pm today");
+        allExampleCommands.add("add do tutorial 10 tomorrow");
+        allExampleCommands.add("add finish assignment by 2359 tomorrow");
+        allExampleCommands.add("add find easter eggs by 10 apr");
+        allExampleCommands.add("add complete proposal by friday");
+        allExampleCommands.add("add exercise every tuesday");
+        allExampleCommands.add("add lunch with boss tomorrow");
+        allExampleCommands.add("add remember to buy milk");
+        allExampleCommands.add("add watch movie with friends today");
+        allExampleCommands.add("add remember wedding anniversary on 12 October");
+        allExampleCommands.add("add buy the latest Harry Potter book");
+        allExampleCommands.add("add sneak into Apple WWDC");
+        allExampleCommands.add("add remember to complete SOC project");
+        allExampleCommands.add("add find partner for Orbital");
+        allExampleCommands.add("add make funny YouTube video next week");
+        allExampleCommands.add("add study for final exams");
+        allExampleCommands.add("add plan for overseas trip next week");
+        allExampleCommands.add("add meeting with boss 23 July");
+        allExampleCommands.add("add return money owed to John");
+        allExampleCommands.add("add run for presidential campaign");
+        allExampleCommands.add("add do some community work next week");
+    }
+
+    // Initialize the help display
+    private void initHelpList() {
+        helpList = FXCollections.observableArrayList();
+        helpList.add(new HelpBox(HELP_ADD_DESC, HELP_ADD_COMMAND));
+        helpList.add(new HelpBox(HELP_EDIT_DESC, HELP_EDIT_COMMAND));
+        helpList.add(new HelpBox(HELP_DELETE_DESC, HELP_DELETE_COMMAND));
+        helpList.add(new HelpBox(HELP_COMPLETE_DESC, HELP_COMPLETE_COMMAND));
+        helpList.add(new HelpBox(HELP_INCOMPLETE_DESC, HELP_INCOMPLETE_COMMAND));
+        helpList.add(new HelpBox(HELP_UNDO_DESC, HELP_UNDO_COMMAND));
+        helpList.add(new HelpBox(HELP_SET_SAVE_LOCATION_DESC,
+                                 HELP_SET_SAVE_LOCATION_COMMAND));
+        helpList.add(new HelpBox(HELP_MOVE_SAVE_LOCATION_DESC,
+                                 HELP_MOVE_SAVE_LOCATION_COMMAND));
+        helpList.add(new HelpBox(HELP_SEARCH_DESC, HELP_SEARCH_COMMAND));
+        helpList.add(new HelpBox(HELP_DISPLAY_INCOMPLETE_DESC,
+                                 HELP_DISPLAY_INCOMPLETE_COMMAND));
+        helpList.add(new HelpBox(HELP_DISPLAY_COMPLETE_DESC,
+                                 HELP_DISPLAY_COMPLETE_COMMAND));
+        helpList.add(new HelpBox(HELP_EXIT_DESC, HELP_EXIT_COMMAND));
+    }
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\target\classes\view\DisplayController.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\target\classes\view\DisplayController.java
+	 */
+
+    // Formats the ArrayList<String> so that it prints element by element
+    private String generateParagraph(ArrayList<String> list, int size) {
+        return StringUtils.join(list.toArray(), "\n", 0, size);
+    }
+}
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\target\classes\view\DisplayController.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\target\classes\view\HelpBox.java
+	 */
+
+public class HelpBox extends HBox {
+
+    private static final String LOCATION_HELP_BOX_FXML = "/view/HelpBox.fxml";
+
+    @FXML
+    private Label description;
+
+    @FXML
+    private Label command;
+
+    public HelpBox(String description, String command) {
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(
+                    LOCATION_HELP_BOX_FXML));
+            loader.setRoot(this);
+            loader.setController(this);
+            loader.load();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        this.description.setText(description);
+        this.command.setText(command);
+    }
+}
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\target\classes\view\HelpBox.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\target\classes\view\TitleBox.java
+	 */
+
+public class TitleBox extends HBox {
+	
+	private static final String LOCATION_TITLE_BOX_FXML = "/view/TitleBox.fxml";
+	
+	 @FXML
+	 private Label title;
+	
+	public TitleBox(String desc) {
+		
+		try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(LOCATION_TITLE_BOX_FXML));
+            loader.setRoot(this);
+            loader.setController(this);
+            loader.load();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		 this.title.setText(desc);
+	}
+}
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\target\classes\view\TitleBox.java
+
+
+
+
+

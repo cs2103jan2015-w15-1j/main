@@ -1,0 +1,3610 @@
+//@author: a0121520a
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\java\Command.java
+	 */
+
+public class Command {
+    public static enum Type {
+        ADD, DISPLAY, DELETE, EDIT, COMPLETE, INCOMPLETE, UNDO, SEARCH, EXIT,
+        SET, CLEAR, HELP, INVALID, MOVE
+    };
+
+    private static final int PARAM_POSITION_COMMAND = 0;
+    private static final int PARAM_START_POSITION_ARGUMENT = 1;
+
+    private static final String STRING_ONE_SPACING = " ";
+
+    private Type commandType;
+    private String userCommand;
+    private String arguments;
+
+    public Command(String input) {
+        String[] parameters = splitUserInput(input);
+
+        userCommand = getUserCommand(parameters);
+        arguments = getUserArguments(parameters);
+
+        commandType = determineCommandType(userCommand);
+    }
+
+    
+    // ================================================================
+    // Public getters
+    // ================================================================
+    /**
+     * Get all command types as an ArrayList of Strings.
+     * 
+     * @return ArrayList of String representations of command types
+     */
+    public static ArrayList<String> getAllCommandTypes() {
+        ArrayList<String> allCommands = new ArrayList<String>();
+        for (Type command : Type.values()) {
+            allCommands.add(command.toString());
+        }
+        return allCommands;
+    }
+
+    public Type getCommandType() {
+        return commandType;
+    }
+
+    public String getArguments() {
+        return arguments;
+    }
+
+
+    // ================================================================
+    // Private methods
+    // ================================================================
+    private Type determineCommandType(String userCommand) {
+        switch (userCommand.toLowerCase()) {
+            case "add" :
+                return Type.ADD;
+            case "delete" :
+                return Type.DELETE;
+            case "edit" :
+                return Type.EDIT;
+            case "display" :
+                return Type.DISPLAY;
+            case "complete" :
+                return Type.COMPLETE;
+            case "incomplete" :
+                return Type.INCOMPLETE;
+            case "undo" :
+                return Type.UNDO;
+            case "search" :
+                return Type.SEARCH;
+            case "help" :
+                return Type.HELP;
+            case "exit" :
+                return Type.EXIT;
+            case "set" :
+                return Type.SET;
+            case "move" :
+                return Type.MOVE;
+            case "clear" :
+                return Type.CLEAR;
+            default :
+                return Type.INVALID;
+        }
+    }
+
+    private String getUserCommand(String[] parameters) {
+        return parameters[PARAM_POSITION_COMMAND];
+    }
+
+    private String getUserArguments(String[] parameters) {
+        StringBuilder builder = new StringBuilder();
+        for (int i = PARAM_START_POSITION_ARGUMENT; i < parameters.length; i++) {
+            builder.append(parameters[i]);
+            builder.append(STRING_ONE_SPACING);
+        }
+        return builder.toString().trim();
+    }
+
+    private String[] splitUserInput(String input) {
+        return input.trim().split(STRING_ONE_SPACING);
+    }
+}
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\java\Command.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\java\DateParser.java
+	 */
+
+/**
+ * <h1>This class helps parse date inputs using Natty.</h1>
+ * 
+ * <p>Usage:
+ * 
+ * <p><tt>DateParser dateParser = DateParser.getInstance();</tt>
+ * <p><tt>dateParser.parse("do homework from 4pm to 6pm on 15 mar");</tt>
+ * <p><tt>ArrayList&lt;LocalDateTime&gt; dates = dateParser.getDates();</tt>
+ * <p><tt>String parsedWords = dateParser.getParsedWords();</tt>
+ * <p><tt>String notParsedWords = dateParser.getNotParsedWords();</tt>
+ */
+public class DateParser {
+   
+    // ================================================================
+    // Constants
+    // ================================================================
+    private static final int POSITION_FIRST_DATE = 0;
+    private static final int POSITION_FIRST_DATE_GROUP = 0;
+    private static final String FORMAT_PATTERN_TIME_DAY_MONTH = "h.mma, d MMMM";
+    private static final String REGEX_PATTERN_DATE_WITH_PERIOD = "\\d+[.]\\d+";
+    private static final String ESCAPE_CHAR = "\"";
+    private static final String STRING_ONE_SPACING = " ";
+    private static final String STRING_EMPTY = "";
+    private static final String EXCEPTION_NON_CHRONO_DATES = "%s is not after %s";
+
+
+    // ================================================================
+    // Variables
+    // ================================================================
+    private static Logger logger;
+    private static DateParser dateParser;
+
+    private Parser parser;
+    private String rawInput;
+    private ArrayList<LocalDateTime> dates;
+    private String parsedWords;
+    private String notParsedWords;
+
+
+    // ================================================================
+    // Constructor
+    // ================================================================
+    private DateParser() {
+        logger = Logger.getLogger("DateParser");
+        logger.setLevel(Level.OFF);
+    }
+
+
+    // ================================================================
+    // Public methods
+    // ================================================================
+    public static DateParser getInstance() {
+        if (dateParser == null) {
+            dateParser = new DateParser();
+        }
+        return dateParser;
+    }
+
+    public void parse(String input) throws DateTimeException {
+        initInstanceVariables();
+        input = modifyInputBeforeParsing(input);
+        List<DateGroup> groups = parser.parse(input);
+
+        if (hasParsedDates(groups)) {
+            input = fixInputFirstPass(input, groups);
+            groups = parser.parse(input);
+        }
+
+        if (hasParsedDates(groups)) {
+            input = fixInputSecondPass(input, groups);
+            groups = parser.parse(input);
+        }
+
+        generateInstanceVariables(input, groups);
+        removeNonChronologicalDates();
+    }
+
+    public String getParsedWords() {
+        return parsedWords;
+    }
+
+    public String getNotParsedWords() {
+        return notParsedWords;
+    }
+
+    public ArrayList<LocalDateTime> getDates() {
+        assert dates != null;
+        return dates;
+    }
+
+
+    // ================================================================
+    // Methods used before parsing the input
+    // ================================================================
+    private void initInstanceVariables() {
+        dates = new ArrayList<LocalDateTime>();
+        parser = new Parser();
+        parsedWords = STRING_EMPTY;
+        notParsedWords = STRING_EMPTY;
+    }
+
+    /**
+     * Returns modified input ready to be parsed.
+     * Ensures timings are properly formatted for interpretation by Natty and
+     * ensures words encapsulated by the escape characters are not parsed.
+     *
+     * @param input
+     * @return modified input
+     */
+    private String modifyInputBeforeParsing(String input) {
+        input = fixTimeFormatting(input);
+        input = hideWordsNotToBeParsed(input);
+        logger.log(Level.INFO, "Input before parsing: " + input);
+        return input;
+    }
+
+    private String fixTimeFormatting(String input) {
+        String modifiedInput = replacePeriodsWithColons(input);
+        rawInput = modifiedInput;
+        return modifiedInput;
+    }
+
+    /**
+     * Escapes every word that's within two escape characters.
+     * 
+     * @param input
+     * @return modified input
+     */
+    private String hideWordsNotToBeParsed(String input) {
+        boolean isTimeToEscapeWords = false;
+        List<String> inputWords = Arrays.asList(input.split(STRING_ONE_SPACING));
+        ArrayList<String> splitInput = new ArrayList<String>(inputWords);
+        
+        int i = 0;
+        for (String word : splitInput) {
+            if (isSurroundedByEscapeChars(word)) {
+                isTimeToEscapeWords = false;
+                
+            } else if (word.startsWith(ESCAPE_CHAR)) {
+                isTimeToEscapeWords = true;
+                splitInput.set(i, word + ESCAPE_CHAR);
+                
+            } else if (word.endsWith(ESCAPE_CHAR)) {
+                isTimeToEscapeWords = false;
+                splitInput.set(i, ESCAPE_CHAR + word);
+                
+            } else if (isTimeToEscapeWords) {
+                splitInput.set(i, ESCAPE_CHAR + word + ESCAPE_CHAR);
+            }
+            i++;
+        }
+        
+        return StringUtils.join(splitInput, STRING_ONE_SPACING);
+    }
+
+    private String replacePeriodsWithColons(String input) {
+        Pattern pattern = Pattern.compile(REGEX_PATTERN_DATE_WITH_PERIOD);
+        Matcher matcher = pattern.matcher(input);
+        while (matcher.find()) {
+            String matchedTime = matcher.group();
+            String modifiedTime = matchedTime.replace(".", ":");
+            input = input.replace(matchedTime, modifiedTime);
+        }
+        return input;
+    }
+
+
+    // ================================================================
+    // Methods for the first pass of fixing the user's input
+    // ================================================================
+    private String fixInputFirstPass(String input, List<DateGroup> groups) {
+        return escapePartiallyParsedWords(input, groups);
+    }
+
+    /**
+     * Escapes words that are partially parsed by Natty.
+     * E.g. Natty parses "fri" when given "fries".
+     * 
+     * @param input             User's input.
+     * @param groups            Parsed DateGroups.
+     * @return modified input
+     */
+    private String escapePartiallyParsedWords(String input,
+                                              List<DateGroup> groups) {
+        DateGroup group = groups.get(POSITION_FIRST_DATE_GROUP);
+        int parsePosition = group.getPosition();
+
+        List<String> parsedWords = Arrays.asList(group.getText()
+                                                      .split(STRING_ONE_SPACING));
+        ArrayList<String> splitParsed = new ArrayList<String>(parsedWords);
+
+        List<String> inputWords = Arrays.asList(input.split(STRING_ONE_SPACING));
+        ArrayList<String> splitInput = new ArrayList<String>(inputWords);
+
+        // Compare words between the two arrays from the back as dates are
+        // typically found towards the back of an input
+        Collections.reverse(splitParsed);
+        Collections.reverse(splitInput);
+
+        for (String parsedWord : splitParsed) {
+            int numChars = 0;
+            int parsePositionFromBack = input.length() - parsePosition - 1;
+
+            for (String inputWord : splitInput) {
+                numChars += inputWord.length() + 1;
+
+                if (inputWord.contains(parsedWord)) {
+                    if (inputWord.equals(parsedWord)) {
+                        // inputWord is correctly parsed, so is not partially parsed.
+                        splitInput.remove(inputWord);
+                        break;
+                        
+                    } else if (numChars >= parsePositionFromBack) {
+                        // if current character num is after the position
+                        // of the character that marks the start of words that
+                        // were parsed (from the back).
+                        int position = getActualIndexOfWord(input,
+                                                            parsePosition,
+                                                            parsedWord);
+                        logger.log(Level.INFO, "Word partially parsed: " +
+                                               parsedWord + ", position: " +
+                                               position);
+                        input = escapeWordAtPosition(input, position);
+                    }
+                }
+            }
+        }
+        return input;
+    }
+    
+
+    // ================================================================
+    // Methods for the second pass of fixing the user's input
+    // ================================================================
+    /**
+     * Second pass to catch several inaccuracies by Natty's parsing and fix them
+     * accordingly.
+     * 
+     * @param input
+     * @param groups
+     * @return modified input
+     */
+    private String fixInputSecondPass(String input, List<DateGroup> groups) {
+        DateGroup group = groups.get(POSITION_FIRST_DATE_GROUP);
+        Map<String, List<ParseLocation>> pLocations = group.getParseLocations();
+
+        input = catchExplicitTimeFalseMatch(input, pLocations);
+        input = catchOptionalPrefix(input, pLocations);
+        input = catchHolidays(input, group, pLocations);
+
+        return input;
+    }
+
+    /**
+     * Catches words that are incorrectly parsed as a time.
+     * Uses Natty's explicit_time key to determine the words that were parsed as
+     * a time. If these words are shorter than 3 characters, there's a high
+     * likelihood that the word isn't meant to be a time.
+     * E.g. "2pm" and "1400" are valid but "1", "12" are not.
+     * i.e Timings without "am" or "pm" will not be parsed.
+     * 
+     * @param input
+     * @param parsedLocations
+     * @return modified input
+     */
+    private String catchExplicitTimeFalseMatch(String input,
+                                               Map<String, List<ParseLocation>> parsedLocations) {
+        String offendingKey = "explicit_time";
+        if (parsedLocations.containsKey(offendingKey)) {
+            for (ParseLocation parsedWord : parsedLocations.get(offendingKey)) {
+                if (parsedWord.getText().length() < 3) {
+                    logger.log(Level.INFO, "Caught time false match: " +
+                                           parsedWord + ", position: " +
+                                           parsedWord.getStart());
+                    input = escapeWordAtPosition(input, parsedWord.getStart());
+                }
+            }
+        }
+        return input;
+    }
+
+    /**
+     * Catches words that are incorrectly parsed as a date or time when a day is
+     * already specified.
+     * E.g. "2 friday" & "2 thursday", the "2" will be escaped as it isn't meant
+     * to be parsed.
+     * 
+     * @param input
+     * @param parsedLocations
+     * @return modified input
+     */
+    private String catchOptionalPrefix(String input,
+                                       Map<String, List<ParseLocation>> parsedLocations) {
+        String offendingKey = "spelled_or_int_optional_prefix";
+        if (parsedLocations.containsKey(offendingKey)) {
+            for (ParseLocation parsedWord : parsedLocations.get(offendingKey)) {
+                logger.log(Level.INFO, "Caught option prefix: " + parsedWord +
+                                       ", position: " + parsedWord.getStart());
+                input = escapeWordAtPosition(input, parsedWord.getStart());
+            }
+        }
+        return input;
+    }
+
+
+    /**
+     * Catches words that are incorrectly parsed as holidays.
+     * E.g. "find easter eggs" will create a task on easter rather than a
+     * floating task.
+     * 
+     * @param input
+     * @param group
+     * @param parsedLocations
+     * @return modified input
+     */
+    private String catchHolidays(String input,
+                                 DateGroup group,
+                                 Map<String, List<ParseLocation>> parsedLocations) {
+        String offendingKey = "holiday";
+        if (parsedLocations.containsKey(offendingKey)) {
+            ParseLocation parsedWords = parsedLocations.get(offendingKey).get(0);
+            String[] parsedHolidayWords = parsedWords.getText()
+                                                     .split(STRING_ONE_SPACING);
+            int startPosition = parsedWords.getStart();
+
+            for (String parsedWord : parsedHolidayWords) {
+                int position = getActualIndexOfWord(input,
+                                                    startPosition,
+                                                    parsedWord);
+                input = escapeWordAtPosition(input, position);
+            }
+        }
+        return input;
+    }
+
+
+    // ================================================================
+    // Methods to generate the variables for public use
+    // ================================================================
+    private void generateInstanceVariables(String input, List<DateGroup> groups) {
+        DateGroup group = null;
+
+        if (hasParsedDates(groups)) {
+            group = groups.get(POSITION_FIRST_DATE_GROUP);
+            generateDates(group);
+            generateParsedAndNotParsedWords(group);
+        } else {
+            notParsedWords = rawInput;
+        }
+    }
+
+    private void generateParsedAndNotParsedWords(DateGroup group) {
+        String parsedWordsFromModifiedInput = group.getText();
+
+        String[] splitParsedWords = parsedWordsFromModifiedInput.split(STRING_ONE_SPACING);
+        ArrayList<String> splitParsedWordsArr = new ArrayList<String>(Arrays.asList(splitParsedWords));
+
+        String[] splitRawInput = rawInput.split(STRING_ONE_SPACING);
+        ArrayList<String> notParsedWordsArr = new ArrayList<String>(Arrays.asList(splitRawInput));
+
+        ArrayList<String> parsedWordsArr = new ArrayList<String>();
+
+        // Compare words between the two arrays from the back as dates are
+        // typically found towards the back of an input
+        Collections.reverse(splitParsedWordsArr);
+        Collections.reverse(notParsedWordsArr);
+
+        for (String parsedWord : splitParsedWordsArr) {
+            for (String inputWord : notParsedWordsArr) {
+                if (parsedWord.equalsIgnoreCase(inputWord)) {
+                    notParsedWordsArr.remove(inputWord);
+                    parsedWordsArr.add(inputWord);
+                    break;
+                }
+            }
+        }
+
+        // Revert back to their original order
+        Collections.reverse(parsedWordsArr);
+        Collections.reverse(notParsedWordsArr);
+
+        parsedWords = StringUtils.join(parsedWordsArr, STRING_ONE_SPACING);
+        notParsedWords = StringUtils.join(notParsedWordsArr, STRING_ONE_SPACING);
+
+        logger.log(Level.INFO, "Parsed words: " + parsedWords);
+        logger.log(Level.INFO, "Not parsed words: " + notParsedWords);
+    }
+
+    private void generateDates(DateGroup group) {
+        List<Date> listOfDates = group.getDates();
+        addNormalDates(listOfDates);
+        addRecurringUntilDate(group);
+
+        logger.log(Level.INFO, "Generated dates: " + dates);
+    }
+
+    private void addRecurringUntilDate(DateGroup group) {
+        if (group.isRecurring() && group.getRecursUntil() != null) {
+            dates.add(LocalDateTime.ofInstant(group.getRecursUntil()
+                                                   .toInstant(),
+                                              ZoneId.systemDefault()));
+        }
+    }
+
+    private void addNormalDates(List<Date> listOfDates) {
+        for (Date d : listOfDates) {
+            dates.add(LocalDateTime.ofInstant(d.toInstant(),
+                                              ZoneId.systemDefault()));
+        }
+    }
+
+
+    // ================================================================
+    // Methods to fix irregularities in generated output
+    // ================================================================
+
+    /**
+     * Ensures the generated dates are in chronological order, if not throw
+     * exception.
+     * 
+     * @throws DateTimeException
+     */
+    private void removeNonChronologicalDates() throws DateTimeException {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(FORMAT_PATTERN_TIME_DAY_MONTH);
+
+        if (!dates.isEmpty()) {
+            LocalDateTime referenceDateTime = dates.get(POSITION_FIRST_DATE);
+
+            for (LocalDateTime dateTime : dates) {
+                if (dateTime.isBefore(referenceDateTime)) {
+                    dates.clear();
+                    String dateTimeString = dateTime.format(formatter);
+                    String referenceDateTimeString = referenceDateTime.format(formatter);
+                    throw new DateTimeException(String.format(EXCEPTION_NON_CHRONO_DATES,
+                                                              dateTimeString,
+                                                              referenceDateTimeString));
+                }
+                referenceDateTime = dateTime;
+            }
+        }
+
+        logger.log(Level.INFO, "After removing non chronological dates: " +
+                               dates);
+    }
+
+
+    // ================================================================
+    // Utility methods
+    // ================================================================
+    private boolean hasParsedDates(List<DateGroup> groups) {
+        return !groups.isEmpty();
+    }
+    
+    private int getActualIndexOfWord(String input,
+                                     int parsePosition,
+                                     String parsedWord) {
+        int position = parsePosition +
+                       input.substring(parsePosition)
+                            .indexOf(parsedWord);
+        return position;
+    }
+
+    private String escapeWordAtPosition(String input, int position) {
+        List<String> inputWords = Arrays.asList(input.split(STRING_ONE_SPACING));
+        ArrayList<String> splitInput = new ArrayList<String>(inputWords);
+
+        int i = getIndexOfWordInSplitInput(splitInput, input, position);
+        assert i != -1;
+        String word = splitInput.get(i);
+
+        if (!isSurroundedByEscapeChars(word)) {
+            splitInput.set(i, ESCAPE_CHAR + word + ESCAPE_CHAR);
+        }
+
+        return StringUtils.join(splitInput, STRING_ONE_SPACING);
+    }
+
+    private int getIndexOfWordInSplitInput(ArrayList<String> splitInput,
+                                           String input,
+                                           int index) {
+        assert index >= 0;
+        int numChars = 0;
+        int currentSplitInputPosition = 0;
+        for (String word : splitInput) {
+            if (index < numChars + word.length() + 1) {
+                return currentSplitInputPosition;
+            }
+            numChars += word.length() + 1;
+            currentSplitInputPosition++;
+        }
+        return -1;
+    }
+
+    private boolean isSurroundedByEscapeChars(String word) {
+        return word.startsWith(ESCAPE_CHAR) && word.endsWith(ESCAPE_CHAR);
+    }
+}
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\java\DateParser.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\java\Task.java
+	 */
+
+    // ================================================================
+    // Utility Methods
+    // ================================================================
+    @Override
+    public String toString() {
+        String result = getDescription() + STRING_EMPTY_SPACE +
+                        getFormattedTimeAndDate(true);
+        return result.trim();
+    }
+    
+    public String getFormattedTimeAndDate(boolean includeDate) {
+        String result = STRING_EMPTY;
+        if (getStartTime() != null) {
+            result += addFormattedTime() + STRING_EMPTY_SPACE;
+        }
+        if (includeDate) {
+            result += addFormattedDate();
+        }
+        return result.trim();
+    }
+    
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\java\Task.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\java\Task.java
+	 */
+
+    // ================================================================
+    // Initialization Methods
+    // ================================================================
+
+    // Determines type of task using the number of dates parsed.
+    private Type determineType(ArrayList<LocalDateTime> parsedDates) {
+        int numDates = parsedDates.size();
+        switch (numDates) {
+            case 2 :
+                return Type.TIMED;
+            case 1 :
+                return Type.DEADLINE;
+            default :
+                return Type.FLOATING;
+        }
+    }
+
+    private void initDateAndTime(Type type, ArrayList<LocalDateTime> parsedDates) {
+        switch (type) {
+            case TIMED :
+                LocalDateTime firstDate = parsedDates.get(POSITION_FIRST_DATE);
+                LocalDateTime secondDate = parsedDates.get(POSITION_SECOND_DATE);
+                date = firstDate.toLocalDate();
+                startTime = firstDate.toLocalTime();
+                endTime = secondDate.toLocalTime();
+                break;
+            case DEADLINE :
+                firstDate = parsedDates.get(POSITION_FIRST_DATE);
+                date = firstDate.toLocalDate();
+                LocalTime time = firstDate.toLocalTime();
+                if (isUserEnteredTime(time)) {
+                    startTime = time;
+                }
+                break;
+            default :
+                break;
+        }
+    }
+
+    private boolean isUserEnteredTime(LocalTime time) {
+        return time.getNano() == 0;
+    }
+
+    /**
+     * Get the description of the task
+     * 
+     * @param notParsedWords
+     * @return description
+     */
+    private String extractDescription(String notParsedWords) {
+        String[] wordArr = notParsedWords.split(STRING_EMPTY_SPACE);
+        ArrayList<String> wordArrayList = new ArrayList<String>(Arrays.asList(wordArr));
+
+        removeKeywords(wordArrayList);
+
+        String description = StringUtils.join(wordArrayList, STRING_EMPTY_SPACE);
+        return description.replace(ESCAPE_CHAR, STRING_EMPTY);
+    }
+
+    private void removeKeywords(ArrayList<String> wordArrayList) {
+        // reverse as we want to delete words from the back
+        Collections.reverse(wordArrayList);
+
+        // delete keywords that do not make up the description of tasks
+        for (String word : KEYWORDS) {
+            wordArrayList.remove(word);
+        }
+
+        Collections.reverse(wordArrayList);
+    }
+    
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\java\Task.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\resources\view\CategoryBox.java
+	 */
+
+public class CategoryBox extends HBox {
+
+    private static final String STYLE_DIM = "-fx-text-fill: #E8E8E8;";
+    private static final String LOCATION_CATEGORY_BOX_FXML = "/view/CategoryBox.fxml";
+    private static final String FORMAT_DATE = "(%s)";
+    private static final String NO_DATE = "";
+
+    @FXML
+    private Label category;
+
+    @FXML
+    private Label date;
+
+    public CategoryBox(String category, String date) {
+        loadFxml();
+        this.category.setText(category);
+        if (!date.isEmpty()) {
+            this.date.setText(String.format(FORMAT_DATE, date));
+        } else {
+            this.date.setText(NO_DATE);
+        }
+    }
+    
+    public CategoryBox(String category) {
+        loadFxml();
+        this.category.setText(category);
+        this.date.setText(NO_DATE);
+    }
+    
+    private void loadFxml() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(LOCATION_CATEGORY_BOX_FXML));
+            loader.setRoot(this);
+            loader.setController(this);
+            loader.load();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public void dim() {
+        category.setStyle(STYLE_DIM);
+        date.setStyle(STYLE_DIM);
+    }
+}
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\resources\view\CategoryBox.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\resources\view\DisplayController.java
+	 */
+
+public class DisplayController extends VBox {
+
+    // ================================================================
+    // FXML Fields
+    // ================================================================
+    @FXML
+    private ListView<HBox> listView;
+
+    @FXML
+    private Label feedbackLabel;
+
+    @FXML
+    private VBox noTaskOverlay;
+
+    @FXML
+    private Label noTaskOverlayIcon;
+
+    @FXML
+    private Label noTaskOverlayGreeting;
+
+    @FXML
+    private Label noTaskOverlayMessage;
+
+    @FXML
+    private VBox helpOverlay;
+
+    @FXML
+    private Label helpOverlayIcon;
+
+    @FXML
+    private Label helpOverlayTitle;
+
+    @FXML
+    private ListView<HelpBox> helpOverlayContents;
+
+
+    // ================================================================
+    // Non-FXML Fields
+    // ================================================================
+    private static Logger logger;
+    private static DisplayController displayController;
+
+    private Timeline feedbackTimeline;
+    private Timeline overlayTimeline;
+    private ArrayList<String> allExampleCommands;
+    private ObservableList<HelpBox> helpList;
+
+    private int currentScrollIndex;
+    private int numExcessTasks;
+    private boolean isCurrentDisplayOverview;
+
+
+    // ================================================================
+    // Constants
+    // ================================================================
+    private final static String LOCATION_TASK_OVERVIEW_FXML = "/view/Display.fxml";
+
+    private final static String STRING_EMPTY = "";
+    private static final String FORMAT_PATTERN_DATE_SPECIAL_CASE = "EEEE, d MMMM";
+    private static final String FORMAT_PATTERN_DATE = "d MMMM";
+    private static final String FORMAT_PATTERN_DAY = "EEEE";
+
+    private static final String LABEL_FLOATING = "Floating";
+    private static final String LABEL_OVERDUE = "Overdue";
+    private static final String LABEL_TODAY = "Today";
+    private static final String LABEL_TOMORROW = "Tomorrow";
+    private static final String LABEL_OTHERS = "Everything else";
+    private static final String LABEL_SUCCESSFUL_SEARCH = "Results for \"%s\"";
+    private static final String LABEL_UNSUCCESSFUL_SEARCH = "No results for \"%s\"";
+    private static final String LABEL_DEFAULT_SEARCH_QUERY = "all tasks";
+    private static final String LABEL_INCOMPLETE = "Incomplete";
+    private static final String LABEL_COMPLETED = "Completed";
+    private static final String LABEL_EXCESS_TASKS = "... and %d more tasks";
+
+    private static final String HELP_OVERLAY_TITLE = "Need help?";
+    private static final String HELP_OVERLAY_ICON = "\uf05a";
+    private static final String HELP_ADD_DESC = "Add a task";
+    private static final String HELP_ADD_COMMAND = "add <description> <time> <day>";
+    private static final String HELP_EDIT_DESC = "Edit a task";
+    private static final String HELP_EDIT_COMMAND = "edit <index> <description> <time> <day>";
+    private static final String HELP_DELETE_DESC = "Delete a task";
+    private static final String HELP_DELETE_COMMAND = "delete <index>";
+    private static final String HELP_COMPLETE_DESC = "Mark a task as completed";
+    private static final String HELP_COMPLETE_COMMAND = "complete <index>";
+    private static final String HELP_INCOMPLETE_DESC = "Mark a task as incomplete";
+    private static final String HELP_INCOMPLETE_COMMAND = "incomplete <index>";
+    private static final String HELP_UNDO_DESC = "Undo previous action";
+    private static final String HELP_UNDO_COMMAND = "undo";
+    private static final String HELP_SET_SAVE_LOCATION_DESC = "Set a file as save file";
+    private static final String HELP_SET_SAVE_LOCATION_COMMAND = "set <directory>";
+    private static final String HELP_MOVE_SAVE_LOCATION_DESC = "Change save directory";
+    private static final String HELP_MOVE_SAVE_LOCATION_COMMAND = "move <directory>";
+    private static final String HELP_SEARCH_DESC = "Search for a task";
+    private static final String HELP_SEARCH_COMMAND = "search <keyword/day>";
+    private static final String HELP_DISPLAY_INCOMPLETE_DESC = "Display overview";
+    private static final String HELP_DISPLAY_INCOMPLETE_COMMAND = "display";
+    private static final String HELP_DISPLAY_COMPLETE_DESC = "Display completed tasks";
+    private static final String HELP_DISPLAY_COMPLETE_COMMAND = "display completed";
+    private static final String HELP_EXIT_DESC = "Exit Veto";
+    private static final String HELP_EXIT_COMMAND = "exit";
+
+    private static final int OVERLAY_FADE_IN_MILLISECONDS = 200;
+
+    private static final String NO_TASK_OVERLAY_GREETING = "Hello!";
+    private static final String NO_TASK_OVERLAY_ICON = "\uf14a";
+    private static final String NO_TASK_OVERLAY_MESSAGE = "Looks like you've got no pending tasks. "
+                                                          + "Type \"help\" for a list of commands or "
+                                                          + "try entering the following:\n\n";
+    private static final int NO_TASK_OVERLAY_NUM_EXAMPLE_COMMANDS = 3;
+
+    private static final int FEEDBACK_FADE_IN_MILLISECONDS = 500;
+    private static final int FEEDBACK_FADE_OUT_MILLISECONDS = 1000;
+    private static final int FEEDBACK_DISPLAY_SECONDS = 8;
+
+    private static final int DISPLAY_MAX_SIZE = 14;
+    private static final int SCROLL_INCREMENT = 5;
+    private static final int MAX_NUM_OF_TASKS = 100;
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\resources\view\DisplayController.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\resources\view\DisplayController.java
+	 */
+
+    public static DisplayController getInstance() {
+        if (displayController == null) {
+            displayController = new DisplayController();
+        }
+        return displayController;
+    }
+
+
+    // ================================================================
+    // Public methods
+    // ================================================================
+    public void hideOverlays() {
+        noTaskOverlay.toBack();
+        helpOverlay.toBack();
+        noTaskOverlay.setOpacity(0);
+        helpOverlay.setOpacity(0);
+    }
+
+    /**
+     * Update display of tasks.
+     * The input tasks follows a predefined order of overdue tasks, floating
+     * tasks, this week's tasks then all other tasks.
+     * This ensures that the index shown in the display corresponds with the
+     * actual index in the input ObservableList.
+     * 
+     * @param tasks Must be sorted in the above order.
+     */
+    public void updateOverviewDisplay(ObservableList<Task> tasks) {
+        handleOverlays(tasks);
+
+        ArrayList<Task> listOfTasks = trimListOfTasks(tasks);
+        logger.log(Level.INFO, "List of tasks: " + listOfTasks.toString());
+
+        ObservableList<HBox> displayBoxes = FXCollections.observableArrayList();
+
+        addTasksToOverviewDisplay(listOfTasks, displayBoxes);
+        addNumExcessTasksLabel(displayBoxes);
+
+        handleChangeHighlights(displayBoxes);
+
+        listView.setItems(displayBoxes);
+        isCurrentDisplayOverview = true;
+    }
+
+    /**
+     * Update display to show search results.
+     * The input tasks follows a predefined order of incomplete tasks then
+     * completed tasks.
+     * This ensures that the index shown in the display corresponds with the
+     * actual index in the input ObservableList.
+     * 
+     * @param searchResults Must be sorted in the above order.
+     * @param searchQuery   User's input query
+     */
+    public void updateSearchDisplay(ObservableList<Task> searchResults,
+                                    String searchQuery) {
+        hideOverlays();
+
+        ArrayList<Task> listOfResults = trimListOfTasks(searchResults);
+        logger.log(Level.INFO, "List of results: " + listOfResults.toString());
+
+        ObservableList<HBox> displayBoxes = FXCollections.observableArrayList();
+
+        addSearchLabel(displayBoxes, searchResults, searchQuery);
+        addTasksToSearchDisplay(listOfResults, displayBoxes);
+        addNumExcessTasksLabel(displayBoxes);
+        listView.setItems(displayBoxes);
+        isCurrentDisplayOverview = false;
+    }
+
+    public void setFeedback(String feedback) {
+        FadeTransition fadeIn = initFadeIn(feedbackLabel,
+                                           FEEDBACK_FADE_IN_MILLISECONDS);
+        FadeTransition fadeOut = initFadeOut(feedbackLabel,
+                                             FEEDBACK_FADE_OUT_MILLISECONDS);
+
+        feedbackTimeline.stop();
+        feedbackTimeline = generateFeedbackTimeline(feedback, fadeIn, fadeOut);
+        feedbackTimeline.play();
+    }
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\resources\view\DisplayController.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\resources\view\DisplayController.java
+	 */
+
+    // ================================================================
+    // Private overlay method
+    // ================================================================
+    /**
+     * Shows an overlay message when there are no tasks to display.
+     */
+    private void showNoTaskOverlay() {
+        setFeedback(STRING_EMPTY);
+        String exampleCommands = generateExampleCommands();
+
+        FadeTransition fadeIn = initFadeIn(noTaskOverlay,
+                                           OVERLAY_FADE_IN_MILLISECONDS);
+
+        overlayTimeline = generateNoTaskOverlayTimeline(exampleCommands, fadeIn);
+        overlayTimeline.play();
+    }
+
+    private String generateExampleCommands() {
+        Collections.shuffle(allExampleCommands);
+        String exampleCommands = generateParagraph(allExampleCommands,
+                                                   NO_TASK_OVERLAY_NUM_EXAMPLE_COMMANDS);
+        return exampleCommands;
+    }
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\resources\view\DisplayController.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\resources\view\DisplayController.java
+	 */
+
+    // ================================================================
+    // Initialization methods
+    // ================================================================
+    private void initTimelines() {
+        feedbackTimeline = new Timeline();
+        overlayTimeline = new Timeline();
+    }
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\resources\view\DisplayController.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\resources\view\DisplayController.java
+	 */
+
+    private void initNoTaskOverlay(String exampleCommands) {
+        noTaskOverlay.setOpacity(0);
+        noTaskOverlay.toFront();
+        noTaskOverlayIcon.setText(NO_TASK_OVERLAY_ICON);
+        noTaskOverlayGreeting.setText(NO_TASK_OVERLAY_GREETING);
+        noTaskOverlayMessage.setText(NO_TASK_OVERLAY_MESSAGE + exampleCommands);
+    }
+
+    private void initFeedbackLabel(String feedback) {
+        feedbackLabel.setOpacity(0);
+        feedbackLabel.setText(feedback);
+    }
+
+    private void initHelpOverlay() {
+        helpOverlay.toFront();
+        helpOverlayIcon.setText(HELP_OVERLAY_ICON);
+        helpOverlayTitle.setText(HELP_OVERLAY_TITLE);
+        helpOverlayContents.setItems(helpList);
+    }
+
+    private FadeTransition initFadeIn(Node node, int duration) {
+        FadeTransition fadeIn = new FadeTransition(new Duration(duration));
+        fadeIn.setNode(node);
+        fadeIn.setToValue(1);
+        return fadeIn;
+    }
+
+    private FadeTransition initFadeOut(Node node, int duration) {
+        FadeTransition fadeOut = new FadeTransition(new Duration(duration));
+        fadeOut.setNode(node);
+        fadeOut.setToValue(0);
+        return fadeOut;
+    }
+
+    // ================================================================
+    // Timeline generators
+    // ================================================================
+    private Timeline generateFeedbackTimeline(String feedback,
+                                              FadeTransition fadeIn,
+                                              FadeTransition fadeOut) {
+        // First KeyFrame is to fade in the feedback message and the second
+        // KeyFrame is to fade it out after several seconds.
+        return new Timeline(new KeyFrame(new Duration(1), // JavaFx does not
+                                                          // work properly when
+                                                          // a duration of zero
+                                                          // is given.
+                                         new EventHandler<ActionEvent>() {
+                                             @Override
+                                             public void handle(ActionEvent event) {
+                                                 initFeedbackLabel(feedback);
+                                                 fadeIn.play();
+                                             }
+                                         }),
+                            new KeyFrame(Duration.seconds(FEEDBACK_DISPLAY_SECONDS),
+                                         new EventHandler<ActionEvent>() {
+                                             @Override
+                                             public void handle(ActionEvent event) {
+                                                 fadeOut.play();
+                                             }
+                                         }));
+    }
+
+    private Timeline generateNoTaskOverlayTimeline(String exampleCommands,
+                                                   FadeTransition fadeIn) {
+        return new Timeline(new KeyFrame(new Duration(1),
+                                         new EventHandler<ActionEvent>() {
+                                             @Override
+                                             public void handle(ActionEvent event) {
+                                                 initNoTaskOverlay(exampleCommands);
+                                                 fadeIn.play();
+                                             }
+                                         }));
+    }
+
+    private Timeline generateHelpOverlayTimeline(FadeTransition fadeIn) {
+        return new Timeline(new KeyFrame(new Duration(1),
+                                         new EventHandler<ActionEvent>() {
+                                             @Override
+                                             public void handle(ActionEvent event) {
+                                                 initHelpOverlay();
+                                                 fadeIn.play();
+                                             }
+                                         }));
+    }
+
+
+    // ================================================================
+    // Logic methods for updateOverviewDisplay
+    // ================================================================
+    private void handleOverlays(ObservableList<Task> tasks) {
+        hideOverlays();
+        if (tasks.isEmpty()) {
+            showNoTaskOverlay();
+        }
+    }
+
+    private void addTasksToOverviewDisplay(ArrayList<Task> listOfTasks,
+                                           ObservableList<HBox> displayBoxes) {
+        LocalDate now = LocalDate.now();
+        int index = 1;
+        index = addOverdueTasks(displayBoxes, listOfTasks, index);
+        index = addFloatingTasks(displayBoxes, listOfTasks, index);
+        index = addThisWeeksTasks(displayBoxes, listOfTasks, now, index);
+        index = addAllOtherTasks(displayBoxes, listOfTasks, now, index);
+    }
+
+    private void handleChangeHighlights(ObservableList<HBox> displayBoxes) {
+        if (isCurrentDisplayOverview) {
+            highlightChanges(displayBoxes);
+        }
+    }
+
+    private int addOverdueTasks(ObservableList<HBox> displayBoxes,
+                                ArrayList<Task> listOfTasks,
+                                int index) {
+        // Add category label to be displayed above that category.
+        CategoryBox overdue = new CategoryBox(LABEL_OVERDUE);
+        displayBoxes.add(overdue);
+
+        boolean hasOverdue = false;
+
+        // Tasks before index-1 are not applicable (not overdue).
+        List<Task> applicableTasks = listOfTasks.subList(index - 1,
+                                                         listOfTasks.size());
+        for (Task task : applicableTasks) {
+            if (task.isOverdue()) {
+                hasOverdue = true;
+                addTask(displayBoxes, index, task, true);
+                index++;
+            } else {
+                break;
+            }
+        }
+
+        // Changes the color of the category label to indicate the lack of tasks
+        // that fall under this category.
+        if (!hasOverdue) {
+            overdue.dim();
+        }
+
+        return index;
+    }
+
+    private int addFloatingTasks(ObservableList<HBox> displayBoxes,
+                                 ArrayList<Task> listOfTasks,
+                                 int index) {
+        CategoryBox floating = new CategoryBox(LABEL_FLOATING);
+        displayBoxes.add(floating);
+
+        boolean hasFloating = false;
+
+        // Tasks before index-1 are not applicable (not floating).
+        List<Task> applicableTasks = listOfTasks.subList(index - 1,
+                                                         listOfTasks.size());
+        for (Task task : applicableTasks) {
+            if (task.getType() == Task.Type.FLOATING) {
+                hasFloating = true;
+                addTask(displayBoxes, index, task, true);
+                index++;
+            } else {
+                break;
+            }
+        }
+
+        if (!hasFloating) {
+            floating.dim();
+        }
+
+        return index;
+    }
+
+    private int addThisWeeksTasks(ObservableList<HBox> displayBoxes,
+                                  ArrayList<Task> listOfTasks,
+                                  LocalDate now,
+                                  int index) {
+        // generate the dates of the 7 days from today
+        ArrayList<LocalDate> days = generateDaysOfWeek(now);
+        assert days.size() == 7;
+
+        for (LocalDate day : days) {
+            CategoryBox label = generateDayLabel(now, day);
+            displayBoxes.add(label);
+
+            boolean hasTaskOnThisDay = false;
+
+            // Tasks before index-1 are not applicable (not equal to day).
+            List<Task> applicableTasks = listOfTasks.subList(index - 1,
+                                                             listOfTasks.size());
+            for (Task task : applicableTasks) {
+                if (day.equals(task.getDate())) {
+                    hasTaskOnThisDay = true;
+                    addTask(displayBoxes, index, task, false);
+                    index++;
+                } else {
+                    break;
+                }
+            }
+
+            if (!hasTaskOnThisDay) {
+                label.dim();
+            }
+        }
+        return index;
+    }
+
+    private int addAllOtherTasks(ObservableList<HBox> displayBoxes,
+                                 ArrayList<Task> listOfTasks,
+                                 LocalDate now,
+                                 int index) {
+        CategoryBox otherTasks = new CategoryBox(LABEL_OTHERS);
+        displayBoxes.add(otherTasks);
+
+        boolean hasOtherTasks = false;
+        LocalDate dayOneWeekFromNow = now.plusWeeks(1);
+
+        // Tasks before index-1 are not applicable as they fall under previous
+        // categories.
+        List<Task> applicableTasks = listOfTasks.subList(index - 1,
+                                                         listOfTasks.size());
+        for (Task task : applicableTasks) {
+            if (task.getDate() != null &&
+                (dayOneWeekFromNow.equals(task.getDate()) || dayOneWeekFromNow.isBefore(task.getDate()))) {
+                hasOtherTasks = true;
+                addTask(displayBoxes, index, task, true);
+                index++;
+            }
+        }
+
+        if (!hasOtherTasks) {
+            otherTasks.dim();
+        }
+
+        return index;
+    }
+
+    private CategoryBox generateDayLabel(LocalDate now, LocalDate day) {
+
+        // formats the date for the day label, eg. Monday, Tuesday, etc
+        DateTimeFormatter dayFormatter = DateTimeFormatter.ofPattern(FORMAT_PATTERN_DAY);
+
+        // formats the date for the date label, eg. 1 April
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(FORMAT_PATTERN_DATE);
+
+        // formats the date for the date label of special cases, eg. Wednesday,
+        // 1 April
+        DateTimeFormatter dateFormatterForSpecialCase = DateTimeFormatter.ofPattern(FORMAT_PATTERN_DATE_SPECIAL_CASE);
+
+        CategoryBox label;
+
+        // special cases to show "Today" and "Tomorrow" instead of day
+        if (day.equals(now)) {
+            label = new CategoryBox(LABEL_TODAY,
+                                    day.format(dateFormatterForSpecialCase));
+        } else if (day.equals(now.plusDays(1))) {
+            label = new CategoryBox(LABEL_TOMORROW,
+                                    day.format(dateFormatterForSpecialCase));
+        } else {
+            label = new CategoryBox(day.format(dayFormatter),
+                                    day.format(dateFormatter));
+        }
+        return label;
+    }
+
+    private ArrayList<LocalDate> generateDaysOfWeek(LocalDate now) {
+        ArrayList<LocalDate> days = new ArrayList<LocalDate>();
+        for (int i = 0; i < 7; i++) {
+            days.add(now.plusDays(i));
+        }
+        return days;
+    }
+
+    private void highlightChanges(ObservableList<HBox> displayBoxes) {
+        ObservableList<HBox> oldDisplayBoxes = listView.getItems();
+
+        // Tasks previously added will not be highlighed when Veto is loaded.
+        if (oldDisplayBoxes.isEmpty()) {
+            return;
+        }
+        for (HBox newBox : displayBoxes) {
+            if (newBox instanceof TaskBox) {
+                TaskBox newTaskBox = (TaskBox) newBox;
+                String query = newTaskBox.getDescription() +
+                               newTaskBox.getTimeAndDate();
+                if (!hasMatchingBox(oldDisplayBoxes, query)) {
+                    newTaskBox.highlight();
+                }
+            }
+        }
+    }
+
+    private boolean hasMatchingBox(ObservableList<HBox> oldDisplayBoxes,
+                                   String query) {
+        for (HBox oldBox : oldDisplayBoxes) {
+            if (oldBox instanceof TaskBox) {
+                TaskBox tBox = (TaskBox) oldBox;
+                String descAndDate = tBox.getDescription() +
+                                     tBox.getTimeAndDate();
+                if (query.equals(descAndDate)) {
+                    oldDisplayBoxes.remove(oldBox);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
+    // ================================================================
+    // Logic methods for updateSearchDisplay
+    // ================================================================
+    private void addTasksToSearchDisplay(ArrayList<Task> listOfResults,
+                                         ObservableList<HBox> displayBoxes) {
+        int index = 1;
+        index = addIncompleteTasks(displayBoxes, listOfResults, index);
+        index = addCompletedTasks(displayBoxes, listOfResults, index);
+    }
+
+    private int addIncompleteTasks(ObservableList<HBox> displayBoxes,
+                                   ArrayList<Task> listOfResults,
+                                   int index) {
+        CategoryBox incompleteLabel = new CategoryBox(LABEL_INCOMPLETE);
+        displayBoxes.add(incompleteLabel);
+
+        boolean hasIncompleteTask = false;
+
+        List<Task> applicableTasks = listOfResults.subList(index - 1,
+                                                           listOfResults.size());
+        for (Task task : applicableTasks) {
+            if (!task.isCompleted()) {
+                hasIncompleteTask = true;
+                addTask(displayBoxes, index, task, true);
+                index++;
+            }
+        }
+
+        if (!hasIncompleteTask) {
+            incompleteLabel.dim();
+        }
+
+        return index;
+    }
+
+    private int addCompletedTasks(ObservableList<HBox> displayBoxes,
+                                  ArrayList<Task> listOfResults,
+                                  int index) {
+        CategoryBox completedLabel = new CategoryBox(LABEL_COMPLETED);
+        displayBoxes.add(completedLabel);
+
+        boolean hasCompletedTask = false;
+
+        List<Task> applicableTasks = listOfResults.subList(index - 1,
+                                                           listOfResults.size());
+        for (Task task : applicableTasks) {
+            if (task.isCompleted()) {
+                hasCompletedTask = true;
+                addTask(displayBoxes, index, task, true);
+                index++;
+            }
+        }
+
+        if (!hasCompletedTask) {
+            completedLabel.dim();
+        }
+
+        return index;
+    }
+
+    private void addSearchLabel(ObservableList<HBox> displayBoxes,
+                                ObservableList<Task> searchResults,
+                                String searchQuery) {
+        CategoryBox searchLabel = generateSearchLabel(searchResults,
+                                                      searchQuery);
+        displayBoxes.add(searchLabel);
+    }
+
+    private CategoryBox generateSearchLabel(ObservableList<Task> searchResults,
+                                            String searchQuery) {
+        CategoryBox searchLabel;
+        if (searchQuery.isEmpty()) {
+            // No search query will cause all tasks to be shown.
+            searchQuery = LABEL_DEFAULT_SEARCH_QUERY;
+        }
+
+        if (searchResults.isEmpty()) {
+            searchLabel = new CategoryBox(String.format(LABEL_UNSUCCESSFUL_SEARCH,
+                                                        searchQuery));
+        } else {
+            searchLabel = new CategoryBox(String.format(LABEL_SUCCESSFUL_SEARCH,
+                                                        searchQuery));
+        }
+
+        return searchLabel;
+    }
+
+    // ================================================================
+    // Utility methods
+    // ================================================================
+    private void addTask(ObservableList<HBox> displayBoxes,
+                         int index,
+                         Task task,
+                         boolean includeDate) {
+        if (task.isCompleted()) {
+            displayBoxes.add(new TaskBox(index,
+                                         task.getDescription(),
+                                         task.getFormattedTimeAndDate(includeDate),
+                                         task.isRecurring(),
+                                         true));
+        } else {
+            displayBoxes.add(new TaskBox(index,
+                                         task.getDescription(),
+                                         task.getFormattedTimeAndDate(includeDate),
+                                         task.isRecurring()));
+        }
+    }
+
+    /**
+     * Adds a label showing the number of tasks that are not displayed.
+     * 
+     * @param displayBoxes
+     */
+    private void addNumExcessTasksLabel(ObservableList<HBox> displayBoxes) {
+        if (numExcessTasks > 0) {
+            displayBoxes.add(new CategoryBox(String.format(LABEL_EXCESS_TASKS,
+                                                           numExcessTasks)));
+        }
+    }
+
+    /**
+     * Returns a sublist of MAX_NUM_OF_TASKS number of tasks.
+     * 
+     * @param tasks
+     * @return ArrayList of size MAX_NUM_OF_TASKS
+     */
+    private ArrayList<Task> trimListOfTasks(ObservableList<Task> tasks) {
+        numExcessTasks = tasks.size() - MAX_NUM_OF_TASKS;
+        if (numExcessTasks > 0) {
+            return new ArrayList<Task>(tasks.subList(0, MAX_NUM_OF_TASKS));
+        }
+        return new ArrayList<Task>(tasks);
+    }
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\resources\view\DisplayController.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\resources\view\RootLayoutController.java
+	 */
+
+    private void handleCommandAutoComplete() {
+        String autoCompletedCommand = getAutoCompletedCommand(userInput.getText());
+        updateUserInput(autoCompletedCommand);
+    }
+
+    private void handleGetPastCommands(KeyEvent event) {
+        String pastCommand = getPastCommandFromHistory(event.getCode());
+        updateUserInput(pastCommand);
+    }
+
+    private void updateUserInput(String newInput) {
+        userInput.setText(newInput);
+        userInput.end();
+    }
+
+
+    // ================================================================
+    // Methods to handle command auto-complete
+    // ================================================================
+    private void initAutoCompleteCommands() {
+        commands = Command.getAllCommandTypes();
+        commands.remove(Command.Type.INVALID.toString());
+    }
+
+    private String getAutoCompletedCommand(String text) {
+        ArrayList<String> splitText = generateSplitText(text);
+        if (hasOnlyOneWord(splitText)) {
+            String firstWord = getFirstWord(splitText);
+            return findSuitableCommand(text, firstWord);
+        } else {
+            return text;
+        }
+    }
+
+    private ArrayList<String> generateSplitText(String text) {
+        ArrayList<String> splitText = new ArrayList<String>(Arrays.asList(text.split(ONE_SPACING)));
+        return splitText;
+    }
+
+    private boolean hasOnlyOneWord(ArrayList<String> splitText) {
+        return splitText.size() == 1;
+    }
+
+    private String getFirstWord(ArrayList<String> splitText) {
+        return splitText.get(0);
+    }
+
+    private String findSuitableCommand(String text, String firstWord) {
+        for (String command : commands) {
+            if (isValidLengths(firstWord, command) &&
+                isWordAtStartOfCommand(firstWord, command)) {
+                return command.toLowerCase() + ONE_SPACING;
+            }
+        }
+        return text;
+    }
+
+    private boolean isValidLengths(String firstWord, String command) {
+        return firstWord.length() <= command.length();
+    }
+
+    private boolean isWordAtStartOfCommand(String firstWord, String command) {
+        return command.substring(0, firstWord.length())
+                      .equalsIgnoreCase(firstWord);
+    }
+
+
+    // ================================================================
+    // Methods to handle history of user entered commands
+    // ================================================================
+    private void initVariablesForHistory() {
+        history = new ArrayList<String>();
+        history.add(EMPTY_STRING);
+        history.add(EMPTY_STRING);
+        pointer = history.size() - 1;
+    }
+
+    private void updateHistory() {
+        pointer = history.size();
+        history.add(pointer - 1, userInput.getText());
+    }
+
+    private String getPastCommandFromHistory(KeyCode code) {
+        if (code == KeyCode.DOWN) {
+            return getNextCommand();
+        } else if (code == KeyCode.UP) {
+            return getPreviousCommand();
+        } else {
+            return EMPTY_STRING;
+        }
+    }
+
+    private String getPreviousCommand() {
+        if (pointer > 0) {
+            pointer--;
+        }
+        return history.get(pointer);
+    }
+
+    private String getNextCommand() {
+        if (pointer < history.size() - 1) {
+            pointer++;
+        }
+        return history.get(pointer);
+    }
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\resources\view\RootLayoutController.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\resources\view\TaskBox.java
+	 */
+
+public class TaskBox extends HBox {
+
+    // ================================================================
+    // FXML Fields
+    // ================================================================
+    @FXML
+    private CheckBox checkbox;
+
+    @FXML
+    private Label index;
+
+    @FXML
+    private Label recurringIcon;
+
+    @FXML
+    private Label description;
+    
+    @FXML
+    private Label timeAndDate;
+
+    @FXML
+    private Button delete;
+
+    
+    // ================================================================
+    // Constants
+    // ================================================================
+    private static final String STRING_EMPTY = "";
+    private static final String STRING_ONE_SPACING = " ";
+    private static final String LOCATION_TASK_BOX_FXML = "/view/TaskBox.fxml";
+    private static final String KEYWORD_COMPLETE = Command.Type.COMPLETE.toString();
+    private static final String KEYWORD_INCOMPLETE = Command.Type.INCOMPLETE.toString();
+    private static final String KEYWORD_DELETE = Command.Type.DELETE.toString();
+    private static final String ICON_DELETE = "\uf014";
+    private static final String ICON_RECURRING = STRING_ONE_SPACING + "\uf01e" +
+                                                 STRING_ONE_SPACING;
+    private static final String FORMAT_DATE = "%s";
+
+    private static final int TIMELINE_FRAME_DELAY_MILLISECONDS = 10;
+    private static final int HIGHLIGHT_DISPLAY_SECONDS = 7;
+    private static final String STYLE_HIGHLIGHT_TAG_FORMAT = "-fx-background-color: %s;";
+    private static final String STYLE_HIGHLIGHT_COLOR_FORMAT = "rgb(255, 187, 141, %.2f)";
+
+
+    // ================================================================
+    // Constructors
+    // ================================================================
+    /**
+     * Creates a TaskBox
+     * 
+     * @param idx           Index to be shown next to the task.
+     * @param desc          Description of the task.
+     * @param timeAndDate   Formatted time and Date to be shown next to the description.
+     * @param isRecurring   To indicate if a TaskBox shows a recurring icon.
+     */
+    public TaskBox(int idx, String desc, String timeAndDate, boolean isRecurring) {
+        loadFxml();
+        initListenerAndFields(idx, desc, timeAndDate, isRecurring);
+    }
+
+    /**
+     * Creates a TaskBox
+     * 
+     * @param idx           Index to be shown next to the task.
+     * @param desc          Description of the task.
+     * @param timeAndDate   Formatted time and Date to be shown next to the description.
+     * @param isRecurring   To indicate if a TaskBox shows a recurring icon.
+     * @param isCompleted   To indicate if a TaskBox shows its checkbox as being ticked.
+     */
+    public TaskBox(int idx, String desc, String timeAndDate,
+                   boolean isRecurring, boolean isCompleted) {
+        loadFxml();
+        checkbox.setSelected(isCompleted);
+        initListenerAndFields(idx, desc, timeAndDate, isRecurring);
+    }
+
+    
+    // ================================================================
+    // Public methods
+    // ================================================================
+    public String getDescription() {
+        return description.getText();
+    }
+    
+    public String getTimeAndDate() {
+        return timeAndDate.getText();
+    }
+
+    public void highlight() {
+        float opacity = 1;
+        highlight(String.format(STYLE_HIGHLIGHT_COLOR_FORMAT, opacity));
+        generateHighlightTimeline().play();
+    }
+    
+
+    // ================================================================
+    // Initialisation methods
+    // ================================================================
+    private void loadFxml() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(LOCATION_TASK_BOX_FXML));
+            loader.setRoot(this);
+            loader.setController(this);
+            loader.load();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void initListenerAndFields(int idx, String desc, String timeAndDate, boolean isRecurring) {
+        ChangeListener<Boolean> checkboxListener = initCheckboxListener(idx);
+        EventHandler<ActionEvent> deleteListener = initDeleteEventHandler(idx);
+        initFxmlFields(idx, desc, timeAndDate, isRecurring, checkboxListener, deleteListener);
+    }
+
+    /**
+     * Initialises a listener for the checkbox.
+     * A change in the value of the checkbox determines which command will be
+     * sent to be executed by Controller.
+     * 
+     * @param idx
+     * @return listener
+     */
+    private ChangeListener<Boolean> initCheckboxListener(int idx) {
+        ChangeListener<Boolean> listener = new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> ov,
+                                Boolean oldVal,
+                                Boolean newVal) {
+                Controller controller = Controller.getInstance();
+                if (newVal) {
+                    controller.executeCommand(KEYWORD_COMPLETE +
+                                              STRING_ONE_SPACING + idx);
+                } else {
+                    controller.executeCommand(KEYWORD_INCOMPLETE +
+                                              STRING_ONE_SPACING + idx);
+                }
+            }
+        };
+        return listener;
+    }
+
+    /**
+     * Initialises an event handler for the delete button.
+     * Clicking on the button deletes the corresponding task.
+     * 
+     * @param idx
+     * @return event handler
+     */
+    private EventHandler<ActionEvent> initDeleteEventHandler(int idx) {
+        EventHandler<ActionEvent> deleteListener = new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                Controller controller = Controller.getInstance();
+                controller.executeCommand(KEYWORD_DELETE + STRING_ONE_SPACING + idx);
+            }
+        };
+        return deleteListener;
+    }
+
+    private void initFxmlFields(int idx,
+                                String desc,
+                                String timeAndDate,
+                                boolean isRecurring,
+                                ChangeListener<Boolean> checkboxListener, EventHandler<ActionEvent> deleteListener) {
+        if (isRecurring) {
+            this.recurringIcon.setText(ICON_RECURRING);
+        } else {
+            this.recurringIcon.setText(STRING_EMPTY);
+        }
+        this.checkbox.selectedProperty().addListener(checkboxListener);
+        this.index.setText(idx + STRING_EMPTY);
+        this.description.setText(desc);
+        this.timeAndDate.setText(String.format(FORMAT_DATE, timeAndDate));
+        this.delete.setText(ICON_DELETE);
+        this.delete.setOnAction(deleteListener);
+    }
+    
+    
+    // ================================================================
+    // Methods for handling highlighting of task boxes
+    // ================================================================
+    private void highlight(String color) {
+        this.setStyle(String.format(STYLE_HIGHLIGHT_TAG_FORMAT, color));
+    }
+
+    private Timeline generateHighlightTimeline() {
+        Timeline timeline = new Timeline();
+        // Add an intial key frame to delay the fading out of the highlight.
+        timeline.getKeyFrames()
+                .add(new KeyFrame(Duration.seconds(HIGHLIGHT_DISPLAY_SECONDS)));
+
+        // Generates the keyframes for the fade out effect.
+        for (int i = 100; i >= 0; i--) {
+            // Calculates the opacity to be used in the css of TaskBox.
+            float opacity = (float) i / 100;
+            String color = String.format(STYLE_HIGHLIGHT_COLOR_FORMAT, opacity);
+            timeline.getKeyFrames()
+                    .add(new KeyFrame(timeline.getTotalDuration() // Add to the end of the timeline.
+                                              .add(Duration.millis(TIMELINE_FRAME_DELAY_MILLISECONDS)),
+                                      new EventHandler<ActionEvent>() {
+                                          @Override
+                                          public void handle(ActionEvent event) {
+                                              highlight(color);
+                                          }
+                                      }));
+        }
+        return timeline;
+    }
+}
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\resources\view\TaskBox.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\tests\java\CommandTest.java
+	 */
+
+public class CommandTest {
+
+    @Test
+    public void testGetAllCommandTypes() {
+       ArrayList<String> allCommands = Command.getAllCommandTypes();
+       assertEquals("Correct num of commands", 14, allCommands.size());
+    }
+
+    @Test
+    public void testAddCommandType() {
+        Command command = new Command("add test input one");
+        String commandTypeString = command.getCommandType().toString();
+        assertEquals("Correct command type", "ADD", commandTypeString);
+        
+        command = new Command("adD test input one");
+        commandTypeString = command.getCommandType().toString();
+        assertEquals("Correct command type", "ADD", commandTypeString);
+    }
+    
+    @Test
+    public void testDeleteCommandType() {
+        Command command = new Command("delete 1");
+        String commandTypeString = command.getCommandType().toString();
+        assertEquals("Correct command type", "DELETE", commandTypeString);
+        
+        command = new Command("DElete 1");
+        commandTypeString = command.getCommandType().toString();
+        assertEquals("Correct command type", "DELETE", commandTypeString);
+    }
+    
+    @Test
+    public void testEditCommandType() {
+        Command command = new Command("edit 1");
+        String commandTypeString = command.getCommandType().toString();
+        assertEquals("Correct command type", "EDIT", commandTypeString);
+        
+        command = new Command("eDit 1");
+        commandTypeString = command.getCommandType().toString();
+        assertEquals("Correct command type", "EDIT", commandTypeString);
+    }
+    
+    @Test
+    public void testDisplayCommandType() {
+        Command command = new Command("display completed");
+        String commandTypeString = command.getCommandType().toString();
+        assertEquals("Correct command type", "DISPLAY", commandTypeString);
+        
+        command = new Command("DISPlay");
+        commandTypeString = command.getCommandType().toString();
+        assertEquals("Correct command type", "DISPLAY", commandTypeString);
+    }
+    
+    @Test
+    public void testCompleteCommandType() {
+        Command command = new Command("complete 3");
+        String commandTypeString = command.getCommandType().toString();
+        assertEquals("Correct command type", "COMPLETE", commandTypeString);
+        
+        command = new Command("Complete 4");
+        commandTypeString = command.getCommandType().toString();
+        assertEquals("Correct command type", "COMPLETE", commandTypeString);
+    }
+    
+    @Test
+    public void testInvalidCommandType() {
+        Command command = new Command("addd test input one");
+        String commandTypeString = command.getCommandType().toString();
+        assertEquals("Correct command type", "INVALID", commandTypeString);
+        
+        command = new Command("find");
+        commandTypeString = command.getCommandType().toString();
+        assertEquals("Correct command type", "INVALID", commandTypeString);
+    }
+    
+    @Test
+    public void testGetArguments() {
+        Command command = new Command("add test input one");
+        String arguments = command.getArguments();
+        assertEquals("Correct arguments", "test input one", arguments);
+        
+        command = new Command("add  ");
+        arguments = command.getArguments();
+        assertEquals("Correct arguments", "", arguments);
+    }
+    
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\tests\java\CommandTest.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\tests\java\DateParserTest.java
+	 */
+
+public class DateParserTest {
+
+    private ArrayList<LocalDateTime> getParsedDates(String input) {
+        DateParser dateParser = DateParser.getInstance();
+        dateParser.parse(input);
+        return dateParser.getDates();
+    }
+    
+    private String getParsedWords(String input) {
+        DateParser dateParser = DateParser.getInstance();
+        dateParser.parse(input);
+        return dateParser.getParsedWords();
+    }
+    
+    private String getNotParsedWords(String input) {
+        DateParser dateParser = DateParser.getInstance();
+        dateParser.parse(input);
+        return dateParser.getNotParsedWords();
+    }
+
+    private LocalDate constructDate(int year, int month, int day) {
+        return LocalDate.of(year, month, day);
+    }
+
+    private LocalDateTime constructDateTime(int year,
+                                            int month,
+                                            int day,
+                                            int hour,
+                                            int minute) {
+        return LocalDateTime.of(year, month, day, hour, minute);
+    }
+    
+    private LocalDate getDateOfComingDay(DayOfWeek day) {
+        return LocalDate.now().with(TemporalAdjusters.next(day));
+    }
+
+    @Test
+    public void inputWithNoDateNoDuration() {
+        String input = "do homework";
+        ArrayList<LocalDateTime> dates = getParsedDates(input);
+        assertEquals("Number of dates", 0, dates.size());
+        assertEquals("Not parsed words", input, getNotParsedWords(input));
+        assertEquals("Parsed words", "", getParsedWords(input));
+    }
+
+    @Test
+    public void inputWithNumericDateNoDuration() {
+        String input = "15 mar";
+        ArrayList<LocalDateTime> dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date",
+                     constructDate(2015, 3, 15),
+                     dates.get(0).toLocalDate());
+        assertEquals("Not parsed words", "", getNotParsedWords(input));
+        assertEquals("Parsed words", "15 mar", getParsedWords(input));
+
+        input = "mar 15";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date",
+                     constructDate(2015, 3, 15),
+                     dates.get(0).toLocalDate());
+        assertEquals("Not parsed words", "", getNotParsedWords(input));
+        assertEquals("Parsed words", "mar 15", getParsedWords(input));
+
+        input = "15 march";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date",
+                     constructDate(2015, 3, 15),
+                     dates.get(0).toLocalDate());
+
+        input = "15 march 2018";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date",
+                     constructDate(2018, 3, 15),
+                     dates.get(0).toLocalDate());
+        
+        input = "03/15";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date",
+                     constructDate(2015, 3, 15),
+                     dates.get(0).toLocalDate());
+    }
+    
+    @Test
+    public void inputWithRelaxedDateNoDuration() {
+        String input = "today";
+        ArrayList<LocalDateTime> dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date",
+                     LocalDate.now(),
+                     dates.get(0).toLocalDate());
+
+        input = "tomorrow";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date",
+                     LocalDate.now().plusDays(1),
+                     dates.get(0).toLocalDate());
+
+        input = "wednesday";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date",
+                     getDateOfComingDay(DayOfWeek.WEDNESDAY),
+                     dates.get(0).toLocalDate());
+
+        input = "next week";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date",
+                     LocalDate.now().plusWeeks(1),
+                     dates.get(0).toLocalDate());
+        
+        input = "next month";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date",
+                     LocalDate.now().plusMonths(1),
+                     dates.get(0).toLocalDate());
+        
+        input = "next year";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date",
+                     LocalDate.now().plusYears(1),
+                     dates.get(0).toLocalDate());
+    }
+
+    @Test
+    public void inputWithNumericDateAndTime() {
+        String input = "15 mar 6pm";
+        ArrayList<LocalDateTime> dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date & time",
+                     constructDateTime(2015, 3, 15, 18, 0),
+                     dates.get(0));
+        
+        input = "6pm 15 mar";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date & time",
+                     constructDateTime(2015, 3, 15, 18, 0),
+                     dates.get(0));
+        
+        input = "1800 15 mar";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date & time",
+                     constructDateTime(2015, 3, 15, 18, 0),
+                     dates.get(0));
+        
+        input = "15 mar 2015 1800";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date & time",
+                     constructDateTime(2015, 3, 15, 18, 0),
+                     dates.get(0));
+        
+        input = "1800 15 mar 2015";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date & time",
+                     constructDateTime(2015, 3, 15, 18, 0),
+                     dates.get(0));
+        
+        input = "1800 03/15";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date & time",
+                     constructDateTime(2015, 3, 15, 18, 0),
+                     dates.get(0));
+        
+        input = "6pm 03/15";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date & time",
+                     constructDateTime(2015, 3, 15, 18, 0),
+                     dates.get(0));
+        
+        input = "read harry potter on 12 apr at 1200";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date & time",
+                     constructDateTime(2015, 4, 12, 12, 0),
+                     dates.get(0));
+        assertEquals("Not parsed words", "read harry potter on", getNotParsedWords(input));
+        assertEquals("Parsed words", "12 apr at 1200", getParsedWords(input));
+    }
+    
+    @Test
+    public void inputWithRelaxedDateAndTime() {
+        String input = "today 6pm";
+        ArrayList<LocalDateTime> dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date & time",
+                     LocalDate.now().atTime(18, 0),
+                     dates.get(0));
+        
+        input = "6pm tomorrow";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date & time",
+                     LocalDate.now().plusDays(1).atTime(18, 0),
+                     dates.get(0));
+        
+        input = "6pm next week";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date & time",
+                     LocalDate.now().plusWeeks(1).atTime(18, 0),
+                     dates.get(0));
+        
+        input = "next week 6pm";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date & time",
+                     LocalDate.now().plusWeeks(1).atTime(18, 0),
+                     dates.get(0));
+        
+        input = "2359 today";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date & time",
+                     LocalDate.now().atTime(23, 59),
+                     dates.get(0));
+        
+        input = "today 2359";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date & time",
+                     LocalDate.now().atTime(23, 59),
+                     dates.get(0));
+    }
+
+    
+    @Test
+    public void inputWithNumericDateAndDuration() {
+        String input = "4pm to 6pm on 15 mar";
+        ArrayList<LocalDateTime> dates = getParsedDates(input);
+        assertEquals("Number of dates", 2, dates.size());
+        assertEquals("Start date & time",
+                     constructDateTime(2015, 3, 15, 16, 0),
+                     dates.get(0));
+        assertEquals("End date & time",
+                     constructDateTime(2015, 3, 15, 18, 0),
+                     dates.get(1));
+        
+        input = "15 mar 4pm to 6pm";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 2, dates.size());
+        assertEquals("Start date & time",
+                     constructDateTime(2015, 3, 15, 16, 0),
+                     dates.get(0));
+        assertEquals("End date & time",
+                     constructDateTime(2015, 3, 15, 18, 0),
+                     dates.get(1));
+
+        input = "15 mar 4.30pm to 6pm";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 2, dates.size());
+        assertEquals("Start date & time",
+                     constructDateTime(2015, 3, 15, 16, 30),
+                     dates.get(0));
+        assertEquals("End date & time",
+                     constructDateTime(2015, 3, 15, 18, 0),
+                     dates.get(1));
+
+        input = "15 mar 4.30pm to 6.30pm";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 2, dates.size());
+        assertEquals("Start date & time",
+                     constructDateTime(2015, 3, 15, 16, 30),
+                     dates.get(0));
+        assertEquals("End date & time",
+                     constructDateTime(2015, 3, 15, 18, 30),
+                     dates.get(1));
+
+        input = "15 mar 4pm - 6pm";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 2, dates.size());
+        assertEquals("Start date & time",
+                     constructDateTime(2015, 3, 15, 16, 0),
+                     dates.get(0));
+        assertEquals("End date & time",
+                     constructDateTime(2015, 3, 15, 18, 0),
+                     dates.get(1));
+
+        input = "1600 - 1800 on 15 mar";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 2, dates.size());
+        assertEquals("Start date & time",
+                     constructDateTime(2015, 3, 15, 16, 0),
+                     dates.get(0));
+        assertEquals("End date & time",
+                     constructDateTime(2015, 3, 15, 18, 0),
+                     dates.get(1));
+
+        input = "4pm to 6:30pm on 15 mar";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 2, dates.size());
+        assertEquals("Start date & time",
+                     constructDateTime(2015, 3, 15, 16, 0),
+                     dates.get(0));
+        assertEquals("End date & time",
+                     constructDateTime(2015, 3, 15, 18, 30),
+                     dates.get(1));
+        
+        input = "attend meeting 1200 - 1400 on 20 Feb";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 2, dates.size());
+        assertEquals("Start date & time",
+                     constructDateTime(2015, 2, 20, 12, 0),
+                     dates.get(0));
+        assertEquals("End date & time",
+                     constructDateTime(2015, 2, 20, 14, 0),
+                     dates.get(1));
+        assertEquals("Not parsed words", "attend meeting", getNotParsedWords(input));
+        assertEquals("Parsed words", "1200 - 1400 on 20 Feb", getParsedWords(input));
+    }
+    
+    @Test
+    public void inputWithRelaxedDateAndDuration() {
+        String input = "4pm to 6pm today";
+        ArrayList<LocalDateTime> dates = getParsedDates(input);
+        assertEquals("Number of dates", 2, dates.size());
+        assertEquals("Start date & time",
+                     LocalDate.now().atTime(16, 0),
+                     dates.get(0));
+        assertEquals("End date & time",
+                     LocalDate.now().atTime(18, 0),
+                     dates.get(1));
+        
+        input = "4pm to 6pm tomorrow";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 2, dates.size());
+        assertEquals("Start date & time",
+                     LocalDate.now().plusDays(1).atTime(16, 0),
+                     dates.get(0));
+        assertEquals("End date & time",
+                     LocalDate.now().plusDays(1).atTime(18, 0),
+                     dates.get(1));
+        
+        input = "4pm to 6pm next week";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 2, dates.size());
+        assertEquals("Start date & time",
+                     LocalDate.now().plusWeeks(1).atTime(16, 0),
+                     dates.get(0));
+        assertEquals("End date & time",
+                     LocalDate.now().plusWeeks(1).atTime(18, 0),
+                     dates.get(1));
+    }
+
+    @Test
+    public void inputWithDateAndNonChronologicalTime() {
+        String input = "6pm to 5pm on 15 mar";
+        try {
+            getParsedDates(input);
+        } catch (DateTimeException e){
+            System.out.println(e.getMessage());
+        }
+    }
+
+
+    @Test
+    public void inputWithNumbers() {
+        String input;
+        ArrayList<LocalDateTime> dates;
+
+        input = "do assignment 2 tomorrow";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Deadline",
+                     LocalDate.now().plusDays(1),
+                     dates.get(0).toLocalDate());
+        assertEquals("Not parsed words", "do assignment 2", getNotParsedWords(input));
+        assertEquals("Parsed words", "tomorrow", getParsedWords(input));
+        
+        input = "do CS1231 tutorial 8";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 0, dates.size());
+        assertEquals("Not parsed words", "do CS1231 tutorial 8", getNotParsedWords(input));
+        assertEquals("Parsed words", "", getParsedWords(input));
+
+        input = "do CS1231 tutorial 2 by 2pm tomorrow";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Deadline",
+                     LocalDate.now().plusDays(1).atTime(14, 0),
+                     dates.get(0));
+        assertEquals("Not parsed words", "do CS1231 tutorial 2 by", getNotParsedWords(input));
+        assertEquals("Parsed words", "2pm tomorrow", getParsedWords(input));
+
+        input = "create 20 word poem";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 0, dates.size());
+        assertEquals("Not parsed words", "create 20 word poem", getNotParsedWords(input));
+        assertEquals("Parsed words", "", getParsedWords(input));
+
+        input = "add assignment 2 from 12pm to 6pm today";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 2, dates.size());
+        assertEquals("Start date & time",
+                     LocalDate.now().atTime(12, 0),
+                     dates.get(0));
+        assertEquals("End date & time",
+                     LocalDate.now().atTime(18, 0),
+                     dates.get(1));
+
+        input = "add attend meeting 20 from 1200 - 1400 23 march";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 2, dates.size());
+        assertEquals("Start date & time",
+                     constructDateTime(2015, 3, 23, 12, 00),
+                     dates.get(0));
+        assertEquals("End date & time",
+                     constructDateTime(2015, 3, 23, 14, 00),
+                     dates.get(1));
+        assertEquals("Not parsed words", "add attend meeting 20 from", getNotParsedWords(input));
+        assertEquals("Parsed words", "1200 - 1400 23 march", getParsedWords(input));
+        
+        input = "add attend meeting 20 from 12pm - 2pm on 23 march";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 2, dates.size());
+        assertEquals("Start date & time",
+                     constructDateTime(2015, 3, 23, 12, 00),
+                     dates.get(0));
+        assertEquals("End date & time",
+                     constructDateTime(2015, 3, 23, 14, 00),
+                     dates.get(1));
+        assertEquals("Not parsed words", "add attend meeting 20 from", getNotParsedWords(input));
+        assertEquals("Parsed words", "12pm - 2pm on 23 march", getParsedWords(input));
+        
+        input = "2 friday";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Not parsed words", "2", getNotParsedWords(input));
+        assertEquals("Parsed words", "friday", getParsedWords(input));
+    }
+
+    @Test
+    public void inputWithPastDateTimes() {
+        String input;
+        ArrayList<LocalDateTime> dates;
+        
+        input = "do this 25 mar 2014";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Deadline",
+                     constructDate(2014, 3, 25),
+                     dates.get(0).toLocalDate());
+        
+        input = "do this 6pm 25 mar 2014";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Deadline",
+                     constructDateTime(2014, 3, 25, 18, 0),
+                     dates.get(0));
+        
+    }
+    
+    @Test
+    public void inputWithFalseMatchingWords() {
+        String input;
+        ArrayList<LocalDateTime> dates;
+
+        input = "fries";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 0, dates.size());
+
+        input = "find girlfriend";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 0, dates.size());
+
+        input = "return money owed to John";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 0, dates.size());
+
+        input = "return money owed to John on wed";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Not parsed words",
+                     "return money owed to John on",
+                     getNotParsedWords(input));
+        assertEquals("Parsed words", "wed", getParsedWords(input));
+
+        input = "abcd owed dcba"; // length = 14
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 0, dates.size());
+    }
+    
+    @Test
+    public void inputWithHolidays() {
+        String input;
+        ArrayList<LocalDateTime> dates;
+
+        input = "good friday";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 0, dates.size());
+        
+        input = "find easter eggs by friday";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date", getDateOfComingDay(DayOfWeek.FRIDAY), dates.get(0).toLocalDate());
+        assertEquals("Not parsed words", "find easter eggs by", getNotParsedWords(input));
+        assertEquals("Parsed words", "friday", getParsedWords(input));
+    }
+    
+    @Test
+    public void inputWithEscapeChar() {
+        String input;
+        ArrayList<LocalDateTime> dates;
+        
+        input = "watch \"day after tomorrow\" today";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date", LocalDate.now(), dates.get(0).toLocalDate());
+        assertEquals("Not parsed words", "watch \"day after tomorrow\"", getNotParsedWords(input));
+        assertEquals("Parsed words", "today", getParsedWords(input));
+        
+        input = "read \"today\" today";
+        dates = getParsedDates(input);
+        assertEquals("Number of dates", 1, dates.size());
+        assertEquals("Date", LocalDate.now(), dates.get(0).toLocalDate());
+        assertEquals("Not parsed words", "read \"today\"", getNotParsedWords(input));
+        assertEquals("Parsed words", "today", getParsedWords(input));
+    }
+}
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\tests\java\DateParserTest.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\target\classes\view\CategoryBox.java
+	 */
+
+public class CategoryBox extends HBox {
+
+    private static final String STYLE_DIM = "-fx-text-fill: #E8E8E8;";
+    private static final String LOCATION_CATEGORY_BOX_FXML = "/view/CategoryBox.fxml";
+    private static final String FORMAT_DATE = "(%s)";
+    private static final String NO_DATE = "";
+
+    @FXML
+    private Label category;
+
+    @FXML
+    private Label date;
+
+    public CategoryBox(String category, String date) {
+        loadFxml();
+        this.category.setText(category);
+        if (!date.isEmpty()) {
+            this.date.setText(String.format(FORMAT_DATE, date));
+        } else {
+            this.date.setText(NO_DATE);
+        }
+    }
+    
+    public CategoryBox(String category) {
+        loadFxml();
+        this.category.setText(category);
+        this.date.setText(NO_DATE);
+    }
+    
+    private void loadFxml() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(LOCATION_CATEGORY_BOX_FXML));
+            loader.setRoot(this);
+            loader.setController(this);
+            loader.load();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public void dim() {
+        category.setStyle(STYLE_DIM);
+        date.setStyle(STYLE_DIM);
+    }
+}
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\target\classes\view\CategoryBox.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\target\classes\view\DisplayController.java
+	 */
+
+public class DisplayController extends VBox {
+
+    // ================================================================
+    // FXML Fields
+    // ================================================================
+    @FXML
+    private ListView<HBox> listView;
+
+    @FXML
+    private Label feedbackLabel;
+
+    @FXML
+    private VBox noTaskOverlay;
+
+    @FXML
+    private Label noTaskOverlayIcon;
+
+    @FXML
+    private Label noTaskOverlayGreeting;
+
+    @FXML
+    private Label noTaskOverlayMessage;
+
+    @FXML
+    private VBox helpOverlay;
+
+    @FXML
+    private Label helpOverlayIcon;
+
+    @FXML
+    private Label helpOverlayTitle;
+
+    @FXML
+    private ListView<HelpBox> helpOverlayContents;
+
+
+    // ================================================================
+    // Non-FXML Fields
+    // ================================================================
+    private static Logger logger;
+    private static DisplayController displayController;
+
+    private Timeline feedbackTimeline;
+    private Timeline overlayTimeline;
+    private ArrayList<String> allExampleCommands;
+    private ObservableList<HelpBox> helpList;
+
+    private int currentScrollIndex;
+    private int numExcessTasks;
+    private boolean isCurrentDisplayOverview;
+
+
+    // ================================================================
+    // Constants
+    // ================================================================
+    private final static String LOCATION_TASK_OVERVIEW_FXML = "/view/Display.fxml";
+
+    private final static String STRING_EMPTY = "";
+    private static final String FORMAT_PATTERN_DATE_SPECIAL_CASE = "EEEE, d MMMM";
+    private static final String FORMAT_PATTERN_DATE = "d MMMM";
+    private static final String FORMAT_PATTERN_DAY = "EEEE";
+
+    private static final String LABEL_FLOATING = "Floating";
+    private static final String LABEL_OVERDUE = "Overdue";
+    private static final String LABEL_TODAY = "Today";
+    private static final String LABEL_TOMORROW = "Tomorrow";
+    private static final String LABEL_OTHERS = "Everything else";
+    private static final String LABEL_SUCCESSFUL_SEARCH = "Results for \"%s\"";
+    private static final String LABEL_UNSUCCESSFUL_SEARCH = "No results for \"%s\"";
+    private static final String LABEL_DEFAULT_SEARCH_QUERY = "all tasks";
+    private static final String LABEL_INCOMPLETE = "Incomplete";
+    private static final String LABEL_COMPLETED = "Completed";
+    private static final String LABEL_EXCESS_TASKS = "... and %d more tasks";
+
+    private static final String HELP_OVERLAY_TITLE = "Need help?";
+    private static final String HELP_OVERLAY_ICON = "\uf05a";
+    private static final String HELP_ADD_DESC = "Add a task";
+    private static final String HELP_ADD_COMMAND = "add <description> <time> <day>";
+    private static final String HELP_EDIT_DESC = "Edit a task";
+    private static final String HELP_EDIT_COMMAND = "edit <index> <description> <time> <day>";
+    private static final String HELP_DELETE_DESC = "Delete a task";
+    private static final String HELP_DELETE_COMMAND = "delete <index>";
+    private static final String HELP_COMPLETE_DESC = "Mark a task as completed";
+    private static final String HELP_COMPLETE_COMMAND = "complete <index>";
+    private static final String HELP_INCOMPLETE_DESC = "Mark a task as incomplete";
+    private static final String HELP_INCOMPLETE_COMMAND = "incomplete <index>";
+    private static final String HELP_UNDO_DESC = "Undo previous action";
+    private static final String HELP_UNDO_COMMAND = "undo";
+    private static final String HELP_SET_SAVE_LOCATION_DESC = "Set a file as save file";
+    private static final String HELP_SET_SAVE_LOCATION_COMMAND = "set <directory>";
+    private static final String HELP_MOVE_SAVE_LOCATION_DESC = "Change save directory";
+    private static final String HELP_MOVE_SAVE_LOCATION_COMMAND = "move <directory>";
+    private static final String HELP_SEARCH_DESC = "Search for a task";
+    private static final String HELP_SEARCH_COMMAND = "search <keyword/day>";
+    private static final String HELP_DISPLAY_INCOMPLETE_DESC = "Display overview";
+    private static final String HELP_DISPLAY_INCOMPLETE_COMMAND = "display";
+    private static final String HELP_DISPLAY_COMPLETE_DESC = "Display completed tasks";
+    private static final String HELP_DISPLAY_COMPLETE_COMMAND = "display completed";
+    private static final String HELP_EXIT_DESC = "Exit Veto";
+    private static final String HELP_EXIT_COMMAND = "exit";
+
+    private static final int OVERLAY_FADE_IN_MILLISECONDS = 200;
+
+    private static final String NO_TASK_OVERLAY_GREETING = "Hello!";
+    private static final String NO_TASK_OVERLAY_ICON = "\uf14a";
+    private static final String NO_TASK_OVERLAY_MESSAGE = "Looks like you've got no pending tasks. "
+                                                          + "Type \"help\" for a list of commands or "
+                                                          + "try entering the following:\n\n";
+    private static final int NO_TASK_OVERLAY_NUM_EXAMPLE_COMMANDS = 3;
+
+    private static final int FEEDBACK_FADE_IN_MILLISECONDS = 500;
+    private static final int FEEDBACK_FADE_OUT_MILLISECONDS = 1000;
+    private static final int FEEDBACK_DISPLAY_SECONDS = 8;
+
+    private static final int DISPLAY_MAX_SIZE = 14;
+    private static final int SCROLL_INCREMENT = 5;
+    private static final int MAX_NUM_OF_TASKS = 100;
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\target\classes\view\DisplayController.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\target\classes\view\DisplayController.java
+	 */
+
+    public static DisplayController getInstance() {
+        if (displayController == null) {
+            displayController = new DisplayController();
+        }
+        return displayController;
+    }
+
+
+    // ================================================================
+    // Public methods
+    // ================================================================
+    public void hideOverlays() {
+        noTaskOverlay.toBack();
+        helpOverlay.toBack();
+        noTaskOverlay.setOpacity(0);
+        helpOverlay.setOpacity(0);
+    }
+
+    /**
+     * Update display of tasks.
+     * The input tasks follows a predefined order of overdue tasks, floating
+     * tasks, this week's tasks then all other tasks.
+     * This ensures that the index shown in the display corresponds with the
+     * actual index in the input ObservableList.
+     * 
+     * @param tasks Must be sorted in the above order.
+     */
+    public void updateOverviewDisplay(ObservableList<Task> tasks) {
+        handleOverlays(tasks);
+
+        ArrayList<Task> listOfTasks = trimListOfTasks(tasks);
+        logger.log(Level.INFO, "List of tasks: " + listOfTasks.toString());
+
+        ObservableList<HBox> displayBoxes = FXCollections.observableArrayList();
+
+        addTasksToOverviewDisplay(listOfTasks, displayBoxes);
+        addNumExcessTasksLabel(displayBoxes);
+
+        handleChangeHighlights(displayBoxes);
+
+        listView.setItems(displayBoxes);
+        isCurrentDisplayOverview = true;
+    }
+
+    /**
+     * Update display to show search results.
+     * The input tasks follows a predefined order of incomplete tasks then
+     * completed tasks.
+     * This ensures that the index shown in the display corresponds with the
+     * actual index in the input ObservableList.
+     * 
+     * @param searchResults Must be sorted in the above order.
+     * @param searchQuery   User's input query
+     */
+    public void updateSearchDisplay(ObservableList<Task> searchResults,
+                                    String searchQuery) {
+        hideOverlays();
+
+        ArrayList<Task> listOfResults = trimListOfTasks(searchResults);
+        logger.log(Level.INFO, "List of results: " + listOfResults.toString());
+
+        ObservableList<HBox> displayBoxes = FXCollections.observableArrayList();
+
+        addSearchLabel(displayBoxes, searchResults, searchQuery);
+        addTasksToSearchDisplay(listOfResults, displayBoxes);
+        addNumExcessTasksLabel(displayBoxes);
+        listView.setItems(displayBoxes);
+        isCurrentDisplayOverview = false;
+    }
+
+    public void setFeedback(String feedback) {
+        FadeTransition fadeIn = initFadeIn(feedbackLabel,
+                                           FEEDBACK_FADE_IN_MILLISECONDS);
+        FadeTransition fadeOut = initFadeOut(feedbackLabel,
+                                             FEEDBACK_FADE_OUT_MILLISECONDS);
+
+        feedbackTimeline.stop();
+        feedbackTimeline = generateFeedbackTimeline(feedback, fadeIn, fadeOut);
+        feedbackTimeline.play();
+    }
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\target\classes\view\DisplayController.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\target\classes\view\DisplayController.java
+	 */
+
+    // ================================================================
+    // Private overlay method
+    // ================================================================
+    /**
+     * Shows an overlay message when there are no tasks to display.
+     */
+    private void showNoTaskOverlay() {
+        setFeedback(STRING_EMPTY);
+        String exampleCommands = generateExampleCommands();
+
+        FadeTransition fadeIn = initFadeIn(noTaskOverlay,
+                                           OVERLAY_FADE_IN_MILLISECONDS);
+
+        overlayTimeline = generateNoTaskOverlayTimeline(exampleCommands, fadeIn);
+        overlayTimeline.play();
+    }
+
+    private String generateExampleCommands() {
+        Collections.shuffle(allExampleCommands);
+        String exampleCommands = generateParagraph(allExampleCommands,
+                                                   NO_TASK_OVERLAY_NUM_EXAMPLE_COMMANDS);
+        return exampleCommands;
+    }
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\target\classes\view\DisplayController.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\target\classes\view\DisplayController.java
+	 */
+
+    // ================================================================
+    // Initialization methods
+    // ================================================================
+    private void initTimelines() {
+        feedbackTimeline = new Timeline();
+        overlayTimeline = new Timeline();
+    }
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\target\classes\view\DisplayController.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\target\classes\view\DisplayController.java
+	 */
+
+    private void initNoTaskOverlay(String exampleCommands) {
+        noTaskOverlay.setOpacity(0);
+        noTaskOverlay.toFront();
+        noTaskOverlayIcon.setText(NO_TASK_OVERLAY_ICON);
+        noTaskOverlayGreeting.setText(NO_TASK_OVERLAY_GREETING);
+        noTaskOverlayMessage.setText(NO_TASK_OVERLAY_MESSAGE + exampleCommands);
+    }
+
+    private void initFeedbackLabel(String feedback) {
+        feedbackLabel.setOpacity(0);
+        feedbackLabel.setText(feedback);
+    }
+
+    private void initHelpOverlay() {
+        helpOverlay.toFront();
+        helpOverlayIcon.setText(HELP_OVERLAY_ICON);
+        helpOverlayTitle.setText(HELP_OVERLAY_TITLE);
+        helpOverlayContents.setItems(helpList);
+    }
+
+    private FadeTransition initFadeIn(Node node, int duration) {
+        FadeTransition fadeIn = new FadeTransition(new Duration(duration));
+        fadeIn.setNode(node);
+        fadeIn.setToValue(1);
+        return fadeIn;
+    }
+
+    private FadeTransition initFadeOut(Node node, int duration) {
+        FadeTransition fadeOut = new FadeTransition(new Duration(duration));
+        fadeOut.setNode(node);
+        fadeOut.setToValue(0);
+        return fadeOut;
+    }
+
+    // ================================================================
+    // Timeline generators
+    // ================================================================
+    private Timeline generateFeedbackTimeline(String feedback,
+                                              FadeTransition fadeIn,
+                                              FadeTransition fadeOut) {
+        // First KeyFrame is to fade in the feedback message and the second
+        // KeyFrame is to fade it out after several seconds.
+        return new Timeline(new KeyFrame(new Duration(1), // JavaFx does not
+                                                          // work properly when
+                                                          // a duration of zero
+                                                          // is given.
+                                         new EventHandler<ActionEvent>() {
+                                             @Override
+                                             public void handle(ActionEvent event) {
+                                                 initFeedbackLabel(feedback);
+                                                 fadeIn.play();
+                                             }
+                                         }),
+                            new KeyFrame(Duration.seconds(FEEDBACK_DISPLAY_SECONDS),
+                                         new EventHandler<ActionEvent>() {
+                                             @Override
+                                             public void handle(ActionEvent event) {
+                                                 fadeOut.play();
+                                             }
+                                         }));
+    }
+
+    private Timeline generateNoTaskOverlayTimeline(String exampleCommands,
+                                                   FadeTransition fadeIn) {
+        return new Timeline(new KeyFrame(new Duration(1),
+                                         new EventHandler<ActionEvent>() {
+                                             @Override
+                                             public void handle(ActionEvent event) {
+                                                 initNoTaskOverlay(exampleCommands);
+                                                 fadeIn.play();
+                                             }
+                                         }));
+    }
+
+    private Timeline generateHelpOverlayTimeline(FadeTransition fadeIn) {
+        return new Timeline(new KeyFrame(new Duration(1),
+                                         new EventHandler<ActionEvent>() {
+                                             @Override
+                                             public void handle(ActionEvent event) {
+                                                 initHelpOverlay();
+                                                 fadeIn.play();
+                                             }
+                                         }));
+    }
+
+
+    // ================================================================
+    // Logic methods for updateOverviewDisplay
+    // ================================================================
+    private void handleOverlays(ObservableList<Task> tasks) {
+        hideOverlays();
+        if (tasks.isEmpty()) {
+            showNoTaskOverlay();
+        }
+    }
+
+    private void addTasksToOverviewDisplay(ArrayList<Task> listOfTasks,
+                                           ObservableList<HBox> displayBoxes) {
+        LocalDate now = LocalDate.now();
+        int index = 1;
+        index = addOverdueTasks(displayBoxes, listOfTasks, index);
+        index = addFloatingTasks(displayBoxes, listOfTasks, index);
+        index = addThisWeeksTasks(displayBoxes, listOfTasks, now, index);
+        index = addAllOtherTasks(displayBoxes, listOfTasks, now, index);
+    }
+
+    private void handleChangeHighlights(ObservableList<HBox> displayBoxes) {
+        if (isCurrentDisplayOverview) {
+            highlightChanges(displayBoxes);
+        }
+    }
+
+    private int addOverdueTasks(ObservableList<HBox> displayBoxes,
+                                ArrayList<Task> listOfTasks,
+                                int index) {
+        // Add category label to be displayed above that category.
+        CategoryBox overdue = new CategoryBox(LABEL_OVERDUE);
+        displayBoxes.add(overdue);
+
+        boolean hasOverdue = false;
+
+        // Tasks before index-1 are not applicable (not overdue).
+        List<Task> applicableTasks = listOfTasks.subList(index - 1,
+                                                         listOfTasks.size());
+        for (Task task : applicableTasks) {
+            if (task.isOverdue()) {
+                hasOverdue = true;
+                addTask(displayBoxes, index, task, true);
+                index++;
+            } else {
+                break;
+            }
+        }
+
+        // Changes the color of the category label to indicate the lack of tasks
+        // that fall under this category.
+        if (!hasOverdue) {
+            overdue.dim();
+        }
+
+        return index;
+    }
+
+    private int addFloatingTasks(ObservableList<HBox> displayBoxes,
+                                 ArrayList<Task> listOfTasks,
+                                 int index) {
+        CategoryBox floating = new CategoryBox(LABEL_FLOATING);
+        displayBoxes.add(floating);
+
+        boolean hasFloating = false;
+
+        // Tasks before index-1 are not applicable (not floating).
+        List<Task> applicableTasks = listOfTasks.subList(index - 1,
+                                                         listOfTasks.size());
+        for (Task task : applicableTasks) {
+            if (task.getType() == Task.Type.FLOATING) {
+                hasFloating = true;
+                addTask(displayBoxes, index, task, true);
+                index++;
+            } else {
+                break;
+            }
+        }
+
+        if (!hasFloating) {
+            floating.dim();
+        }
+
+        return index;
+    }
+
+    private int addThisWeeksTasks(ObservableList<HBox> displayBoxes,
+                                  ArrayList<Task> listOfTasks,
+                                  LocalDate now,
+                                  int index) {
+        // generate the dates of the 7 days from today
+        ArrayList<LocalDate> days = generateDaysOfWeek(now);
+        assert days.size() == 7;
+
+        for (LocalDate day : days) {
+            CategoryBox label = generateDayLabel(now, day);
+            displayBoxes.add(label);
+
+            boolean hasTaskOnThisDay = false;
+
+            // Tasks before index-1 are not applicable (not equal to day).
+            List<Task> applicableTasks = listOfTasks.subList(index - 1,
+                                                             listOfTasks.size());
+            for (Task task : applicableTasks) {
+                if (day.equals(task.getDate())) {
+                    hasTaskOnThisDay = true;
+                    addTask(displayBoxes, index, task, false);
+                    index++;
+                } else {
+                    break;
+                }
+            }
+
+            if (!hasTaskOnThisDay) {
+                label.dim();
+            }
+        }
+        return index;
+    }
+
+    private int addAllOtherTasks(ObservableList<HBox> displayBoxes,
+                                 ArrayList<Task> listOfTasks,
+                                 LocalDate now,
+                                 int index) {
+        CategoryBox otherTasks = new CategoryBox(LABEL_OTHERS);
+        displayBoxes.add(otherTasks);
+
+        boolean hasOtherTasks = false;
+        LocalDate dayOneWeekFromNow = now.plusWeeks(1);
+
+        // Tasks before index-1 are not applicable as they fall under previous
+        // categories.
+        List<Task> applicableTasks = listOfTasks.subList(index - 1,
+                                                         listOfTasks.size());
+        for (Task task : applicableTasks) {
+            if (task.getDate() != null &&
+                (dayOneWeekFromNow.equals(task.getDate()) || dayOneWeekFromNow.isBefore(task.getDate()))) {
+                hasOtherTasks = true;
+                addTask(displayBoxes, index, task, true);
+                index++;
+            }
+        }
+
+        if (!hasOtherTasks) {
+            otherTasks.dim();
+        }
+
+        return index;
+    }
+
+    private CategoryBox generateDayLabel(LocalDate now, LocalDate day) {
+
+        // formats the date for the day label, eg. Monday, Tuesday, etc
+        DateTimeFormatter dayFormatter = DateTimeFormatter.ofPattern(FORMAT_PATTERN_DAY);
+
+        // formats the date for the date label, eg. 1 April
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(FORMAT_PATTERN_DATE);
+
+        // formats the date for the date label of special cases, eg. Wednesday,
+        // 1 April
+        DateTimeFormatter dateFormatterForSpecialCase = DateTimeFormatter.ofPattern(FORMAT_PATTERN_DATE_SPECIAL_CASE);
+
+        CategoryBox label;
+
+        // special cases to show "Today" and "Tomorrow" instead of day
+        if (day.equals(now)) {
+            label = new CategoryBox(LABEL_TODAY,
+                                    day.format(dateFormatterForSpecialCase));
+        } else if (day.equals(now.plusDays(1))) {
+            label = new CategoryBox(LABEL_TOMORROW,
+                                    day.format(dateFormatterForSpecialCase));
+        } else {
+            label = new CategoryBox(day.format(dayFormatter),
+                                    day.format(dateFormatter));
+        }
+        return label;
+    }
+
+    private ArrayList<LocalDate> generateDaysOfWeek(LocalDate now) {
+        ArrayList<LocalDate> days = new ArrayList<LocalDate>();
+        for (int i = 0; i < 7; i++) {
+            days.add(now.plusDays(i));
+        }
+        return days;
+    }
+
+    private void highlightChanges(ObservableList<HBox> displayBoxes) {
+        ObservableList<HBox> oldDisplayBoxes = listView.getItems();
+
+        // Tasks previously added will not be highlighed when Veto is loaded.
+        if (oldDisplayBoxes.isEmpty()) {
+            return;
+        }
+        for (HBox newBox : displayBoxes) {
+            if (newBox instanceof TaskBox) {
+                TaskBox newTaskBox = (TaskBox) newBox;
+                String query = newTaskBox.getDescription() +
+                               newTaskBox.getTimeAndDate();
+                if (!hasMatchingBox(oldDisplayBoxes, query)) {
+                    newTaskBox.highlight();
+                }
+            }
+        }
+    }
+
+    private boolean hasMatchingBox(ObservableList<HBox> oldDisplayBoxes,
+                                   String query) {
+        for (HBox oldBox : oldDisplayBoxes) {
+            if (oldBox instanceof TaskBox) {
+                TaskBox tBox = (TaskBox) oldBox;
+                String descAndDate = tBox.getDescription() +
+                                     tBox.getTimeAndDate();
+                if (query.equals(descAndDate)) {
+                    oldDisplayBoxes.remove(oldBox);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
+    // ================================================================
+    // Logic methods for updateSearchDisplay
+    // ================================================================
+    private void addTasksToSearchDisplay(ArrayList<Task> listOfResults,
+                                         ObservableList<HBox> displayBoxes) {
+        int index = 1;
+        index = addIncompleteTasks(displayBoxes, listOfResults, index);
+        index = addCompletedTasks(displayBoxes, listOfResults, index);
+    }
+
+    private int addIncompleteTasks(ObservableList<HBox> displayBoxes,
+                                   ArrayList<Task> listOfResults,
+                                   int index) {
+        CategoryBox incompleteLabel = new CategoryBox(LABEL_INCOMPLETE);
+        displayBoxes.add(incompleteLabel);
+
+        boolean hasIncompleteTask = false;
+
+        List<Task> applicableTasks = listOfResults.subList(index - 1,
+                                                           listOfResults.size());
+        for (Task task : applicableTasks) {
+            if (!task.isCompleted()) {
+                hasIncompleteTask = true;
+                addTask(displayBoxes, index, task, true);
+                index++;
+            }
+        }
+
+        if (!hasIncompleteTask) {
+            incompleteLabel.dim();
+        }
+
+        return index;
+    }
+
+    private int addCompletedTasks(ObservableList<HBox> displayBoxes,
+                                  ArrayList<Task> listOfResults,
+                                  int index) {
+        CategoryBox completedLabel = new CategoryBox(LABEL_COMPLETED);
+        displayBoxes.add(completedLabel);
+
+        boolean hasCompletedTask = false;
+
+        List<Task> applicableTasks = listOfResults.subList(index - 1,
+                                                           listOfResults.size());
+        for (Task task : applicableTasks) {
+            if (task.isCompleted()) {
+                hasCompletedTask = true;
+                addTask(displayBoxes, index, task, true);
+                index++;
+            }
+        }
+
+        if (!hasCompletedTask) {
+            completedLabel.dim();
+        }
+
+        return index;
+    }
+
+    private void addSearchLabel(ObservableList<HBox> displayBoxes,
+                                ObservableList<Task> searchResults,
+                                String searchQuery) {
+        CategoryBox searchLabel = generateSearchLabel(searchResults,
+                                                      searchQuery);
+        displayBoxes.add(searchLabel);
+    }
+
+    private CategoryBox generateSearchLabel(ObservableList<Task> searchResults,
+                                            String searchQuery) {
+        CategoryBox searchLabel;
+        if (searchQuery.isEmpty()) {
+            // No search query will cause all tasks to be shown.
+            searchQuery = LABEL_DEFAULT_SEARCH_QUERY;
+        }
+
+        if (searchResults.isEmpty()) {
+            searchLabel = new CategoryBox(String.format(LABEL_UNSUCCESSFUL_SEARCH,
+                                                        searchQuery));
+        } else {
+            searchLabel = new CategoryBox(String.format(LABEL_SUCCESSFUL_SEARCH,
+                                                        searchQuery));
+        }
+
+        return searchLabel;
+    }
+
+    // ================================================================
+    // Utility methods
+    // ================================================================
+    private void addTask(ObservableList<HBox> displayBoxes,
+                         int index,
+                         Task task,
+                         boolean includeDate) {
+        if (task.isCompleted()) {
+            displayBoxes.add(new TaskBox(index,
+                                         task.getDescription(),
+                                         task.getFormattedTimeAndDate(includeDate),
+                                         task.isRecurring(),
+                                         true));
+        } else {
+            displayBoxes.add(new TaskBox(index,
+                                         task.getDescription(),
+                                         task.getFormattedTimeAndDate(includeDate),
+                                         task.isRecurring()));
+        }
+    }
+
+    /**
+     * Adds a label showing the number of tasks that are not displayed.
+     * 
+     * @param displayBoxes
+     */
+    private void addNumExcessTasksLabel(ObservableList<HBox> displayBoxes) {
+        if (numExcessTasks > 0) {
+            displayBoxes.add(new CategoryBox(String.format(LABEL_EXCESS_TASKS,
+                                                           numExcessTasks)));
+        }
+    }
+
+    /**
+     * Returns a sublist of MAX_NUM_OF_TASKS number of tasks.
+     * 
+     * @param tasks
+     * @return ArrayList of size MAX_NUM_OF_TASKS
+     */
+    private ArrayList<Task> trimListOfTasks(ObservableList<Task> tasks) {
+        numExcessTasks = tasks.size() - MAX_NUM_OF_TASKS;
+        if (numExcessTasks > 0) {
+            return new ArrayList<Task>(tasks.subList(0, MAX_NUM_OF_TASKS));
+        }
+        return new ArrayList<Task>(tasks);
+    }
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\target\classes\view\DisplayController.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\target\classes\view\RootLayoutController.java
+	 */
+
+    private void handleCommandAutoComplete() {
+        String autoCompletedCommand = getAutoCompletedCommand(userInput.getText());
+        updateUserInput(autoCompletedCommand);
+    }
+
+    private void handleGetPastCommands(KeyEvent event) {
+        String pastCommand = getPastCommandFromHistory(event.getCode());
+        updateUserInput(pastCommand);
+    }
+
+    private void updateUserInput(String newInput) {
+        userInput.setText(newInput);
+        userInput.end();
+    }
+
+
+    // ================================================================
+    // Methods to handle command auto-complete
+    // ================================================================
+    private void initAutoCompleteCommands() {
+        commands = Command.getAllCommandTypes();
+        commands.remove(Command.Type.INVALID.toString());
+    }
+
+    private String getAutoCompletedCommand(String text) {
+        ArrayList<String> splitText = generateSplitText(text);
+        if (hasOnlyOneWord(splitText)) {
+            String firstWord = getFirstWord(splitText);
+            return findSuitableCommand(text, firstWord);
+        } else {
+            return text;
+        }
+    }
+
+    private ArrayList<String> generateSplitText(String text) {
+        ArrayList<String> splitText = new ArrayList<String>(Arrays.asList(text.split(ONE_SPACING)));
+        return splitText;
+    }
+
+    private boolean hasOnlyOneWord(ArrayList<String> splitText) {
+        return splitText.size() == 1;
+    }
+
+    private String getFirstWord(ArrayList<String> splitText) {
+        return splitText.get(0);
+    }
+
+    private String findSuitableCommand(String text, String firstWord) {
+        for (String command : commands) {
+            if (isValidLengths(firstWord, command) &&
+                isWordAtStartOfCommand(firstWord, command)) {
+                return command.toLowerCase() + ONE_SPACING;
+            }
+        }
+        return text;
+    }
+
+    private boolean isValidLengths(String firstWord, String command) {
+        return firstWord.length() <= command.length();
+    }
+
+    private boolean isWordAtStartOfCommand(String firstWord, String command) {
+        return command.substring(0, firstWord.length())
+                      .equalsIgnoreCase(firstWord);
+    }
+
+
+    // ================================================================
+    // Methods to handle history of user entered commands
+    // ================================================================
+    private void initVariablesForHistory() {
+        history = new ArrayList<String>();
+        history.add(EMPTY_STRING);
+        history.add(EMPTY_STRING);
+        pointer = history.size() - 1;
+    }
+
+    private void updateHistory() {
+        pointer = history.size();
+        history.add(pointer - 1, userInput.getText());
+    }
+
+    private String getPastCommandFromHistory(KeyCode code) {
+        if (code == KeyCode.DOWN) {
+            return getNextCommand();
+        } else if (code == KeyCode.UP) {
+            return getPreviousCommand();
+        } else {
+            return EMPTY_STRING;
+        }
+    }
+
+    private String getPreviousCommand() {
+        if (pointer > 0) {
+            pointer--;
+        }
+        return history.get(pointer);
+    }
+
+    private String getNextCommand() {
+        if (pointer < history.size() - 1) {
+            pointer++;
+        }
+        return history.get(pointer);
+    }
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\target\classes\view\RootLayoutController.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\target\classes\view\TaskBox.java
+	 */
+
+public class TaskBox extends HBox {
+
+    // ================================================================
+    // FXML Fields
+    // ================================================================
+    @FXML
+    private CheckBox checkbox;
+
+    @FXML
+    private Label index;
+
+    @FXML
+    private Label recurringIcon;
+
+    @FXML
+    private Label description;
+    
+    @FXML
+    private Label timeAndDate;
+
+    @FXML
+    private Button delete;
+
+    
+    // ================================================================
+    // Constants
+    // ================================================================
+    private static final String STRING_EMPTY = "";
+    private static final String STRING_ONE_SPACING = " ";
+    private static final String LOCATION_TASK_BOX_FXML = "/view/TaskBox.fxml";
+    private static final String KEYWORD_COMPLETE = Command.Type.COMPLETE.toString();
+    private static final String KEYWORD_INCOMPLETE = Command.Type.INCOMPLETE.toString();
+    private static final String KEYWORD_DELETE = Command.Type.DELETE.toString();
+    private static final String ICON_DELETE = "\uf014";
+    private static final String ICON_RECURRING = STRING_ONE_SPACING + "\uf01e" +
+                                                 STRING_ONE_SPACING;
+    private static final String FORMAT_DATE = "%s";
+
+    private static final int TIMELINE_FRAME_DELAY_MILLISECONDS = 10;
+    private static final int HIGHLIGHT_DISPLAY_SECONDS = 7;
+    private static final String STYLE_HIGHLIGHT_TAG_FORMAT = "-fx-background-color: %s;";
+    private static final String STYLE_HIGHLIGHT_COLOR_FORMAT = "rgb(255, 187, 141, %.2f)";
+
+
+    // ================================================================
+    // Constructors
+    // ================================================================
+    /**
+     * Creates a TaskBox
+     * 
+     * @param idx           Index to be shown next to the task.
+     * @param desc          Description of the task.
+     * @param timeAndDate   Formatted time and Date to be shown next to the description.
+     * @param isRecurring   To indicate if a TaskBox shows a recurring icon.
+     */
+    public TaskBox(int idx, String desc, String timeAndDate, boolean isRecurring) {
+        loadFxml();
+        initListenerAndFields(idx, desc, timeAndDate, isRecurring);
+    }
+
+    /**
+     * Creates a TaskBox
+     * 
+     * @param idx           Index to be shown next to the task.
+     * @param desc          Description of the task.
+     * @param timeAndDate   Formatted time and Date to be shown next to the description.
+     * @param isRecurring   To indicate if a TaskBox shows a recurring icon.
+     * @param isCompleted   To indicate if a TaskBox shows its checkbox as being ticked.
+     */
+    public TaskBox(int idx, String desc, String timeAndDate,
+                   boolean isRecurring, boolean isCompleted) {
+        loadFxml();
+        checkbox.setSelected(isCompleted);
+        initListenerAndFields(idx, desc, timeAndDate, isRecurring);
+    }
+
+    
+    // ================================================================
+    // Public methods
+    // ================================================================
+    public String getDescription() {
+        return description.getText();
+    }
+    
+    public String getTimeAndDate() {
+        return timeAndDate.getText();
+    }
+
+    public void highlight() {
+        float opacity = 1;
+        highlight(String.format(STYLE_HIGHLIGHT_COLOR_FORMAT, opacity));
+        generateHighlightTimeline().play();
+    }
+    
+
+    // ================================================================
+    // Initialisation methods
+    // ================================================================
+    private void loadFxml() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(LOCATION_TASK_BOX_FXML));
+            loader.setRoot(this);
+            loader.setController(this);
+            loader.load();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void initListenerAndFields(int idx, String desc, String timeAndDate, boolean isRecurring) {
+        ChangeListener<Boolean> checkboxListener = initCheckboxListener(idx);
+        EventHandler<ActionEvent> deleteListener = initDeleteEventHandler(idx);
+        initFxmlFields(idx, desc, timeAndDate, isRecurring, checkboxListener, deleteListener);
+    }
+
+    /**
+     * Initialises a listener for the checkbox.
+     * A change in the value of the checkbox determines which command will be
+     * sent to be executed by Controller.
+     * 
+     * @param idx
+     * @return listener
+     */
+    private ChangeListener<Boolean> initCheckboxListener(int idx) {
+        ChangeListener<Boolean> listener = new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> ov,
+                                Boolean oldVal,
+                                Boolean newVal) {
+                Controller controller = Controller.getInstance();
+                if (newVal) {
+                    controller.executeCommand(KEYWORD_COMPLETE +
+                                              STRING_ONE_SPACING + idx);
+                } else {
+                    controller.executeCommand(KEYWORD_INCOMPLETE +
+                                              STRING_ONE_SPACING + idx);
+                }
+            }
+        };
+        return listener;
+    }
+
+    /**
+     * Initialises an event handler for the delete button.
+     * Clicking on the button deletes the corresponding task.
+     * 
+     * @param idx
+     * @return event handler
+     */
+    private EventHandler<ActionEvent> initDeleteEventHandler(int idx) {
+        EventHandler<ActionEvent> deleteListener = new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                Controller controller = Controller.getInstance();
+                controller.executeCommand(KEYWORD_DELETE + STRING_ONE_SPACING + idx);
+            }
+        };
+        return deleteListener;
+    }
+
+    private void initFxmlFields(int idx,
+                                String desc,
+                                String timeAndDate,
+                                boolean isRecurring,
+                                ChangeListener<Boolean> checkboxListener, EventHandler<ActionEvent> deleteListener) {
+        if (isRecurring) {
+            this.recurringIcon.setText(ICON_RECURRING);
+        } else {
+            this.recurringIcon.setText(STRING_EMPTY);
+        }
+        this.checkbox.selectedProperty().addListener(checkboxListener);
+        this.index.setText(idx + STRING_EMPTY);
+        this.description.setText(desc);
+        this.timeAndDate.setText(String.format(FORMAT_DATE, timeAndDate));
+        this.delete.setText(ICON_DELETE);
+        this.delete.setOnAction(deleteListener);
+    }
+    
+    
+    // ================================================================
+    // Methods for handling highlighting of task boxes
+    // ================================================================
+    private void highlight(String color) {
+        this.setStyle(String.format(STYLE_HIGHLIGHT_TAG_FORMAT, color));
+    }
+
+    private Timeline generateHighlightTimeline() {
+        Timeline timeline = new Timeline();
+        // Add an intial key frame to delay the fading out of the highlight.
+        timeline.getKeyFrames()
+                .add(new KeyFrame(Duration.seconds(HIGHLIGHT_DISPLAY_SECONDS)));
+
+        // Generates the keyframes for the fade out effect.
+        for (int i = 100; i >= 0; i--) {
+            // Calculates the opacity to be used in the css of TaskBox.
+            float opacity = (float) i / 100;
+            String color = String.format(STYLE_HIGHLIGHT_COLOR_FORMAT, opacity);
+            timeline.getKeyFrames()
+                    .add(new KeyFrame(timeline.getTotalDuration() // Add to the end of the timeline.
+                                              .add(Duration.millis(TIMELINE_FRAME_DELAY_MILLISECONDS)),
+                                      new EventHandler<ActionEvent>() {
+                                          @Override
+                                          public void handle(ActionEvent event) {
+                                              highlight(color);
+                                          }
+                                      }));
+        }
+        return timeline;
+    }
+}
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\target\classes\view\TaskBox.java
+
+
+
+
+

@@ -1,0 +1,1371 @@
+//@author: a0122393l
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\java\Controller.java
+	 */
+
+    private String addTask(String input) {
+        if (input.isEmpty()) {
+            return MESSAGE_INVALID_COMMAND;
+        }
+        try {
+            parser.parse(input);
+        } catch (DateTimeException e) {
+            return String.format(MESSAGE_NON_CHRONO_DATES, e.getMessage());
+        }
+        Task task;
+        ArrayList<LocalDateTime> parsedDates = parser.getDates();
+        String parsedWords = parser.getParsedWords();
+        String notParsedWords = parser.getNotParsedWords();
+        ArrayList<Task> newTask = new ArrayList<Task>();
+
+        // Instantiate a new Task object
+        try {
+            newTask = taskCreator.create(input,
+                                         parsedDates,
+                                         parsedWords,
+                                         notParsedWords);
+            task = newTask.get(0);
+        } catch (IndexOutOfBoundsException e) {
+            return MESSAGE_INVALID_COMMAND;
+        }
+        allTasks.addAll(newTask);
+        updateStorageWithAllTasks();
+        return String.format(MESSAGE_ADD, task);
+    }
+
+    /**
+     *
+     * Deletes the task with the selected index. Replaces it with a new task by calling addTask
+     * with the extracted arguments.
+     *
+     */
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\java\Controller.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\java\Controller.java
+	 */
+
+    private String deleteTask(String input) {
+        boolean deleteAll = false;
+        Task removeTask;
+
+        if (input.toLowerCase().contains(STRING_ALL)) {
+            // Remove the "all" keyword so the try-catch can parse it properly
+            input = input.toLowerCase().replace(STRING_ALL, STRING_EMPTY).trim();
+            deleteAll = true;
+        }
+
+        try {
+            // ArrayList is 0-indexed, but Tasks are displayed to users as 1-indexed
+            int removalIndex = Integer.parseInt(input) - 1;
+            removeTask = displayedTasks.get(removalIndex);
+        } catch (IndexOutOfBoundsException | NumberFormatException e) {
+            return MESSAGE_TASK_INDEX_ERROR;
+        }
+
+        if (deleteAll && removeTask.getId() != null) {
+            deleteAllTasks(removeTask);
+            return String.format(MESSAGE_DELETE_ALL, removeTask.getDescription());
+        } else {
+            deleteIndividualTask(removeTask);
+            return String.format(MESSAGE_DELETE, removeTask);
+        }
+    }
+
+    private void deleteIndividualTask(Task taskToDelete) {
+        if (taskToDelete.isRecurring()) {
+            for (Task task : allTasks) {
+                if (task.getId() != null && task.getId().equals(taskToDelete.getId())) {
+                    task.addException(taskToDelete.getDate());
+                }
+            }
+        }
+        displayedTasks.remove(taskToDelete);
+        allTasks.remove(taskToDelete);
+        updateStorageWithAllTasks();
+        logger.log(Level.INFO, "displayedTasks after individual deletion: " + displayedTasks);
+    }
+
+    private void deleteAllTasks(Task taskToDelete) {
+        String recurringId = taskToDelete.getId();
+        ArrayList<Task> tasksToDelete = new ArrayList<Task>();
+
+        for (Task task : allTasks) {
+            if (task.getId() != null && task.getId().equals(recurringId)) {
+                tasksToDelete.add(task);
+            }
+        }
+        displayedTasks.removeAll(tasksToDelete);
+        allTasks.removeAll(tasksToDelete);
+        updateStorageWithAllTasks();
+        logger.log(Level.INFO, "displayedTasks after all deletion: " + displayedTasks);
+    }
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\java\Controller.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\java\Controller.java
+	 */
+
+    private void search(String input) {
+        if (input.equals(STRING_COMPLETED)) {
+        	updateDisplayWithCompleted();
+        } else {
+        	displayedTasks.clear();
+	        parser.parse(input);
+	        ArrayList<LocalDateTime> searchDate = parser.getDates();
+	        for (Task task : allTasks) {
+	            String taskInfo = task.getDescription().toLowerCase();
+	            if (taskInfo.contains(input.toLowerCase())) {
+	                displayedTasks.add(task);
+	            } else if (searchDate.size() > 0
+	                    && searchDate.get(0).toLocalDate().equals(task.getDate())) {
+	                displayedTasks.add(task);
+	            }
+	        }
+        }
+    }
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\java\Controller.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\java\Controller.java
+	 */
+
+    private String moveSaveFileDirectory(String input) {
+        if (storage.moveSaveFileDirectory(input)) {
+            return MESSAGE_SAVE_MOVE;
+        } else {
+            return MESSAGE_SAVE_MOVE_FAIL;
+        }
+    }
+    
+    private String setSaveFileDirectory(String input) {
+        if (storage.setSaveFileDirectory(input)) {
+            allTasks = storage.readFile();
+            return MESSAGE_SAVE_SET;
+        } else {
+            return MESSAGE_SAVE_SET_FAIL;
+        }
+    }
+    
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\java\Controller.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\java\Controller.java
+	 */
+
+    private void updateStorageWithAllTasks() {
+        storage.updateFiles(allTasks);
+    }
+
+    // ================================================================
+    // Testing methods
+    // ================================================================
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\java\Controller.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\java\CreateTask.java
+	 */
+
+/**
+ * This class process the infomation and creates the Task (Object/s) accordingly
+ * - creates a task if it is not recurring - creates multiple instances of the
+ * recurring task
+ * 
+ * CreateTask will determine if it is a recurring Task or not by finding the
+ * rate and frequency at which the Task is recurring at. - frequncy is
+ * represented by YEARLY, MONTHLY, WEEKLY, DAILY - rate is represented by a
+ * integer
+ * 
+ * CreateTask will then split the information up and find the start date and
+ * time, end date and time of recurring, and date exceptions should there be any
+ */
+public class CreateTask {
+    public static enum Type {
+        YEARLY, MONTHLY, WEEKLY, DAILY,
+    };
+
+    private static final String KEYWORD = "every";
+    private static final String EXCEPTWORD = "except";
+    private static final String STARTWORD = "from";
+    private static final String[] IGNOREWORD = { " day from", " week from",
+            " month from", " year from", "everyday from" };
+    private static final String[] IGNOREWORD2 = { "monday from",
+            "tuesday from", "wednesday from", "thursday from", "friday from",
+            "saturday from", "sunday from", "mon from", "tue from", "wed from",
+            "thu from", "fri from", "sat from", "sun from" };
+    private static final String[] ENDWORD = { "until", "till" };
+    private static final String[] ENDWORD2 = { " to ", " by " };
+    private static final String[] MAINWORD = { "daily", "everyday", "monthly",
+            "weekly", "yearly" };
+    private static final String[] YEARWORD = { "yearly", "year" };
+    private static final String[] MONTHWORD = { "monthly", "month", "jan",
+            "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct",
+            "nov", "dec" };
+    private static final String[] WEEKWORD = { "weekly", "week", "mon", "tue",
+            "wed", "thu", "fri", "sat", "sun" };
+    private static final String[] DAYWORD = { "day", "daily" };
+    private static final int YEAR_LIMIT = 10;
+    private static final int MONTH_LIMIT = 3;
+    private static final int LENGHT_OF_KEYWORD = 6;
+
+    private static CreateTask taskCreator;
+    private DateParser dateParser;
+    private ArrayList<Task> tempList;
+    private LocalDateTime endDateTime;
+    private LocalDateTime limit;
+    private ArrayList<String> removedWords;
+    private ArrayList<LocalDate> exceptionDates;
+    private String endDateWords;
+    private int recurRate;
+    private String exceptionString;
+    private String rawInfo;
+
+    // ================================================================
+    // get instance of createTask
+    // ================================================================
+    public static CreateTask getInstance() {
+        if (taskCreator == null) {
+            taskCreator = new CreateTask();
+        }
+        return taskCreator;
+    }
+
+    // ================================================================
+    // passes the information to various methods for processing
+    // ================================================================
+    public ArrayList<Task> create(String input,
+            ArrayList<LocalDateTime> parsedDates, String parsedWords,
+            String nonParsedWords) {
+        resetField();
+        rawInfo = input;
+
+        input = removeTime(input);
+
+        Type type = checkFrequency(input);
+        Boolean hasIgnoreWords = false;
+        Boolean hasIgnoreWords2 = false;
+
+        ArrayList<LocalDateTime> recurDate = new ArrayList<LocalDateTime>();
+        String recurId;
+        Task task;
+        recurId = UUID.randomUUID().toString();
+
+        input = findExceptionDates(input);
+        hasIgnoreWords = searchIgnoreWord(input, IGNOREWORD);
+        hasIgnoreWords2 = searchIgnoreWord(input, IGNOREWORD2);
+
+        if (type != null) {
+            recurDate = new ArrayList<LocalDateTime>(findNeededDates(type,
+                    input, hasIgnoreWords2));
+
+            if (parsedDates.size() > 1
+                    && parsedDates.get(0).toLocalDate()
+                            .equals(parsedDates.get(1).toLocalDate())) {
+                recurDate.add(LocalDateTime.of(recurDate.get(0).toLocalDate(),
+                        parsedDates.get(1).toLocalTime()));
+            }
+
+            if (!parsedDates.isEmpty()
+                    && !hasIgnoreWords
+                    && parsedDates.size() > 1
+                    && !recurDate.get(0).toLocalDate().isEqual(LocalDate.now())
+                    && recurDate.get(0).toLocalDate()
+                            .isBefore(parsedDates.get(0).toLocalDate())
+                    && !(hasIgnoreWords2 && recurDate
+                            .get(0)
+                            .toLocalDate()
+                            .isEqual(
+                                    parsedDates.get(0).toLocalDate()
+                                            .minusWeeks(1)))) {
+                recurDate.set(0, parsedDates.get(0));
+            }
+
+            if (!parsedDates.isEmpty()
+                    && parsedDates.get(0).toLocalTime().getSecond() != recurDate
+                            .get(0).toLocalTime().getSecond()) {
+                LocalDateTime timeFix = LocalDateTime.of(recurDate.get(0)
+                        .toLocalDate(), parsedDates.get(0).toLocalTime());
+                recurDate.set(0, timeFix);
+            }
+
+            getEndDateTime(recurDate);
+
+            if (!removedWords.isEmpty()) {
+                for (String remove : removedWords) {
+                    input = input.replace(remove, "");
+                    nonParsedWords = nonParsedWords.replace(remove, "");
+                }
+            }
+
+            nonParsedWords = findCommonWord(input, nonParsedWords);
+
+            createRecurring(type, input, parsedWords, nonParsedWords,
+                    recurDate, recurId, rawInfo);
+        } else {
+            task = new Task(input, parsedDates, parsedWords, nonParsedWords);
+            tempList.add(task);
+        }
+
+        return tempList;
+    }
+
+    // ================================================================
+    // remove the time from input
+    // ================================================================
+    private String removeTime(String input) {
+        String[] split = input.split(" ");
+        String output = "";
+        for (String subString : split) {
+            if (subString.contains("pm")) {
+                subString = subString.replaceAll(subString, "");
+            } else {
+                output += " " + subString;
+            }
+            output = output.trim();
+        }
+        return output;
+    }
+
+    // ================================================================
+    // check if input consist any of the word in list
+    // ================================================================
+    private Boolean searchIgnoreWord(String input, String[] list) {
+        for (String string : list) {
+            if (input.contains(string)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // ================================================================
+    // compare the 2 strings and returns the first similar substring
+    // ================================================================
+    private String findCommonWord(String input, String nonParsedWords) {
+        String result = null;
+        int stringLength = Math.min(input.length(), nonParsedWords.length());
+
+        for (int i = 0; i <= stringLength; i++) {
+            if (input.substring(0, i).equals(nonParsedWords.substring(0, i))) {
+                result = input.substring(0, i);
+            } else {
+                break;
+            }
+        }
+        return result;
+    }
+
+    // ================================================================
+    // resets all the variables in CreateTask
+    // ================================================================
+    private void resetField() {
+        endDateTime = null;
+        dateParser = DateParser.getInstance();
+        recurRate = 1;
+        tempList = new ArrayList<Task>();
+        removedWords = new ArrayList<String>();
+        exceptionDates = new ArrayList<LocalDate>();
+        endDateWords = "";
+        exceptionString = "";
+        limit = null;
+        rawInfo = "";
+    }
+
+    // ================================================================
+    // creates the instances of the recurring task
+    // ================================================================
+    private void createRecurring(Type type, String input, String parsedWords,
+            String nonParsedWords, ArrayList<LocalDateTime> recurDate,
+            String recurId, String rawInfo) {
+        Task task;
+        LocalDateTime nextDate = null;
+        boolean hasException = false;
+
+        while (!recurDate.get(0).toLocalDate()
+                .isAfter(endDateTime.toLocalDate())) {
+            hasException = checkForException(recurDate.get(0));
+            if (!hasException) {
+                task = new Task(input, recurDate, parsedWords, nonParsedWords);
+                task.setId(recurId);
+                task.setRawInfo(rawInfo);
+                task.setException(exceptionDates);
+                tempList.add(task);
+            }
+            hasException = false;
+
+            switch (type) {
+            case DAILY:
+                nextDate = recurDate.get(0).plusDays(recurRate);
+                break;
+            case WEEKLY:
+                nextDate = recurDate.get(0).plusWeeks(recurRate);
+                break;
+            case MONTHLY:
+                nextDate = recurDate.get(0).plusMonths(recurRate);
+                break;
+            case YEARLY:
+                nextDate = recurDate.get(0).plusYears(recurRate);
+                break;
+            default:
+                break;
+            }
+            if (!hasException) {
+                recurDate.set(0, nextDate);
+            }
+        }
+
+    }
+
+    // ================================================================
+    // check if nextDate is and exception date
+    // ================================================================
+    private Boolean checkForException(LocalDateTime nextDate) {
+        for (LocalDate date : exceptionDates) {
+            if (date.equals(nextDate.toLocalDate())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // ================================================================
+    // find the start date time, end date time and the limit
+    // ================================================================
+    private ArrayList<LocalDateTime> findNeededDates(Type type, String input,
+            Boolean hasIgnoreWords2) {
+        ArrayList<LocalDateTime> result = new ArrayList<LocalDateTime>();
+        ArrayList<LocalDateTime> tempResult = new ArrayList<LocalDateTime>();
+        LocalDate tempDate;
+        Boolean hasEndWord = false;
+
+        // checks for "to" or "by" after "from"
+        for (String check : ENDWORD2) {
+            if (input.toLowerCase().contains(STARTWORD)) {
+                String endCondition = input.substring(input.toLowerCase()
+                        .indexOf(STARTWORD), input.length());
+                dateParser.parse(endCondition);
+                if (dateParser.getDates().size() > 1
+                        && !dateParser
+                                .getDates()
+                                .get(0)
+                                .toLocalDate()
+                                .isEqual(
+                                        dateParser.getDates().get(1)
+                                                .toLocalDate())) {
+                    if (endCondition.toLowerCase().contains(check)) {
+                        endCondition = endCondition.substring(
+                                endCondition.indexOf(check),
+                                endCondition.length());
+                        input = findEndDate(input, endCondition);
+                        hasEndWord = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        // checks for "till" or "until"
+        if (!hasEndWord) {
+            for (String check : ENDWORD) {
+                if (input.toLowerCase().contains(check)) {
+                    String endCondition = input.substring(input.indexOf(check),
+                            input.length());
+                    input = findEndDate(input, endCondition);
+                    break;
+                }
+            }
+        }
+
+        dateParser.parse(rawInfo);
+
+        // search for the desired start date in the string based
+        if (dateParser.getDates().size() > 1
+                && input.toLowerCase().contains(STARTWORD)) {
+            String subString = input.substring(input.indexOf(STARTWORD),
+                    input.length());
+            removedWords.add(dateParser.getParsedWords());
+            tempResult.addAll(dateParser.getDates());
+
+            dateParser.parse(subString);
+            if (dateParser.getDates().isEmpty()) {
+                tempDate = LocalDate.now();
+            } else {
+                tempDate = dateParser.getDates().get(0).toLocalDate();
+            }
+            for (LocalDateTime time : tempResult) {
+                result.add(LocalDateTime.of(tempDate, time.toLocalTime()));
+            }
+            removedWords.add(dateParser.getParsedWords());
+        } else if (hasIgnoreWords2) {
+            result = partialParse(input, result);
+            removedWords.add(dateParser.getParsedWords());
+        } else if (input.toLowerCase().contains(STARTWORD)) {
+            String subString = input.substring(input.indexOf(STARTWORD),
+                    input.length());
+            result = partialParse(subString, result);
+            removedWords.add(dateParser.getParsedWords());
+        } else {
+            result = partialParse(input, result);
+            removedWords.add(dateParser.getParsedWords());
+        }
+
+        // ensures that endDateTime is not the same as StartDateTime
+        if (endDateTime != null
+                && result.get(0).toLocalDate()
+                        .isEqual(endDateTime.toLocalDate())) {
+            result.add(endDateTime);
+            endDateTime = null;
+        }
+
+        if (result.size() > 1
+                && (result.get(0).getSecond() == result.get(1).getSecond() || result
+                        .get(1).equals(LocalDateTime.now()))) {
+            result.remove(1);
+        }
+
+        if (type.equals(Type.YEARLY)) {
+            limit = result.get(0).plusYears(YEAR_LIMIT);
+        } else if (type.equals(Type.MONTHLY)) {
+            limit = result.get(0).plusYears(MONTH_LIMIT);
+        } else {
+            limit = result.get(0).plusYears(1);
+        }
+        return result;
+    }
+
+    // ================================================================
+    // adds current date time if no date is avaible from parsing
+    // ================================================================
+    private ArrayList<LocalDateTime> partialParse(String input,
+            ArrayList<LocalDateTime> result) {
+        dateParser.parse(input);
+        if (dateParser.getDates().isEmpty()) {
+            result.add(LocalDateTime.now());
+        } else {
+            result.addAll(dateParser.getDates());
+        }
+        return result;
+    }
+
+    // ================================================================
+    // find and remove exception dates from the recurring task
+    // ================================================================
+    private String findExceptionDates(String input) {
+        if (input.toLowerCase().contains(EXCEPTWORD)) {
+            exceptionString = input.substring(
+                    input.toLowerCase().indexOf(EXCEPTWORD), input.length());
+            exceptionString.replace(EXCEPTWORD, "");
+
+            String[] split = exceptionString.split(",");
+            for (String string : split) {
+                try {
+                    dateParser.parse(string);
+                    exceptionDates.add(dateParser.getDates().get(0)
+                            .toLocalDate());
+                } catch (NullPointerException e) {
+                }
+            }
+        }
+
+        if (!exceptionString.equals(null)) {
+            rawInfo = rawInfo.replace(exceptionString, "").trim();
+            input = input.replace(exceptionString, "");
+        }
+        return input;
+    }
+
+    // ================================================================
+    // determines find the end date and remove from input
+    // ================================================================
+    private String findEndDate(String input, String endCondition) {
+        dateParser.parse(endCondition);
+        endDateWords = dateParser.getParsedWords();
+        if (!dateParser.getDates().isEmpty()) {
+            endDateTime = dateParser.getDates().get(0);
+        }
+        input = input.replaceAll(endDateWords, "");
+        removedWords.add(endDateWords);
+        return input;
+    }
+
+    // ================================================================
+    // determine when to stop recurring of task
+    // ================================================================
+    private void getEndDateTime(ArrayList<LocalDateTime> recurDate) {
+        if (endDateTime == null) {
+            if (recurDate.size() > 1
+                    && !recurDate.get(recurDate.size() - 1).toLocalDate()
+                            .isEqual(recurDate.get(0).toLocalDate())) {
+                endDateTime = recurDate.get(recurDate.size() - 1);
+            } else {
+                endDateTime = limit;
+            }
+        }
+    }
+
+    // ================================================================
+    // checks if the input contains words to indicate recurring tasks
+    // ================================================================
+    private Type checkFrequency(String input) {
+        for (String check : MAINWORD) {
+            if (input.toLowerCase().contains(check)) {
+                switch (check) {
+                case "yearly":
+                    removedWords.add(check);
+                    return Type.YEARLY;
+                case "monthly":
+                    removedWords.add(check);
+                    return Type.MONTHLY;
+                case "weekly":
+                    removedWords.add(check);
+                    return Type.WEEKLY;
+                case "daily":
+                    removedWords.add(check);
+                    return Type.DAILY;
+                case "everyday":
+                    removedWords.add(check);
+                    return Type.DAILY;
+                }
+            }
+        }
+
+        if (input.toLowerCase().contains(KEYWORD)) {
+            String check = input.substring(input.lastIndexOf(KEYWORD)
+                    + LENGHT_OF_KEYWORD, input.length());
+            String[] split = check.split(" ");
+            try {
+                recurRate = Integer.parseInt(split[0]);
+            } catch (NumberFormatException e) {
+                recurRate = 1;
+            }
+            if (findFrequency(split, YEARWORD)) {
+                return Type.YEARLY;
+            } else if (findFrequency(split, MONTHWORD)) {
+                return Type.MONTHLY;
+            } else if (findFrequency(split, WEEKWORD)) {
+                return Type.WEEKLY;
+            } else if (findFrequency(split, DAYWORD)) {
+                return Type.DAILY;
+            }
+        }
+        return null;
+    }
+
+    // ================================================================
+    // checks if the splited string contains any frequency string
+    // ================================================================
+    private Boolean findFrequency(String[] split, String[] frequency) {
+        for (String find : frequency) {
+            if (split[0].toLowerCase().contains(find)
+                    || (split.length > 1 && split[1].toLowerCase().contains(
+                            find))) {
+                if (split.length > 1 && split[1].toLowerCase().contains(find)) {
+                    removedWords.add(split[0] + " " + split[1]);
+                    removedWords.add(KEYWORD + " " + split[0]);
+                } else {
+                    removedWords.add(KEYWORD + " " + split[0]);
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // ================================================================
+    // Utility methods for testing purpose
+    // ================================================================
+    private String getRecurRate() {
+        return Integer.toString(recurRate);
+    }
+
+    // test getting the correct rate and frequency
+    public static String testFrequency(String input) {
+        String output = "";
+        getInstance().resetField();
+        Type frequency = getInstance().checkFrequency(input);
+        try {
+            switch (frequency) {
+            case DAILY:
+                output = getInstance().getRecurRate() + " daily";
+                break;
+            case WEEKLY:
+                output = getInstance().getRecurRate() + " weekly";
+                break;
+            case MONTHLY:
+                output = getInstance().getRecurRate() + " monthly";
+                break;
+            case YEARLY:
+                output = getInstance().getRecurRate() + " yearly";
+                break;
+            default:
+                output = getInstance().getRecurRate() + "";
+                break;
+            }
+        } catch (NullPointerException e) {
+            return output;
+        }
+        return output;
+    }
+
+    // test getting the dates for exception
+    public static String testException(String input) {
+        getInstance().resetField();
+        getInstance().findExceptionDates(input);
+        String output = "";
+        for (LocalDate date : getInstance().exceptionDates) {
+            output += date.toString() + " ";
+        }
+        return output;
+    }
+
+    // test extracting the needed dates
+    public static ArrayList<String> testNeededDates(String input) {
+        getInstance().resetField();
+        Type frequency = getInstance().checkFrequency(input);
+        ArrayList<String> output = new ArrayList<String>();
+        output.add(getInstance().findNeededDates(frequency, input, false)
+                .get(0).toLocalDate().toString());
+        try {
+            output.add(getInstance().endDateTime.toLocalDate().toString());
+        } catch (NullPointerException e) {
+            output.add("");
+        }
+        output.add(getInstance().limit.toLocalDate().toString());
+        return output;
+    }
+}
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\java\CreateTask.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\java\Storage.java
+	 */
+
+/**
+* This class creates the necessary files needed to save the data
+*       - creates a settings file where the location of the savefile is stored
+*       - creates a savefile where the data is saved
+*       - creates a backup where the data is also saved
+* 
+* This class is able to handle the following function
+*       - writing of data from savefile
+*       - reading of data from savefile
+*       - setting another file as save file
+*       - moving savefile to another directory
+* 
+* Should the reading of the savefile fail, due to corruption or missing file,
+* Storage.java tries to read the backup and tries to restore the data
+*/
+public class Storage {
+    private static final Logger logger = Logger.getLogger("VetoStorage");
+
+    private static final String DEFAULT_SAVE_FILE = "savefile.txt";
+    private static final String SETTINGS_FILE_NAME = "settings.txt";
+    private static final String BACKUP_FILE_NAME = "backup.txt";
+
+    private static Storage storage;
+    private static File settingsFile;
+    private File saveFile;
+    private File backupFile;
+    private String saveFileName;
+    private BufferedReader reader;
+    private PrintWriter writer;
+    private Gson gson;
+
+    // ================================================================
+    // get instance of Storage
+    // ================================================================
+    public static Storage getInstance() {
+        logger.setLevel(Level.OFF);
+        if (storage == null || !settingsFile.exists()) {
+            storage = new Storage();
+        }
+        return storage;
+    }
+
+    // ================================================================
+    // constructor
+    // ================================================================
+    private Storage() {
+        gson = new Gson();
+        settingsFile = new File(SETTINGS_FILE_NAME);
+        createIfMissingFile(settingsFile);
+        saveFileName = getSaveFileNameFromSettingsFile(settingsFile);
+        updateSettingsFile(saveFileName);
+        saveFile = new File(saveFileName);
+        createIfMissingFile(saveFile);
+        backupFile = new File(BACKUP_FILE_NAME);
+        createIfMissingFile(backupFile);
+        backupFile.setWritable(false);
+        logger.log(Level.INFO, "Storage Initialised");
+    }
+
+    // ================================================================
+    // update settings file on the changes of save file directory
+    // ================================================================
+    private void updateSettingsFile(String fileName) {
+        try {
+            writer = new PrintWriter(settingsFile, "UTF-8");
+            writer.println(fileName);
+            writer.close();
+        } catch (FileNotFoundException | UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // ================================================================
+    // get the directory of the save file from settings file
+    // ================================================================
+    private String getSaveFileNameFromSettingsFile(File fileName) {
+        String text = "";
+        initBufferedReader(fileName);
+        try {
+            if ((text = reader.readLine()) == null) {
+                text = DEFAULT_SAVE_FILE;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        closeBufferedReader();
+        return text;
+    }
+
+    // ================================================================
+    // create the file if not found
+    // ================================================================
+    private void createIfMissingFile(File fileName) {
+        try {
+            if (!fileName.exists()) {
+                fileName.createNewFile();
+                logger.log(Level.INFO, fileName.toString()
+                        + " have been created");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // ================================================================
+    // Update necessary files
+    // ================================================================
+    public Boolean updateFiles(ArrayList<Task> input) {
+        Boolean hasUpdatedSaveFile = false;
+        Boolean hasUpdatedBackup = false;
+
+        hasUpdatedSaveFile = writeTasksToFile(saveFile, input);
+        backupFile.setWritable(true);
+        hasUpdatedBackup = writeTasksToFile(backupFile, input);
+        backupFile.setWritable(false);
+
+        if (hasUpdatedSaveFile && hasUpdatedBackup) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    // ================================================================
+    // writes all task objects in the list to the save file
+    // ================================================================
+    private Boolean writeTasksToFile(File fileName, ArrayList<Task> input) {
+        try {
+            writer = new PrintWriter(fileName, "UTF-8");
+            for (Task task : input) {
+                writer.println(taskToJson(task));
+            }
+        } catch (FileNotFoundException | UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return false;
+        }
+        writer.close();
+        return true;
+    }
+
+    // ================================================================
+    // converts task object to string
+    // ================================================================
+    private Object taskToJson(Task task) {
+        return gson.toJson(task);
+    }
+
+    // ================================================================
+    // select file to read
+    // ================================================================
+    public ArrayList<Task> readFile() {
+        ArrayList<Task> storage;
+        storage = readSavedTasks(saveFile);
+        if (storage == null || storage.isEmpty()) {
+            storage = readSavedTasks(backupFile);
+            if (storage == null || storage.isEmpty()) {
+                storage = new ArrayList<Task>();
+                logger.log(Level.INFO, "File corrupted, backup failed");
+            } else if (!storage.isEmpty()) {
+                logger.log(Level.INFO,
+                        "File corrupted, restored data from backup file");
+            }
+        }
+        return storage;
+    }
+
+    // ================================================================
+    // reads tasks in the file
+    // ================================================================
+    private ArrayList<Task> readSavedTasks(File saveFile) {
+        ArrayList<Task> storageData;
+        String text = "";
+        storageData = new ArrayList<Task>();
+
+        try {
+            if (!initBufferedReader(saveFile)) {
+                return storageData;
+            }
+            while ((text = reader.readLine()) != null) {
+                Task task = gson.fromJson(text, Task.class);
+                storageData.add(task);
+            }
+        } catch (IOException | JsonSyntaxException e) {
+            return null;
+        }
+        closeBufferedReader();
+        return storageData;
+    }
+
+    // ================================================================
+    // close buffered reader
+    // ================================================================
+    private void closeBufferedReader() {
+        try {
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // ================================================================
+    // initialize buffered reader
+    // ================================================================
+    private Boolean initBufferedReader(File file) {
+        try {
+            reader = new BufferedReader(new FileReader(file));
+        } catch (FileNotFoundException e) {
+            return false;
+        }
+        return true;
+    }
+
+    // ================================================================
+    // move the save file
+    // ================================================================
+    public Boolean moveSaveFileDirectory(String input) {
+        saveFileName = input;
+        if (saveFile.renameTo(new File(saveFileName))) {
+            updateSettingsFile(saveFileName);
+            saveFile = new File(saveFileName);
+            createIfMissingFile(saveFile);
+            logger.log(Level.INFO,
+                    "File directory changed to " + saveFile.toString());
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    // ================================================================
+    // set a specific file as the save file
+    // ================================================================
+    public Boolean setSaveFileDirectory(String input) {
+        saveFileName = input;
+        File setFile = new File(saveFileName);
+        if (setFile.equals(saveFile)) {
+            return false;
+        } else if (setFile.exists()) {
+            updateSettingsFile(saveFileName);
+            saveFile = setFile;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    // ================================================================
+    // get the name of save file
+    // ================================================================
+    public String getSaveFileName() {
+        return saveFileName;
+    }
+}
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\java\Storage.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\java\Task.java
+	 */
+
+    public Task(String input, ArrayList<LocalDateTime> parsedDates,
+                String parsedWords, String notParsedWords) {
+        markAsIncomplete();
+        rawInfo = input;
+        type = determineType(parsedDates);
+        initDateAndTime(type, parsedDates);
+        description = extractDescription(notParsedWords);
+        while (description.substring(description.length() - 1).equals(STRING_EMPTY_SPACE)) {
+            description = description.trim();
+        }
+    }
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\java\Task.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\java\Task.java
+	 */
+
+    // ================================================================
+    // Public setters
+    // ================================================================
+    public void setId(String input) {
+        recurId = input;
+    }
+    
+    public void setRawInfo(String input) {
+        rawInfo = input;
+    }
+
+    public void setDescription(String input) {
+        description = input;
+    }
+
+    public void setTime(LocalTime inputStartTime, LocalTime inputEndTime) {
+        if (inputStartTime == null && inputEndTime == null) {
+            startTime = null;
+            endTime = null;
+        } else if (inputStartTime.isBefore(inputEndTime)) {
+            setType(Type.TIMED);
+            startTime = inputStartTime;
+            endTime = inputEndTime;
+        }
+    }
+
+    public void markAsCompleted() {
+        isCompleted = true;
+    }
+
+    public void markAsIncomplete() {
+        isCompleted = false;
+    }
+
+    public void setException(ArrayList<LocalDate> dates) {
+        exceptionDates = dates;
+    }
+    
+    public void addException(LocalDate date){
+        exceptionDates.add(date);
+    }
+
+    public ArrayList<LocalDate> getExceptionDates() {
+        return exceptionDates;
+    }
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\java\Task.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\tests\java\CreateTaskTest.java
+	 */
+
+public class CreateTaskTest {
+    DateParser dateParser = DateParser.getInstance();
+    String[] frequencyStrings = { "everyday", "every 3 day", "daily",
+            "nothing", "monthly", "every 2 weeks", "yearly", "weekly",
+            "every 2 year", "every 3 month" };
+    String[] exceptionStrings = { "except 13 apr", "except 14 apr",
+            "except 24 may", "except 30 jun, 23 jun", "except 32 jan" };
+
+    @Test
+    // test getting the right rate and frequency
+    public void frequencyTest() {
+        assertEquals("1 daily", CreateTask.testFrequency(frequencyStrings[0]));
+        assertEquals("3 daily", CreateTask.testFrequency(frequencyStrings[1]));
+        assertEquals("1 daily", CreateTask.testFrequency(frequencyStrings[2]));
+        assertEquals("", CreateTask.testFrequency(frequencyStrings[3]));
+        assertEquals("1 monthly", CreateTask.testFrequency(frequencyStrings[4]));
+        assertEquals("2 weekly", CreateTask.testFrequency(frequencyStrings[5]));
+        assertEquals("1 yearly", CreateTask.testFrequency(frequencyStrings[6]));
+        assertEquals("1 weekly", CreateTask.testFrequency(frequencyStrings[7]));
+        assertEquals("2 yearly", CreateTask.testFrequency(frequencyStrings[8]));
+        assertEquals("3 monthly", CreateTask.testFrequency(frequencyStrings[9]));
+    }
+
+    @Test
+    // test getting the exception dates
+    public void exceptionTest() {
+        assertEquals("2015-04-13 ",
+                CreateTask.testException(exceptionStrings[0]));
+        assertEquals("2015-04-14 ",
+                CreateTask.testException(exceptionStrings[1]));
+        assertEquals("2015-05-24 ",
+                CreateTask.testException(exceptionStrings[2]));
+        assertEquals("2015-06-30 2015-06-23 ",
+                CreateTask.testException(exceptionStrings[3]));
+        assertEquals("2015-01-01 ",
+                CreateTask.testException(exceptionStrings[4]));
+    }
+
+    @Test
+    // test getting the exception dates
+    public void datesTesting() {
+        String input ="";
+        ArrayList<String> result;
+        
+        input = "add watch anime every day 2pm to 5pm from 10 may until 30 jun";
+        result = CreateTask.testNeededDates(input);
+        assertEquals("2015-05-10", result.get(0));
+        assertEquals("2015-06-30", result.get(1));
+        assertEquals("2016-05-10", result.get(2));
+        
+
+        input = "add go overseas every year from 30 may";
+        result = CreateTask.testNeededDates(input);
+        assertEquals("2015-05-30", result.get(0));
+        assertEquals("", result.get(1));
+        assertEquals("2025-05-30", result.get(2));
+        
+
+        input = "add attend boring meeting every month";
+        result = CreateTask.testNeededDates(input);
+        assertEquals(LocalDate.now().toString(), result.get(0));
+        assertEquals("", result.get(1));
+        assertEquals("2018-04-13", result.get(2));
+    }
+}
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\tests\java\CreateTaskTest.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\tests\java\StorageTest.java
+	 */
+
+public class StorageTest {
+    String defaultDirectory = "savefile.txt";
+    String newDirectory = "saveRenamedFile.txt";
+    String newDirectory2 = "memory.txt";
+    String newDirectory3 = "blank.txt";
+    String SettingsDirectory = "settings.txt";
+    String backupDirectory = "backup.txt";
+    File defaultFile = new File(defaultDirectory);
+    File backupFile = new File(backupDirectory);
+    File testFile = new File(newDirectory);
+    File testFile2 = new File(newDirectory2);
+    File testFile3 = new File(newDirectory3);
+    File settingsFile = new File(SettingsDirectory);
+    PrintWriter writer;
+    BufferedReader reader;
+
+    @Test
+    // test initializing settings file and moving save file
+    public void testSettings() {
+        // delete any existing file before testing
+        defaultFile.delete();
+        settingsFile.delete();
+
+        // creating the settings file for the first time
+        Storage test = Storage.getInstance();
+        String testData = "Data Testing";
+        String text = "";
+
+        // test moving save file
+        assertEquals(true, defaultFile.exists());
+        assertEquals(false, testFile.exists());
+        assertEquals(true, test.moveSaveFileDirectory(newDirectory));
+        assertEquals(true, testFile.exists());
+        assertEquals(false, defaultFile.exists());
+
+        // test adding data and moving save file
+        try {
+            writer = new PrintWriter(testFile, "UTF-8");
+            writer.println(testData);
+            writer.close();
+        } catch (FileNotFoundException | UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        assertEquals(false, testFile2.exists());
+        assertEquals(true, test.moveSaveFileDirectory(newDirectory2));
+        assertEquals(true, testFile2.exists());
+        assertEquals(false, testFile.exists());
+        try {
+            reader = new BufferedReader(new FileReader(testFile2));
+            text = reader.readLine();
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        assertEquals(testData, text);
+
+        // test setting another file as save file
+        assertEquals(false, test.setSaveFileDirectory(newDirectory3));
+        try {
+            testFile3.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        assertEquals(true, test.setSaveFileDirectory(newDirectory3));
+        assertEquals("blank.txt", test.getSaveFileName());
+    }
+
+    @Test
+    // Test the write and read the task from the file
+    public void testWriteAndRead() {
+        // data for testing
+        String[] data = { "attend meeting later at 1200-1400 on 20 Feb",
+                "finish homework by 20 Feb", "meet boss later today" };
+        ArrayList<Task> tempData = new ArrayList<Task>();
+        ArrayList<Task> readData = new ArrayList<Task>();
+        createArrayListOfTask(data, tempData);
+
+        Storage test = Storage.getInstance();
+        // write data to storage
+        assertEquals(true, test.updateFiles(tempData));
+        // read data from storage
+        readData = test.readFile();
+        compareData(tempData, readData);
+    }
+
+    @Test
+    // Test backup file
+    public void testBackup() {
+        // data for testing
+        String[] data = { "attend meeting later at 1200-1400 on 20 Feb",
+                "finish homework by 20 Feb", "meet boss later today" };
+        ArrayList<Task> tempData = new ArrayList<Task>();
+        ArrayList<Task> readData = new ArrayList<Task>();
+        createArrayListOfTask(data, tempData);
+
+        Storage test = Storage.getInstance();
+        assertEquals(true, test.updateFiles(tempData));
+
+        // corrupting data
+        try {
+            writer = new PrintWriter(defaultFile, "UTF-8");
+            writer.println("corrupting the desired save file format");
+            writer.close();
+        } catch (FileNotFoundException | UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        readData = test.readFile();
+        compareData(tempData, readData);
+
+        // if save file is not found
+        defaultFile.delete();
+        readData = test.readFile();
+        compareData(tempData, readData);
+
+        // if backup is corrupted too, all data will be lost
+        try {
+            backupFile.setWritable(true);
+            writer = new PrintWriter(backupFile, "UTF-8");
+            writer.println("corrupting the desired save file format");
+            writer.close();
+            backupFile.setWritable(false);
+        } catch (FileNotFoundException | UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        readData = test.readFile();
+        assertEquals(true, readData.isEmpty());
+
+        // if backup file is not found
+        readData = test.readFile();
+        assertEquals(true, readData.isEmpty());
+    }
+
+    // method to set-up the ArrayList
+    private void createArrayListOfTask(String[] data, ArrayList<Task> tempData) {
+        DateParser parser = DateParser.getInstance();
+        for (String string : data) {
+            parser.parse(string);
+            ArrayList<LocalDateTime> parsedDates = parser.getDates();
+            String parsedWords = parser.getParsedWords();
+            String nonParsedWords = parser.getNotParsedWords();
+            tempData.add(new Task(string, parsedDates, parsedWords,
+                    nonParsedWords));
+        }
+    }
+
+    // method to compare and check all variables of tasks
+    private void compareData(ArrayList<Task> tempData, ArrayList<Task> readData) {
+        for (int i = 0; i < readData.size(); i++) {
+            assertEquals(tempData.get(i).isCompleted(), readData.get(i)
+                    .isCompleted());
+            assertEquals(tempData.get(i).getDescription(), readData.get(i)
+                    .getDescription());
+            assertEquals(tempData.get(i).isCompleted(), readData.get(i)
+                    .isCompleted());
+            assertEquals(tempData.get(i).getDate(), readData.get(i).getDate());
+            assertEquals(tempData.get(i).getStartTime(), readData.get(i)
+                    .getStartTime());
+            assertEquals(tempData.get(i).getEndTime(), readData.get(i)
+                    .getEndTime());
+        }
+    }
+
+    @After
+    // delete all files to ensure consistant testing
+    public void deleteAllFile() {
+        testFile.delete();
+        testFile2.delete();
+        testFile3.delete();
+        defaultFile.delete();
+        settingsFile.delete();
+        backupFile.delete();
+    }
+}
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\tests\java\StorageTest.java
+
+
+
+
+

@@ -1,0 +1,1226 @@
+//@author: a0122081x
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\java\Controller.java
+	 */
+
+public class Controller {
+	
+    // ================================================================
+    // Fields
+    // ================================================================
+    // Singleton
+    private static Controller controller;
+
+    private static Logger logger;
+
+    private Storage storage;
+
+    private ArrayList<Task> allTasks;
+    private ObservableList<Task> displayedTasks = FXCollections.observableArrayList();
+    
+    private History previousStates;
+
+    private String searchArgument;
+    private DateParser parser;
+    private CreateTask taskCreator;
+
+    private boolean switchDisplayToSearch = false;
+    
+    private UserDefinedSort userDefinedSort;
+
+    private Stage stage;
+
+    // For testing purposes ONLY, un-comment the following line. Comment it for deployment.
+//    private DisplayControllerStub displayController = DisplayControllerStub.getInstance();
+
+    // For deployment purposes, un-comment the following line. Comment it for JUnit testing.
+    private DisplayController displayController = DisplayController.getInstance();
+
+    // ================================================================
+    // Constants
+    // ================================================================
+    private static final String MESSAGE_WELCOME = "Welcome to Veto! Here is an overview of the week ahead.";
+    private static final String MESSAGE_DISPLAY_INCOMPLETE = "Displaying all incomplete tasks.";
+    private static final String MESSAGE_DISPLAY_COMPLETE = "Displaying all completed tasks.";
+    private static final String MESSAGE_ADD = "Task has been successfully added: %s";
+    private static final String MESSAGE_DELETE = "Task has been successfully deleted: %s";
+    private static final String MESSAGE_DELETE_ALL = "All recurring task has been successfully deleted: %s";
+    private static final String MESSAGE_EDIT = "Task has been successfully edited: %s";
+    private static final String MESSAGE_EDIT_ALL = "All recurring task has been successfully edited: %s";
+    private static final String MESSAGE_COMPLETE = "\"%s\" completed.";
+    private static final String MESSAGE_COMPLETE_FAILED = "\"%s\" already completed.";
+    private static final String MESSAGE_INCOMPLETE = "\"%s\" marked as incomplete.";
+    private static final String MESSAGE_UNDO = "Previous command has been undone: \"%s\"";
+    private static final String MESSAGE_INVALID_COMMAND = "Invalid command.";
+    private static final String MESSAGE_NO_UNDO = "Already at oldest change, unable to undo.";
+    private static final String MESSAGE_ALL_CLEAR = "All tasks have been deleted!";
+    private static final String MESSAGE_TASK_INDEX_ERROR = "The task you specified could not be found.";
+    private static final String MESSAGE_SAVE_SET = "File save destination has been confirmed.";
+    private static final String MESSAGE_SAVE_SET_FAIL = "File save destination failed.";
+    private static final String MESSAGE_SAVE_MOVE = "Save file has been moved.";
+    private static final String MESSAGE_SAVE_MOVE_FAIL = "Moving save file failed.";
+    private static final String MESSAGE_NON_CHRONO_DATES = "Task was not created as %s";
+   
+    private static final String STRING_EMPTY = "";
+    private static final String STRING_SPACE = " ";
+    private static final String STRING_ALL = "all";
+    private static final String STRING_COMPLETED = "completed";
+    
+    // ================================================================
+ 	// Constructor
+ 	// ================================================================
+    private Controller() {
+        logger = Logger.getLogger("Controller");
+        logger.setLevel(Level.OFF);
+
+        parser = DateParser.getInstance();
+        storage = Storage.getInstance();
+        taskCreator = CreateTask.getInstance();
+        allTasks = storage.readFile();
+        previousStates = new History();       
+        sortAllTasks();
+        loadIncompleteTasks();
+        warmUpParser();
+    }
+
+	// Singleton pattern for Controller
+	public static Controller getInstance() {
+	    if (controller == null) {
+	        controller = new Controller();
+	        controller.initFirstDisplay();
+	    }
+	    return controller;
+	}
+
+	// To load the tasks into the display on the first load
+    private void initFirstDisplay() {
+        displayController.setFeedback(getWelcomeMessage());
+        displayController.updateOverviewDisplay(displayedTasks);
+    }
+
+    // ================================================================
+    // Public methods
+    // ================================================================
+    public String getWelcomeMessage() {
+        return MESSAGE_WELCOME;
+    }
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\java\Controller.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\java\Controller.java
+	 */
+
+    public void setStage(Stage stage) {
+	    this.stage = stage;
+	}
+    
+    // Fixes the delay when adding first task upon start up
+	private void warmUpParser() {
+		parser.parse("foo today");
+	}
+
+	// Load the incomplete tasks into displayedTasks
+	private void loadIncompleteTasks() {
+		for (Task task : getIncompleteTasks(allTasks)) {
+            displayedTasks.add(task);
+        }
+	}
+
+	// ================================================================
+	// Getters
+	// ================================================================
+	
+	public ObservableList<Task> getDisplayedTasks() {
+	    return displayedTasks;
+	}
+
+    private ArrayList<Task> getIncompleteTasks(ArrayList<Task> allTasks) {
+        List<Task> incompleteTasks = allTasks.stream()
+                .filter(task -> !task.isCompleted())
+                .collect(Collectors.toList());
+        return (ArrayList<Task>) incompleteTasks;
+    }
+
+    private List<Task> getCompletedTasks(ArrayList<Task> allTasks) {
+        List<Task> completedTasks = allTasks.stream()
+                .filter(task -> task.isCompleted())
+                .collect(Collectors.toList());
+        return completedTasks;
+    }
+
+    // ================================================================
+    // Logic methods
+    // ================================================================
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\java\Controller.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\java\Controller.java
+	 */
+
+    private String editTask(String input) {
+        String[] inputArray;
+        int editIndex;
+        boolean editAll = false;
+        Task editTask;
+
+        // Check if it's an edit all
+        if (input.toLowerCase().contains(STRING_ALL)) {
+            input = input.replace(STRING_ALL, STRING_EMPTY).trim();
+            editAll = true;
+            logger.log(Level.INFO, "Contains 'all' in edit");
+        }
+
+        try {
+            inputArray = input.split(STRING_SPACE);
+            // ArrayList is 0-indexed, but Tasks are displayed to users as 1-indexed
+            editIndex = Integer.parseInt(inputArray[0]) - 1;
+            editTask = displayedTasks.get(editIndex);
+        } catch (IndexOutOfBoundsException | NumberFormatException e) {
+            return MESSAGE_TASK_INDEX_ERROR;
+        }
+
+        // Creates an input to addTask
+        String[] addArgumentArray =  new String[inputArray.length - 1];
+        System.arraycopy(inputArray, 1, addArgumentArray, 0, inputArray.length - 1);
+        String addArgument = String.join(STRING_SPACE, addArgumentArray);
+
+        if (addArgument.isEmpty()) {
+            return MESSAGE_INVALID_COMMAND;
+        }
+
+        if (editAll && editTask.getId() != null) {
+            deleteAllTasks(editTask);
+            addTask(addArgument);
+            return String.format(MESSAGE_EDIT_ALL, editTask);
+        } else {
+            deleteIndividualTask(editTask);
+            addTask(addArgument);
+        }
+        
+        checkPreviousDisplay();
+
+        return String.format(MESSAGE_EDIT, editTask);
+    }
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\java\Controller.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\java\Controller.java
+	 */
+
+    private String completeTask(String input) {
+        try {
+            int index = Integer.parseInt(input.trim()) - 1;
+            Task task = displayedTasks.get(index);
+            
+            if (task.isCompleted()) {
+                return String.format(MESSAGE_COMPLETE_FAILED, task.getDescription());
+            }
+            
+            task.markAsCompleted();
+            logger.log(Level.INFO, "the completed task: " + task.toString());
+
+            updateStorageWithAllTasks();
+            checkPreviousDisplay();
+
+            logger.log(Level.INFO, "completed tasks after complete: " + getCompletedTasks(allTasks));
+            return String.format(MESSAGE_COMPLETE, task.getDescription());
+        } catch (NumberFormatException | IndexOutOfBoundsException e) {
+            return MESSAGE_TASK_INDEX_ERROR;
+        }
+    }
+
+    private String incompleteTask(String input) {
+        try {
+            int index = Integer.parseInt(input.trim()) - 1;
+            Task task = displayedTasks.get(index);
+            task.markAsIncomplete();
+            logger.log(Level.INFO, "the incompleted task: " + task.toString());
+
+            updateStorageWithAllTasks();
+            checkPreviousDisplay();
+            
+            logger.log(Level.INFO, "incomplete tasks after incomplete: " + getIncompleteTasks(allTasks));
+            return String.format(MESSAGE_INCOMPLETE, task.getDescription());
+        } catch (NumberFormatException | IndexOutOfBoundsException e) {
+            return MESSAGE_TASK_INDEX_ERROR;
+        }
+    }
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\java\Controller.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\java\Controller.java
+	 */
+
+    private String displayTask(String input) {
+        displayedTasks.clear();
+
+        if (input.equals(STRING_COMPLETED)) {
+            switchDisplayToSearch = true;
+            searchArgument = input;
+            updateDisplayWithCompleted();
+            return MESSAGE_DISPLAY_COMPLETE;
+        } else if (input.equals(STRING_EMPTY)) {
+            switchDisplayToSearch = false;
+            searchArgument = null;
+            return MESSAGE_DISPLAY_INCOMPLETE;
+        } else {
+            return MESSAGE_INVALID_COMMAND;
+        }
+    }
+
+    private String invalid() {
+        return MESSAGE_INVALID_COMMAND;
+    }
+    
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\java\Controller.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\java\Controller.java
+	 */
+
+    private String clear() {
+        allTasks = new ArrayList<Task>();
+        displayedTasks = FXCollections.observableArrayList();;
+        storage.updateFiles(allTasks);
+        displayController.resetScrollIndex();
+        return MESSAGE_ALL_CLEAR;
+    }
+
+    private void exit() {
+        updateStorageWithAllTasks();
+    }
+
+    // ================================================================
+    // Utility methods
+    // ================================================================
+    
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\java\Controller.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\java\Controller.java
+	 */
+
+    private void updateDisplayWithDefault() {
+        displayedTasks.setAll(getIncompleteTasks(allTasks));
+        displayController.updateOverviewDisplay(displayedTasks);
+        logger.log(Level.INFO, "Displayed tasks: " + displayedTasks);
+    }
+
+    private void updateDisplayWithCompleted() {
+        displayedTasks.setAll(getCompletedTasks(allTasks));
+        displayController.updateSearchDisplay(displayedTasks, STRING_COMPLETED);
+        logger.log(Level.INFO, "Displayed tasks: " + displayedTasks);
+    }
+    
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\java\Controller.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\java\Controller.java
+	 */
+
+    public List<Task> getIncompleteTasksPublic() {
+        return getIncompleteTasks(allTasks);
+    }
+
+    public List<Task> getCompleteTasksPublic() {
+        return getCompletedTasks(allTasks);
+    }
+
+    public List<Task> getAllTasks() {
+        return allTasks;
+    }
+}
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\java\Controller.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\java\MainApp.java
+	 */
+
+public class MainApp extends Application {
+
+    private static final String WINDOW_TITLE = "Veto";
+    private static final String IMAGE_ICON = "/images/icon.png";
+    // ================================================================
+	// Fields
+	// ================================================================
+	private Stage primaryStage;
+	private RootLayoutController rootLayoutController;
+	private Controller controller;
+    private static final int STAGE_MINIMUM_HEIGHT = 650;
+    private static final int STAGE_MINIMUM_WIDTH = 650;
+
+	// ================================================================
+	// Methods
+	// ================================================================
+	public static void main(String[] args) {
+		launch(args);
+	}
+
+	@Override
+	public void start(Stage primaryStage) throws Exception{
+		initController();
+		initRootLayout();
+		initPrimaryStage(primaryStage);
+
+		// Provide a stage handle in controller so that controller can close it when exiting
+		assert primaryStage != null;
+		controller.setStage(this.primaryStage);
+	}
+
+    private void initController() {
+        controller = Controller.getInstance();
+    }
+
+    private void initPrimaryStage(Stage primaryStage) {
+        this.primaryStage = primaryStage;
+		this.primaryStage.getIcons().add(new Image(IMAGE_ICON)); 
+		this.primaryStage.setTitle(WINDOW_TITLE);
+		this.primaryStage.setMinWidth(STAGE_MINIMUM_WIDTH);
+		this.primaryStage.setMinHeight(STAGE_MINIMUM_HEIGHT);
+		assert rootLayoutController != null;
+		this.primaryStage.setScene(new Scene(rootLayoutController));
+        this.primaryStage.show();
+    }
+
+	private void initRootLayout() {
+		rootLayoutController = new RootLayoutController(controller);
+	}
+}
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\java\MainApp.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\java\Task.java
+	 */
+
+    @Override
+    public Task clone() throws CloneNotSupportedException {
+        Task cloned = (Task) super.clone();
+
+        // Set all the attributes
+        cloned.setType(cloned.getType());
+        cloned.setDescription(cloned.getDescription());
+        cloned.setIsCompleted(cloned.isCompleted());
+        cloned.setDate(cloned.getDate());
+        cloned.setStartTime(cloned.getStartTime());
+        cloned.setEndTime(cloned.getEndTime());
+        cloned.setId(cloned.getId());
+        cloned.setException(cloneExceptionDates(cloned.getExceptionDates()));
+        return cloned;
+    }
+
+    private ArrayList<LocalDate> cloneExceptionDates(ArrayList<LocalDate> exceptionDates) {
+        if (exceptionDates == null) {
+            return null;
+        }
+        ArrayList<LocalDate> output = new ArrayList<LocalDate>();
+        for (LocalDate date : exceptionDates) {
+            output.add(date);
+        }
+        return output;
+    }
+    
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\java\Task.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\java\Task.java
+	 */
+
+    // ================================================================
+    // Private setters
+    // ================================================================
+
+    private void setDate(LocalDate date) {
+        this.date = date;
+    }
+
+    private void setType(Type type) {
+        this.type = type;
+    }
+
+    private void setIsCompleted(Boolean isCompleted) {
+        this.isCompleted = isCompleted;
+    }
+
+    private void setStartTime(LocalTime startTime) {
+        this.startTime = startTime;
+    }
+
+    private void setEndTime(LocalTime endTime) {
+        this.endTime = endTime;
+    }
+    
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\java\Task.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\resources\view\DisplayController.java
+	 */
+
+    // ================================================================
+    // Constructor
+    // ================================================================
+    private DisplayController() {
+        logger = Logger.getLogger("Display");
+        logger.setLevel(Level.OFF);
+
+        FXMLLoader loader = new FXMLLoader(getClass().getResource(LOCATION_TASK_OVERVIEW_FXML));
+        loader.setRoot(this);
+        loader.setController(this);
+
+        try {
+            loader.load();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        initTimelines();
+        initExampleCommands();
+        initHelpList();
+    }
+
+    
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\resources\view\DisplayController.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\resources\view\DisplayController.java
+	 */
+
+    public void resetScrollIndex() {
+        currentScrollIndex = 0;
+    }
+
+    public void scrollDown() {
+        logger.log(Level.INFO, "Current scroll index: " + currentScrollIndex);
+        if (currentScrollIndex == 0 &&
+            listView.getItems().size() < DISPLAY_MAX_SIZE) {
+            currentScrollIndex = 0;
+        } else if (currentScrollIndex < listView.getItems().size() -
+                                        DISPLAY_MAX_SIZE) {
+            currentScrollIndex += SCROLL_INCREMENT;
+            listView.scrollTo(currentScrollIndex);
+        }
+    }
+
+    public void scrollUp() {
+        logger.log(Level.INFO, "Current scroll index: " + currentScrollIndex);
+        if (currentScrollIndex > 0) {
+            currentScrollIndex -= SCROLL_INCREMENT;
+            listView.scrollTo(currentScrollIndex);
+        } else if (currentScrollIndex < 0) {
+            currentScrollIndex = 0;
+        }
+    }
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\resources\view\DisplayController.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\resources\view\RootLayoutController.java
+	 */
+
+public class RootLayoutController extends BorderPane {
+
+    // ================================================================
+    // FXML Fields
+    // ================================================================
+    @FXML
+    private TextField userInput;
+
+    // ================================================================
+    // Non-FXML Fields
+    // ================================================================
+    private Controller controller;
+    private DisplayController displayController;
+
+    private ArrayList<String> history;
+    private int pointer;
+
+    private ArrayList<String> commands;
+
+    private final String ROOT_LAYOUT_LOCATION = "/view/RootLayout.fxml";
+    private final String WELCOME_INPUT = "Enter your task here";
+    private final String ONE_SPACING = " ";
+    private final String EMPTY_STRING = "";
+    private final String ALL_KEYWORD = "all";
+    private final String EXCEPT_KEYWORD = " except ";
+    private final String BY_KEYWORD = "by  ";
+    private final String TO_KEYWORD = "to  ";
+
+    // formats the date for the date label, eg. 1 April
+    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d MMMM");
+
+    // formats the time for the time label, eg 2:00PM to 4:00PM
+    private final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("h:mma");
+
+    // ================================================================
+    // Constructor
+    // ================================================================
+    public RootLayoutController(Controller controller) {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource(ROOT_LAYOUT_LOCATION));
+        loader.setRoot(this);
+        loader.setController(this);
+
+        try {
+            loader.load();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        setController(controller);
+        initDisplay();
+        initVariablesForHistory();
+        initAutoCompleteCommands();
+        userInput.setText(WELCOME_INPUT);
+    }
+    
+
+    // ================================================================
+    // Public methods
+    // ================================================================
+    @FXML
+    public void handleKeyPress(KeyEvent event) {
+        if (event.isControlDown() && event.getCode() == KeyCode.D) {
+            displayController.scrollDown();
+        } else if (event.isControlDown() && event.getCode() == KeyCode.U) {
+            displayController.scrollUp();
+        } else if (event.getCode() == KeyCode.SPACE) {
+            listenForEdit(event);
+        } else if (event.getCode() == KeyCode.ENTER) {
+            handleUserInput();
+        } else if (event.getCode() == KeyCode.UP ||
+                   event.getCode() == KeyCode.DOWN) {
+            event.consume(); // nullifies the default behavior of UP and DOWN on a TextArea
+            handleGetPastCommands(event);
+        } else if (event.getCode() == KeyCode.TAB) {
+            handleCommandAutoComplete();
+        } else if (event.getCode() == KeyCode.ESCAPE) {
+            displayController.hideOverlays();
+        }
+    }
+
+    
+    // ================================================================
+    // Private Methods
+    // ================================================================
+    private void initDisplay() {
+        this.displayController = DisplayController.getInstance();
+        this.setCenter(displayController);
+    }
+    
+    // So that user input can be passed to Controller from RLC
+    private void setController(Controller controller) {
+        assert controller != null;
+        this.controller = controller;
+    }
+    
+    private void handleUserInput() {
+        String inputString = userInput.getText();
+        if (containsEditAll(inputString)) {
+            ArrayList<LocalDate> exceptionDates = extractExceptionDates(inputString);
+            if (exceptionDates != null && exceptionDates.size() > 0) {
+                inputString = buildExceptStringToAdd(inputString, exceptionDates);
+            }
+        }
+        controller.executeCommand(inputString);
+        updateHistory();
+        updateUserInput(EMPTY_STRING);
+    }
+
+    private boolean containsEditAll(String input) {
+        String[] output = input.split(ONE_SPACING);
+
+        return output.length >= 3 &&
+                output[0].equalsIgnoreCase(Command.Type.EDIT.toString()) &&
+                output[1].equalsIgnoreCase(ALL_KEYWORD);
+    }
+
+    private ArrayList<LocalDate> extractExceptionDates(String inputString) {
+        int editIndex = getEditIndex(inputString, 2);
+        Task task = Controller.getInstance().getDisplayedTasks().get(editIndex - 1);
+        ArrayList<LocalDate> exceptionDates = task.getExceptionDates();
+
+        return exceptionDates;
+    }
+
+    private String buildExceptStringToAdd(String inputString, ArrayList<LocalDate> exceptionDates) {
+        StringBuilder newInputString = new StringBuilder(inputString);
+        newInputString.append(EXCEPT_KEYWORD);
+        for (LocalDate date : exceptionDates) {
+            newInputString.append(date.toString());
+            newInputString.append(",");
+        }
+        String output = newInputString.toString();
+
+        return output;
+    }
+    
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\resources\view\RootLayoutController.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\main\resources\view\RootLayoutController.java
+	 */
+
+    // ================================================================
+    // Methods to handle edit auto-complete
+    // ================================================================
+    private enum EditType {
+        INDIVIDUAL, ALL;
+    }
+
+    private void listenForEdit(KeyEvent event) {
+        // editIndexPosition is the index of the integer after the edit keyword in the
+        // array input array
+        int editIndexPosition = 0;
+        String inputString = userInput.getText();
+        EditType type = null;
+
+        if (isEditIndividualFormat(inputString)) {
+            editIndexPosition = 1;
+            type = EditType.INDIVIDUAL;
+        } else if(isEditAllFormat(inputString)) {
+            editIndexPosition = 2;
+            type = EditType.ALL;
+        }
+
+        // Auto-complete only if there is a valid editIndexPosition
+        if (editIndexPosition > 0) {
+            int index = getEditIndex(inputString, editIndexPosition);
+            autoCompleteEdit(index, type);
+        }
+    }
+
+    private boolean isEditIndividualFormat(String input) {
+        String[] output = input.split(ONE_SPACING);
+
+        // Performs a check when the input box has "edit <int>"
+        // Length is 2. Index 0 is the word "edit" and index 1 is the int
+        if (output.length == 2 &&
+                output[0].equalsIgnoreCase(Command.Type.EDIT.toString())) {
+            // Check for whether it's in the format "edit <int>"
+            try {
+                Integer.parseInt(output[1]);
+                return true;
+            } catch (NumberFormatException e) {
+                return false;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean isEditAllFormat(String input) {
+        String[] output = input.split(ONE_SPACING);
+
+        // Performs a check when the input box has "edit all <int>"
+        // Length is 3. Index 0 is the word "edit" and index 2 is the int
+        if (output.length == 3 &&
+                output[0].equalsIgnoreCase(Command.Type.EDIT.toString()) &&
+                output[1].equalsIgnoreCase(ALL_KEYWORD)) {
+            try {
+                Integer.parseInt(output[2]);
+                return true;
+            } catch (NumberFormatException e) {
+                return false;
+            }
+        }
+
+        return false;
+    }
+
+    private int getEditIndex(String input, int editIndexPosition) {
+        String[] output = input.split(ONE_SPACING);
+        return Integer.parseInt(output[editIndexPosition]);
+    }
+
+    private void autoCompleteEdit(int index, EditType type) {
+        ObservableList<Task> displayedTasks = controller.getDisplayedTasks();
+        if (index < displayedTasks.size() + 1) { // check if supplied index is within displayedTasks' range
+            Task task = displayedTasks.get(index - 1);
+            Task.Type taskType = task.getType();
+
+            if (type.equals(EditType.ALL)) {
+                autoCompleteRecurringTask(userInput, task);
+                return;
+            } else if (type.equals(EditType.INDIVIDUAL)) {
+                userInput.appendText(ONE_SPACING + task.getDescription());
+                switch (taskType) {
+                    case FLOATING:
+                        break;
+                    case DEADLINE:
+                        autoCompleteDeadlineTask(userInput, task);
+                        break;
+                    case TIMED:
+                        autoCompleteTimedTask(userInput, task);
+                        break;
+                }
+                userInput.end();
+            }
+        }
+    }
+
+    private void autoCompleteRecurringTask(TextField userInput, Task task) {
+        userInput.appendText(ONE_SPACING + task.getRawInfo());
+        userInput.end();
+    }
+
+    private void autoCompleteDeadlineTask(TextField userInput, Task task) {
+        userInput.appendText(ONE_SPACING);
+        if (task.getStartTime() != null) {
+            userInput.appendText(BY_KEYWORD + task.getStartTime().format(timeFormatter) + ONE_SPACING);
+        }
+        userInput.appendText(task.getDate().format(dateFormatter));
+    }
+
+    private void autoCompleteTimedTask(TextField userInput, Task task) {
+        userInput.appendText(ONE_SPACING);
+        userInput.appendText(task.getStartTime()
+                .format(timeFormatter) +
+                ONE_SPACING +
+                TO_KEYWORD +
+                task.getEndTime()
+                        .format(timeFormatter) +
+                ONE_SPACING +
+                task.getDate().format(dateFormatter));
+    }
+}
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\main\resources\view\RootLayoutController.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\src\tests\java\ControllerTest.java
+	 */
+
+public class ControllerTest extends TestCase {
+
+    // ================================================================
+    // Constants
+    // ================================================================
+    private static final String MESSAGE_INVALID_COMMAND = "Invalid command.";
+    private static final String MESSAGE_WELCOME = "Welcome to Veto! Here is an overview of the week ahead.";
+    private static final String MESSAGE_TASK_INDEX_ERROR = "The task you specified could not be found.";
+
+    // ================================================================
+    // Utility methods
+    // ================================================================
+	// End of segment: C:\Users\user\Documents\GitHub\main\src\tests\java\ControllerTest.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\target\classes\view\DisplayController.java
+	 */
+
+    // ================================================================
+    // Constructor
+    // ================================================================
+    private DisplayController() {
+        logger = Logger.getLogger("Display");
+        logger.setLevel(Level.OFF);
+
+        FXMLLoader loader = new FXMLLoader(getClass().getResource(LOCATION_TASK_OVERVIEW_FXML));
+        loader.setRoot(this);
+        loader.setController(this);
+
+        try {
+            loader.load();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        initTimelines();
+        initExampleCommands();
+        initHelpList();
+    }
+
+    
+	// End of segment: C:\Users\user\Documents\GitHub\main\target\classes\view\DisplayController.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\target\classes\view\DisplayController.java
+	 */
+
+    public void resetScrollIndex() {
+        currentScrollIndex = 0;
+    }
+
+    public void scrollDown() {
+        logger.log(Level.INFO, "Current scroll index: " + currentScrollIndex);
+        if (currentScrollIndex == 0 &&
+            listView.getItems().size() < DISPLAY_MAX_SIZE) {
+            currentScrollIndex = 0;
+        } else if (currentScrollIndex < listView.getItems().size() -
+                                        DISPLAY_MAX_SIZE) {
+            currentScrollIndex += SCROLL_INCREMENT;
+            listView.scrollTo(currentScrollIndex);
+        }
+    }
+
+    public void scrollUp() {
+        logger.log(Level.INFO, "Current scroll index: " + currentScrollIndex);
+        if (currentScrollIndex > 0) {
+            currentScrollIndex -= SCROLL_INCREMENT;
+            listView.scrollTo(currentScrollIndex);
+        } else if (currentScrollIndex < 0) {
+            currentScrollIndex = 0;
+        }
+    }
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\target\classes\view\DisplayController.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\target\classes\view\RootLayoutController.java
+	 */
+
+public class RootLayoutController extends BorderPane {
+
+    // ================================================================
+    // FXML Fields
+    // ================================================================
+    @FXML
+    private TextField userInput;
+
+    // ================================================================
+    // Non-FXML Fields
+    // ================================================================
+    private Controller controller;
+    private DisplayController displayController;
+
+    private ArrayList<String> history;
+    private int pointer;
+
+    private ArrayList<String> commands;
+
+    private final String ROOT_LAYOUT_LOCATION = "/view/RootLayout.fxml";
+    private final String WELCOME_INPUT = "Enter your task here";
+    private final String ONE_SPACING = " ";
+    private final String EMPTY_STRING = "";
+    private final String ALL_KEYWORD = "all";
+    private final String EXCEPT_KEYWORD = " except ";
+    private final String BY_KEYWORD = "by  ";
+    private final String TO_KEYWORD = "to  ";
+
+    // formats the date for the date label, eg. 1 April
+    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d MMMM");
+
+    // formats the time for the time label, eg 2:00PM to 4:00PM
+    private final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("h:mma");
+
+    // ================================================================
+    // Constructor
+    // ================================================================
+    public RootLayoutController(Controller controller) {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource(ROOT_LAYOUT_LOCATION));
+        loader.setRoot(this);
+        loader.setController(this);
+
+        try {
+            loader.load();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        setController(controller);
+        initDisplay();
+        initVariablesForHistory();
+        initAutoCompleteCommands();
+        userInput.setText(WELCOME_INPUT);
+    }
+    
+
+    // ================================================================
+    // Public methods
+    // ================================================================
+    @FXML
+    public void handleKeyPress(KeyEvent event) {
+        if (event.isControlDown() && event.getCode() == KeyCode.D) {
+            displayController.scrollDown();
+        } else if (event.isControlDown() && event.getCode() == KeyCode.U) {
+            displayController.scrollUp();
+        } else if (event.getCode() == KeyCode.SPACE) {
+            listenForEdit(event);
+        } else if (event.getCode() == KeyCode.ENTER) {
+            handleUserInput();
+        } else if (event.getCode() == KeyCode.UP ||
+                   event.getCode() == KeyCode.DOWN) {
+            event.consume(); // nullifies the default behavior of UP and DOWN on a TextArea
+            handleGetPastCommands(event);
+        } else if (event.getCode() == KeyCode.TAB) {
+            handleCommandAutoComplete();
+        } else if (event.getCode() == KeyCode.ESCAPE) {
+            displayController.hideOverlays();
+        }
+    }
+
+    
+    // ================================================================
+    // Private Methods
+    // ================================================================
+    private void initDisplay() {
+        this.displayController = DisplayController.getInstance();
+        this.setCenter(displayController);
+    }
+    
+    // So that user input can be passed to Controller from RLC
+    private void setController(Controller controller) {
+        assert controller != null;
+        this.controller = controller;
+    }
+    
+    private void handleUserInput() {
+        String inputString = userInput.getText();
+        if (containsEditAll(inputString)) {
+            ArrayList<LocalDate> exceptionDates = extractExceptionDates(inputString);
+            if (exceptionDates != null && exceptionDates.size() > 0) {
+                inputString = buildExceptStringToAdd(inputString, exceptionDates);
+            }
+        }
+        controller.executeCommand(inputString);
+        updateHistory();
+        updateUserInput(EMPTY_STRING);
+    }
+
+    private boolean containsEditAll(String input) {
+        String[] output = input.split(ONE_SPACING);
+
+        return output.length >= 3 &&
+                output[0].equalsIgnoreCase(Command.Type.EDIT.toString()) &&
+                output[1].equalsIgnoreCase(ALL_KEYWORD);
+    }
+
+    private ArrayList<LocalDate> extractExceptionDates(String inputString) {
+        int editIndex = getEditIndex(inputString, 2);
+        Task task = Controller.getInstance().getDisplayedTasks().get(editIndex - 1);
+        ArrayList<LocalDate> exceptionDates = task.getExceptionDates();
+
+        return exceptionDates;
+    }
+
+    private String buildExceptStringToAdd(String inputString, ArrayList<LocalDate> exceptionDates) {
+        StringBuilder newInputString = new StringBuilder(inputString);
+        newInputString.append(EXCEPT_KEYWORD);
+        for (LocalDate date : exceptionDates) {
+            newInputString.append(date.toString());
+            newInputString.append(",");
+        }
+        String output = newInputString.toString();
+
+        return output;
+    }
+    
+	// End of segment: C:\Users\user\Documents\GitHub\main\target\classes\view\RootLayoutController.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\Documents\GitHub\main\target\classes\view\RootLayoutController.java
+	 */
+
+    // ================================================================
+    // Methods to handle edit auto-complete
+    // ================================================================
+    private enum EditType {
+        INDIVIDUAL, ALL;
+    }
+
+    private void listenForEdit(KeyEvent event) {
+        // editIndexPosition is the index of the integer after the edit keyword in the
+        // array input array
+        int editIndexPosition = 0;
+        String inputString = userInput.getText();
+        EditType type = null;
+
+        if (isEditIndividualFormat(inputString)) {
+            editIndexPosition = 1;
+            type = EditType.INDIVIDUAL;
+        } else if(isEditAllFormat(inputString)) {
+            editIndexPosition = 2;
+            type = EditType.ALL;
+        }
+
+        // Auto-complete only if there is a valid editIndexPosition
+        if (editIndexPosition > 0) {
+            int index = getEditIndex(inputString, editIndexPosition);
+            autoCompleteEdit(index, type);
+        }
+    }
+
+    private boolean isEditIndividualFormat(String input) {
+        String[] output = input.split(ONE_SPACING);
+
+        // Performs a check when the input box has "edit <int>"
+        // Length is 2. Index 0 is the word "edit" and index 1 is the int
+        if (output.length == 2 &&
+                output[0].equalsIgnoreCase(Command.Type.EDIT.toString())) {
+            // Check for whether it's in the format "edit <int>"
+            try {
+                Integer.parseInt(output[1]);
+                return true;
+            } catch (NumberFormatException e) {
+                return false;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean isEditAllFormat(String input) {
+        String[] output = input.split(ONE_SPACING);
+
+        // Performs a check when the input box has "edit all <int>"
+        // Length is 3. Index 0 is the word "edit" and index 2 is the int
+        if (output.length == 3 &&
+                output[0].equalsIgnoreCase(Command.Type.EDIT.toString()) &&
+                output[1].equalsIgnoreCase(ALL_KEYWORD)) {
+            try {
+                Integer.parseInt(output[2]);
+                return true;
+            } catch (NumberFormatException e) {
+                return false;
+            }
+        }
+
+        return false;
+    }
+
+    private int getEditIndex(String input, int editIndexPosition) {
+        String[] output = input.split(ONE_SPACING);
+        return Integer.parseInt(output[editIndexPosition]);
+    }
+
+    private void autoCompleteEdit(int index, EditType type) {
+        ObservableList<Task> displayedTasks = controller.getDisplayedTasks();
+        if (index < displayedTasks.size() + 1) { // check if supplied index is within displayedTasks' range
+            Task task = displayedTasks.get(index - 1);
+            Task.Type taskType = task.getType();
+
+            if (type.equals(EditType.ALL)) {
+                autoCompleteRecurringTask(userInput, task);
+                return;
+            } else if (type.equals(EditType.INDIVIDUAL)) {
+                userInput.appendText(ONE_SPACING + task.getDescription());
+                switch (taskType) {
+                    case FLOATING:
+                        break;
+                    case DEADLINE:
+                        autoCompleteDeadlineTask(userInput, task);
+                        break;
+                    case TIMED:
+                        autoCompleteTimedTask(userInput, task);
+                        break;
+                }
+                userInput.end();
+            }
+        }
+    }
+
+    private void autoCompleteRecurringTask(TextField userInput, Task task) {
+        userInput.appendText(ONE_SPACING + task.getRawInfo());
+        userInput.end();
+    }
+
+    private void autoCompleteDeadlineTask(TextField userInput, Task task) {
+        userInput.appendText(ONE_SPACING);
+        if (task.getStartTime() != null) {
+            userInput.appendText(BY_KEYWORD + task.getStartTime().format(timeFormatter) + ONE_SPACING);
+        }
+        userInput.appendText(task.getDate().format(dateFormatter));
+    }
+
+    private void autoCompleteTimedTask(TextField userInput, Task task) {
+        userInput.appendText(ONE_SPACING);
+        userInput.appendText(task.getStartTime()
+                .format(timeFormatter) +
+                ONE_SPACING +
+                TO_KEYWORD +
+                task.getEndTime()
+                        .format(timeFormatter) +
+                ONE_SPACING +
+                task.getDate().format(dateFormatter));
+    }
+}
+
+	// End of segment: C:\Users\user\Documents\GitHub\main\target\classes\view\RootLayoutController.java
+
+
+
+
+
