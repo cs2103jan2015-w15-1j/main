@@ -36,10 +36,8 @@ public class StorageTest {
     PrintWriter writer;
     BufferedReader reader;
 
-    // ================================================================
-    // test initializing settings file and moving save file
-    // ================================================================
     @Test
+    // test initializing settings file and moving save file
     public void testSettings() {
         // delete any existing file before testing
         defaultFile.delete();
@@ -89,10 +87,8 @@ public class StorageTest {
         assertEquals("blank.txt", test.getSaveFileName());
     }
 
-    // ================================================================
-    // Test the write and read the task from the file
-    // ================================================================
     @Test
+    // Test the write and read the task from the file
     public void testWriteAndRead() {
         // data for testing
         String[] data = { "attend meeting later at 1200-1400 on 20 Feb",
@@ -109,10 +105,8 @@ public class StorageTest {
         compareData(tempData, readData);
     }
 
-    // ================================================================
-    // Test backup file
-    // ================================================================
     @Test
+    // Test backup file
     public void testBackup() {
         // data for testing
         String[] data = { "attend meeting later at 1200-1400 on 20 Feb",
@@ -158,9 +152,6 @@ public class StorageTest {
         assertEquals(true, readData.isEmpty());
     }
 
-    // ================================================================
-    // Utility methods
-    // ================================================================
     // method to set-up the ArrayList
     private void createArrayListOfTask(String[] data, ArrayList<Task> tempData) {
         DateParser parser = DateParser.getInstance();
@@ -192,6 +183,7 @@ public class StorageTest {
     }
 
     @After
+    // delete all files to ensure consistant testing
     public void deleteAllFile() {
         testFile.delete();
         testFile2.delete();

@@ -21,10 +21,8 @@ public class CreateTaskTest {
     String[] exceptionStrings = { "except 13 apr", "except 14 apr",
             "except 24 may", "except 30 jun, 23 jun", "except 32 jan" };
 
-    // ================================================================
-    // test getting the right rate and frequency
-    // ================================================================
     @Test
+    // test getting the right rate and frequency
     public void frequencyTest() {
         assertEquals("1 daily", CreateTask.testFrequency(frequencyStrings[0]));
         assertEquals("3 daily", CreateTask.testFrequency(frequencyStrings[1]));
@@ -38,10 +36,8 @@ public class CreateTaskTest {
         assertEquals("3 monthly", CreateTask.testFrequency(frequencyStrings[9]));
     }
 
-    // ================================================================
-    // test getting the exception dates
-    // ================================================================
     @Test
+    // test getting the exception dates
     public void exceptionTest() {
         assertEquals("2015-04-13 ",
                 CreateTask.testException(exceptionStrings[0]));
@@ -55,10 +51,8 @@ public class CreateTaskTest {
                 CreateTask.testException(exceptionStrings[4]));
     }
 
-    // ================================================================
-    // test getting the exception dates
-    // ================================================================
     @Test
+    // test getting the exception dates
     public void datesTesting() {
         String input ="";
         ArrayList<String> result;
