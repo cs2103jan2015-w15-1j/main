@@ -83,16 +83,4 @@ public class CreateTaskTest {
         assertEquals("", result.get(1));
         assertEquals("2018-04-13", result.get(2));
     }
-
-    // ================================================================
-    // Utility methods for testing purpose
-    // ================================================================
-    public Task createNewTask(String input) {
-        DateParser parser = DateParser.getInstance();
-        parser.parse(input);
-        ArrayList<LocalDateTime> parsedDates = parser.getDates();
-        String parsedWords = parser.getParsedWords();
-        String nonParsedWords = parser.getNotParsedWords();
-        return new Task(input, parsedDates, parsedWords, nonParsedWords);
-    }
 }
