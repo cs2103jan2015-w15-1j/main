@@ -275,10 +275,8 @@ public class Controller {
         } catch (IndexOutOfBoundsException e) {
             return MESSAGE_INVALID_COMMAND;
         }
-
         allTasks.addAll(newTask);
         updateStorageWithAllTasks();
-
         return String.format(MESSAGE_ADD, task);
     }
 
@@ -405,6 +403,7 @@ public class Controller {
             logger.log(Level.INFO, "the completed task: " + task.toString());
 
             updateStorageWithAllTasks();
+            checkPreviousDisplay();
 
             logger.log(Level.INFO, "completed tasks after complete: " + getCompletedTasks(allTasks));
             return String.format(MESSAGE_COMPLETE, task.getDescription());
@@ -421,7 +420,8 @@ public class Controller {
             logger.log(Level.INFO, "the incompleted task: " + task.toString());
 
             updateStorageWithAllTasks();
-
+            checkPreviousDisplay();
+            
             logger.log(Level.INFO, "incomplete tasks after incomplete: " + getIncompleteTasks(allTasks));
             return String.format(MESSAGE_INCOMPLETE, task.getDescription());
         } catch (NumberFormatException | IndexOutOfBoundsException e) {
@@ -458,18 +458,21 @@ public class Controller {
 
     //@author A0122393L
     private void search(String input) {
-        displayedTasks.clear();
-        parser.parse(input);
-        ArrayList<LocalDateTime> searchDate = parser.getDates();
-
-        for (Task task : allTasks) {
-            String taskInfo = task.getDescription().toLowerCase();
-            if (taskInfo.contains(input.toLowerCase())) {
-                displayedTasks.add(task);
-            } else if (searchDate.size() > 0
-                    && searchDate.get(0).toLocalDate().equals(task.getDate())) {
-                displayedTasks.add(task);
-            }
+        if (input.equals(STRING_COMPLETED)) {
+        	updateDisplayWithCompleted();
+        } else {
+        	displayedTasks.clear();
+	        parser.parse(input);
+	        ArrayList<LocalDateTime> searchDate = parser.getDates();
+	        for (Task task : allTasks) {
+	            String taskInfo = task.getDescription().toLowerCase();
+	            if (taskInfo.contains(input.toLowerCase())) {
+	                displayedTasks.add(task);
+	            } else if (searchDate.size() > 0
+	                    && searchDate.get(0).toLocalDate().equals(task.getDate())) {
+	                displayedTasks.add(task);
+	            }
+	        }
         }
     }
 
@@ -482,7 +485,7 @@ public class Controller {
             searchArgument = input;
             updateDisplayWithCompleted();
             return MESSAGE_DISPLAY_COMPLETE;
-        } else if (input.equals((STRING_EMPTY))) {
+        } else if (input.equals(STRING_EMPTY)) {
             switchDisplayToSearch = false;
             searchArgument = null;
             return MESSAGE_DISPLAY_INCOMPLETE;
@@ -553,7 +556,7 @@ public class Controller {
 
     private void updateDisplayWithCompleted() {
         displayedTasks.setAll(getCompletedTasks(allTasks));
-        displayController.updateOverviewDisplay(displayedTasks);
+        displayController.updateSearchDisplay(displayedTasks, STRING_COMPLETED);
         logger.log(Level.INFO, "Displayed tasks: " + displayedTasks);
     }
     
